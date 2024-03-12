@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  service-agent:
+    build: ../..
+    image: 2060-service-agent
+    container_name: chatbot-service-agent
+    restart: always    
+    networks:
+      - chatbot
+    ports:
+      - 3000:3000
+      - 3001:3001
+    environment:
+      - AGENT_PUBLIC_DID=did:web:10.82.14.12%3A3000
+      - AGENT_ENDPOINT=ws://10.82.14.12:3001
+      - AGENT_INVITATION_IMAGE_URL=http://10.82.14.12:3001/avatar.png
+      - AGENT_NAME=Chatbot Agent
+      - USE_CORS=true
+      - EVENTS_BASE_URL=http://chatbot-backend:5000
+    volumes:
+       - ./afj:/root/.afj
+  chatbot-backend:
+    build: .
+    image: 2060-service-agent-chatbot
+    container_name: chatbot-backend
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 5000:5000
+    environment:
+      - PORT=5000
+      - SERVICE_AGENT_ADMIN_BASE_URL=http://chatbot-service-agent:3000
+      - PNVS_SERVICE_AGENT_ADMIN_BASE_URL=http://10.82.14.12:3100
+networks:
+  chatbot:

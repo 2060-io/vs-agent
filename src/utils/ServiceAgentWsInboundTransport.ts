@@ -1,0 +1,136 @@
+import {
+  Agent,
+  InboundTransport,
+  Logger,
+  TransportSession,
+  EncryptedMessage,
+  ConnectionRecord,
+  AgentContext,
+} from '@credo-ts/core'
+
+import { CredoError, AgentConfig, TransportService, utils } from '@credo-ts/core'
+import WebSocket, { Server } from 'ws'
+
+// Workaround for types (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20780)
+interface ExtWebSocket extends WebSocket {
+  isAlive: boolean
+  lastActivity: Date
+}
+
+export class ServiceAgentWsInboundTransport implements InboundTransport {
+  private socketServer: Server
+  private logger!: Logger
+
+  // We're using a `socketId` just for the prevention of calling the connection handler twice.
+  private socketIds: Record<string, unknown> = {}
+
+  public constructor({ server, port }: { server: Server; port?: undefined } | { server?: undefined; port: number }) {
+    this.socketServer = server ?? new Server({ port })
+  }
+
+  public async start(agent: Agent) {
+    const transportService = agent.dependencyManager.resolve(TransportService)
+    const config = agent.dependencyManager.resolve(AgentConfig)
+
+    this.logger = agent.context.config.logger
+    this.logger.debug('Service Agent Ws Inbound transport start')
+
+    const wsEndpoint = config.endpoints.find((e) => e.startsWith('ws'))
+    this.logger.debug(`Starting WS inbound transport`, {
+      endpoint: wsEndpoint,
+    })
+
+    this.socketServer.on('connection', (socket: WebSocket) => {
+      const socketId = utils.uuid()
+      this.logger.debug('Socket connected.')
+      ;(socket as ExtWebSocket).isAlive = true
+      ;(socket as ExtWebSocket).lastActivity = new Date()
+      if (!this.socketIds[socketId]) {
+        this.logger.debug(`Saving new socket with id ${socketId}.`)
+        this.socketIds[socketId] = socket
+        const session = new WebSocketTransportSession(socketId, socket, this.logger)
+        this.listenOnWebSocketMessages(agent, socket, session)
+        socket.on('close', () => {
+          this.logger.debug('Socket closed.')
+          transportService.removeSession(session)
+        })
+      } else {
+        this.logger.debug(`Socket with id ${socketId} already exists.`)
+      }
+    })
+
+    this.startIdleSocketTimer(60000)
+  }
+
+  public async stop() {
+    this.logger.debug('Closing WebSocket Server')
+
+    return new Promise<void>((resolve, reject) => {
+      this.socketServer.close((error) => {
+        if (error) {
+          reject(error)
+        }
+
+        resolve()
+      })
+    })
+  }
+
+  private startIdleSocketTimer(interval: number) {
+    setInterval(() => {
+      const currentDate = new Date()
+      this.socketServer.clients.forEach((item) => {
+        if (currentDate.valueOf() - (item as ExtWebSocket).lastActivity.valueOf() > interval) {
+          this.logger.debug('Client session closed by inactivity')
+          item.close()
+        }
+      })
+    }, interval)
+  }
+
+  private listenOnWebSocketMessages(agent: Agent, socket: WebSocket, session: WebSocketTransportSession) {
+    socket.on('pong', () => {
+      this.logger.debug('Pong received')
+      ;(socket as ExtWebSocket).isAlive = true
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    socket.addEventListener('message', async (event: any) => {
+      this.logger.debug('WebSocket message event received.', { url: event.target.url, data: event.data })
+      ;(socket as ExtWebSocket).lastActivity = new Date()
+      try {
+        await agent.receiveMessage(JSON.parse(event.data), session)
+      } catch (error) {
+        this.logger.error('Error processing message')
+      }
+    })
+  }
+}
+
+export class WebSocketTransportSession implements TransportSession {
+  public id: string
+  public readonly type = 'WebSocket'
+  public socket: WebSocket
+  public connection?: ConnectionRecord
+  public logger: Logger
+
+  public constructor(id: string, socket: WebSocket, logger: Logger) {
+    this.id = id
+    this.socket = socket
+    this.logger = logger
+  }
+
+  public async send(agentContext: AgentContext, encryptedMessage: EncryptedMessage): Promise<void> {
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      throw new CredoError(`${this.type} transport session has been closed.`)
+    }
+
+    this.socket.send(JSON.stringify(encryptedMessage))
+    ;(this.socket as ExtWebSocket).lastActivity = new Date()
+  }
+
+  public async close(): Promise<void> {
+    this.logger.debug(`Web Socket Transport Session close requested. Connection Id: ${this.connection?.id}`)
+    // Do not actually close socket. Leave heartbeat to do its job
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "entryFile": "src/index.ts",
+  "controllerPathGlobs": ["src/**/*Controller.ts"],
+  "spec": {
+    "outputDirectory": "src/routes",
+    "specVersion": 3
+  },
+  "routes": {
+    "routesDir": "src/routes",
+    "iocModule": "./src/utils/tsyringeTsoaIocContainer"
+  }
+}
