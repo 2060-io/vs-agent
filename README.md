@@ -78,3 +78,7 @@ docker run -e AGENT_PUBLIC_DID=... -e AGENT_ENDPOINT=... -e AGENT_PORT=yyy -e US
 ```
 
 where yyy is an publicly accesible port from the host machine.
+
+## API
+
+For the moment, some details about Service Agent API can be found in this [Document](./doc/service-agent-api.md). There is some work in progress to make the API available within Swagger: when deployed, just go to [SERVICE_AGENT_ADMIN_BASE_URL]/api.

@@ -7,6 +7,8 @@ import { VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
+import packageJson from '../package.json'
+
 import { ServiceAgentModule } from './app.module'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -74,7 +76,7 @@ const run = async () => {
   messageEvents(agent, conf)
 
   console.log(
-    `Service Agent running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,
+    `Service Agent v${packageJson['version']} running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,
   )
 }
 
