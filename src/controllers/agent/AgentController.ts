@@ -1,8 +1,9 @@
 import type { AgentInfo } from '../types'
 
 import { Controller, Get } from '@nestjs/common'
-import { AgentService } from '../../services/AgentService'
 import { ApiTags } from '@nestjs/swagger'
+
+import { AgentService } from '../../services/AgentService'
 
 @ApiTags('agent')
 @Controller({

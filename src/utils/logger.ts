@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ILogObject } from 'tslog'
-import util from 'util'
 
 import { LogLevel, BaseLogger } from '@credo-ts/core'
 import { appendFileSync } from 'fs'
 import { Logger } from 'tslog'
+import util from 'util'
 
 function logToTransport(logObject: ILogObject) {
   appendFileSync('logs.txt', JSON.stringify(logObject) + '\n')

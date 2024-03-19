@@ -1,0 +1,38 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: [main, dev, dev-test]
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main, dev, dev-test]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup node v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Check Format
+        run: |
+          yarn check-format
+
+      - name: Check Types
+        run: |
+          yarn check-types
+
+      - name: Build
+        run: |
+          yarn build

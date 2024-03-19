@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsInstance, ValidateNested } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface MenuSelectMessageOptions extends BaseMessageOptions {
@@ -29,7 +30,7 @@ export class MenuSelectMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.menuItems = options.menuItems.map((item) => new MenuItemSelection(item))
+      this.menuItems = options.menuItems.map(item => new MenuItemSelection(item))
     }
   }
 

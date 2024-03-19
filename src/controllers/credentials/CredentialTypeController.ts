@@ -1,6 +1,3 @@
-import { utils } from '@credo-ts/core'
-
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '../types'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
@@ -13,9 +10,24 @@ import {
   AnonCredsSchemaRecord,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Logger, NotFoundException, Param, Post } from '@nestjs/common'
+import { utils } from '@credo-ts/core'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Logger,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
+
 import { AgentService } from '../../services/AgentService'
+import { CredentialTypeInfo, ImportCredentialTypeOptions } from '../types'
+
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
 
 @ApiTags('credential-types')
@@ -24,7 +36,7 @@ import { CreateCredentialTypeDto } from './CredentialTypeDto'
   version: '1',
 })
 export class CredentialTypesController {
-  private readonly logger = new Logger(CredentialTypesController.name);
+  private readonly logger = new Logger(CredentialTypesController.name)
 
   constructor(private readonly agentService: AgentService) {}
 
@@ -40,7 +52,7 @@ export class CredentialTypesController {
     const credentialDefinitions = await agent.modules.anoncreds.getCreatedCredentialDefinitions({})
 
     return Promise.all(
-      credentialDefinitions.map(async (record) => {
+      credentialDefinitions.map(async record => {
         const schemaResult = await agent.modules.anoncreds.getSchema(record.credentialDefinition.schemaId)
 
         const schema = schemaResult.schema
@@ -51,7 +63,7 @@ export class CredentialTypesController {
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
         }
-      })
+      }),
     )
   }
 
@@ -68,18 +80,14 @@ export class CredentialTypesController {
       example: {
         summary: 'Phone Number',
         value: {
-          "name": "phoneNumber",
-          "version": "1.0",
-          "attributes": [
-            "phoneNumber"
-          ]
+          name: 'phoneNumber',
+          version: '1.0',
+          attributes: ['phoneNumber'],
         },
       },
     },
   })
-  public async createCredentialType(
-    @Body() options: CreateCredentialTypeDto,
-  ): Promise<CredentialTypeInfo> {
+  public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
       const agent = await this.agentService.getAgent()
 
@@ -128,21 +136,23 @@ export class CredentialTypesController {
 
       const credentialDefinitionId = registrationResult.credentialDefinitionState.credentialDefinitionId
       this.logger.debug!(
-        `credentialDefinitionState: ${JSON.stringify(registrationResult.credentialDefinitionState)}`
+        `credentialDefinitionState: ${JSON.stringify(registrationResult.credentialDefinitionState)}`,
       )
 
       if (!credentialDefinitionId) {
-        throw new Error(`Cannot create credential definition: ${JSON.stringify(registrationResult.registrationMetadata)}`)
+        throw new Error(
+          `Cannot create credential definition: ${JSON.stringify(registrationResult.registrationMetadata)}`,
+        )
       }
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
 
       // Apply name and version as tags
       const credentialDefinitionRepository = agent.dependencyManager.resolve(
-        AnonCredsCredentialDefinitionRepository
+        AnonCredsCredentialDefinitionRepository,
       )
       const credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
         agent.context,
-        credentialDefinitionId
+        credentialDefinitionId,
       )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
@@ -156,72 +166,93 @@ export class CredentialTypesController {
         schemaId,
       }
     } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: `something went wrong: ${error}`,
-      }, HttpStatus.INTERNAL_SERVER_ERROR, {
-        cause: error
-      });
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `something went wrong: ${error}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          cause: error,
+        },
+      )
     }
   }
 
   /**
    * Delete a credential type, including its underlying cryptographic data
-   * 
+   *
    * @param credentialTypeId Credential Type Id
    * @returns ConnectionRecord
    */
   @Delete('/:credentialTypeId')
-  public async deleteCredentialTypeById(
-    @Param('credentialTypeId') credentialTypeId: string,
-  ) {
+  public async deleteCredentialTypeById(@Param('credentialTypeId') credentialTypeId: string) {
     const agent = await this.agentService.getAgent()
 
-    const credentialDefinitionRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionRepository)
-    const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionPrivateRepository)
-    const keyCorrectnessProofRepository = agent.dependencyManager.resolve(AnonCredsKeyCorrectnessProofRepository)
-    
+    const credentialDefinitionRepository = agent.dependencyManager.resolve(
+      AnonCredsCredentialDefinitionRepository,
+    )
+    const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(
+      AnonCredsCredentialDefinitionPrivateRepository,
+    )
+    const keyCorrectnessProofRepository = agent.dependencyManager.resolve(
+      AnonCredsKeyCorrectnessProofRepository,
+    )
+
     const credentialDefinitionRecord = await credentialDefinitionRepository.findByCredentialDefinitionId(
       agent.context,
-      credentialTypeId
+      credentialTypeId,
     )
-    if (!credentialDefinitionRecord) throw new NotFoundException({ reason: `credential type with id "${credentialTypeId}" not found.` })
+    if (!credentialDefinitionRecord)
+      throw new NotFoundException({ reason: `credential type with id "${credentialTypeId}" not found.` })
 
     // Delete private data
-    const credDefPrivRecord = await credentialDefinitionPrivateRepository.getByCredentialDefinitionId(agent.context, credentialTypeId)
+    const credDefPrivRecord = await credentialDefinitionPrivateRepository.getByCredentialDefinitionId(
+      agent.context,
+      credentialTypeId,
+    )
     await credentialDefinitionPrivateRepository.delete(agent.context, credDefPrivRecord)
 
-    const keyCorrectnessProofRecord = await keyCorrectnessProofRepository.getByCredentialDefinitionId(agent.context, credentialTypeId)
+    const keyCorrectnessProofRecord = await keyCorrectnessProofRepository.getByCredentialDefinitionId(
+      agent.context,
+      credentialTypeId,
+    )
     await keyCorrectnessProofRepository.delete(agent.context, keyCorrectnessProofRecord)
 
     // Delete public data
     await credentialDefinitionRepository.delete(agent.context, credentialDefinitionRecord)
 
     // TODO: shall we delete also schema?
-
   }
-
 
   /**
    * Export a credential type, including its underlying cryptographic data for importing it in another instance
-   * 
+   *
    * @param credentialTypeId Credential Type Id
    * @returns ConnectionRecord
    */
   @Get('/export/:credentialTypeId')
-  public async exportCredentialTypeById(
-    @Param('credentialTypeId') credentialTypeId: string,
-  ) {
+  public async exportCredentialTypeById(@Param('credentialTypeId') credentialTypeId: string) {
     const agent = await this.agentService.getAgent()
 
-    const credentialDefinitionRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionRepository)
-    const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionPrivateRepository)
-    const keyCorrectnessProofRepository = agent.dependencyManager.resolve(AnonCredsKeyCorrectnessProofRepository)
+    const credentialDefinitionRepository = agent.dependencyManager.resolve(
+      AnonCredsCredentialDefinitionRepository,
+    )
+    const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(
+      AnonCredsCredentialDefinitionPrivateRepository,
+    )
+    const keyCorrectnessProofRepository = agent.dependencyManager.resolve(
+      AnonCredsKeyCorrectnessProofRepository,
+    )
     const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
-    
-    const credentialDefinitionRecord = (await credentialDefinitionRepository.findByCredentialDefinitionId(agent.context, credentialTypeId))
 
-    if (!credentialDefinitionRecord) throw new NotFoundException({ reason: `credential type with id "${credentialTypeId}" not found.` })
+    const credentialDefinitionRecord = await credentialDefinitionRepository.findByCredentialDefinitionId(
+      agent.context,
+      credentialTypeId,
+    )
+
+    if (!credentialDefinitionRecord)
+      throw new NotFoundException({ reason: `credential type with id "${credentialTypeId}" not found.` })
 
     return {
       id: credentialTypeId,
@@ -229,10 +260,22 @@ export class CredentialTypesController {
         name: credentialDefinitionRecord.getTag('name'),
         version: credentialDefinitionRecord.getTag('version'),
         credentialDefinition: credentialDefinitionRecord.credentialDefinition,
-        credentialDefinitionPrivate: (await credentialDefinitionPrivateRepository.getByCredentialDefinitionId(agent.context, credentialTypeId)).value,
-        keyCorrectnessProof: (await keyCorrectnessProofRepository.getByCredentialDefinitionId(agent.context, credentialTypeId)).value,
-        schema: (await schemaRepository.findBySchemaId(agent.context, credentialDefinitionRecord.credentialDefinition.schemaId))?.schema
-      }
+        credentialDefinitionPrivate: (
+          await credentialDefinitionPrivateRepository.getByCredentialDefinitionId(
+            agent.context,
+            credentialTypeId,
+          )
+        ).value,
+        keyCorrectnessProof: (
+          await keyCorrectnessProofRepository.getByCredentialDefinitionId(agent.context, credentialTypeId)
+        ).value,
+        schema: (
+          await schemaRepository.findBySchemaId(
+            agent.context,
+            credentialDefinitionRecord.credentialDefinition.schemaId,
+          )
+        )?.schema,
+      },
     }
   }
 
@@ -249,11 +292,17 @@ export class CredentialTypesController {
     const agent = await this.agentService.getAgent()
 
     try {
-      const credentialDefinitionRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionRepository)
-      const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionPrivateRepository)
-      const keyCorrectnessProofRepository = agent.dependencyManager.resolve(AnonCredsKeyCorrectnessProofRepository)
+      const credentialDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsCredentialDefinitionRepository,
+      )
+      const credentialDefinitionPrivateRepository = agent.dependencyManager.resolve(
+        AnonCredsCredentialDefinitionPrivateRepository,
+      )
+      const keyCorrectnessProofRepository = agent.dependencyManager.resolve(
+        AnonCredsKeyCorrectnessProofRepository,
+      )
       const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
-  
+
       const issuerId = agent.did
 
       if (await credentialDefinitionRepository.findByCredentialDefinitionId(agent.context, options.id)) {
@@ -264,8 +313,9 @@ export class CredentialTypesController {
         throw new Error('Agent does not have any defined public DID')
       }
 
-      const credentialDefinition = options.data.credentialDefinition as unknown as AnonCredsCredentialDefinition
-      let schema = options.data.schema ? options.data.schema as unknown as AnonCredsSchema : undefined
+      const credentialDefinition = options.data
+        .credentialDefinition as unknown as AnonCredsCredentialDefinition
+      let schema = options.data.schema ? (options.data.schema as unknown as AnonCredsSchema) : undefined
 
       if (!schema) {
         // No schema specified. It must be retrieved from elsewhere
@@ -278,47 +328,65 @@ export class CredentialTypesController {
         }
       }
 
-      const existingSchemaRecord = await schemaRepository.findBySchemaId(agent.context, credentialDefinition.schemaId)
+      const existingSchemaRecord = await schemaRepository.findBySchemaId(
+        agent.context,
+        credentialDefinition.schemaId,
+      )
 
       let schemaRecordId = existingSchemaRecord?.id
       if (!existingSchemaRecord) {
         schemaRecordId = utils.uuid()
-        await schemaRepository.save(agent.context, new AnonCredsSchemaRecord({
-          methodName: 'web',
-          schema,
-          schemaId: credentialDefinition.schemaId,
-          id: schemaRecordId,
-        }))
+        await schemaRepository.save(
+          agent.context,
+          new AnonCredsSchemaRecord({
+            methodName: 'web',
+            schema,
+            schemaId: credentialDefinition.schemaId,
+            id: schemaRecordId,
+          }),
+        )
       }
       const schemaRecord = await schemaRepository.getById(agent.context, schemaRecordId!)
       schemaRecord.setTag('schemaId', credentialDefinition.schemaId)
       await schemaRepository.update(agent.context, schemaRecord)
 
       const credentialDefinitionRecordId = utils.uuid()
-      await credentialDefinitionRepository.save(agent.context, new AnonCredsCredentialDefinitionRecord({
-        methodName: 'web',
-        credentialDefinition,
-        credentialDefinitionId: options.id,
-        id: credentialDefinitionRecordId
-      }))
-      const credentialDefinitionRecord = await credentialDefinitionRepository.getById(agent.context, credentialDefinitionRecordId)
+      await credentialDefinitionRepository.save(
+        agent.context,
+        new AnonCredsCredentialDefinitionRecord({
+          methodName: 'web',
+          credentialDefinition,
+          credentialDefinitionId: options.id,
+          id: credentialDefinitionRecordId,
+        }),
+      )
+      const credentialDefinitionRecord = await credentialDefinitionRepository.getById(
+        agent.context,
+        credentialDefinitionRecordId,
+      )
 
       // Apply name and version as tags
       credentialDefinitionRecord.setTag('name', options.data.name)
       credentialDefinitionRecord.setTag('version', options.data.version)
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 
-      await credentialDefinitionPrivateRepository.save(agent.context, new AnonCredsCredentialDefinitionPrivateRecord({
-        value: options.data.credentialDefinitionPrivate,
-        credentialDefinitionId: options.id,
-        id: credentialDefinitionRecordId
-      }))
+      await credentialDefinitionPrivateRepository.save(
+        agent.context,
+        new AnonCredsCredentialDefinitionPrivateRecord({
+          value: options.data.credentialDefinitionPrivate,
+          credentialDefinitionId: options.id,
+          id: credentialDefinitionRecordId,
+        }),
+      )
 
-      await keyCorrectnessProofRepository.save(agent.context, new AnonCredsKeyCorrectnessProofRecord({
-        value: options.data.keyCorrectnessProof,
-        credentialDefinitionId: options.id,
-        id: credentialDefinitionRecordId
-      }))
+      await keyCorrectnessProofRepository.save(
+        agent.context,
+        new AnonCredsKeyCorrectnessProofRecord({
+          value: options.data.keyCorrectnessProof,
+          credentialDefinitionId: options.id,
+          id: credentialDefinitionRecordId,
+        }),
+      )
 
       return {
         id: options.id,
@@ -328,13 +396,16 @@ export class CredentialTypesController {
         schemaId: credentialDefinition.schemaId,
       }
     } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: `something went wrong: ${error}`,
-      }, HttpStatus.INTERNAL_SERVER_ERROR, {
-        cause: error
-      });
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `something went wrong: ${error}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          cause: error,
+        },
+      )
     }
   }
-
 }

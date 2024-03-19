@@ -1,16 +1,17 @@
-import { MessageReceipt, MessageState } from 'credo-ts-receipts'
+import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Type, Transform } from 'class-transformer'
 import { IsInstance, IsArray, IsDate, IsString, ValidateNested } from 'class-validator'
+import { MessageReceipt, MessageState } from 'credo-ts-receipts'
+
 import { BaseMessage } from './BaseMessage'
-import { DateParser } from '@credo-ts/core/build/utils/transformers'
 
 // FIXME: Do a better conversion between DIDComm protocol and Service Agent protocol constants
 const didcommMessageState: Record<string, MessageState> = {
-  'created' : MessageState.Created,
-  'deleted' : MessageState.Deleted,
-  'received' : MessageState.Received,
-  'submitted' : MessageState.Submitted,
-  'viewed' : MessageState.Viewed
+  created: MessageState.Created,
+  deleted: MessageState.Deleted,
+  received: MessageState.Received,
+  submitted: MessageState.Submitted,
+  viewed: MessageState.Viewed,
 }
 
 export interface ServiceAgentMessageReceiptOptions {
@@ -48,8 +49,8 @@ export interface ReceiptsMessageOptions {
   receipts: ServiceAgentMessageReceiptOptions[]
 }
 
-export const didcommReceiptFromServiceAgentReceipt = 
-  (receipt: ServiceAgentMessageReceipt) => new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()]})
+export const didcommReceiptFromServiceAgentReceipt = (receipt: ServiceAgentMessageReceipt) =>
+  new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()] })
 
 export class ReceiptsMessage extends BaseMessage {
   public constructor(options: ReceiptsMessageOptions) {
@@ -60,7 +61,10 @@ export class ReceiptsMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.receipts = options.receipts.map((receipt) => new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()]}))
+      this.receipts = options.receipts.map(
+        receipt =>
+          new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()] }),
+      )
     }
   }
 

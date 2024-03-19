@@ -1,4 +1,5 @@
 import { IsString, IsOptional } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface InvitationMessageOptions extends BaseMessageOptions {
@@ -35,5 +36,5 @@ export class InvitationMessage extends BaseMessage {
 
   @IsString()
   @IsOptional()
-  public did?: string  
+  public did?: string
 }

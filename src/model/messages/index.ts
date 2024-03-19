@@ -15,4 +15,3 @@ export * from './MenuSelectMessage'
 export * from './ProfileMessage'
 export * from './ReceiptsMessage'
 export * from './TextMessage'
-

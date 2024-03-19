@@ -1,4 +1,10 @@
-import type { InboundTransport, Agent, TransportSession, EncryptedMessage, AgentContext } from '@credo-ts/core'
+import type {
+  InboundTransport,
+  Agent,
+  TransportSession,
+  EncryptedMessage,
+  AgentContext,
+} from '@credo-ts/core'
 import type { Express, Request, Response } from 'express'
 import type { Server } from 'http'
 

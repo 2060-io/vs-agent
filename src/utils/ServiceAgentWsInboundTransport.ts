@@ -6,9 +6,11 @@ import {
   EncryptedMessage,
   ConnectionRecord,
   AgentContext,
+  CredoError,
+  AgentConfig,
+  TransportService,
+  utils,
 } from '@credo-ts/core'
-
-import { CredoError, AgentConfig, TransportService, utils } from '@credo-ts/core'
 import WebSocket, { Server } from 'ws'
 
 // Workaround for types (https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20780)
@@ -24,7 +26,10 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
   // We're using a `socketId` just for the prevention of calling the connection handler twice.
   private socketIds: Record<string, unknown> = {}
 
-  public constructor({ server, port }: { server: Server; port?: undefined } | { server?: undefined; port: number }) {
+  public constructor({
+    server,
+    port,
+  }: { server: Server; port?: undefined } | { server?: undefined; port: number }) {
     this.socketServer = server ?? new Server({ port })
   }
 
@@ -35,7 +40,7 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
     this.logger = agent.context.config.logger
     this.logger.debug('Service Agent Ws Inbound transport start')
 
-    const wsEndpoint = config.endpoints.find((e) => e.startsWith('ws'))
+    const wsEndpoint = config.endpoints.find(e => e.startsWith('ws'))
     this.logger.debug(`Starting WS inbound transport`, {
       endpoint: wsEndpoint,
     })
@@ -66,7 +71,7 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
     this.logger.debug('Closing WebSocket Server')
 
     return new Promise<void>((resolve, reject) => {
-      this.socketServer.close((error) => {
+      this.socketServer.close(error => {
         if (error) {
           reject(error)
         }
@@ -79,7 +84,7 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
   private startIdleSocketTimer(interval: number) {
     setInterval(() => {
       const currentDate = new Date()
-      this.socketServer.clients.forEach((item) => {
+      this.socketServer.clients.forEach(item => {
         if (currentDate.valueOf() - (item as ExtWebSocket).lastActivity.valueOf() > interval) {
           this.logger.debug('Client session closed by inactivity')
           item.close()

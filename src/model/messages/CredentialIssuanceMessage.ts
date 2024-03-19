@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer'
 import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface ClaimOptions {
@@ -46,7 +47,7 @@ export class CredentialIssuanceMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.credentialDefinitionId = options.credentialDefinitionId
-      this.claims = options.claims?.map((item) => new Claim(item))
+      this.claims = options.claims?.map(item => new Claim(item))
     }
   }
 

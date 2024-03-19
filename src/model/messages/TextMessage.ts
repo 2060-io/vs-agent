@@ -1,5 +1,6 @@
-import { Expose, Type } from 'class-transformer'
-import { IsInstance, IsString, ValidateNested } from 'class-validator'
+import { Expose } from 'class-transformer'
+import { IsString } from 'class-validator'
+
 import { BaseMessage } from './BaseMessage'
 
 export interface TextMessageOptions {

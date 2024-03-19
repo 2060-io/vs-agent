@@ -5,31 +5,32 @@
 ## Configuration
 
 At the moment, all configuration is done by environment variables. All of them are optional for development
-but likely needed for production and test deployments. 
+but likely needed for production and test deployments.
 
-| Variable | Description | Default value |
-|----------|------------ | ------------- | 
-| AGENT_ENDPOINT | Public endpoint where agent DIDComm endpoints will be accessible (including protocol and port) | ws://localhost:3001 |
-| AGENT_ENDPOINTS | List of endpoints where agent DIDComm endpoints will be accessible (including protocol and port), comma separated | ws://localhost:3001 |
-| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations | none |
-| AGENT_INVITATION_BASE_URL | Public URL for fallback when no DIDComm agent is found | https://2060.io/i |
-| AGENT_PUBLIC_DID | Agent's public DID (in did:web format) | none |
-| AGENT_PORT | Port where DIDComm agent will be running | 3001 |
-| AGENT_LOG_LEVEL | Aries Agent Log level | 4 (warn) |
-| ENABLE_WS | Enable Web Socket transport for Agent | true |
-| ENABLE_HTTP | Enable HTTP transport for Agent | true |
-| AGENT_NAME | Label to show to other DIDComm agents | Test Service Agent |
-| USE_CORS | Enable Cross-Origin Resource Sharing (only for development purposes) | false |
-| ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL | none |
-| ADMIN_PORT | Administration interface port | 3000 |
-| ADMIN_LOG_LEVEL | Admin interface Log level | 2 (debug) |
-| EVENTS_BASE_URL | Base URL for sending events | http://localhost:5000 |
+| Variable                   | Description                                                                                                       | Default value         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
+| AGENT_ENDPOINT             | Public endpoint where agent DIDComm endpoints will be accessible (including protocol and port)                    | ws://localhost:3001   |
+| AGENT_ENDPOINTS            | List of endpoints where agent DIDComm endpoints will be accessible (including protocol and port), comma separated | ws://localhost:3001   |
+| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
+| AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://2060.io/i     |
+| AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)                                                                            | none                  |
+| AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
+| AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
+| ENABLE_WS                  | Enable Web Socket transport for Agent                                                                             | true                  |
+| ENABLE_HTTP                | Enable HTTP transport for Agent                                                                                   | true                  |
+| AGENT_NAME                 | Label to show to other DIDComm agents                                                                             | Test Service Agent    |
+| USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
+| ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
+| ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
+| ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
+| EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
 
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
-> 
+>
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 
 Possible log levels:
+
 - 0: test
 - 1: trace
 - 2: debug
