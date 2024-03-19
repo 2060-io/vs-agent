@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, dev, dev-test]
+    branches: [main, dev]
 
   workflow_dispatch:
 
@@ -37,10 +37,6 @@ jobs:
               { 
                 name: 'dev',
                 prerelease: true
-              },
-              { 
-                name: 'dev-test',
-                prerelease: true
               }
             ]
           plugins: |
@@ -66,16 +62,17 @@ jobs:
               "@semantic-release/release-notes-generator",
             ]
       - run: echo ${{ steps.semantic.outputs.release-version }}
- 
-      - name: Build Docker image
-        run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} .
 
       - name: Log in to Docker Hub
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
-  
+
+      - name: Build Docker image
+        if: steps.semantic.outputs.new-release-published == 'true'            
+        run: |
+          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} .
+ 
       - name: Add tags to Docker image
         if: steps.semantic.outputs.new-release-published == 'true'      
         run: |
