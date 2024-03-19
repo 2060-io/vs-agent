@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  DH_TOKEN: ${{ secrets.DOCKER_HUB_LOGIN }}
-  DH_USERNAME	: ${{ secrets.DOCKER_HUB_PWD }}
+  DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
+  DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: '2060-service-agent'        
 
 jobs:
@@ -61,7 +61,6 @@ jobs:
               ],
               "@semantic-release/release-notes-generator",
             ]
-      - run: echo ${{ steps.semantic.outputs.release-version }}
 
       - name: Log in to Docker Hub
         if: steps.semantic.outputs.new-release-published == 'true'
