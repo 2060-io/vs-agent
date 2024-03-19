@@ -19,7 +19,9 @@ app.use(express.urlencoded({ extended: true }))
 
 app.set('json spaces', 2)
 
-const phoneNumberCredentialDefinitionId = process.env.PHONE_CREDENTIAL_DEFINITION_ID || 'did:web:pn-vs.dev.2060.io?service=anoncreds&relativeRef=/credDef/26BYVUEasEVQDkVwttUTQm33vf9JQ35CPnySRem1VwtB'
+const phoneNumberCredentialDefinitionId =
+  process.env.PHONE_CREDENTIAL_DEFINITION_ID ||
+  'did:web:pn-vs.dev.2060.io?service=anoncreds&relativeRef=/credDef/26BYVUEasEVQDkVwttUTQm33vf9JQ35CPnySRem1VwtB'
 
 const server = app.listen(PORT, async () => {
   console.log(`Dummy chatbot started on port ${PORT}`)
@@ -131,7 +133,10 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   // Rocky quotes
   if (selectedItem === 'rocky' || selectedItem === '💪 Rocky quotes' || selectedItem === 'Inspire me!') {
     // send random Rocky quote
-    await sendTextMessage({ connectionId, content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)] })
+    await sendTextMessage({
+      connectionId,
+      content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)],
+    })
     await sendQuestion({
       connectionId,
       question: {
@@ -152,7 +157,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   }
 
   // World Cup poll responses
-  const worldCupResponses = worldCupPoll.menuItems.map((item) => item.text)
+  const worldCupResponses = worldCupPoll.menuItems.map(item => item.text)
   if (worldCupResponses.includes(selectedItem)) {
     if (selectedItem === '🇦🇷 Argentina') {
       // Yes!
@@ -232,7 +237,10 @@ app.post('/message-received', async (req, res) => {
       }
       await submitMessage(body)
     } else if (content.startsWith('/rocky')) {
-      await sendTextMessage({ connectionId, content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)] })
+      await sendTextMessage({
+        connectionId,
+        content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)],
+      })
     } else if (content.startsWith('/help')) {
       await sendTextMessage({ connectionId, content: helpMessage })
     } else {

@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer'
 import { IsString, IsOptional } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface ContextualMenuSelectMessageOptions extends BaseMessageOptions {

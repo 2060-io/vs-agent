@@ -6,7 +6,7 @@
   },
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["node"],
+    "types": ["node"]
   },
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules", "build"]
 }

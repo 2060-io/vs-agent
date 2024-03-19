@@ -2,11 +2,28 @@ import type { ServerConfig } from '../utils/ServerConfig'
 import type { CredentialStateChangedEvent } from '@credo-ts/core'
 import type { MessageReceiptsReceivedEvent } from 'credo-ts-receipts'
 
-import { CredentialEventTypes, CredentialState, V2PresentationProblemReportMessage } from '@credo-ts/core'
+import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
+import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
+import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
+import {
+  CredentialEventTypes,
+  CredentialState,
+  V2PresentationProblemReportMessage,
+  AgentEventTypes,
+  AgentMessageProcessedEvent,
+  BasicMessage,
+  V2PresentationMessage,
+} from '@credo-ts/core'
 import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
+import {
+  MediaSharingEventTypes,
+  MediaSharingRole,
+  MediaSharingState,
+  MediaSharingStateChangedEvent,
+} from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
+import { ProfileEventTypes, UserProfileRequestedEvent } from 'credo-ts-user-profile'
 
-import { sendWebhookEvent } from './WebhookEvent'
 import {
   BaseMessage,
   Claim,
@@ -19,14 +36,10 @@ import {
   ContextualMenuSelectMessage,
   MediaMessage,
 } from '../model'
-import { AgentEventTypes, AgentMessageProcessedEvent, BasicMessage, V2PresentationMessage } from '@credo-ts/core'
-import { ProfileEventTypes, UserProfileRequestedEvent } from 'credo-ts-user-profile'
-import { ServiceAgent } from '../utils/ServiceAgent'
-import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
-import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
-import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
-import { MediaSharingEventTypes, MediaSharingRole, MediaSharingState, MediaSharingStateChangedEvent } from 'credo-ts-media-sharing'
+import { ServiceAgent } from '../utils/ServiceAgent'
+
+import { sendWebhookEvent } from './WebhookEvent'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
 // as soon as the corresponding extension is added to them
@@ -37,7 +50,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
     if (!connection) {
       config.logger.warn(
-        `[messageEvents] Received contactless message of type ${message.type}. Not supported yet.`
+        `[messageEvents] Received contactless message of type ${message.type}. Not supported yet.`,
       )
       return
     }
@@ -79,17 +92,20 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
     // Question Answer protocol messages
     if (message.type === AnswerMessage.type.messageTypeUri) {
-      const record = await agent.dependencyManager.resolve(QuestionAnswerService).getByThreadAndConnectionId(agent.context, 
-        connection.id, message.threadId)
+      const record = await agent.dependencyManager
+        .resolve(QuestionAnswerService)
+        .getByThreadAndConnectionId(agent.context, connection.id, message.threadId)
 
       const textIdMapping = record.metadata.get<Record<string, string>>('text-id-mapping')
 
       if (!textIdMapping) {
         config.logger.warn(
-          `[messageEvents] No text-id mapping found for Menu message. Using responded text as identifier`
-        )  
+          `[messageEvents] No text-id mapping found for Menu message. Using responded text as identifier`,
+        )
       }
-      const selectionId = textIdMapping ? textIdMapping[(message as AnswerMessage).response] : (message as AnswerMessage).response
+      const selectionId = textIdMapping
+        ? textIdMapping[(message as AnswerMessage).response]
+        : (message as AnswerMessage).response
       const msg = new MenuSelectMessage({
         threadId: message.threadId,
         connectionId: connection.id,
@@ -100,17 +116,24 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       await sendMessageReceivedEvent(msg, msg.timestamp, config)
     }
 
-    if ([V2PresentationProblemReportMessage.type.messageTypeUri, V1PresentationProblemReportMessage.type.messageTypeUri].includes(message.type)) {
+    if (
+      [
+        V2PresentationProblemReportMessage.type.messageTypeUri,
+        V1PresentationProblemReportMessage.type.messageTypeUri,
+      ].includes(message.type)
+    ) {
       config.logger.info('Presentation problem report received')
-      try{
+      try {
         const record = await agent.proofs.getByThreadAndConnectionId(message.threadId, connection.id)
         const msg = new IdentityProofSubmitMessage({
           submittedProofItems: [
             new VerifiableCredentialSubmittedProofItem({
-              errorCode: (message as V2PresentationProblemReportMessage).description.en ?? (message as V2PresentationProblemReportMessage).description.code,
+              errorCode:
+                (message as V2PresentationProblemReportMessage).description.en ??
+                (message as V2PresentationProblemReportMessage).description.code,
               id: record.threadId, // TODO: store id as a tag
               proofExchangeId: record.id,
-            })
+            }),
           ],
           connectionId: record.connectionId!,
           id: message.id,
@@ -122,10 +145,13 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       } catch (error) {
         config.logger.error(`Error processing presentaion problem report: ${error}`)
       }
-
     }
     // Proofs protocol messages
-    if ([V1PresentationMessage.type.messageTypeUri, V2PresentationMessage.type.messageTypeUri].includes(message.type)) {
+    if (
+      [V1PresentationMessage.type.messageTypeUri, V2PresentationMessage.type.messageTypeUri].includes(
+        message.type,
+      )
+    ) {
       config.logger.info('Presentation received')
 
       try {
@@ -133,13 +159,15 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
         const formatData = await agent.proofs.getFormatData(record.id)
 
-        const revealedAttributes = formatData.presentation?.anoncreds?.requested_proof.revealed_attrs ?? 
+        const revealedAttributes =
+          formatData.presentation?.anoncreds?.requested_proof.revealed_attrs ??
           formatData.presentation?.indy?.requested_proof.revealed_attrs
 
-        const revealedAttributeGroups = formatData.presentation?.anoncreds?.requested_proof?.revealed_attr_groups ?? 
+        const revealedAttributeGroups =
+          formatData.presentation?.anoncreds?.requested_proof?.revealed_attr_groups ??
           formatData.presentation?.indy?.requested_proof.revealed_attr_groups
 
-        let claims: Claim[] = []
+        const claims: Claim[] = []
         if (revealedAttributes) {
           for (const [name, value] of Object.entries(revealedAttributes)) {
             claims.push(new Claim({ name, value: value.raw }))
@@ -147,11 +175,10 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         }
 
         if (revealedAttributeGroups) {
-          for (const [groupName, groupAttributes] of Object.entries(revealedAttributeGroups)) {
+          for (const [, groupAttributes] of Object.entries(revealedAttributeGroups)) {
             for (const attrName in groupAttributes.values) {
               claims.push(new Claim({ name: attrName, value: groupAttributes.values[attrName].raw }))
             }
-            
           }
         }
         const msg = new IdentityProofSubmitMessage({
@@ -161,7 +188,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
               proofExchangeId: record.id,
               claims,
               verified: record.isVerified ?? false,
-            })
+            }),
           ],
           connectionId: record.connectionId!,
           id: message.id,
@@ -177,44 +204,53 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
   })
 
   // Credential events
-  agent.events.on(CredentialEventTypes.CredentialStateChanged, async ({ payload }: CredentialStateChangedEvent) => {
-    config.logger.debug(`CredentialStateChangedEvent received. Record id: 
+  agent.events.on(
+    CredentialEventTypes.CredentialStateChanged,
+    async ({ payload }: CredentialStateChangedEvent) => {
+      config.logger.debug(`CredentialStateChangedEvent received. Record id: 
       ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
-    const record = payload.credentialRecord
+      const record = payload.credentialRecord
 
-    if (record.state === CredentialState.ProposalReceived) {
-      const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
-      const message = new CredentialRequestMessage({
-        connectionId: record.connectionId!,
-        id: record.id,
-        threadId: credentialProposalMessage?.threadId,
-        claims:
-          credentialProposalMessage?.credentialPreview?.attributes.map(
-            (p) => new Claim({ name: p.name, value: p.value, mimeType: p.mimeType })
-          ) ?? [],
-        credentialDefinitionId: record.metadata.get(
-          AnonCredsCredentialDefinitionRecordMetadataKeys.CredentialDefinitionMetadata
-        )?.credentialDefinitionId!,
-        timestamp: record.createdAt,
-      })
+      if (record.state === CredentialState.ProposalReceived) {
+        const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
+        const message = new CredentialRequestMessage({
+          connectionId: record.connectionId!,
+          id: record.id,
+          threadId: credentialProposalMessage?.threadId,
+          claims:
+            credentialProposalMessage?.credentialPreview?.attributes.map(
+              p => new Claim({ name: p.name, value: p.value, mimeType: p.mimeType }),
+            ) ?? [],
+          credentialDefinitionId: record.metadata.get(
+            AnonCredsCredentialDefinitionRecordMetadataKeys.CredentialDefinitionMetadata,
+          )?.credentialDefinitionId,
+          timestamp: record.createdAt,
+        })
 
-      await sendMessageReceivedEvent(message, message.timestamp, config)
-    } else if ([CredentialState.Declined, CredentialState.Done, CredentialState.Abandoned].includes(record.state)) {
-      const message = new CredentialReceptionMessage({
-        connectionId: record.connectionId!,
-        id: record.id,
-        threadId: record.threadId,
-        state: record.errorMessage === 'issuance-abandoned: e.msg.refused' ? CredentialState.Declined : record.state,
-      })
-      await sendMessageReceivedEvent(message, message.timestamp, config)
-    }
-  })
+        await sendMessageReceivedEvent(message, message.timestamp, config)
+      } else if (
+        [CredentialState.Declined, CredentialState.Done, CredentialState.Abandoned].includes(record.state)
+      ) {
+        const message = new CredentialReceptionMessage({
+          connectionId: record.connectionId!,
+          id: record.id,
+          threadId: record.threadId,
+          state:
+            record.errorMessage === 'issuance-abandoned: e.msg.refused'
+              ? CredentialState.Declined
+              : record.state,
+        })
+        await sendMessageReceivedEvent(message, message.timestamp, config)
+      }
+    },
+  )
 
   // Media protocol events
   agent.events.on(MediaSharingEventTypes.StateChanged, async ({ payload }: MediaSharingStateChangedEvent) => {
     const record = payload.mediaSharingRecord
 
-    config.logger.debug(`MediaSharingStateChangedEvent received. Role: ${record.role} Connection id: ${record.connectionId}. 
+    config.logger
+      .debug(`MediaSharingStateChangedEvent received. Role: ${record.role} Connection id: ${record.connectionId}. 
     Items: ${JSON.stringify(record.items)} `)
 
     if (record.state === MediaSharingState.MediaShared && record.role === MediaSharingRole.Receiver) {
@@ -232,27 +268,29 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
             byteCount: item.byteCount,
             description: item.description,
             filename: item.fileName,
-          }))
+          })),
         })
-        
+
         await sendMessageReceivedEvent(message, message.timestamp, config)
       }
     }
   })
 
-
   // Receipts protocol events
-  agent.events.on(ReceiptsEventTypes.MessageReceiptsReceived, async ({ payload }: MessageReceiptsReceivedEvent) => {
-    const connectionId = payload.connectionId
-    config.logger.debug(`MessageReceiptsReceivedEvent received. Connection id: ${connectionId}. 
+  agent.events.on(
+    ReceiptsEventTypes.MessageReceiptsReceived,
+    async ({ payload }: MessageReceiptsReceivedEvent) => {
+      const connectionId = payload.connectionId
+      config.logger.debug(`MessageReceiptsReceivedEvent received. Connection id: ${connectionId}. 
     Receipts: ${JSON.stringify(payload.receipts)} `)
-    const receipts = payload.receipts
+      const receipts = payload.receipts
 
-    receipts.forEach((receipt) => {
-      const { messageId, timestamp, state } = receipt
-      sendMessageStateUpdatedEvent({ messageId, connectionId, state, timestamp, config })
-    })
-  })
+      receipts.forEach(receipt => {
+        const { messageId, timestamp, state } = receipt
+        sendMessageStateUpdatedEvent({ messageId, connectionId, state, timestamp, config })
+      })
+    },
+  )
 
   // User profile events
   agent.events.on(ProfileEventTypes.UserProfileRequested, async ({ payload }: UserProfileRequestedEvent) => {
@@ -265,38 +303,34 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (outOfBandRecordId) {
       const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
       const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
-      if (!parentConnectionId) await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
+      if (!parentConnectionId)
+        await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
   })
 }
 
-const sendMessageReceivedEvent = async (
-  message: BaseMessage, 
-  timestamp: Date, 
-  config: ServerConfig) => {
+const sendMessageReceivedEvent = async (message: BaseMessage, timestamp: Date, config: ServerConfig) => {
   const body = {
     timestamp,
     type: 'message-received',
     message: message.toJSON(),
   }
-  
+
   await sendWebhookEvent(config.webhookUrl + '/message-received', body, config.logger)
 }
 
-const sendMessageStateUpdatedEvent = async (
-  options: {
-    messageId: string,
-    connectionId: string,
-    state: string,
-    timestamp: Date,
-    config: ServerConfig
-  }
-) => {
+const sendMessageStateUpdatedEvent = async (options: {
+  messageId: string
+  connectionId: string
+  state: string
+  timestamp: Date
+  config: ServerConfig
+}) => {
   const { messageId, connectionId, state, timestamp, config } = options
 
   const body = {
     type: 'message-state-updated',
-    messageId, 
+    messageId,
     state,
     timestamp,
     connectionId,

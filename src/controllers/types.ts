@@ -1,4 +1,3 @@
-import { AnonCredsCredentialDefinition, AnonCredsSchema } from '@credo-ts/anoncreds'
 import type {
   HandshakeProtocol,
   ReceiveOutOfBandInvitationConfig,
@@ -58,7 +57,6 @@ export interface CreatePresentationRequestResult {
   url: string
 }
 
-
 export interface ClaimOptions {
   name: string
   mimeType?: string
@@ -67,7 +65,7 @@ export interface ClaimOptions {
 
 export interface CreateCredentialOfferOptions {
   credentialDefinitionId: string
-  claims: ClaimOptions[] 
+  claims: ClaimOptions[]
 }
 
 export interface CreateCredentialOfferResult {

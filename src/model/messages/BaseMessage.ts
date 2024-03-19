@@ -1,6 +1,6 @@
+import { JsonTransformer } from '@credo-ts/core'
 import { Expose } from 'class-transformer'
 import { v4 as uuid } from 'uuid'
-import { JsonTransformer } from '@credo-ts/core'
 
 export interface BaseMessageOptions {
   id?: string

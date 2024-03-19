@@ -1,13 +1,19 @@
-
+import { ConnectionRepository, DidExchangeState, RecordNotFoundError } from '@credo-ts/core'
 import {
-  ConnectionRepository,
-  DidExchangeState,
-  RecordNotFoundError,
-} from '@credo-ts/core'
-import { Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Query, Res } from '@nestjs/common'
-import { Response } from 'express';
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Query,
+  Res,
+} from '@nestjs/common'
+import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { Response } from 'express'
+
 import { AgentService } from '../../services/AgentService'
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('connections')
 @Controller({
@@ -15,7 +21,6 @@ import { ApiQuery, ApiTags } from '@nestjs/swagger';
   version: '1',
 })
 export class ConnectionController {
-
   constructor(private readonly agentService: AgentService) {}
 
   /**
@@ -40,7 +45,7 @@ export class ConnectionController {
     @Query('state') state?: DidExchangeState,
     @Query('myDid') myDid?: string,
     @Query('theirDid') theirDid?: string,
-    @Query('theirLabel') theirLabel?: string
+    @Query('theirLabel') theirLabel?: string,
   ) {
     const agent = await this.agentService.getAgent()
 
@@ -59,10 +64,10 @@ export class ConnectionController {
         state,
       })
 
-      return connections.map((c) => c.toJSON())
+      return connections.map(c => c.toJSON())
     }
 
-    return connections.map((c) => c.toJSON())
+    return connections.map(c => c.toJSON())
   }
 
   /**
@@ -71,14 +76,13 @@ export class ConnectionController {
    * @returns ConnectionRecord
    */
   @Get(':connectionId')
-  public async getConnectionById(
-    @Param('connectionId') connectionId: string,
-  ) {
+  public async getConnectionById(@Param('connectionId') connectionId: string) {
     const agent = await this.agentService.getAgent()
 
     const connection = await agent.connections.findById(connectionId)
 
-    if (!connection) throw new NotFoundException({ reason: `connection with connection id "${connectionId}" not found.` })
+    if (!connection)
+      throw new NotFoundException({ reason: `connection with connection id "${connectionId}" not found.` })
 
     return connection.toJSON()
   }
@@ -89,10 +93,7 @@ export class ConnectionController {
    * @param connectionId Connection identifier
    */
   @Delete('/:connectionId')
-  public async deleteConnection(
-    @Param('connectionId') connectionId: string,
-    @Res() response: Response
-  ) {
+  public async deleteConnection(@Param('connectionId') connectionId: string, @Res() response: Response) {
     const agent = await this.agentService.getAgent()
 
     try {
@@ -102,12 +103,16 @@ export class ConnectionController {
       if (error instanceof RecordNotFoundError) {
         throw new NotFoundException({ reason: `connection with connection id "${connectionId}" not found.` })
       }
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: `something went wrong: ${error}`,
-      }, HttpStatus.INTERNAL_SERVER_ERROR, {
-        cause: error
-      });
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `something went wrong: ${error}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          cause: error,
+        },
+      )
     }
   }
 }

@@ -1,10 +1,11 @@
-import { utils } from '@credo-ts/core';
+import { utils } from '@credo-ts/core'
 import { Type } from 'class-transformer'
 import { IsOptional, IsArray, IsInstance, IsString, ValidateNested } from 'class-validator'
+
 import { BaseMessage } from './BaseMessage'
 
 export interface CipheringInfo {
-  algorithm: string;
+  algorithm: string
   // Other fields are dependant on the algorithm chosen
   parameters?: Record<string, unknown>
 }
@@ -25,7 +26,6 @@ export interface MediaItemOptions {
 }
 
 export class MediaItem {
-
   public constructor(options: MediaItemOptions) {
     if (options) {
       this.id = options.id ?? utils.uuid()

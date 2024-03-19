@@ -14,7 +14,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useUnknownInCatchVariables": false,
-    "outDir": "./build",
+    "outDir": "./build"
   },
   "include": ["src/**/*", "src/routes"],
   "exclude": [
@@ -26,5 +26,4 @@
     "**/build/**",
     "scripts"
   ]
-
 }

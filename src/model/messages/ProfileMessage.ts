@@ -3,8 +3,8 @@ import { BaseMessage } from './BaseMessage'
 export interface ProfileMessageOptions {
   id?: string
   connectionId: string
-  displayName?: string | null,
-  displayImageUrl?: string | null,
+  displayName?: string | null
+  displayImageUrl?: string | null
   displayIconUrl?: string | null
 }
 

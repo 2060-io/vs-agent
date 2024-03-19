@@ -5,7 +5,7 @@ services:
     build: ../..
     image: 2060-service-agent
     container_name: phonenumbervs-service-agent
-    restart: always    
+    restart: always
     networks:
       - phonenumbervs
     ports:
@@ -19,7 +19,7 @@ services:
       - USE_CORS=true
       - EVENTS_BASE_URL=http://phonenumbervs-backend:5000
     volumes:
-       - ./afj:/root/.afj
+      - ./afj:/root/.afj
 
   phonenumbervs-backend:
     build: .

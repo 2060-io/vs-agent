@@ -1,21 +1,20 @@
-import { isUri } from "@credo-ts/core/build/utils";
-import { PictureData } from "credo-ts-user-profile";
+import { isUri } from '@credo-ts/core/build/utils'
+import { PictureData } from 'credo-ts-user-profile'
 
 export function parseDataUrl(dataUrl: string) {
-    var regex = /^data:(.+);base64,(.*)$/
+  const regex = /^data:(.+);base64,(.*)$/
 
-    const matches = dataUrl.match(regex);
-    if (!matches) return null
+  const matches = dataUrl.match(regex)
+  if (!matches) return null
 
-    return { mimeType: matches[1], data: matches[2]}
+  return { mimeType: matches[1], data: matches[2] }
 }
 
 export function parsePictureData(pictureData: string): PictureData | undefined {
-
-    const parsedDataUrl = parseDataUrl(pictureData)
-    if (parsedDataUrl) {
-        return { base64: parsedDataUrl.data, mimeType: parsedDataUrl.mimeType }
-    } else if (isUri(pictureData)) {
-        return { links: [pictureData] }
-    }
+  const parsedDataUrl = parseDataUrl(pictureData)
+  if (parsedDataUrl) {
+    return { base64: parsedDataUrl.data, mimeType: parsedDataUrl.mimeType }
+  } else if (isUri(pictureData)) {
+    return { links: [pictureData] }
+  }
 }

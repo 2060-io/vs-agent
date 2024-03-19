@@ -50,7 +50,6 @@ In addition, it supports a notification mechanism to subscribe to any event the 
     - [Service Agent - Chat Backend Interface](#service-agent---chat-backend-interface)
     - [Chat topic creation and management](#chat-topic-creation-and-management)
 
-
 ## Messaging
 
 Messages are submitted in a JSON format, whose base is as follows:
@@ -65,7 +64,7 @@ Messages are submitted in a JSON format, whose base is as follows:
 }
 ```
 
-### Messaging to/from other agents 
+### Messaging to/from other agents
 
 To message other agents, a single endpoint is used (`/message`), which receives by POST a JSON body containing the message.
 
@@ -102,6 +101,7 @@ Currently, the following messages can be submitted and received:
 - Profile (`profile`)
 
 > **TODO**: Messages for:
+>
 > - Open browsing session
 > - System messages in topics
 > - Message signaling (typing)
@@ -111,9 +111,9 @@ Currently, the following messages can be submitted and received:
 This message starts a Credential Issuance flow. The requested credential type is defined by its `credentialDefinitionId`, which must be known beforehand by the requester. Optionally, requester can define some claims about themselves (if not defined, the issuer will get them from other messages (e.g. by requesting proofs or asking through text messages).
 
 Parameters:
-  - Credential Definition ID
-  - (optional) Claims (name, phoneNumber, subscriptionId, etc) if needed 
 
+- Credential Definition ID
+- (optional) Claims (name, phoneNumber, subscriptionId, etc) if needed
 
 ```json
 {
@@ -125,6 +125,7 @@ Parameters:
 ```
 
 Example:
+
 - Phone Number VC: `{ credentialDefinitionId: 'vc-issuer-1:TAG:1, claims: [phoneNumber: "+5731294956" ]}`
 - Subscription VC: `{ credentialDefinitionId: 'vc-issuer-2:TAG:1 }`
 
@@ -135,8 +136,9 @@ By sending this message, a Verifiable Credential is effectively issued and sent 
 This message could be sent as a response to a Credential Request. In such case, `threadId` is used to identify credential details. But it can also start a new Credential Issuance flow, and specify
 
 Parameters:
-  - (optional) Credential Definition ID
-  - (optional) Claims
+
+- (optional) Credential Definition ID
+- (optional) Claims
 
 ```json
 {
@@ -147,7 +149,6 @@ Parameters:
 }
 ```
 
-
 #### Credential Reception
 
 By sending this message, a recipient acknowledges the reception of a Verifiable Credential (or informs they declined it).
@@ -157,7 +158,8 @@ This message is sent as a response to a Credential Issue. `threadId` is used to 
 The state can be one of 'done', 'declined' or 'abandoned', depending on how the flow went.
 
 Parameters:
-  - State: final state of the flow. 'done' in case that the recipient accepted and stored the credential, and 'declined' if they refused to receive it. 'abandoned' may be thrown in case of an error 
+
+- State: final state of the flow. 'done' in case that the recipient accepted and stored the credential, and 'declined' if they refused to receive it. 'abandoned' may be thrown in case of an error
 
 ```json
 {
@@ -170,7 +172,6 @@ Parameters:
 #### Identity Proof Request
 
 Starts an Identity Verification flow, requesting a certain number of identity proofing items. It is usually sent by an issuer to a potential holder before the credential is actually issued.
-
 
 ```json
 {
@@ -258,7 +259,8 @@ Shares media files to a destination. They might be previously encrypted and stor
 
 `ciphering` is optional but recommended once it is supported by the clients. `preview` is also optional and dependant on the type of content to send. For the moment, for images a [BlurHash](https://blurha.sh) is used.
 
-> **Note**: 
+> **Note**:
+>
 > - At the moment, only a single media file per message is supported. The list format is kept for future compatibility
 > - Content encryption is not yet supported by Mobile Agent so only unencrypted content will be usable
 
@@ -278,7 +280,6 @@ Sends message updates for a number of messages.
 }
 ```
 
-
 #### Contextual Menu Request
 
 Requests a destination agent context menu root (if any). The other side should always respond with a [Context Menu Update](#contextual-menu-update) even if no context menu is available (in such case, an empty payload will be sent).
@@ -291,7 +292,6 @@ Requests a destination agent context menu root (if any). The other side should a
 ```
 
 Description fields are optional and used as a prompt to give more details about each option (and the contextual menu itself). ID fields are used to identify the selection when an agent interacts with the contextual menu.
-
 
 #### Contextual Menu Update
 
@@ -314,7 +314,6 @@ Sends or updates the contents for the contextual menu to destination agent.
 ```
 
 Description fields are optional and used as a prompt to give more details about each option (and the contextual menu itself). ID fields are used to identify the selection when an agent interacts with the contextual menu.
-
 
 #### Contextual Menu Selection
 
@@ -361,7 +360,7 @@ Submits the selected item of a presented menu, defined in `threadId` field.
    "type": "menu-select",
    "menuItems" : [
     {
-      id: string 
+      id: string
     }],
   "content": string
 }
@@ -371,7 +370,7 @@ Submits the selected item of a presented menu, defined in `threadId` field.
 
 Creates an Out of Band invitation message and sends it through an already established DIDComm channel. This is used mostly to generate sub-connections, but can also be used to forward an invitation to a public resolvable DID (passed optionally as a parameter).
 
-If no `did` specified, a new pairwise connection will be created. The newly created connection will be related to the one where it has been sent (this concept is referred to as  `sub-connections`.
+If no `did` specified, a new pairwise connection will be created. The newly created connection will be related to the one where it has been sent (this concept is referred to as `sub-connections`.
 
 `label` and `imageUrl` are optional but recommended. URL is given as a Data URL (it can be either a link or base64-encoded).
 
@@ -391,7 +390,8 @@ The generated message Id will be used as invitationId un subsequent Connection S
 
 Sends User Profile to a particular connection. An Agent may have its default profile settings, but also override them and send any arbitrary value to each connection. All items are optional.
 
-> **Notes**: 
+> **Notes**:
+
 - Display Image and Contextual Menu Image are sent as a Data URL or regular URL
 - A null value means to delete any existing one. A missing value means to keep the previous one.
 
@@ -407,9 +407,9 @@ Sends User Profile to a particular connection. An Agent may have its default pro
 
 ### Identity Proof Item types
 
-When a Credential Issuance is requested, the issuer might require the recipient to present certain identity proofing elements. 
+When a Credential Issuance is requested, the issuer might require the recipient to present certain identity proofing elements.
 
-For instance: 
+For instance:
 
 - Verifiable Credential
 - Documents (File uploads)
@@ -423,7 +423,7 @@ Currently, the following types are supported:
 
 #### Verifiable Credential
 
-This proof type involves a [Present Proof](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2) flow, where a Verifiable Presentation is created and sent by the *prover*.
+This proof type involves a [Present Proof](https://github.com/hyperledger/aries-rfcs/tree/main/features/0454-present-proof-v2) flow, where a Verifiable Presentation is created and sent by the _prover_.
 
 ##### Request value
 
@@ -439,7 +439,7 @@ When a Verifiable Credential Presentation is submitted, the following fields may
 
 - proofExchangeId: reference to the proof exchange
 - claims: list of received claims
-- verified: boolean determining if the presentation is cryptographically valid 
+- verified: boolean determining if the presentation is cryptographically valid
 - errorCode: if any, it indicated that an error has ocurred in the flow. Known error codes are the following:
   - 'Request declined': user has refused to present credential
   - 'e.msg.no-compatble-credentials': user does not have a compatible credential to present
@@ -479,7 +479,7 @@ Sent whenever a connection has been created or updated. Event format is as follo
 
 ```json
 {
-  ...  
+  ...
   "type": "connection-state-updated",
   "connectionId": UUID,
   "invitationId": UUID,
@@ -495,7 +495,7 @@ Sent when a message delivery status has been changed. Event format is as follows
 
 ```json
 {
-  ...  
+  ...
   "type": "message-state-updated",
   "messageId": UUID,
   "timestamp": NumericDate,
@@ -504,7 +504,7 @@ Sent when a message delivery status has been changed. Event format is as follows
 }
 ```
 
-MessageState corresponds to the different states specified in [Messaging]([https://gitlab/messaging.md](https://gitlab.mobiera.com/2060/2060-spec/-/blob/master/messaging.md)).
+MessageState corresponds to the different states specified in [Messaging](<[https://gitlab/messaging.md](https://gitlab.mobiera.com/2060/2060-spec/-/blob/master/messaging.md)>).
 
 #### Message Received
 
@@ -512,7 +512,7 @@ Sent when a message is received. Event format is as follows:
 
 ```json
 {
-  ...  
+  ...
   "type": "message-received",
   "message": Message,
 }
@@ -523,14 +523,15 @@ Payload contains the message itself, as specified in the previous section.
 ### Subscribing to events
 
 > **NOTE**: Not yet supported by Service Agent implementation
-Subscription to events is maanaged in a REST route (`/event-subscriptions`) that allows to list, create and remove Webhooks for different topics. 
+> Subscription to events is maanaged in a REST route (`/event-subscriptions`) that allows to list, create and remove Webhooks for different topics.
 
 Subscriptions are composed by:
+
 - (optional) type: EventType (or array of Event Types). If not specified, send all events to the endpoint
 - (optional) filter: send only events that match specific fields. This only works when a particular EventType is defined in type
 - endpoint: URL where the Service Agent will connect to send the notifications (it could be HTTP or WS)
 
-## Verifiable Data Registry Operations  
+## Verifiable Data Registry Operations
 
 This section specifies the different endpoints provided by the Service Agent to operate with the VDR.
 
@@ -557,7 +558,6 @@ Response from Service Agent will generally result in a 200 HTTP response code an
   "id": credential definition Id (as registered in VDR)
 }
 ```
-
 
 ## Initial Service Agent API Use Cases
 
@@ -588,7 +588,7 @@ PNVS -> SA: Issue Credential
 ```
 
 ### Service Agent - Subscription Service Backend Interface
- 
+
 ```plantuml
 @startuml
 participant SA as "2060 Service Agent"
@@ -610,7 +610,7 @@ end
 ```
 
 > **Note**: No specific Open browser session message is yet supported, but a Media message with mimeType 'text/html' can be used instead
-    
+
 ### Service Agent - Chat Backend Interface
 
 ```plantuml

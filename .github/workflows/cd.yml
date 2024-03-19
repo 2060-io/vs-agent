@@ -1,0 +1,85 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [main, dev, dev-test]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup node v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - uses: codfish/semantic-release-action@v3
+        id: semantic
+        with:
+          branches: |
+            [
+              'main',
+              { 
+                name: 'dev',
+                prerelease: true
+              },
+              { 
+                name: 'dev-test',
+                prerelease: true
+              }
+            ]
+          plugins: |
+            [
+              [
+                "@semantic-release/commit-analyzer",
+                {
+                  "preset": "angular",
+                  "releaseRules": [
+                    {
+                      "type": "refactor",
+                      "release": "patch"
+                    }
+                  ]
+                }
+              ],
+              [
+                "@semantic-release/npm",
+                {
+                  "npmPublish": false
+                }
+              ],
+              "@semantic-release/release-notes-generator",
+              [
+                "@codedependant/semantic-release-docker",
+                {
+                  "dockerTags": 
+                    [
+                      "${RELEASE_MAJOR}-${GITHUB_REF##*/}", 
+                      "${RELEASE_MAJOR}.${RELEASE_MINOR}-${GITHUB_REF##*/}", 
+                      "${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH}-${GITHUB_REF##*/}", 
+                      "$RELEASE_VERSION",
+                      "${GITHUB_REF##*/}"
+                    ],
+                  "dockerImage": "${IMAGE_NAME}"
+                }
+              ]
+            ]
+          additional-packages: |
+            ['@codedependant/semantic-release-docker']
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_HUB_LOGIN }}
+          DOCKER_REGISTRY_PASSWORD	: ${{ secrets.DOCKER_HUB_PWD }}
+          IMAGE_NAME: '2060-service-agent'        
+
+      - run: echo ${{ steps.semantic.outputs.release-version }}

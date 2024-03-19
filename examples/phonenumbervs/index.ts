@@ -54,7 +54,7 @@ export const getCredentialTypes = async () => {
   if (!Array.isArray(types)) {
     throw new Error('Invalid response from Service Agent')
   }
-  return types.map((value) => value as CredentialTypeInfo)
+  return types.map(value => value as CredentialTypeInfo)
 }
 
 const server = app.listen(PORT, async () => {
@@ -62,7 +62,7 @@ const server = app.listen(PORT, async () => {
   const credentialTypes = await getCredentialTypes()
 
   const phoneNumberCredentialType = credentialTypes.find(
-    (type) => type.name === 'phoneNumber' && type.version === '1.0'
+    type => type.name === 'phoneNumber' && type.version === '1.0',
   )
 
   phoneNumberCredentialDefinitionId =
@@ -75,7 +75,7 @@ const server = app.listen(PORT, async () => {
 })
 
 export const submitMessage = async (body: unknown) => {
-  await new Promise((res) => setTimeout(res, 1000))
+  await new Promise(res => setTimeout(res, 1000))
   await fetch(`${SERVICE_AGENT_BASE_URL}/message`, {
     method: 'POST',
     body: JSON.stringify(body),
@@ -83,7 +83,13 @@ export const submitMessage = async (body: unknown) => {
   })
 }
 
-const submitProofResult = async (connectionId: string, threadId: string, id: string, type: string, code: string) => {
+const submitProofResult = async (
+  connectionId: string,
+  threadId: string,
+  id: string,
+  type: string,
+  code: string,
+) => {
   const proofResultBody = {
     type: 'identity-proof-result',
     connectionId,
@@ -119,7 +125,7 @@ app.post('/message-received', async (req, res) => {
     await submitMessage(body)
   } else if (obj.type === 'identity-proof-submit') {
     const submittedProofItem = obj.submittedProofItems.find(
-      (item: { type: string }) => item.type === 'authorization-code'
+      (item: { type: string }) => item.type === 'authorization-code',
     )
     if (submittedProofItem) {
       const expirationTime = new Date(submittedProofItem.value.expirationTime as string).getTime()
@@ -147,7 +153,7 @@ app.post('/message-received', async (req, res) => {
           obj.threadId,
           submittedProofItem.id,
           submittedProofItem.type,
-          'expired'
+          'expired',
         )
       } else if (code !== '123456') {
         // send mismatch error
@@ -156,11 +162,17 @@ app.post('/message-received', async (req, res) => {
           obj.threadId,
           submittedProofItem.id,
           submittedProofItem.type,
-          'mismatch'
+          'mismatch',
         )
       } else {
         // send ok result + credential issuance
-        await submitProofResult(obj.connectionId, obj.threadId, submittedProofItem.id, submittedProofItem.type, 'ok')
+        await submitProofResult(
+          obj.connectionId,
+          obj.threadId,
+          submittedProofItem.id,
+          submittedProofItem.type,
+          'ok',
+        )
 
         const body = {
           type: 'credential-issuance',

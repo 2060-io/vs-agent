@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, IsOptional, ValidateNested } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 // TODO: define action types in protocol
@@ -48,7 +49,7 @@ export class MenuDisplayMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.prompt = options.prompt
-      this.menuItems = options.menuItems.map((item) => new MenuItem(item))
+      this.menuItems = options.menuItems.map(item => new MenuItem(item))
     }
   }
 

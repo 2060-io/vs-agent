@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, IsOptional, ValidateNested } from 'class-validator'
+
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface ContextualMenuItemOptions {
@@ -47,7 +48,7 @@ export class ContextualMenuUpdateMessage extends BaseMessage {
       this.connectionId = options.connectionId
       this.title = options.title
       this.description = options.description
-      this.options = options.options.map((item) => new ContextualMenuItem(item))
+      this.options = options.options.map(item => new ContextualMenuItem(item))
     }
   }
 

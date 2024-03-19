@@ -1,7 +1,7 @@
 import { Expose, Type } from 'class-transformer'
-import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 
+import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface RequestedProofItemOptions {
   id: string
@@ -50,4 +50,5 @@ export class IdentityProofRequestMessage extends BaseMessage {
   @IsArray()
   @ValidateNested()
   @IsInstance(RequestedProofItem, { each: true })
-  public requestedProofItems!: RequestedProofItem[]}
+  public requestedProofItems!: RequestedProofItem[]
+}

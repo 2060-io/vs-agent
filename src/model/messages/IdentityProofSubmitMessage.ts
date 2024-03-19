@@ -1,6 +1,7 @@
 import { Expose, Type } from 'class-transformer'
-import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
+
+import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface SubmittedProofItemOptions {
   id: string

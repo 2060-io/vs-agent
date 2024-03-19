@@ -1,3 +1,5 @@
+import type WebSocket from 'ws'
+
 import {
   Agent,
   AgentConfig,
@@ -14,7 +16,6 @@ import {
   JsonEncoder,
   Buffer,
 } from '@credo-ts/core'
-import type WebSocket from 'ws'
 
 export function getProtocolScheme(url: string) {
   const [protocolScheme] = url.split(':')
@@ -40,7 +41,7 @@ export class ServiceAgentWsOutboundTransport implements OutboundTransport {
   private startIdleSocketTimer(interval: number) {
     setInterval(() => {
       const currentDate = new Date()
-      this.transportTable.forEach((item) => {
+      this.transportTable.forEach(item => {
         if (currentDate.valueOf() - (item as ExtWebSocket).lastActivity.valueOf() > interval) {
           item.removeEventListener('message', this.handleMessageEvent)
           item.close()
@@ -61,7 +62,7 @@ export class ServiceAgentWsOutboundTransport implements OutboundTransport {
 
   public async stop() {
     this.logger.debug('Stopping WS outbound transport')
-    this.transportTable.forEach((socket) => {
+    this.transportTable.forEach(socket => {
       socket.removeEventListener('message', this.handleMessageEvent)
       socket.close()
       this.logger.debug('Socket closed!')
@@ -125,7 +126,7 @@ export class ServiceAgentWsOutboundTransport implements OutboundTransport {
     if (!isValidJweStructure(payload)) {
       throw new Error(
         `Received a response from the other agent but the structure of the
-         incoming message is not a DIDComm message: ${payload}`
+         incoming message is not a DIDComm message: ${payload}`,
       )
     }
     this.logger.debug('Payload received from mediator')
@@ -159,7 +160,7 @@ export class ServiceAgentWsOutboundTransport implements OutboundTransport {
         resolve(socket)
       }
 
-      socket.onerror = (error) => {
+      socket.onerror = error => {
         this.logger.debug(`Error while connecting to WebSocket ${endpoint}`, {
           error,
         })

@@ -1,4 +1,19 @@
-import { AutoAcceptCredential, AutoAcceptProof, utils, MessageSender, OutboundMessageContext, OutOfBandRepository, OutOfBandInvitation } from '@credo-ts/core'
+import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
+import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
+import {
+  JsonTransformer,
+  AutoAcceptCredential,
+  AutoAcceptProof,
+  utils,
+  MessageSender,
+  OutboundMessageContext,
+  OutOfBandRepository,
+  OutOfBandInvitation,
+} from '@credo-ts/core'
+import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
+import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
+import { ApiBody, ApiTags } from '@nestjs/swagger'
+
 import {
   TextMessage,
   ReceiptsMessage,
@@ -13,18 +28,10 @@ import {
   didcommReceiptFromServiceAgentReceipt,
   IdentityProofResultMessage,
 } from '../../model'
-import { JsonTransformer } from '@credo-ts/core'
-import { ActionMenuRole } from '@credo-ts/action-menu'
-import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { ActionMenuOption } from '@credo-ts/action-menu'
-import {
-  AnonCredsRequestedAttribute,
-} from '@credo-ts/anoncreds'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
-import { parsePictureData } from '../../utils/parsers'
 import { AgentService } from '../../services/AgentService'
-import { Body, Controller, HttpException, HttpStatus, Logger, Post, Res } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { parsePictureData } from '../../utils/parsers'
+
 import { MessageDto } from './MessageDto'
 
 @ApiTags('message')
@@ -33,11 +40,10 @@ import { MessageDto } from './MessageDto'
   version: '1',
 })
 export class MessageController {
-  private readonly logger = new Logger(MessageController.name);
+  private readonly logger = new Logger(MessageController.name)
 
   constructor(private readonly agentService: AgentService) {}
 
-  
   @Post('/')
   @ApiBody({
     type: MessageDto,
@@ -45,28 +51,26 @@ export class MessageController {
       text: {
         summary: 'Text message',
         value: {
-          "connectionId": "2ab2e45e-d896-40bb-9d03-1f79e6083c33",
-          "type": "text",
-          "timestamp": "2024-03-11T14:03:50.607Z",
-          "content": "Hello"
+          connectionId: '2ab2e45e-d896-40bb-9d03-1f79e6083c33',
+          type: 'text',
+          timestamp: '2024-03-11T14:03:50.607Z',
+          content: 'Hello',
         },
       },
       invitation: {
         summary: 'Invitation message',
         value: {
-          "connectionId": "2ab2e45e-d896-40bb-9d03-1f79e6083c33",
-          "type": "invitation",
-          "timestamp": "2024-03-11T14:03:50.607Z",
-          "label": "A service",
-          "imageUrl": "https://aservice.com/avatar.png",
-          "did": "did:web:aservice.com"
+          connectionId: '2ab2e45e-d896-40bb-9d03-1f79e6083c33',
+          type: 'invitation',
+          timestamp: '2024-03-11T14:03:50.607Z',
+          label: 'A service',
+          imageUrl: 'https://aservice.com/avatar.png',
+          did: 'did:web:aservice.com',
         },
-      },      
+      },
     },
   })
-  public async sendMessage(
-    @Body() message: IBaseMessage,
-  ): Promise<{ id: string }> {
+  public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
       const agent = await this.agentService.getAgent()
 
@@ -84,24 +88,24 @@ export class MessageController {
         const record = await agent.modules.media.share({
           recordId: mediaRecord.id,
           description: mediaMsg.description,
-          items: mediaMsg.items.map(item => (
-            {
-              id: item.id,
-              uri: item.uri,
-              description: item.description,
-              mimeType: item.mimeType,
-              byteCount: item.byteCount,
-              ciphering: item.ciphering?.algorithm ? 
-              { ...item.ciphering, parameters: item.ciphering.parameters ?? {} } : undefined,
-              fileName: item.filename,
-              metadata: {
-                preview: item.preview,
-                duration: item.duration,
-                title: item.title,
-                icon: item.icon,
-                openingMode: item.openingMode
-              }
-            })),
+          items: mediaMsg.items.map(item => ({
+            id: item.id,
+            uri: item.uri,
+            description: item.description,
+            mimeType: item.mimeType,
+            byteCount: item.byteCount,
+            ciphering: item.ciphering?.algorithm
+              ? { ...item.ciphering, parameters: item.ciphering.parameters ?? {} }
+              : undefined,
+            fileName: item.filename,
+            metadata: {
+              preview: item.preview,
+              duration: item.duration,
+              title: item.title,
+              icon: item.icon,
+              openingMode: item.openingMode,
+            },
+          })),
         })
         messageId = record.threadId
       } else if (messageType === ReceiptsMessage.type) {
@@ -115,15 +119,19 @@ export class MessageController {
 
         const record = await agent.modules.questionAnswer.sendQuestion(msg.connectionId, {
           question: msg.prompt,
-          validResponses: msg.menuItems.map((item) => new ValidResponse({ text: item.text })),
+          validResponses: msg.menuItems.map(item => new ValidResponse({ text: item.text })),
         })
         messageId = record.threadId
 
         // Add id-text mapping so we can recover it when receiving an answer
-        record.metadata.add('text-id-mapping', 
-          msg.menuItems.reduce((acc, curr) => (acc[curr.text] = curr.id, acc), {} as Record<string, string>))
+        record.metadata.add(
+          'text-id-mapping',
+          msg.menuItems.reduce(
+            (acc, curr) => ((acc[curr.text] = curr.id), acc),
+            {} as Record<string, string>,
+          ),
+        )
         await agent.dependencyManager.resolve(QuestionAnswerRepository).update(agent.context, record)
-
       } else if (messageType === ContextualMenuUpdateMessage.type) {
         const msg = JsonTransformer.fromJSON(message, ContextualMenuUpdateMessage)
 
@@ -137,7 +145,12 @@ export class MessageController {
             title: msg.title,
             description: msg.description ?? '',
             options: msg.options.map(
-              (item) => new ActionMenuOption({ title: item.title, name: item.id, description: item.description ?? '' })
+              item =>
+                new ActionMenuOption({
+                  title: item.title,
+                  name: item.id,
+                  description: item.description ?? '',
+                }),
             ),
           },
         })
@@ -159,15 +172,15 @@ export class MessageController {
               throw new Error('Received attributes is not an array')
             }
 
-            const { credentialDefinition } = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
+            const { credentialDefinition } =
+              await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
 
-            
             if (!credentialDefinition) {
               throw Error(`Cannot find information about credential definition ${credentialDefinitionId}.`)
             }
 
             // Verify that requested attributes are present in credential definition
-              const { schema }= await agent.modules.anoncreds.getSchema(credentialDefinition.schemaId)
+            const { schema } = await agent.modules.anoncreds.getSchema(credentialDefinition.schemaId)
 
             if (!schema) {
               throw Error(`Cannot find information about schema ${credentialDefinition.schemaId}.`)
@@ -178,17 +191,17 @@ export class MessageController {
               attributes = schema.attrNames
             }
 
-            if (!attributes.every((item) => schema.attrNames.includes(item))) {
-                throw new Error(
-                  `Some attributes are not present in the requested credential type: Requested: ${attributes}, Present: ${schema.attrNames}`
-                )
-              }
+            if (!attributes.every(item => schema.attrNames.includes(item))) {
+              throw new Error(
+                `Some attributes are not present in the requested credential type: Requested: ${attributes}, Present: ${schema.attrNames}`,
+              )
+            }
 
             const requestedAttributes: Record<string, AnonCredsRequestedAttribute> = {}
 
             requestedAttributes[schema.name] = {
-                names: attributes,
-                restrictions: [{ cred_def_id: credentialDefinitionId }],
+              names: attributes,
+              restrictions: [{ cred_def_id: credentialDefinitionId }],
             }
 
             const record = await agent.proofs.requestProof({
@@ -210,12 +223,10 @@ export class MessageController {
         }
       } else if (messageType === IdentityProofResultMessage.type) {
         throw new Error(`Identity proof Result not supported`)
-
-
       } else if (messageType === CredentialIssuanceMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialIssuanceMessage)
 
-        const credential = (await agent.credentials.getAll()).find((item) => item.threadId === message.threadId)
+        const credential = (await agent.credentials.getAll()).find(item => item.threadId === message.threadId)
         if (credential) {
           await agent.credentials.acceptProposal({
             credentialRecordId: credential.id,
@@ -227,7 +238,7 @@ export class MessageController {
               connectionId: msg.connectionId,
               credentialFormats: {
                 anoncreds: {
-                  attributes: msg.claims.map((item) => {
+                  attributes: msg.claims.map(item => {
                     return { name: item.name, mimeType: item.mimeType, value: item.value }
                   }),
                   credentialDefinitionId: msg.credentialDefinitionId,
@@ -239,7 +250,7 @@ export class MessageController {
             messageId = record.threadId
           } else {
             throw new Error(
-              'Claims and credentialDefinitionId attributes must be present if a credential without related thread is to be issued'
+              'Claims and credentialDefinitionId attributes must be present if a credential without related thread is to be issued',
             )
           }
         }
@@ -247,12 +258,10 @@ export class MessageController {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)
         const { label, imageUrl, did } = msg
 
-
         const connection = await agent.connections.getById(msg.connectionId)
         const messageSender = agent.context.dependencyManager.resolve(MessageSender)
 
         if (did) {
-
           // FIXME: This is a workaround due to an issue found in AFJ validator. Replace with class when fixed
           const json = {
             '@type': OutOfBandInvitation.type.messageTypeUri,
@@ -260,11 +269,10 @@ export class MessageController {
             label: label ?? '',
             imageUrl: imageUrl,
             services: [did],
-            handshake_protocols: ['https://didcomm.org/didexchange/1.0']
+            handshake_protocols: ['https://didcomm.org/didexchange/1.0'],
           }
-      
+
           const invitation = OutOfBandInvitation.fromJson(json)
-      
 
           /*const invitation = new OutOfBandInvitation({ 
             id: did,
@@ -273,39 +281,45 @@ export class MessageController {
             handshakeProtocols: [HandshakeProtocol.DidExchange],
         })*/
 
-        await messageSender.sendMessage(new OutboundMessageContext(invitation, {
-          agentContext: agent.context,
-          connection,
-         }))
-         
-         messageId = invitation.id
+          await messageSender.sendMessage(
+            new OutboundMessageContext(invitation, {
+              agentContext: agent.context,
+              connection,
+            }),
+          )
 
+          messageId = invitation.id
         } else {
           const outOfBandRecord = await agent.oob.createInvitation({
             label,
             imageUrl,
-           })
-           outOfBandRecord.setTag('parentConnectionId', connection.id)
-           await agent.dependencyManager.resolve(OutOfBandRepository).update(agent.context, outOfBandRecord)
-  
-           await messageSender.sendMessage(new OutboundMessageContext(outOfBandRecord.outOfBandInvitation, {
-            agentContext: agent.context,
-            connection,
-           }))
-           
-           messageId = outOfBandRecord.id
+          })
+          outOfBandRecord.setTag('parentConnectionId', connection.id)
+          await agent.dependencyManager.resolve(OutOfBandRepository).update(agent.context, outOfBandRecord)
+
+          await messageSender.sendMessage(
+            new OutboundMessageContext(outOfBandRecord.outOfBandInvitation, {
+              agentContext: agent.context,
+              connection,
+            }),
+          )
+
+          messageId = outOfBandRecord.id
         }
       } else if (messageType === ProfileMessage.type) {
         const msg = JsonTransformer.fromJSON(message, ProfileMessage)
         const { displayImageUrl, displayName, displayIconUrl } = msg
 
         const connection = await agent.connections.getById(msg.connectionId)
-        
-        await agent.modules.userProfile.sendUserProfile({ connectionId: connection.id, profileData: {
-          displayName: displayName ?? undefined,
-          displayPicture: displayImageUrl ? parsePictureData(displayImageUrl) : undefined,
-          displayIcon: displayIconUrl ? parsePictureData(displayIconUrl) : undefined,
-        }})
+
+        await agent.modules.userProfile.sendUserProfile({
+          connectionId: connection.id,
+          profileData: {
+            displayName: displayName ?? undefined,
+            displayPicture: displayImageUrl ? parsePictureData(displayImageUrl) : undefined,
+            displayIcon: displayIconUrl ? parsePictureData(displayIconUrl) : undefined,
+          },
+        })
 
         // FIXME: No message id is returned here
       }
@@ -313,12 +327,16 @@ export class MessageController {
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: `something went wrong: ${error}`,
-      }, HttpStatus.INTERNAL_SERVER_ERROR, {
-        cause: error
-      });
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `something went wrong: ${error}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          cause: error,
+        },
+      )
     }
   }
 }

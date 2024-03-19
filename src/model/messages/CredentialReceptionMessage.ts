@@ -1,8 +1,8 @@
-import { Expose, Type } from 'class-transformer'
-import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
-import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { CredentialState } from '@credo-ts/core'
+import { Expose } from 'class-transformer'
+import { IsString } from 'class-validator'
 
+import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 
 export interface CredentialReceptionMessageOptions extends BaseMessageOptions {
   state: CredentialState
@@ -27,5 +27,4 @@ export class CredentialReceptionMessage extends BaseMessage {
   @Expose()
   @IsString()
   public state!: CredentialState
-
 }
