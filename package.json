@@ -14,7 +14,7 @@
   "homepage": "https://2060.io",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.mobiera.com/2060/2060-service-agent"
+    "url": "https://github.com/2060-io/2060-service-agent"
   },
   "bin": {
     "afj-rest": "bin/afj-rest.js"
