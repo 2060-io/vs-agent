@@ -60,6 +60,7 @@ const run = async () => {
 
   const serverLogger = new TsLogger(
     process.env.ADMIN_LOG_LEVEL ? Number(process.env.ADMIN_LOG_LEVEL) : LogLevel.debug,
+    'Server',
   )
 
   const conf: ServerConfig = {

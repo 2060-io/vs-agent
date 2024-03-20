@@ -52,7 +52,7 @@ export const setupAgent = async ({
   enableHttp?: boolean
   useCors?: boolean
 }) => {
-  const logger = new TsLogger(logLevel ?? LogLevel.warn)
+  const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
   if (!enableHttp && !enableWs) {
     throw new Error('No transport has been enabled. Set at least one of HTTP and WS')

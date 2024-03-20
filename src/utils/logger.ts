@@ -1,53 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ILogObject } from 'tslog'
-
 import { LogLevel, BaseLogger } from '@credo-ts/core'
-import { appendFileSync } from 'fs'
-import { Logger } from 'tslog'
+import { Logger } from '@nestjs/common'
 import util from 'util'
-
-function logToTransport(logObject: ILogObject) {
-  appendFileSync('logs.txt', JSON.stringify(logObject) + '\n')
-}
 
 export class TsLogger extends BaseLogger {
   private logger: Logger
 
   // Map our log levels to tslog levels
   private tsLogLevelMap = {
-    [LogLevel.test]: 'silly',
-    [LogLevel.trace]: 'trace',
+    [LogLevel.test]: 'debug',
+    [LogLevel.trace]: 'debug',
     [LogLevel.debug]: 'debug',
-    [LogLevel.info]: 'info',
+    [LogLevel.info]: 'log',
     [LogLevel.warn]: 'warn',
     [LogLevel.error]: 'error',
     [LogLevel.fatal]: 'fatal',
   } as const
 
-  public constructor(logLevel: LogLevel, name?: string) {
+  public constructor(logLevel: LogLevel, name: string) {
     super(logLevel)
 
-    this.logger = new Logger({
-      name,
-      minLevel: this.logLevel == LogLevel.off ? undefined : this.tsLogLevelMap[this.logLevel],
-      ignoreStackLevels: 1,
-      attachedTransports: [
-        {
-          transportLogger: {
-            silly: logToTransport,
-            debug: logToTransport,
-            trace: logToTransport,
-            info: logToTransport,
-            warn: logToTransport,
-            error: logToTransport,
-            fatal: logToTransport,
-          },
-          // always log to file
-          minLevel: 'silly',
-        },
-      ],
-    })
+    this.logger = new Logger(name)
   }
 
   private log(level: Exclude<LogLevel, LogLevel.off>, message: string, data?: Record<string, any>): void {
