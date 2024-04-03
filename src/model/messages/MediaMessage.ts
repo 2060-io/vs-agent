@@ -19,10 +19,13 @@ export interface MediaItemOptions {
   uri: string
   ciphering?: CipheringInfo
   preview?: string
+  width?: number
+  height?: number
   duration?: string
   title?: string
   icon?: string
   openingMode?: string
+  screenOrientaton?: string
 }
 
 export class MediaItem {
@@ -36,10 +39,13 @@ export class MediaItem {
       this.uri = options.uri
       this.ciphering = options.ciphering
       this.preview = options.preview
+      this.width = options.width
+      this.height = options.height
       this.duration = options.duration
       this.title = options.title
       this.icon = options.icon
       this.openingMode = options.openingMode
+      this.screenOrientation = options.screenOrientaton
     }
   }
 
@@ -69,6 +75,12 @@ export class MediaItem {
   public preview?: string
 
   @IsOptional()
+  public width?: number
+
+  @IsOptional()
+  public height?: number
+
+  @IsOptional()
   @IsString()
   public duration?: string
 
@@ -83,6 +95,10 @@ export class MediaItem {
   @IsOptional()
   @IsString()
   public openingMode?: string
+
+  @IsOptional()
+  @IsString()
+  public screenOrientation?: string
 
   @IsOptional()
   public ciphering?: CipheringInfo
