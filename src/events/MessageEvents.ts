@@ -268,6 +268,14 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
             byteCount: item.byteCount,
             description: item.description,
             filename: item.fileName,
+            duration: item.metadata?.duration as string,
+            preview: item.metadata?.preview as string,
+            width: item.metadata?.width as number,
+            height: item.metadata?.height as number,
+            title: item.metadata?.title as string,
+            icon: item.metadata?.icon as string,
+            openingMode: item.metadata?.openingMode as string,
+            screenOrientation: item.metadata?.screenOrientation as string,
           })),
         })
 

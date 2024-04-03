@@ -100,10 +100,13 @@ export class MessageController {
             fileName: item.filename,
             metadata: {
               preview: item.preview,
+              width: item.width,
+              height: item.height,
               duration: item.duration,
               title: item.title,
               icon: item.icon,
               openingMode: item.openingMode,
+              screenOrientation: item.screenOrientation,
             },
           })),
         })
