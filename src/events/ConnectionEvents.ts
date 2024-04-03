@@ -1,7 +1,7 @@
 import type { ServerConfig } from '../utils/ServerConfig'
-import type { ConnectionStateChangedEvent } from '@credo-ts/core'
+import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
 
-import { ConnectionEventTypes, ConnectionRepository } from '@credo-ts/core'
+import { AgentEventTypes, ConnectionEventTypes, ConnectionRepository, HangupMessage } from '@credo-ts/core'
 
 import { ServiceAgent } from '../utils/ServiceAgent'
 
@@ -34,4 +34,21 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     },
   )
+
+  // When a hangup message is received for a given connection, it will be effectively terminated. Service Agent controller
+  // will be notified about this 'termination' status
+  agent.events.on(AgentEventTypes.AgentMessageProcessed, async ({ payload }: AgentMessageProcessedEvent) => {
+    const { message, connection } = payload
+
+    if (message.type === HangupMessage.type.messageTypeUri && connection) {
+      const body = {
+        type: 'connection-state-updated',
+        connectionId: connection.id,
+        invitationId: connection.outOfBandId,
+        state: 'terminated',
+      }
+
+      await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
+    }
+  })
 }
