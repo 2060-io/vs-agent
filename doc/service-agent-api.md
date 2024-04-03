@@ -31,6 +31,7 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Menu Selection](#menu-selection)
       - [Invitation](#invitation)
       - [Profile](#profile)
+      - [Terminate Connection](#terminate-connection)
     - [Identity Proof Item types](#identity-proof-item-types)
       - [Verifiable Credential](#verifiable-credential)
         - [Request value](#request-value)
@@ -99,10 +100,10 @@ Currently, the following messages can be submitted and received:
 - Receipts (`receipts`)
 - Invitation (`invitation`)
 - Profile (`profile`)
+- Terminate Connection (`terminate-connection`)
 
 > **TODO**: Messages for:
 >
-> - Open browsing session
 > - System messages in topics
 > - Message signaling (typing)
 
@@ -402,6 +403,17 @@ Sends User Profile to a particular connection. An Agent may have its default pro
    "displayName": string,
    "displayImageUrl": string,
    "displayIconUrl": string
+}
+```
+
+#### Terminate Connection
+
+Terminates a particular connection, notifying the other party through a 'Hangup' message. No further messages will be allowed after this action.
+
+```json
+{
+   ...
+   "type": "terminate-connection",
 }
 ```
 

@@ -9,6 +9,7 @@ import {
   OutboundMessageContext,
   OutOfBandRepository,
   OutOfBandInvitation,
+  DidExchangeState,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
@@ -27,6 +28,7 @@ import {
   IBaseMessage,
   didcommReceiptFromServiceAgentReceipt,
   IdentityProofResultMessage,
+  TerminateConnectionMessage,
 } from '../../model'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
@@ -77,6 +79,14 @@ export class MessageController {
       let messageId: string | undefined
       const messageType = message.type
       this.logger.debug!(`Message submitted. ${JSON.stringify(message)}`)
+
+      const connection = await agent.connections.findById(message.connectionId)
+
+      if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
+
+      if (connection.state === DidExchangeState.Completed && (!connection.did || !connection.theirDid)) {
+        throw new Error(`This connection has been terminated. No further messages are possible`)
+      }
 
       if (messageType === TextMessage.type) {
         const textMsg = JsonTransformer.fromJSON(message, TextMessage)
@@ -261,7 +271,6 @@ export class MessageController {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)
         const { label, imageUrl, did } = msg
 
-        const connection = await agent.connections.getById(msg.connectionId)
         const messageSender = agent.context.dependencyManager.resolve(MessageSender)
 
         if (did) {
@@ -313,8 +322,6 @@ export class MessageController {
         const msg = JsonTransformer.fromJSON(message, ProfileMessage)
         const { displayImageUrl, displayName, displayIconUrl } = msg
 
-        const connection = await agent.connections.getById(msg.connectionId)
-
         await agent.modules.userProfile.sendUserProfile({
           connectionId: connection.id,
           profileData: {
@@ -325,7 +332,14 @@ export class MessageController {
         })
 
         // FIXME: No message id is returned here
+      } else if (messageType === TerminateConnectionMessage.type) {
+        JsonTransformer.fromJSON(message, TerminateConnectionMessage)
+
+        await agent.connections.hangup({ connectionId: connection.id })
+
+        // FIXME: No message id is returned here
       }
+
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
