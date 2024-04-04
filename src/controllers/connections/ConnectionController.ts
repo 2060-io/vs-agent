@@ -1,4 +1,4 @@
-import { ConnectionRepository, DidExchangeState, RecordNotFoundError } from '@credo-ts/core'
+import { DidExchangeState, RecordNotFoundError } from '@credo-ts/core'
 import {
   Controller,
   Delete,
@@ -34,40 +34,42 @@ export class ConnectionController {
    */
   @Get('/')
   @ApiQuery({ name: 'outOfBandId', required: false, type: String })
-  @ApiQuery({ name: 'alias', required: false, type: String })
   @ApiQuery({ name: 'state', required: false, type: String })
-  @ApiQuery({ name: 'myDid', required: false, type: String })
+  @ApiQuery({ name: 'did', required: false, type: String })
   @ApiQuery({ name: 'theirDid', required: false, type: String })
-  @ApiQuery({ name: 'theirLabel', required: false, type: String })
+  @ApiQuery({ name: 'threadId', required: false, type: String })
   public async getAllConnections(
     @Query('outOfBandId') outOfBandId?: string,
-    @Query('alias') alias?: string,
     @Query('state') state?: DidExchangeState,
-    @Query('myDid') myDid?: string,
+    @Query('did') did?: string,
     @Query('theirDid') theirDid?: string,
-    @Query('theirLabel') theirLabel?: string,
+    @Query('threadId') threadId?: string,
   ) {
     const agent = await this.agentService.getAgent()
 
-    let connections
+    const connections = await agent.connections.findAllByQuery({
+      did,
+      theirDid,
+      threadId,
+      state,
+      outOfBandId,
+    })
 
-    if (outOfBandId) {
-      connections = await agent.connections.findAllByOutOfBandId(outOfBandId)
-    } else {
-      const connectionRepository = agent.dependencyManager.resolve(ConnectionRepository)
-
-      const connections = await connectionRepository.findByQuery(agent.context, {
-        alias,
-        myDid,
-        theirDid,
-        theirLabel,
-        state,
-      })
-
-      return connections.map(c => c.toJSON())
-    }
-
-    return connections.map(c => c.toJSON())
+    return connections.map(record => ({
+      id: record.id,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+      did: record.did,
+      theirDid: record.theirDid,
+      theirLabel: record.theirLabel,
+      state: record.state,
+      role: record.role,
+      alias: record.alias,
+      threadId: record.threadId,
+      imageUrl: record.imageUrl,
+      outOfBandId: record.outOfBandId,
+      invitationDid: record.invitationDid,
+    }))
   }
 
   /**
