@@ -248,22 +248,45 @@ Shares media files to a destination. They might be previously encrypted and stor
    "items": [{
     "mimeType": string,
     "filename": string,
+    "description": string,
     "byteCount": number,
     "uri": string,
     "ciphering": { "algorithm": string, ... },
-    "preview": string
+    "preview": string,
+    "width": number,
+    "height": number,
+    "duration": number,
+    "title": string,
+    "icon": string,
+    "openingMode": string,
+    "screenOrientaton": string
    }]
 }
 ```
 
-`mimeType`, `filename` and `byteCount` are optional but recommended to make it easier for the receiving end to know information about the file about to be downloaded.
+`mimeType` is mandatory and specifies the kind of media that is being shared. Some supported types are:
+  - `image/png` and `image/jpg` for images
+  - `video/*` for videos
+  - `audio/*` for voice notes
+  - `text/html` for links to websites
 
-`ciphering` is optional but recommended once it is supported by the clients. `preview` is also optional and dependant on the type of content to send. For the moment, for images a [BlurHash](https://blurha.sh) is used.
+`filename`, `description` and `byteCount` are optional but recommended to make it easier for the receiving end to know information about the file about to be downloaded.
+
+`ciphering` is optional but recommended. Other parameters are optional and depend on the nature of the media that is being shared. Namely:
+
+- `preview`: is a string used mainly for video and images that includes a base64-encoded thumbnail
+- `width` and `height` are used also for videos and images to let the other party know the actual dimensions of the media before downloading it (e.g. to pre-calculate the placeholder in their screen). They are measured in pixels
+- `duration` is used in videos and audio files to specify the number of seconds they last
+
+There are some parameters used in Links (`text/html` mimeType):
+- title
+- icon: URL or Data URI containing the icon to show as preview of the website
+- openingMode: `embedded` or `fullScreen`
+- screenOrientation: `portrait` or `landscape` in case it is requested to force a specific orientation (leave it undefined in case there is no need to force orientation)
 
 > **Note**:
 >
 > - At the moment, only a single media file per message is supported. The list format is kept for future compatibility
-> - Content encryption is not yet supported by Mobile Agent so only unencrypted content will be usable
 
 #### Receipts
 
