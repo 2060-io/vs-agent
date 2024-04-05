@@ -21,7 +21,7 @@ export interface MediaItemOptions {
   preview?: string
   width?: number
   height?: number
-  duration?: string
+  duration?: number
   title?: string
   icon?: string
   openingMode?: string
@@ -81,8 +81,7 @@ export class MediaItem {
   public height?: number
 
   @IsOptional()
-  @IsString()
-  public duration?: string
+  public duration?: number
 
   @IsOptional()
   @IsString()
