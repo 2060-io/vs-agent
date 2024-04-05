@@ -1,4 +1,4 @@
-FROM node:20.12 as base
+FROM node:20 as base
 
 # AFJ specifc setup
 WORKDIR /www
