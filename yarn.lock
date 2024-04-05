@@ -689,45 +689,45 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@credo-ts/action-menu@0.5.0", "@credo-ts/action-menu@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/action-menu/-/action-menu-0.5.0.tgz#0e1247e18ede52a62592f245d5b8927500120701"
-  integrity sha512-LX55Hjl+cIUGntsI62Pcc1A2y1ulXR+hVJJk7Z8b1i2yqGhiSaVgIQbUO9IOIIJwGI/FIiJMjrHdn1YJa493yg==
+"@credo-ts/action-menu@0.5.1", "@credo-ts/action-menu@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/action-menu/-/action-menu-0.5.1.tgz#f81c0c690b25cd1f4f9ccbd5551f7fe30a8ef138"
+  integrity sha512-Jl/bbqhp3sEnQhPozNmBFrHQpg5RW0RAZdZA/mhlXR5/Jz0pG5mf1eSQI8dW1g6pQNfXo2YS9hw0shtR++uTYw==
   dependencies:
-    "@credo-ts/core" "0.5.0"
+    "@credo-ts/core" "0.5.1"
     class-transformer "0.5.1"
     class-validator "0.14.1"
     rxjs "^7.8.0"
 
-"@credo-ts/anoncreds@0.5.0", "@credo-ts/anoncreds@^0.5.0", "@credo-ts/anoncreds@^0.5.0-alpha.116":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/anoncreds/-/anoncreds-0.5.0.tgz#74bcaec9b3e5f75fd03924efc2e8bd67b905b035"
-  integrity sha512-fYPYxGV2S99dTCb0LHcHnJrVL3FLgrON5tFiv6U7By6aR9paT70Gwep/Lyp0WNzssg2vZ+a4gEf2gKjQiBE8pA==
+"@credo-ts/anoncreds@0.5.1", "@credo-ts/anoncreds@^0.5.0-alpha.116", "@credo-ts/anoncreds@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/anoncreds/-/anoncreds-0.5.1.tgz#d1ba19e5764e1de5982a0a7e51cd5bc1badce6ad"
+  integrity sha512-d97wELxvt7jOqgr21FOVfFqHFSu487L+qF0QObOVCl9xElsST9sYl1iaRPHHW2GzYUMWLlnSwZm8fN4pLo9UVA==
   dependencies:
     "@astronautlabs/jsonpath" "^1.1.2"
-    "@credo-ts/core" "0.5.0"
+    "@credo-ts/core" "0.5.1"
     big-integer "^1.6.51"
     bn.js "^5.2.1"
     class-transformer "0.5.1"
     class-validator "0.14.1"
     reflect-metadata "^0.1.13"
 
-"@credo-ts/askar@0.5.0", "@credo-ts/askar@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/askar/-/askar-0.5.0.tgz#5fa2e6443fe3ae1b15c8b66eb73e63beb5c096a1"
-  integrity sha512-84wxDU6GbucBTe4HV7gUbCieFdhXVX19q8o6dNK8a3zl87yiV3OVwPwtnzghjh47vv14Xr+gWRvqbRvZrhRsaA==
+"@credo-ts/askar@0.5.1", "@credo-ts/askar@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/askar/-/askar-0.5.1.tgz#107d2f91f6afecb77fc7f24556725ec0e7597989"
+  integrity sha512-O3XWnmpnEe5U/a0kGQHigzXPw6/SXKp2v4ob3DJdHA0kiK3DywANNeG/Hw44lxdg24nNpizmVlO5EjRa6ULcmw==
   dependencies:
-    "@credo-ts/core" "0.5.0"
+    "@credo-ts/core" "0.5.1"
     bn.js "^5.2.1"
     class-transformer "0.5.1"
     class-validator "0.14.1"
     rxjs "^7.8.0"
     tsyringe "^4.8.0"
 
-"@credo-ts/core@0.5.0", "@credo-ts/core@^0.5.0", "@credo-ts/core@^0.5.0-alpha.116":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/core/-/core-0.5.0.tgz#a6366df4b176a492f4f45b7e2f45b8c905e1eeca"
-  integrity sha512-7SJBgs1yd2gpwv8BnCO+U63Uu06v6Cxzg+ypWpqyNkkG4nTsQZSI8r0oSQ+DgbiqwN/AZKsn9HuNISFftf5yKQ==
+"@credo-ts/core@0.5.1", "@credo-ts/core@^0.5.0-alpha.116", "@credo-ts/core@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/core/-/core-0.5.1.tgz#bb38e2f5451753cea1d3a73b1d407255af02c4ed"
+  integrity sha512-ywwFw6wwiMft3A994Y91LAm8CrEg2G7CJQRyLD8UzneU4coMWZTeED63thAEX6XK/tyDmv2MAcrO04hE3KQPcA==
   dependencies:
     "@digitalcredentials/jsonld" "^6.0.0"
     "@digitalcredentials/jsonld-signatures" "^9.4.0"
@@ -761,24 +761,24 @@
     varint "^6.0.0"
     web-did-resolver "^2.0.21"
 
-"@credo-ts/node@0.5.0", "@credo-ts/node@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/node/-/node-0.5.0.tgz#d28ed5040f9925777a65f66f55abed7c2d2e53de"
-  integrity sha512-/44SrgmjuRDE4Sjb6QDMvquPTUsH5DkIp8pbN7csLe0GEDDzPOUvzCaf4yI7TRnuSZN9Nh9/f6C2UGn0JuQ0Sg==
+"@credo-ts/node@0.5.1", "@credo-ts/node@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/node/-/node-0.5.1.tgz#adf24f931fd80848722f8f313012be00da405deb"
+  integrity sha512-F/PA3wyKN9MvH2JFSUmYGqQT+JaeSGKWNJxT+OkQzqseCZnCbErAnr8oNWlTwBWogp6ECx31FEn9wMq9zAMLaw==
   dependencies:
     "@2060.io/ffi-napi" "^4.0.8"
     "@2060.io/ref-napi" "^3.0.6"
-    "@credo-ts/core" "0.5.0"
+    "@credo-ts/core" "0.5.1"
     "@types/express" "^4.17.15"
     express "^4.17.1"
     ws "^8.13.0"
 
-"@credo-ts/question-answer@0.5.0", "@credo-ts/question-answer@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@credo-ts/question-answer/-/question-answer-0.5.0.tgz#d3871127a36f783c7977c3cbcca8a23523453a32"
-  integrity sha512-cF4RRoVIS05ssIMk4iNQcn53k5E3G4jHVTSrBr3ZoV5EAGHTQ0Y5NMlLCx7kLlY31KGvhdiPXxeECG/uSiS3sg==
+"@credo-ts/question-answer@0.5.1", "@credo-ts/question-answer@^0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@credo-ts/question-answer/-/question-answer-0.5.1.tgz#538dbfec8fc866de188c11ede9860bf0ef712937"
+  integrity sha512-yPjOl3tUfK5GT9BvX70hiTq86Fi5WTxB0pL42e17evq7+puBOMqhwQ1nv7dhDSWC2Oy+r0D0mF7Lz2hGulrJJg==
   dependencies:
-    "@credo-ts/core" "0.5.0"
+    "@credo-ts/core" "0.5.1"
     class-transformer "0.5.1"
     class-validator "0.14.1"
     rxjs "^7.8.0"
