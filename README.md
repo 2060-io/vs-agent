@@ -18,7 +18,10 @@ but likely needed for production and test deployments.
 | AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
 | ENABLE_WS                  | Enable Web Socket transport for Agent                                                                             | true                  |
 | ENABLE_HTTP                | Enable HTTP transport for Agent                                                                                   | true                  |
-| AGENT_NAME                 | Label to show to other DIDComm agents                                                                             | Test Service Agent    |
+| AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test Service Agent    |
+| AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-service-agent    |
+| AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-service-agent    |
+| AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test Service Agent    |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 | ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |

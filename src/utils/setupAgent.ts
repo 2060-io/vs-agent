@@ -9,11 +9,11 @@ import {
   DidRecord,
   DidRepository,
   HttpOutboundTransport,
-  KeyDerivationMethod,
   KeyType,
   LogLevel,
   TypedArrayEncoder,
   utils,
+  WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
@@ -31,7 +31,8 @@ import { TsLogger } from './logger'
 
 export const setupAgent = async ({
   port,
-  name,
+  walletConfig,
+  label,
   displayPictureUrl,
   endpoints,
   logLevel,
@@ -42,7 +43,8 @@ export const setupAgent = async ({
   useCors,
 }: {
   port: number
-  name: string
+  walletConfig: WalletConfig
+  label: string
   displayPictureUrl?: string
   endpoints: string[]
   logLevel?: LogLevel
@@ -60,9 +62,10 @@ export const setupAgent = async ({
 
   const agent = createServiceAgent({
     config: {
-      label: name,
+      label,
+      connectionImageUrl: displayPictureUrl,
       endpoints,
-      walletConfig: { id: name, key: name, keyDerivationMethod: KeyDerivationMethod.Argon2IInt }, // TODO: Update to Argon2Mod or make configurable
+      walletConfig,
       autoUpdateStorageOnStartup: true,
       logger,
     },
@@ -118,7 +121,7 @@ export const setupAgent = async ({
     const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
     await agent.modules.userProfile.updateUserProfileData({
-      displayName: name,
+      displayName: label,
       displayPicture,
     })
   }

@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { LogLevel } from '@credo-ts/core'
+import { KeyDerivationMethod, LogLevel } from '@credo-ts/core'
 import { VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -44,7 +44,13 @@ const run = async () => {
   const { agent } = await setupAgent({
     endpoints,
     port: Number(process.env.AGENT_PORT) || 3001,
-    name: process.env.AGENT_NAME || 'Test Service Agent',
+    walletConfig: {
+      id: process.env.AGENT_WALLET_ID || process.env.AGENT_NAME || 'test-service-agent',
+      key: process.env.AGENT_WALLET_KEY || process.env.AGENT_NAME || 'test-service-agent',
+      keyDerivationMethod: KeyDerivationMethod.Argon2IInt,
+    },
+    label: process.env.AGENT_LABEL || 'Test Service Agent',
+    displayPictureUrl: process.env.AGENT_INVITATION_IMAGE_URL,
     publicDid: process.env.AGENT_PUBLIC_DID,
     logLevel: process.env.AGENT_LOG_LEVEL ? Number(process.env.AGENT_LOG_LEVEL) : LogLevel.warn,
     enableHttp:
