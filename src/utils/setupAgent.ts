@@ -5,6 +5,7 @@ import {
   DidCommV1Service,
   DidDocumentBuilder,
   DidDocumentRole,
+  DidDocumentService,
   DidExchangeState,
   DidRecord,
   DidRepository,
@@ -189,6 +190,16 @@ export const setupAgent = async ({
             routingKeys: [], // TODO: Support mediation
             recipientKeys: [keyAgreementId],
             accept: ['didcomm/aip2;env=rfc19'],
+          }),
+        )
+      }
+
+      if (anoncredsServiceBaseUrl) {
+        builder.addService(
+          new DidDocumentService({
+            id: `${publicDid}#anoncreds`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            type: 'AnonCredsRegistry',
           }),
         )
       }

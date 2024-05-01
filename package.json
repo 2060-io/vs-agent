@@ -61,14 +61,14 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@credo-ts/action-menu": "^0.5.1",
-    "@credo-ts/anoncreds": "^0.5.1",
-    "@credo-ts/askar": "^0.5.1",
-    "@credo-ts/core": "^0.5.1",
-    "@credo-ts/node": "^0.5.1",
-    "@credo-ts/question-answer": "^0.5.1",
-    "@hyperledger/anoncreds-nodejs": "^0.2.1",
-    "@hyperledger/aries-askar-nodejs": "^0.2.0",
+    "@credo-ts/action-menu": "^0.5.2",
+    "@credo-ts/anoncreds": "^0.5.2",
+    "@credo-ts/askar": "^0.5.2",
+    "@credo-ts/core": "^0.5.2",
+    "@credo-ts/node": "^0.5.2",
+    "@credo-ts/question-answer": "^0.5.2",
+    "@hyperledger/anoncreds-nodejs": "^0.2.2",
+    "@hyperledger/aries-askar-nodejs": "^0.2.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
@@ -120,19 +120,18 @@
     "typescript": "^5.3.3"
   },
   "resolutions": {
-    "@2060.io/ffi-napi": "4.0.9",
     "@types/node": "20.11.19",
     "typescript": "5.3.3",
     "tsyringe": "4.8.0",
-    "@hyperledger/anoncreds-nodejs": "0.2.1",
-    "@hyperledger/aries-askar-nodejs": "0.2.0",
-    "@hyperledger/anoncreds-shared": "0.2.1",
-    "@hyperledger/aries-askar-shared": "0.2.0",
-    "@credo-ts/action-menu": "0.5.1",
-    "@credo-ts/core": "0.5.1",
-    "@credo-ts/question-answer": "0.5.1",
-    "@credo-ts/node": "0.5.1",
-    "@credo-ts/askar": "0.5.1",
-    "@credo-ts/anoncreds": "0.5.1"
+    "@hyperledger/anoncreds-nodejs": "0.2.2",
+    "@hyperledger/aries-askar-nodejs": "0.2.1",
+    "@hyperledger/anoncreds-shared": "0.2.2",
+    "@hyperledger/aries-askar-shared": "0.2.1",
+    "@credo-ts/action-menu": "0.5.2",
+    "@credo-ts/core": "0.5.2",
+    "@credo-ts/question-answer": "0.5.2",
+    "@credo-ts/node": "0.5.2",
+    "@credo-ts/askar": "0.5.2",
+    "@credo-ts/anoncreds": "0.5.2"
   }
 }

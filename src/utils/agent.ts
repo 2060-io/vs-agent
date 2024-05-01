@@ -1,4 +1,4 @@
-import { HandshakeProtocol } from '@credo-ts/core'
+import { AgentMessage, HandshakeProtocol } from '@credo-ts/core'
 
 import { ServiceAgent } from './ServiceAgent'
 
@@ -9,14 +9,15 @@ import { ServiceAgent } from './ServiceAgent'
  * @param agent
  * @returns
  */
-export async function createInvitation(agent: ServiceAgent) {
+export async function createInvitation(agent: ServiceAgent, messages?: AgentMessage[]) {
   const outOfBandInvitation = (
     await agent.oob.createInvitation({
       label: agent.config.label,
       handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
-      did: agent.did,
-      multiUseInvitation: true,
+      invitationDid: agent.did,
+      multiUseInvitation: !messages,
       imageUrl: process.env.AGENT_INVITATION_IMAGE_URL,
+      messages,
     })
   ).outOfBandInvitation
   return {

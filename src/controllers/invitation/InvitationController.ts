@@ -32,7 +32,7 @@ export class InvitationController {
 
     const { requestedCredentials } = options
 
-    if (requestedCredentials.length === 0) {
+    if (!requestedCredentials?.length) {
       throw Error('You must specify a least a requested credential')
     }
     const credentialDefinitionId = requestedCredentials[0].credentialDefinitionId
@@ -85,13 +85,11 @@ export class InvitationController {
       },
     })
 
-    const outOfBandRecord = await agent.oob.createInvitation({ messages: [request.message] })
+    const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
 
     return {
       id: request.proofRecord.id,
-      url: outOfBandRecord.outOfBandInvitation.toUrl({
-        domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://2060.io/i',
-      }),
+      url,
     }
   }
 
@@ -144,13 +142,11 @@ export class InvitationController {
       },
     })
 
-    const outOfBandRecord = await agent.oob.createInvitation({ messages: [request.message] })
+    const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
 
     return {
       id: request.credentialRecord.id,
-      url: outOfBandRecord.outOfBandInvitation.toUrl({
-        domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://2060.io/i',
-      }),
+      url,
     }
   }
 }

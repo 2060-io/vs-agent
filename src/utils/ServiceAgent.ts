@@ -14,6 +14,7 @@ import {
   AutoAcceptProof,
   ConnectionsModule,
   CredentialsModule,
+  DidsModule,
   InitConfig,
   ProofsModule,
   V2CredentialProtocol,
@@ -27,10 +28,13 @@ import { MediaSharingModule } from 'credo-ts-media-sharing'
 import { ReceiptsModule } from 'credo-ts-receipts'
 import { UserProfileModule } from 'credo-ts-user-profile'
 
+import { CachedWebDidResolver } from './CachedWebDidResolver'
+
 type ServiceAgentModules = {
   askar: AskarModule
   anoncreds: AnonCredsModule
   actionMenu: ActionMenuModule
+  dids: DidsModule
   connections: ConnectionsModule
   credentials: CredentialsModule<
     [V2CredentialProtocol<[LegacyIndyCredentialFormatService, AnonCredsCredentialFormatService]>]
@@ -91,6 +95,7 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
             }),
           ],
         }),
+        dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
         proofs: new ProofsModule({
           autoAcceptProofs: AutoAcceptProof.ContentApproved,
           proofProtocols: [

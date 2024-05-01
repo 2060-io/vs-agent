@@ -3,7 +3,6 @@ import 'reflect-metadata'
 import type { DidWebServerConfig } from './utils/ServerConfig'
 
 import { AnonCredsCredentialDefinitionRepository, AnonCredsSchemaRepository } from '@credo-ts/anoncreds'
-import { DidDocumentService } from '@credo-ts/core'
 import cors from 'cors'
 import express from 'express'
 import path from 'path'
@@ -42,16 +41,6 @@ export const addDidWebRoutes = async (
     if (agent.did) {
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
       const didDocument = didRecord.didDocument
-      if (anoncredsBaseUrl) {
-        didDocument?.service?.push(
-          new DidDocumentService({
-            id: `${agent.did}#anoncreds`,
-            serviceEndpoint: `${anoncredsBaseUrl}/anoncreds/v1`,
-            type: 'AnonCredsRegistry',
-          }),
-        )
-      }
-
       if (didDocument) {
         res.send(didDocument.toJSON())
       } else {
