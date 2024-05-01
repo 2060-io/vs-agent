@@ -6,7 +6,7 @@ ENV RUN_MODE="docker"
 
 COPY package.json package.json
 COPY yarn.lock yarn.lock
-COPY ./patches ./patches
+# COPY ./patches ./patches
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching
