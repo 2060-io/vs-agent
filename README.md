@@ -24,6 +24,7 @@ but likely needed for production and test deployments.
 | AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test Service Agent    |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 | ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
+| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |

@@ -109,7 +109,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.proofRecord.id,
     })
-    const shortUrl = `${process.env.AGENT_URL_SHORTENER_BASE_URL ?? 'https://2060.io'}/s?id=${shortUrlId}`
+    const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
 
     return {
       presentationRequestId: request.proofRecord.id,
@@ -188,7 +188,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.credentialRecord.id,
     })
-    const shortUrl = `${process.env.AGENT_URL_SHORTENER_BASE_URL ?? 'https://2060.io'}/s?id=${shortUrlId}`
+    const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
 
     return {
       credentialOfferId: request.credentialRecord.id,
