@@ -53,8 +53,9 @@ export type RequestedCredential = {
 }
 
 export interface CreatePresentationRequestResult {
-  id: string
+  presentationRequestId: string
   url: string
+  shortUrl: string
 }
 
 export interface ClaimOptions {
@@ -69,8 +70,9 @@ export interface CreateCredentialOfferOptions {
 }
 
 export interface CreateCredentialOfferResult {
-  id: string
+  credentialOfferId: string
   url: string
+  shortUrl: string
 }
 
 type ReceiveOutOfBandInvitationProps = Omit<ReceiveOutOfBandInvitationConfig, 'routing'>

@@ -23,6 +23,7 @@ import { Socket } from 'net'
 import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
+import { addInvitationRoutes } from '../invitationRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createServiceAgent } from './ServiceAgent'
@@ -103,6 +104,8 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
+
+  addInvitationRoutes(app, agent)
 
   // Add WebSocket support if required
   if (enableWs) {

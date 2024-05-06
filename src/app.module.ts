@@ -7,6 +7,7 @@ import { InvitationController } from './controllers/invitation/InvitationControl
 import { QrController } from './controllers/invitation/QrController'
 import { MessageController } from './controllers/message/MessageController'
 import { AgentService } from './services/AgentService'
+import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
 
 @Module({})
@@ -28,6 +29,7 @@ export class ServiceAgentModule {
           useValue: agent,
         },
         AgentService,
+        UrlShorteningService,
       ],
       exports: [AgentService],
     }

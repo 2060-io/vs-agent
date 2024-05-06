@@ -1,15 +1,13 @@
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { AgentService } from '../../services/AgentService'
+import { UrlShorteningService } from '../../services/UrlShorteningService'
 import { createInvitation } from '../../utils/agent'
-import {
-  CreateCredentialOfferOptions,
-  CreateCredentialOfferResult,
-  CreatePresentationRequestOptions,
-  CreatePresentationRequestResult,
-} from '../types'
+import { CreateCredentialOfferResult, CreatePresentationRequestResult } from '../types'
+
+import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
 
 @ApiTags('invitation')
 @Controller({
@@ -17,7 +15,10 @@ import {
   version: '1',
 })
 export class InvitationController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(
+    private readonly agentService: AgentService,
+    private readonly urlShortenerService: UrlShorteningService,
+  ) {}
 
   @Get('/')
   public async getInvitation() {
@@ -25,8 +26,25 @@ export class InvitationController {
   }
 
   @Post('/presentation-request')
+  @ApiBody({
+    type: CreatePresentationRequestDto,
+    examples: {
+      example: {
+        summary: 'Phone Number',
+        value: {
+          requestedCredentials: [
+            {
+              credentialDefinitionId:
+                'did:web:chatbot-demo.dev.2060.io?service=anoncreds&relativeRef=/credDef/8TsGLaSPVKPVMXK8APzBRcXZryxutvQuZnnTcDmbqd9p',
+              attributes: ['phoneNumber'],
+            },
+          ],
+        },
+      },
+    },
+  })
   public async createPresentationRequest(
-    @Body() options: CreatePresentationRequestOptions,
+    @Body() options: CreatePresentationRequestDto,
   ): Promise<CreatePresentationRequestResult> {
     const agent = await this.agentService.getAgent()
 
@@ -87,15 +105,35 @@ export class InvitationController {
 
     const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
 
+    const shortUrlId = await this.urlShortenerService.createShortUrl({
+      longUrl: url,
+      relatedFlowId: request.proofRecord.id,
+    })
+    const shortUrl = `${process.env.AGENT_URL_SHORTENER_BASE_URL ?? 'https://2060.io'}/s?id=${shortUrlId}`
+
     return {
-      id: request.proofRecord.id,
+      presentationRequestId: request.proofRecord.id,
       url,
+      shortUrl,
     }
   }
 
   @Post('/credential-offer')
+  @ApiBody({
+    type: CreateCredentialOfferDto,
+    examples: {
+      example: {
+        summary: 'Phone Number',
+        value: {
+          credentialDefinitionId:
+            'did:web:chatbot-demo.dev.2060.io?service=anoncreds&relativeRef=/credDef/8TsGLaSPVKPVMXK8APzBRcXZryxutvQuZnnTcDmbqd9p',
+          claims: [{ name: 'phoneNumber', value: '+57128348520' }],
+        },
+      },
+    },
+  })
   public async createCredentialOffer(
-    @Body() options: CreateCredentialOfferOptions,
+    @Body() options: CreateCredentialOfferDto,
   ): Promise<CreateCredentialOfferResult> {
     const agent = await this.agentService.getAgent()
 
@@ -104,6 +142,8 @@ export class InvitationController {
     if (claims && !Array.isArray(claims)) {
       throw new Error('Received claims is not an array')
     }
+
+    if (!claims) throw new Error('No claims are defined')
 
     const [credentialDefinition] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
       credentialDefinitionId,
@@ -144,9 +184,16 @@ export class InvitationController {
 
     const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
 
+    const shortUrlId = await this.urlShortenerService.createShortUrl({
+      longUrl: url,
+      relatedFlowId: request.credentialRecord.id,
+    })
+    const shortUrl = `${process.env.AGENT_URL_SHORTENER_BASE_URL ?? 'https://2060.io'}/s?id=${shortUrlId}`
+
     return {
-      id: request.credentialRecord.id,
+      credentialOfferId: request.credentialRecord.id,
       url,
+      shortUrl,
     }
   }
 }

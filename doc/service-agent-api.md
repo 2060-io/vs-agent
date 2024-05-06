@@ -566,6 +566,85 @@ Subscriptions are composed by:
 - (optional) filter: send only events that match specific fields. This only works when a particular EventType is defined in type
 - endpoint: URL where the Service Agent will connect to send the notifications (it could be HTTP or WS)
 
+## Invitations
+
+Service Agent suppors the creation of invitation codes that are used to start flows with agents where a persistent DIDComm connection is not yet established. For that purpose, three types of invitations are provided:
+
+- Connection Invitation: invite other agents to create a persistent, general purpose DIDComm connection. Codes created can be re-used by multiple agents that want to connect by processing it
+- Presentation Request: invite other agent to start a Presentation Request flow. Codes created can only be used once
+- Credential Offer: invite other agent to start a credential issuance flow. Codes created can only be used once
+
+### Connection Invitation
+
+It's a GET request to `/invitation`. It does not receive any parameter. 
+
+Response from Service Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:
+
+
+```json
+{
+  "url": "string containing long form URL-encoded invitation"
+}
+```
+
+Note that the following Service Agent configuration environment variables are used when creating invitations:
+
+- AGENT_INVITATION_BASE_URL: Base URL for for invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
+- AGENT_LABEL: An optional label to show along the connection invitation
+
+### Presentation Request
+
+Presentation Request invitation codes are created by specifying details of the credentials required.
+
+This means that a single presentation request can ask for a number of attributes present in for two or more credentials. At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified, then Service Agent will ask for all attributes in the credential. 
+
+It's a POST to `/invitation/presentation-request` which receives a JSON object in the body
+
+```json
+{
+  "requestedCredentials": [
+    { 
+      "credentialDefinitionId": "full credential definition identifier",
+      "attributes": [ "attribute-1", "attribute-2"]
+    }
+  ]
+}
+```
+
+Response will include the invitation code in both short and long form URL format.
+
+```json
+{
+    "url": "string containing long form URL-encoded invitation",
+    "shortUrl": "string containing a shortened URL for the invitation",
+    "presentationRequestId": "unique identifier for the flow",
+}
+```
+
+### Credential Offer
+
+Credential offer invitation codes include a preview of the offered credential, meaning by that its `credentialDefinitionId` and claims.
+
+It's a POST to `/invitation/credential-offer` which receives a JSON object in the body
+
+```json
+{
+  "credentialDefinitionId": "full credential definition identifier",
+  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+}
+```
+
+Response will include the invitation code in both short and long form URL format.
+
+```json
+{
+    "url": "string containing long form URL-encoded invitation",
+    "shortUrl": "string containing a shortened URL for the invitation",
+    "credentialOfferId": "unique identifier for the flow",
+}
+```
+
 ## Verifiable Data Registry Operations
 
 This section specifies the different endpoints provided by the Service Agent to operate with the VDR.
@@ -574,7 +653,7 @@ This section specifies the different endpoints provided by the Service Agent to 
 
 This command allows to create a new credential format and publish it so credentials with this format can be requested by users and verifiers that are willing to use them.
 
-It's a POST endpoint to `/credential-types` which receives a JSON object in the body
+It's a POST request to `/credential-types` which receives a JSON object in the body
 
 ```json
 {

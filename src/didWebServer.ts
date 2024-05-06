@@ -5,11 +5,8 @@ import type { DidWebServerConfig } from './utils/ServerConfig'
 import { AnonCredsCredentialDefinitionRepository, AnonCredsSchemaRepository } from '@credo-ts/anoncreds'
 import cors from 'cors'
 import express from 'express'
-import path from 'path'
-import QRCode from 'qrcode'
 
 import { ServiceAgent } from './utils/ServiceAgent'
-import { createInvitation } from './utils/agent'
 
 export const startDidWebServer = async (agent: ServiceAgent, config: DidWebServerConfig) => {
   const app = config.app ?? express()
@@ -93,49 +90,4 @@ export const addDidWebRoutes = async (
       res.send(404)
     })
   }
-
-  const staticDir = path.join(__dirname, '../public')
-  app.use(express.static(staticDir))
-
-  // Add invitation endpoint (TODO: remove as it should be part of an external API)
-  app.get('/invitation', async (req, res) => {
-    const { url: invitationUrl } = await createInvitation(agent)
-    res.send(invitationUrl)
-  })
-
-  app.get('/qr', async (req, res) => {
-    const { fcolor, bcolor, size, padding, level } = req.query as {
-      fcolor?: string
-      bcolor?: string
-      size?: number
-      padding?: number
-      level?: string
-    }
-
-    const { url: invitationUrl } = await createInvitation(agent)
-
-    function isQRCodeErrorCorrectionLevel(input?: string): input is QRCode.QRCodeErrorCorrectionLevel {
-      return input ? ['low', 'medium', 'quartile', 'high', 'L', 'M', 'Q', 'H'].includes(input) : false
-    }
-    const errorCorrectionLevel: QRCode.QRCodeErrorCorrectionLevel = isQRCodeErrorCorrectionLevel(level)
-      ? level
-      : 'L'
-
-    try {
-      const qr = await QRCode.toBuffer(invitationUrl, {
-        color: {
-          dark: fcolor ? `#${fcolor}` : undefined,
-          light: bcolor ? `#${bcolor}` : undefined,
-        },
-        errorCorrectionLevel,
-        width: size,
-        margin: padding,
-      })
-      res.header('Content-Type', 'image/png; charset=utf-8')
-      res.send(qr)
-    } catch (error) {
-      res.status(500)
-      res.json({ error: error.message }).end()
-    }
-  })
 }
