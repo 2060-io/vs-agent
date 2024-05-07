@@ -1,3 +1,4 @@
+import { ProofExchangeRecord } from '@credo-ts/core'
 import {
   BadRequestException,
   Controller,
@@ -12,7 +13,7 @@ import { ApiTags } from '@nestjs/swagger'
 
 import { Claim } from '../../model'
 import { AgentService } from '../../services/AgentService'
-import { CredentialTypeInfo } from '../types'
+import { PresentationData } from '../types'
 
 @ApiTags('presentations')
 @Controller({
@@ -30,23 +31,14 @@ export class PresentationsController {
    * @returns
    */
   @Get('/')
-  public async getAllCredentialTypes(): Promise<CredentialTypeInfo[]> {
+  public async getAllPresentations(): Promise<PresentationData[]> {
     const agent = await this.agentService.getAgent()
 
-    const credentialDefinitions = await agent.modules.anoncreds.getCreatedCredentialDefinitions({})
+    const records = await agent.proofs.getAll()
 
     return Promise.all(
-      credentialDefinitions.map(async record => {
-        const schemaResult = await agent.modules.anoncreds.getSchema(record.credentialDefinition.schemaId)
-
-        const schema = schemaResult.schema
-
-        return {
-          id: record.credentialDefinitionId,
-          name: (record.getTag('name') as string) ?? schema?.name,
-          version: (record.getTag('version') as string) ?? schema?.version,
-          attributes: schema?.attrNames || [],
-        }
+      records.map(async record => {
+        return await this.getPresentationData(record)
       }),
     )
   }
@@ -83,40 +75,46 @@ export class PresentationsController {
     }
 
     try {
-      const formatData = await agent.proofs.getFormatData(record.id)
-
-      const revealedAttributes =
-        formatData.presentation?.anoncreds?.requested_proof.revealed_attrs ??
-        formatData.presentation?.indy?.requested_proof.revealed_attrs
-
-      const revealedAttributeGroups =
-        formatData.presentation?.anoncreds?.requested_proof?.revealed_attr_groups ??
-        formatData.presentation?.indy?.requested_proof.revealed_attr_groups
-
-      const claims: Claim[] = []
-      if (revealedAttributes) {
-        for (const [name, value] of Object.entries(revealedAttributes)) {
-          claims.push(new Claim({ name, value: value.raw }))
-        }
-      }
-
-      if (revealedAttributeGroups) {
-        for (const [, groupAttributes] of Object.entries(revealedAttributeGroups)) {
-          for (const attrName in groupAttributes.values) {
-            claims.push(new Claim({ name: attrName, value: groupAttributes.values[attrName].raw }))
-          }
-        }
-      }
-      return {
-        claims,
-        verified: record.isVerified ?? false,
-        state: record.state,
-        proofExchangeId: record.id,
-        threadId: record.threadId,
-        updatedAt: record.updatedAt,
-      }
+      return await this.getPresentationData(record)
     } catch (error) {
       throw new InternalServerErrorException(error)
+    }
+  }
+
+  private async getPresentationData(proofExchange: ProofExchangeRecord): Promise<PresentationData> {
+    const agent = await this.agentService.getAgent()
+
+    const formatData = await agent.proofs.getFormatData(proofExchange.id)
+
+    const revealedAttributes =
+      formatData.presentation?.anoncreds?.requested_proof.revealed_attrs ??
+      formatData.presentation?.indy?.requested_proof.revealed_attrs
+
+    const revealedAttributeGroups =
+      formatData.presentation?.anoncreds?.requested_proof?.revealed_attr_groups ??
+      formatData.presentation?.indy?.requested_proof.revealed_attr_groups
+
+    const claims: Claim[] = []
+    if (revealedAttributes) {
+      for (const [name, value] of Object.entries(revealedAttributes)) {
+        claims.push(new Claim({ name, value: value.raw }))
+      }
+    }
+
+    if (revealedAttributeGroups) {
+      for (const [, groupAttributes] of Object.entries(revealedAttributeGroups)) {
+        for (const attrName in groupAttributes.values) {
+          claims.push(new Claim({ name: attrName, value: groupAttributes.values[attrName].raw }))
+        }
+      }
+    }
+    return {
+      claims,
+      verified: proofExchange.isVerified ?? false,
+      state: proofExchange.state,
+      proofExchangeId: proofExchange.id,
+      threadId: proofExchange.threadId,
+      updatedAt: proofExchange.updatedAt,
     }
   }
 }

@@ -2,7 +2,10 @@ import type {
   HandshakeProtocol,
   ReceiveOutOfBandInvitationConfig,
   OutOfBandDidCommService,
+  ProofState,
 } from '@credo-ts/core'
+
+import { Claim } from '../model'
 
 export interface AgentInfo {
   label: string
@@ -56,6 +59,15 @@ export interface CreatePresentationRequestResult {
   proofExchangeId: string
   url: string
   shortUrl: string
+}
+
+export interface PresentationData {
+  claims: Claim[]
+  verified: boolean
+  state: ProofState
+  proofExchangeId: string
+  threadId: string
+  updatedAt: Date | undefined
 }
 
 export interface ClaimOptions {

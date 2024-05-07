@@ -568,7 +568,7 @@ Subscriptions are composed by:
 
 ## Invitations
 
-Service Agent suppors the creation of invitation codes that are used to start flows with agents where a persistent DIDComm connection is not yet established. For that purpose, three types of invitations are provided:
+Service Agent supports the creation of invitation codes that are used to start flows with agents where a persistent DIDComm connection is not yet established. For that purpose, three types of invitations are provided:
 
 - Connection Invitation: invite other agents to create a persistent, general purpose DIDComm connection. Codes created can be re-used by multiple agents that want to connect by processing it
 - Presentation Request: invite other agent to start a Presentation Request flow. Codes created can only be used once
@@ -589,7 +589,7 @@ Response from Service Agent is a JSON object containing an URL-encoded invitatio
 
 Note that the following Service Agent configuration environment variables are used when creating invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for for invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://2060.io/i)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 
@@ -622,6 +622,14 @@ Response will include the invitation code in both short and long form URL format
 }
 ```
 
+Note that the following Service Agent configuration environment variables are used when creating presentation request invitations:
+
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
+- AGENT_LABEL: An optional label to show along the connection invitation
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+
+
 ### Credential Offer
 
 Credential offer invitation codes include a preview of the offered credential, meaning by that its `credentialDefinitionId` and claims.
@@ -644,6 +652,27 @@ Response will include the invitation code in both short and long form URL format
     "credentialOfferId": "unique identifier for the flow",
 }
 ```
+
+Note that the following Service Agent configuration environment variables are used when creating credential offer invitations:
+
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
+- AGENT_LABEL: An optional label to show along the connection invitation
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+
+## Presentations
+
+It is possible to query all presentation flows created by Service Agent through the endpoint `/presentations`, which will respond with records using the following format:
+
+- proofExchangeId: flow identifier (the same as the one used in events and other responses)
+- state: current state of the presentation flow (e.g. `request-sent` when it was just started, `done` when finished)
+- claims: array containing the claims received within the presentation
+- verified: boolean stating if the presentation is valid (only meaningful when state is `done`)
+- threadId: DIDComm thread id (shared with the other party)
+- updatedAt: last time activity was recorded for this flow
+
+It is possible to query for a single presentation by executing a GET to `/presentations/<proofExchangeId>`.
+
 
 ## Verifiable Data Registry Operations
 
