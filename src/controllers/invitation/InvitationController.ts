@@ -112,7 +112,7 @@ export class InvitationController {
     const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
 
     return {
-      presentationRequestId: request.proofRecord.id,
+      proofExchangeId: request.proofRecord.id,
       url,
       shortUrl,
     }
@@ -191,7 +191,7 @@ export class InvitationController {
     const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
 
     return {
-      credentialOfferId: request.credentialRecord.id,
+      credentialExchangeId: request.credentialRecord.id,
       url,
       shortUrl,
     }

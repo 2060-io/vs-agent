@@ -53,7 +53,7 @@ export type RequestedCredential = {
 }
 
 export interface CreatePresentationRequestResult {
-  presentationRequestId: string
+  proofExchangeId: string
   url: string
   shortUrl: string
 }
@@ -70,7 +70,7 @@ export interface CreateCredentialOfferOptions {
 }
 
 export interface CreateCredentialOfferResult {
-  credentialOfferId: string
+  credentialExchangeId: string
   url: string
   shortUrl: string
 }
