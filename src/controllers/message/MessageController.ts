@@ -33,6 +33,7 @@ import {
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
 import { parsePictureData } from '../../utils/parsers'
+import { RequestedCredential } from '../types'
 
 import { MessageDto } from './MessageDto'
 
@@ -232,6 +233,11 @@ export class MessageController {
               autoAcceptProof: AutoAcceptProof.Never,
             })
             messageId = record.threadId
+            record.metadata.set('_2060/requestedCredentials', {
+              credentialDefinitionId,
+              attributes,
+            } as RequestedCredential)
+            await agent.proofs.update(record)
           }
         }
       } else if (messageType === IdentityProofResultMessage.type) {

@@ -103,6 +103,9 @@ export class InvitationController {
       },
     })
 
+    request.proofRecord.metadata.set('_2060/requestedCredentials', requestedCredentials)
+    await agent.proofs.update(request.proofRecord)
+
     const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
 
     const shortUrlId = await this.urlShortenerService.createShortUrl({

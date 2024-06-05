@@ -13,7 +13,7 @@ import { ApiTags } from '@nestjs/swagger'
 
 import { Claim } from '../../model'
 import { AgentService } from '../../services/AgentService'
-import { PresentationData } from '../types'
+import { PresentationData, RequestedCredential } from '../types'
 
 @ApiTags('presentations')
 @Controller({
@@ -86,6 +86,10 @@ export class PresentationsController {
 
     const formatData = await agent.proofs.getFormatData(proofExchange.id)
 
+    const requestedCredentials = proofExchange.metadata.get(
+      '_2060/requestedCredentials',
+    ) as RequestedCredential[]
+
     const revealedAttributes =
       formatData.presentation?.anoncreds?.requested_proof.revealed_attrs ??
       formatData.presentation?.indy?.requested_proof.revealed_attrs
@@ -109,6 +113,7 @@ export class PresentationsController {
       }
     }
     return {
+      requestedCredentials,
       claims,
       verified: proofExchange.isVerified ?? false,
       state: proofExchange.state,

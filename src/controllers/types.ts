@@ -62,6 +62,7 @@ export interface CreatePresentationRequestResult {
 }
 
 export interface PresentationData {
+  requestedCredentials: RequestedCredential[]
   claims: Claim[]
   verified: boolean
   state: ProofState
