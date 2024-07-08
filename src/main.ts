@@ -15,6 +15,7 @@ import { messageEvents } from './events/MessageEvents'
 import { ServiceAgent } from './utils/ServiceAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
+import { vcAuthnEvents } from './events/VCAuthnEvents'
 
 export const startAdminServer = async (agent: ServiceAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(ServiceAgentModule.register(agent))
@@ -81,6 +82,9 @@ const run = async () => {
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
   messageEvents(agent, conf)
+
+  // VCAuthn related events (TODO: make configurable)
+  vcAuthnEvents(agent, conf)
 
   console.log(
     `Service Agent v${packageJson['version']} running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,

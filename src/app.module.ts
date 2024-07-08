@@ -7,6 +7,7 @@ import { InvitationController } from './controllers/invitation/InvitationControl
 import { QrController } from './controllers/invitation/QrController'
 import { MessageController } from './controllers/message/MessageController'
 import { PresentationsController } from './controllers/presentations/PresentationsController'
+import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
@@ -24,6 +25,7 @@ export class ServiceAgentModule {
         PresentationsController,
         InvitationController,
         QrController,
+        VCAuthNController,
       ],
       providers: [
         {
