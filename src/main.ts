@@ -12,10 +12,10 @@ import packageJson from '../package.json'
 import { ServiceAgentModule } from './app.module'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
+import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { ServiceAgent } from './utils/ServiceAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
-import { vcAuthnEvents } from './events/VCAuthnEvents'
 
 export const startAdminServer = async (agent: ServiceAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(ServiceAgentModule.register(agent))
