@@ -10,7 +10,7 @@ export class PresentProofCreateDto {
   })
   @IsNotEmpty()
   @Expose({ name: 'proof_request' })
-  proofRequest!: AnonCredsProofRequest
+  proof_request!: AnonCredsProofRequest
 }
 
 export type PresentProofCreateResult = {

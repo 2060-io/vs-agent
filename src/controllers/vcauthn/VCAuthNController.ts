@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -27,22 +28,24 @@ export class VCAuthNController {
 
   constructor(private readonly agentService: AgentService) {}
 
-  CREATE_PRESENTATION_REQUEST_URL = '/present-proof/create-request'
-
   @Post('/present-proof/create-request')
+  @HttpCode(200)
   @ApiBody({
     type: PresentProofCreateDto,
   })
   public async createProofRequest(@Body() options: PresentProofCreateDto): Promise<PresentProofCreateResult> {
     const agent = await this.agentService.getAgent()
 
-    const { proofRequest } = options
+    const { proof_request: proofRequest } = options
+
+    // TODO: Verify proofRequest
+    this.logger.debug(`proofRequest: ${JSON.stringify(options)}`)
 
     const request = await agent.proofs.createRequest({
       proofFormats: { anoncreds: proofRequest },
       protocolVersion: 'v2',
     })
-
+    this.logger.debug(`created request: ${JSON.stringify(request)}`)
     return {
       thread_id: request.proofRecord.threadId,
       presentation_exchange_id: request.proofRecord.id,
@@ -51,6 +54,7 @@ export class VCAuthNController {
   }
 
   @Post('/out-of-band/create-invitation')
+  @HttpCode(200)
   @ApiBody({
     type: OobInvitationDto,
   })
@@ -59,7 +63,7 @@ export class VCAuthNController {
   ): Promise<OutOfBandInvitationCreateResult> {
     const agent = await this.agentService.getAgent()
 
-    const { attachments, usePublicDid } = options
+    const { attachments, use_public_did: usePublicDid } = options
 
     if (attachments?.length !== 1) {
       throw Error('You must specify a single attachment')
@@ -79,6 +83,8 @@ export class VCAuthNController {
         imageUrl: process.env.AGENT_INVITATION_IMAGE_URL,
         messages: [requestMessage],
       })
+
+      this.logger.debug(`Invitation: ${JSON.stringify(invitation.outOfBandInvitation.toJSON())}`)
       return {
         invitation: invitation.outOfBandInvitation.toJSON(),
         invi_msg_id: invitation.outOfBandInvitation.id,
@@ -100,7 +106,7 @@ export class VCAuthNController {
    * @param proofExchangeId
    * @returns { presentation and request }
    */
-  @Get('/:proofExchangeId')
+  @Get('/present-proof/records/:proofExchangeId')
   public async getPresentationById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
 
@@ -128,7 +134,8 @@ export class VCAuthNController {
     }
   }
 
-  @Get('/:proofExchangeId/verify')
+  @Post('/present-proof/records/:proofExchangeId/verify-presentation')
+  @HttpCode(200)
   public async verifyPresentationById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
 
@@ -148,7 +155,7 @@ export class VCAuthNController {
       return {
         presentation: data.presentation?.anoncreds ?? data.presentation?.indy,
         presentation_request: data.request?.anoncreds ?? data.request?.indy,
-        verified: record.isVerified,
+        verified: record.isVerified ? 'true' : 'false',
         state: record.state,
       }
     } catch (error) {

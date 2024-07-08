@@ -18,7 +18,7 @@ export class OobInvitationDto {
   @IsNotEmpty()
   @IsBoolean()
   @Expose({ name: 'use_public_did' })
-  usePublicDid!: boolean
+  use_public_did!: boolean
 }
 
 export type OutOfBandInvitationCreateResult = {
