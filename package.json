@@ -16,9 +16,6 @@
     "type": "git",
     "url": "https://github.com/2060-io/2060-service-agent"
   },
-  "bin": {
-    "afj-rest": "bin/afj-rest.js"
-  },
   "nohoist": [
     "@credo-ts/node",
     "**/@credo-ts/node",
