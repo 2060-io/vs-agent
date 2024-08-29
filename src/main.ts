@@ -16,6 +16,7 @@ import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { ServiceAgent } from './utils/ServiceAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
+import { askarPostgresConfig } from './utils/walletConfig'
 
 export const startAdminServer = async (agent: ServiceAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(ServiceAgentModule.register(agent))
@@ -49,6 +50,7 @@ const run = async () => {
       id: process.env.AGENT_WALLET_ID || process.env.AGENT_NAME || 'test-service-agent',
       key: process.env.AGENT_WALLET_KEY || process.env.AGENT_NAME || 'test-service-agent',
       keyDerivationMethod: KeyDerivationMethod.Argon2IInt,
+      storage: process.env.POSTGRES_HOST ? askarPostgresConfig : undefined
     },
     label: process.env.AGENT_LABEL || 'Test Service Agent',
     displayPictureUrl: process.env.AGENT_INVITATION_IMAGE_URL,
