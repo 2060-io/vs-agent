@@ -21,6 +21,7 @@ but likely needed for production and test deployments.
 | AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test Service Agent    |
 | AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-service-agent    |
 | AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-service-agent    |
+| AGENT_WALLET_KEY_DERIVATION_METHOD | Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW | ARGON2I_MOD |
 | AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test Service Agent    |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 | ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
@@ -28,6 +29,12 @@ but likely needed for production and test deployments.
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
+| POSTGRES_HOST             | PosgreSQL database host                                                                                             | None (use SQLite)               |
+| POSTGRES_USER             | PosgreSQL database username                                                                                         | None                            |
+| POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
+| POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
+| POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
+
 
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
 >
