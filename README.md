@@ -28,6 +28,9 @@ but likely needed for production and test deployments.
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
+| POSTGRES_HOST            | PostgreSQL database server                                                                                       | none |
+| POSTGRES_USER            | Database user credential                                                                                         | none |
+| POSTGRES_PASSWORD            | Database password credential                                                                                         | none |
 
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
 >
