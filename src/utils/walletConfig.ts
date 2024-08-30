@@ -2,6 +2,9 @@ import type { AskarWalletPostgresStorageConfig } from '@credo-ts/askar/build/wal
 
 import { KeyDerivationMethod } from '@credo-ts/core'
 
+export const AGENT_WALLET_ID = process.env.AGENT_WALLET_ID
+export const AGENT_WALLET_KEY = process.env.AGENT_WALLET_KEY
+export const AGENT_WALLET_KEY_DERIVATION_METHOD = process.env.AGENT_WALLET_KEY_DERIVATION_METHOD
 export const POSTGRES_HOST = process.env.POSTGRES_HOST
 export const POSTGRES_USER = process.env.POSTGRES_USER
 export const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD
@@ -13,7 +16,6 @@ export const askarPostgresConfig: AskarWalletPostgresStorageConfig = {
   config: {
     host: POSTGRES_HOST as string,
     connectTimeout: 10,
-    maxConnections: 2
   },
   credentials: {
     account: POSTGRES_USER as string,
