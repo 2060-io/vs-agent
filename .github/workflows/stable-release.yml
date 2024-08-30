@@ -1,0 +1,61 @@
+name: Stable release
+on:
+  push:
+    tags:
+      - "*"
+env:
+  DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
+  DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
+  IMAGE_NAME: '2060-service-agent'      
+  IMAGE_TAG: ${{ github.ref }}
+jobs:
+  build-and-push:
+    name: Build and push docker images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup node v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: get_version
+        uses: battila7/get-version-action@v2
+          
+      - name: Install dependencies
+        run: |
+          yarn install
+      - name: Log in to Docker Hub
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
+
+      - name: Build Docker image
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+ 
+      - name: Add tags to Docker image and push to Docker Hub
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
+            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
+            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
+            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
+            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
+  publish:
+    name: Publish release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Publish release
+        uses: ghalactic/github-release-from-tag@v5
