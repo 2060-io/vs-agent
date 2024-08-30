@@ -49,13 +49,3 @@ jobs:
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
-  publish:
-    name: Publish release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Publish release
-        uses: ghalactic/github-release-from-tag@v5
