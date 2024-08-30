@@ -7,7 +7,6 @@ env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: '2060-service-agent'      
-  IMAGE_TAG: ${{ github.ref }}
 jobs:
   build-and-push:
     name: Build and push docker images
@@ -36,16 +35,16 @@ jobs:
       - name: Build Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
  
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
-            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
+            docker push $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}}
