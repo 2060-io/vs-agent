@@ -11,12 +11,17 @@ import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
+import { MessageService } from './controllers/message/MessageService'
+import { HandledRedisModule } from './modules/redis.module'
 
 @Module({})
 export class ServiceAgentModule {
   static register(agent: ServiceAgent): DynamicModule {
     return {
       module: ServiceAgentModule,
+      imports: [
+        HandledRedisModule
+      ],
       controllers: [
         AgentController,
         ConnectionController,
@@ -33,6 +38,7 @@ export class ServiceAgentModule {
           useValue: agent,
         },
         AgentService,
+        MessageService,
         UrlShorteningService,
       ],
       exports: [AgentService],
