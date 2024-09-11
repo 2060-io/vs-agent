@@ -12,10 +12,9 @@ import {
   DidExchangeState,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Body, Controller, HttpException, HttpStatus, Injectable, Logger, Post } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
-import { Observable, throwError, timer } from 'rxjs';
-import { catchError, mergeMap, retry } from 'rxjs/operators';
+import { Process, Processor } from '@nestjs/bull'
+import { HttpException, HttpStatus, Logger } from '@nestjs/common'
+import { Job } from 'bull'
 
 import {
   TextMessage,
@@ -36,21 +35,17 @@ import { VerifiableCredentialRequestedProofItem } from '../../model/messages/pro
 import { AgentService } from '../../services/AgentService'
 import { parsePictureData } from '../../utils/parsers'
 import { RequestedCredential } from '../types'
-import { Process, Processor } from '@nestjs/bull'
-import { Job } from 'bull'
 
 @Processor('message')
 export class MessageService {
-  private readonly logger = new Logger(MessageService.name);
+  private readonly logger = new Logger(MessageService.name)
 
-  constructor(
-    private readonly agentService: AgentService,
-  ) {}
+  constructor(private readonly agentService: AgentService) {}
 
   @Process()
-  public async sendMessage(job: Job<{message:IBaseMessage, idGenerated: string}>): Promise<{ id: string }> {
+  public async sendMessage(job: Job<{ message: IBaseMessage }>): Promise<{ id: string }> {
     try {
-      const { message, idGenerated } = job.data;
+      const { message, idGenerated } = job.data
       const agent = await this.agentService.getAgent()
 
       let messageId: string | undefined
@@ -321,7 +316,8 @@ export class MessageService {
 
         // FIXME: No message id is returned here
       }
-      if(messageId !== undefined) await agent.genericRecords.save({id: messageId, content: { id: idGenerated } })
+      if (messageId !== undefined)
+        await agent.genericRecords.save({ id: messageId, content: { id: idGenerated } })
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {

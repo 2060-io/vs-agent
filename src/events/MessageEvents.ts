@@ -317,9 +317,14 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
   })
 }
 
-const sendMessageReceivedEvent = async (agent: ServiceAgent, message: BaseMessage, timestamp: Date, config: ServerConfig) => {
+const sendMessageReceivedEvent = async (
+  agent: ServiceAgent,
+  message: BaseMessage,
+  timestamp: Date,
+  config: ServerConfig,
+) => {
   const recordId = await agent.genericRecords.findById(message.id)
-  message.id = recordId?.content.id as string ?? message.id
+  if (recordId?.content.id as string) message.id = recordId?.content.id as string
   const body = {
     timestamp,
     type: 'message-received',
@@ -337,13 +342,12 @@ const sendMessageStateUpdatedEvent = async (options: {
   timestamp: Date
   config: ServerConfig
 }) => {
-  let { agent, messageId, connectionId, state, timestamp, config } = options
+  const { agent, messageId, connectionId, state, timestamp, config } = options
   const recordId = await agent.genericRecords.findById(messageId)
-  messageId = recordId?.content.id  as string ?? messageId
 
   const body = {
     type: 'message-state-updated',
-    messageId,
+    messageId: (recordId?.content.id as string) ?? messageId,
     state,
     timestamp,
     connectionId,

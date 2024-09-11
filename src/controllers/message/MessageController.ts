@@ -1,43 +1,12 @@
-import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
-import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import {
-  JsonTransformer,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  utils,
-  MessageSender,
-  OutboundMessageContext,
-  OutOfBandRepository,
-  OutOfBandInvitation,
-  DidExchangeState,
-} from '@credo-ts/core'
-import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
+import { utils } from '@credo-ts/core'
+import { InjectQueue } from '@nestjs/bull'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { Queue } from 'bull'
 
-import {
-  TextMessage,
-  ReceiptsMessage,
-  IdentityProofRequestMessage,
-  MenuDisplayMessage,
-  CredentialIssuanceMessage,
-  ContextualMenuUpdateMessage,
-  InvitationMessage,
-  ProfileMessage,
-  MediaMessage,
-  IBaseMessage,
-  didcommReceiptFromServiceAgentReceipt,
-  IdentityProofResultMessage,
-  TerminateConnectionMessage,
-} from '../../model'
-import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
-import { AgentService } from '../../services/AgentService'
-import { parsePictureData } from '../../utils/parsers'
-import { RequestedCredential } from '../types'
+import { IBaseMessage } from '../../model'
 
 import { MessageDto } from './MessageDto'
-import { InjectQueue } from '@nestjs/bull'
-import { Queue } from 'bull'
 
 @ApiTags('message')
 @Controller({
@@ -77,9 +46,11 @@ export class MessageController {
   })
   public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
-      const idGenerated = utils.uuid()
-      await this.messageQueue.add('', { message, idGenerated })
-      return { id: idGenerated };
+      const messageId = message.id ?? utils.uuid()
+      // TODO: Check if message id already exists
+
+      await this.messageQueue.add('', { message })
+      return { id: messageId }
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new HttpException(
