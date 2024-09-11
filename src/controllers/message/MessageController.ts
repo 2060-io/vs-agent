@@ -77,8 +77,9 @@ export class MessageController {
   })
   public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
-      const job = await this.messageQueue.add('', message)
-      return { id: utils.uuid() };
+      const idGenerated = utils.uuid()
+      await this.messageQueue.add('', { message, idGenerated })
+      return { id: idGenerated };
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new HttpException(

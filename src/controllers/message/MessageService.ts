@@ -48,9 +48,9 @@ export class MessageService {
   ) {}
 
   @Process()
-  public async sendMessage(job: Job<IBaseMessage>): Promise<{ id: string }> {
+  public async sendMessage(job: Job<{message:IBaseMessage, idGenerated: string}>): Promise<{ id: string }> {
     try {
-      const message = job.data;
+      const { message, idGenerated } = job.data;
       const agent = await this.agentService.getAgent()
 
       let messageId: string | undefined
@@ -321,7 +321,7 @@ export class MessageService {
 
         // FIXME: No message id is returned here
       }
-
+      if(messageId !== undefined) await agent.genericRecords.save({id: messageId, content: { id: idGenerated } })
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
