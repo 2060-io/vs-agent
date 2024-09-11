@@ -11,8 +11,8 @@ import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
-import { MessageService } from './controllers/message/MessageService'
 import { HandledRedisModule } from './modules/redis.module'
+import { FallbackMessageService, MessageService, MessageServiceFactory, RedisMessageService } from './controllers/message/MessageService'
 
 @Module({})
 export class ServiceAgentModule {
@@ -38,10 +38,20 @@ export class ServiceAgentModule {
           useValue: agent,
         },
         AgentService,
-        MessageService,
         UrlShorteningService,
+        MessageService,
+        RedisMessageService,
+        FallbackMessageService,
+        MessageServiceFactory,
+        {
+          provide: 'MESSAGE_SERVICE',
+          useFactory: (factory: MessageServiceFactory) => {
+            return factory.getMessageService(true);
+          },
+          inject: [MessageServiceFactory],
+        },
       ],
-      exports: [AgentService],
+      exports: [AgentService, 'MESSAGE_SERVICE'],
     }
   }
 }

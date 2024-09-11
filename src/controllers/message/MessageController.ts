@@ -1,6 +1,6 @@
 import { utils } from '@credo-ts/core'
 import { InjectQueue } from '@nestjs/bull'
-import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
+import { Body, Controller, HttpException, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 import { Queue } from 'bull'
 
@@ -48,6 +48,7 @@ export class MessageController {
     try {
       const messageId = message.id ?? utils.uuid()
       // TODO: Check if message id already exists
+      message.id = messageId
 
       await this.messageQueue.add('', { message })
       return { id: messageId }

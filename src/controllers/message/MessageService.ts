@@ -13,7 +13,7 @@ import {
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Process, Processor } from '@nestjs/bull'
-import { HttpException, HttpStatus, Logger } from '@nestjs/common'
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common'
 import { Job } from 'bull'
 
 import {
@@ -36,16 +36,14 @@ import { AgentService } from '../../services/AgentService'
 import { parsePictureData } from '../../utils/parsers'
 import { RequestedCredential } from '../types'
 
-@Processor('message')
+@Injectable()
 export class MessageService {
   private readonly logger = new Logger(MessageService.name)
 
   constructor(private readonly agentService: AgentService) {}
 
-  @Process()
-  public async sendMessage(job: Job<{ message: IBaseMessage }>): Promise<{ id: string }> {
+  public async sendMessage(message: IBaseMessage): Promise<{ id: string }> {
     try {
-      const { message, idGenerated } = job.data
       const agent = await this.agentService.getAgent()
 
       let messageId: string | undefined
@@ -317,7 +315,7 @@ export class MessageService {
         // FIXME: No message id is returned here
       }
       if (messageId !== undefined)
-        await agent.genericRecords.save({ id: messageId, content: { id: idGenerated } })
+        await agent.genericRecords.save({ id: messageId, content: { id: message.id } })
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
@@ -333,5 +331,44 @@ export class MessageService {
         },
       )
     }
+  }
+}
+
+@Injectable()
+@Processor('message')
+export class RedisMessageService {
+  private readonly logger = new Logger(RedisMessageService.name)
+  constructor( private readonly messageService: MessageService ) {}
+
+  @Process()
+  async processMessage(job: Job<{ message: IBaseMessage }>): Promise<{ id: string }> {
+    const { message } = job.data
+    this.logger.debug!(`Queuing message with Bull: ${message.id}`);
+    await this.messageService.sendMessage( message );
+    return { id: message.id ?? utils.uuid() };
+  }
+}
+
+@Injectable()
+export class FallbackMessageService {
+  private readonly logger = new Logger(FallbackMessageService.name)
+  constructor( private readonly messageService: MessageService ) {}
+
+  async processMessage(message: IBaseMessage): Promise<{ id: string }> {
+    this.logger.log(`Sending message directly: ${message.id}`);
+    await this.messageService.sendMessage( message );
+    return { id: message.id ?? utils.uuid() };
+  }
+}
+
+@Injectable()
+export class MessageServiceFactory {
+  constructor(
+    private readonly redisMessageService: RedisMessageService,
+    private readonly fallbackMessageService: FallbackMessageService
+  ) {}
+
+  getMessageService(redisAvailable: boolean) {
+    return redisAvailable ? this.redisMessageService : this.fallbackMessageService;
   }
 }
