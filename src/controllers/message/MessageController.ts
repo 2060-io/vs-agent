@@ -6,6 +6,7 @@ import { IBaseMessage } from '../../model'
 
 import { MessageDto } from './MessageDto'
 import { MessageServiceFactory } from './MessageService'
+import { AgentService } from 'src/services/AgentService'
 
 @ApiTags('message')
 @Controller({
@@ -15,7 +16,10 @@ import { MessageServiceFactory } from './MessageService'
 export class MessageController {
   private readonly logger = new Logger(MessageController.name)
 
-  constructor( private readonly messageServiceFactory: MessageServiceFactory ) {}
+  constructor( 
+    private readonly messageServiceFactory: MessageServiceFactory,
+    private readonly agentService: AgentService
+   ) {}
 
   @Post('/')
   @ApiBody({
@@ -45,8 +49,23 @@ export class MessageController {
   })
   public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
+      const agent = await this.agentService.getAgent()
+
+      if(message.id!==undefined) {
+        const recordId = await agent.genericRecords.findById(message.id)
+        if (recordId?.content.id as string) 
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.BAD_REQUEST,
+              error: `something went wrong: Duplicated ID`,
+            },
+            HttpStatus.BAD_REQUEST,
+            {
+              cause: 'Duplicated ID',
+            },
+          )
+      }
       const messageId = message.id ?? utils.uuid()
-      // TODO: Check if message id already exists
       message.id = messageId
 
       await this.messageServiceFactory.setProcessMessage( process.env.REDIS_HOST!==undefined, message )
