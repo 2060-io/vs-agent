@@ -43,15 +43,8 @@ export class ServiceAgentModule {
         RedisMessageService,
         FallbackMessageService,
         MessageServiceFactory,
-        {
-          provide: 'MESSAGE_SERVICE',
-          useFactory: (factory: MessageServiceFactory) => {
-            return factory.getMessageService(true);
-          },
-          inject: [MessageServiceFactory],
-        },
       ],
-      exports: [AgentService, 'MESSAGE_SERVICE'],
+      exports: [AgentService],
     }
   }
 }

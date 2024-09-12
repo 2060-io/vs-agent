@@ -1,12 +1,11 @@
 import { utils } from '@credo-ts/core'
-import { InjectQueue } from '@nestjs/bull'
-import { Body, Controller, HttpException, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
+import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
-import { Queue } from 'bull'
 
 import { IBaseMessage } from '../../model'
 
 import { MessageDto } from './MessageDto'
+import { MessageServiceFactory } from './MessageService'
 
 @ApiTags('message')
 @Controller({
@@ -16,7 +15,7 @@ import { MessageDto } from './MessageDto'
 export class MessageController {
   private readonly logger = new Logger(MessageController.name)
 
-  constructor(@InjectQueue('message') private messageQueue: Queue) {}
+  constructor( private readonly messageServiceFactory: MessageServiceFactory ) {}
 
   @Post('/')
   @ApiBody({
@@ -50,7 +49,7 @@ export class MessageController {
       // TODO: Check if message id already exists
       message.id = messageId
 
-      await this.messageQueue.add('', { message })
+      await this.messageServiceFactory.setProcessMessage( process.env.REDIS_HOST!==undefined, message )
       return { id: messageId }
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)

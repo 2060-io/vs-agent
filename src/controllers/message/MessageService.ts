@@ -12,9 +12,9 @@ import {
   DidExchangeState,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Process, Processor } from '@nestjs/bull'
+import { InjectQueue, Process, Processor } from '@nestjs/bull'
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { Job } from 'bull'
+import { Job, Queue } from 'bull'
 
 import {
   TextMessage,
@@ -334,7 +334,6 @@ export class MessageService {
   }
 }
 
-@Injectable()
 @Processor('message')
 export class RedisMessageService {
   private readonly logger = new Logger(RedisMessageService.name)
@@ -364,11 +363,11 @@ export class FallbackMessageService {
 @Injectable()
 export class MessageServiceFactory {
   constructor(
-    private readonly redisMessageService: RedisMessageService,
+    @InjectQueue('message') private messageQueue: Queue,
     private readonly fallbackMessageService: FallbackMessageService
   ) {}
 
-  getMessageService(redisAvailable: boolean) {
-    return redisAvailable ? this.redisMessageService : this.fallbackMessageService;
+  async setProcessMessage(redisAvailable: boolean, message: IBaseMessage) {
+    return redisAvailable ? await this.messageQueue.add('', { message }) : await this.fallbackMessageService.processMessage(message);
   }
 }
