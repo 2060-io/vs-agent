@@ -1,12 +1,13 @@
-import { utils } from '@credo-ts/core'
-import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
+import { ConnectionRecord, DidExchangeState, utils } from '@credo-ts/core'
+import { Body, Controller, HttpException, HttpStatus, Logger, Post, Query } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { IBaseMessage } from '../../model'
 
 import { MessageDto } from './MessageDto'
-import { MessageServiceFactory } from './MessageService'
-import { AgentService } from 'src/services/AgentService'
+import { AgentService } from '../../services/AgentService'
+import { MessageServiceFactory } from './services/MessageServiceFactory'
+import { GenericRecord } from '@credo-ts/core/build/modules/generic-records/repository/GenericRecord'
 
 @ApiTags('message')
 @Controller({
@@ -49,32 +50,24 @@ export class MessageController {
   })
   public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
-      const agent = await this.agentService.getAgent()
+      let connection: ConnectionRecord | null = null;
+      connection = await this.checkForDuplicateId(message);
 
-      if(message.id!==undefined) {
-        const recordId = await agent.genericRecords.findById(message.id)
-        if (recordId?.content.id as string) 
-          throw new HttpException(
-            {
-              statusCode: HttpStatus.BAD_REQUEST,
-              error: `something went wrong: Duplicated ID`,
-            },
-            HttpStatus.BAD_REQUEST,
-            {
-              cause: 'Duplicated ID',
-            },
-          )
+      if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
+
+      if (connection.state === DidExchangeState.Completed && (!connection.did || !connection.theirDid)) {
+        throw new Error(`This connection has been terminated. No further messages are possible`)
       }
       const messageId = message.id ?? utils.uuid()
       message.id = messageId
 
-      await this.messageServiceFactory.setProcessMessage( process.env.REDIS_HOST!==undefined, message )
+      await this.messageServiceFactory.setProcessMessage( this.isRedisEnabled(), message, connection )
       return { id: messageId }
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new HttpException(
         {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          statusCode: error.statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR,
           error: `something went wrong: ${error}`,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -84,4 +77,17 @@ export class MessageController {
       )
     }
   }
+
+  private isRedisEnabled(): boolean {
+    return process.env.REDIS_HOST !== undefined;
+  }
+
+  private async checkForDuplicateId(message: IBaseMessage): Promise<ConnectionRecord | null> {
+    const agent = await this.agentService.getAgent()
+    const records = message.id ? await agent.genericRecords.findAllByQuery({ 'messageId': message.id, 'connectionId': message.connectionId }):null
+
+    if (records && records.length > 0) 
+      throw new Error(`Duplicated ID: ${JSON.stringify(records)}`);
+    return await agent.connections.findById(message.connectionId)
+  }  
 }

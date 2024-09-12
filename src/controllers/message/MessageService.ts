@@ -10,11 +10,10 @@ import {
   OutOfBandRepository,
   OutOfBandInvitation,
   DidExchangeState,
+  ConnectionRecord,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { InjectQueue, Process, Processor } from '@nestjs/bull'
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { Job, Queue } from 'bull'
+import { Injectable, Logger } from '@nestjs/common'
 
 import {
   TextMessage,
@@ -42,21 +41,13 @@ export class MessageService {
 
   constructor(private readonly agentService: AgentService) {}
 
-  public async sendMessage(message: IBaseMessage): Promise<{ id: string }> {
+  public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
     try {
       const agent = await this.agentService.getAgent()
 
       let messageId: string | undefined
       const messageType = message.type
       this.logger.debug!(`Message submitted. ${JSON.stringify(message)}`)
-
-      const connection = await agent.connections.findById(message.connectionId)
-
-      if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
-
-      if (connection.state === DidExchangeState.Completed && (!connection.did || !connection.theirDid)) {
-        throw new Error(`This connection has been terminated. No further messages are possible`)
-      }
 
       if (messageType === TextMessage.type) {
         const textMsg = JsonTransformer.fromJSON(message, TextMessage)
@@ -314,60 +305,14 @@ export class MessageService {
 
         // FIXME: No message id is returned here
       }
-      if (messageId !== undefined)
-        await agent.genericRecords.save({ id: messageId, content: { id: message.id } })
+      
+      if (messageId)
+        await agent.genericRecords.save({ id: messageId, content: {}, tags: { messageId: message.id, connectionId: message.connectionId } })
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `something went wrong: ${error}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        {
-          cause: error,
-        },
-      )
+      throw new Error(`something went wrong: ${error}`);
     }
-  }
-}
-
-@Processor('message')
-export class RedisMessageService {
-  private readonly logger = new Logger(RedisMessageService.name)
-  constructor( private readonly messageService: MessageService ) {}
-
-  @Process()
-  async processMessage(job: Job<{ message: IBaseMessage }>): Promise<{ id: string }> {
-    const { message } = job.data
-    this.logger.debug!(`Queuing message with Bull: ${message.id}`);
-    await this.messageService.sendMessage( message );
-    return { id: message.id ?? utils.uuid() };
-  }
-}
-
-@Injectable()
-export class FallbackMessageService {
-  private readonly logger = new Logger(FallbackMessageService.name)
-  constructor( private readonly messageService: MessageService ) {}
-
-  async processMessage(message: IBaseMessage): Promise<{ id: string }> {
-    this.logger.log(`Sending message directly: ${message.id}`);
-    await this.messageService.sendMessage( message );
-    return { id: message.id ?? utils.uuid() };
-  }
-}
-
-@Injectable()
-export class MessageServiceFactory {
-  constructor(
-    @InjectQueue('message') private messageQueue: Queue,
-    private readonly fallbackMessageService: FallbackMessageService
-  ) {}
-
-  async setProcessMessage(redisAvailable: boolean, message: IBaseMessage) {
-    return redisAvailable ? await this.messageQueue.add('', { message }) : await this.fallbackMessageService.processMessage(message);
   }
 }

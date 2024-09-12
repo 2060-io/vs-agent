@@ -12,7 +12,7 @@ import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
 import { HandledRedisModule } from './modules/redis.module'
-import { FallbackMessageService, MessageService, MessageServiceFactory, RedisMessageService } from './controllers/message/MessageService'
+import { CoreMessageService, MessageService, MessageServiceFactory, RedisMessageService } from './controllers/message'
 
 @Module({})
 export class ServiceAgentModule {
@@ -41,7 +41,7 @@ export class ServiceAgentModule {
         UrlShorteningService,
         MessageService,
         RedisMessageService,
-        FallbackMessageService,
+        CoreMessageService,
         MessageServiceFactory,
       ],
       exports: [AgentService],
