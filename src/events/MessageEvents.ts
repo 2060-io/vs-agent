@@ -324,7 +324,7 @@ const sendMessageReceivedEvent = async (
   config: ServerConfig,
 ) => {
   const recordId = await agent.genericRecords.findById(message.id)
-    if (recordId?.getTag('messageId') as string) message.id = recordId?.getTag('messageId') as string
+  if (recordId?.getTag('messageId') as string) message.id = recordId?.getTag('messageId') as string
   const body = {
     timestamp,
     type: 'message-received',

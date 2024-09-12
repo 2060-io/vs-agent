@@ -5,23 +5,26 @@ import { ConnectionController } from './controllers/connections/ConnectionContro
 import { CredentialTypesController } from './controllers/credentials/CredentialTypeController'
 import { InvitationController } from './controllers/invitation/InvitationController'
 import { QrController } from './controllers/invitation/QrController'
+import {
+  CoreMessageService,
+  MessageService,
+  MessageServiceFactory,
+  RedisMessageService,
+} from './controllers/message'
 import { MessageController } from './controllers/message/MessageController'
 import { PresentationsController } from './controllers/presentations/PresentationsController'
 import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
+import { HandledRedisModule } from './modules/redis.module'
 import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { ServiceAgent } from './utils/ServiceAgent'
-import { HandledRedisModule } from './modules/redis.module'
-import { CoreMessageService, MessageService, MessageServiceFactory, RedisMessageService } from './controllers/message'
 
 @Module({})
 export class ServiceAgentModule {
   static register(agent: ServiceAgent): DynamicModule {
     return {
       module: ServiceAgentModule,
-      imports: [
-        HandledRedisModule
-      ],
+      imports: [HandledRedisModule],
       controllers: [
         AgentController,
         ConnectionController,

@@ -9,7 +9,6 @@ import {
   OutboundMessageContext,
   OutOfBandRepository,
   OutOfBandInvitation,
-  DidExchangeState,
   ConnectionRecord,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
@@ -305,14 +304,18 @@ export class MessageService {
 
         // FIXME: No message id is returned here
       }
-      
+
       if (messageId)
-        await agent.genericRecords.save({ id: messageId, content: {}, tags: { messageId: message.id, connectionId: message.connectionId } })
+        await agent.genericRecords.save({
+          id: messageId,
+          content: {},
+          tags: { messageId: message.id, connectionId: message.connectionId },
+        })
       this.logger.debug!(`messageId: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
-      throw new Error(`something went wrong: ${error}`);
+      throw new Error(`something went wrong: ${error}`)
     }
   }
 }
