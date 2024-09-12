@@ -90,7 +90,7 @@ export class MessageController {
         })
       : null
 
-    if (records && records.length > 0) throw new Error(`Duplicated ID: ${JSON.stringify(records)}`)
+    if (records && records.length > 0) throw new Error(`Duplicated ID: ${message.id}`)
     return await agent.connections.findById(message.connectionId)
   }
 }

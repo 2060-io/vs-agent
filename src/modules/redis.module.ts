@@ -1,19 +1,34 @@
-import { BullModule } from '@nestjs/bull'
-import { Module } from '@nestjs/common'
+import { BullModule, BullModuleOptions } from '@nestjs/bull'
+import { DynamicModule, Module } from '@nestjs/common'
 
-@Module({
-  imports: [
-    BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST,
-        port: 6379,
-        password: process.env.REDIS_PASSWORD,
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'message',
-    }),
-  ],
-  exports: [BullModule],
-})
-export class HandledRedisModule {}
+@Module({})
+export class HandledRedisModule {
+  static forRoot(): DynamicModule {
+    const imports = []
+
+    if (process.env.REDIS_HOST) {
+      const bullOptions: BullModuleOptions = {
+        redis: {
+          host: process.env.REDIS_HOST,
+          port: 6379,
+          password: process.env.REDIS_PASSWORD,
+          maxRetriesPerRequest: 3,
+          connectTimeout: 5000,
+        },
+      }
+
+      imports.push(
+        BullModule.forRoot(bullOptions),
+        BullModule.registerQueue({
+          name: 'message',
+        }),
+      )
+    }
+
+    return {
+      module: HandledRedisModule,
+      imports,
+      exports: process.env.REDIS_HOST ? [BullModule] : [],
+    }
+  }
+}

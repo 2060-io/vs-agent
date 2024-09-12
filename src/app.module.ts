@@ -24,7 +24,7 @@ export class ServiceAgentModule {
   static register(agent: ServiceAgent): DynamicModule {
     return {
       module: ServiceAgentModule,
-      imports: [HandledRedisModule],
+      imports: [HandledRedisModule.forRoot()],
       controllers: [
         AgentController,
         ConnectionController,
