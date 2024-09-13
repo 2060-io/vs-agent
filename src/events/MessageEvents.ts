@@ -65,7 +65,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         timestamp: new Date(), // It can take also 'sentTime' to be related to the origin
       })
 
-      await sendMessageReceivedEvent(msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     // Action Menu protocol messages
@@ -76,7 +76,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         timestamp: new Date(),
       })
 
-      await sendMessageReceivedEvent(msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (message.type === PerformMessage.type.messageTypeUri) {
@@ -87,7 +87,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         timestamp: new Date(),
       })
 
-      await sendMessageReceivedEvent(msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     // Question Answer protocol messages
@@ -113,7 +113,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         id: message.id,
       })
 
-      await sendMessageReceivedEvent(msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (
@@ -141,7 +141,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           timestamp: record.updatedAt,
         })
 
-        await sendMessageReceivedEvent(msg, msg.timestamp, config)
+        await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } catch (error) {
         config.logger.error(`Error processing presentaion problem report: ${error}`)
       }
@@ -196,7 +196,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           timestamp: record.updatedAt,
         })
 
-        await sendMessageReceivedEvent(msg, msg.timestamp, config)
+        await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } catch (error) {
         config.logger.error(`Error processing presentaion message: ${error}`)
       }
@@ -227,7 +227,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           timestamp: record.createdAt,
         })
 
-        await sendMessageReceivedEvent(message, message.timestamp, config)
+        await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       } else if (
         [CredentialState.Declined, CredentialState.Done, CredentialState.Abandoned].includes(record.state)
       ) {
@@ -240,7 +240,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
               ? CredentialState.Declined
               : record.state,
         })
-        await sendMessageReceivedEvent(message, message.timestamp, config)
+        await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       }
     },
   )
@@ -279,7 +279,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           })),
         })
 
-        await sendMessageReceivedEvent(message, message.timestamp, config)
+        await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       }
     }
   })
@@ -295,7 +295,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
       receipts.forEach(receipt => {
         const { messageId, timestamp, state } = receipt
-        sendMessageStateUpdatedEvent({ messageId, connectionId, state, timestamp, config })
+        sendMessageStateUpdatedEvent({ agent, messageId, connectionId, state, timestamp, config })
       })
     },
   )
@@ -317,7 +317,14 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
   })
 }
 
-const sendMessageReceivedEvent = async (message: BaseMessage, timestamp: Date, config: ServerConfig) => {
+const sendMessageReceivedEvent = async (
+  agent: ServiceAgent,
+  message: BaseMessage,
+  timestamp: Date,
+  config: ServerConfig,
+) => {
+  const recordId = await agent.genericRecords.findById(message.id)
+  if (recordId?.getTag('messageId') as string) message.id = recordId?.getTag('messageId') as string
   const body = {
     timestamp,
     type: 'message-received',
@@ -328,17 +335,19 @@ const sendMessageReceivedEvent = async (message: BaseMessage, timestamp: Date, c
 }
 
 const sendMessageStateUpdatedEvent = async (options: {
+  agent: ServiceAgent
   messageId: string
   connectionId: string
   state: string
   timestamp: Date
   config: ServerConfig
 }) => {
-  const { messageId, connectionId, state, timestamp, config } = options
+  const { agent, messageId, connectionId, state, timestamp, config } = options
+  const recordId = await agent.genericRecords.findById(messageId)
 
   const body = {
     type: 'message-state-updated',
-    messageId,
+    messageId: (recordId?.getTag('messageId') as string) ?? messageId,
     state,
     timestamp,
     connectionId,
