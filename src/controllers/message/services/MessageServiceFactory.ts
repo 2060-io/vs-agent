@@ -16,7 +16,7 @@ export class MessageServiceFactory {
 
   async processMessage(message: IBaseMessage, connection: ConnectionRecord) {
     return process.env.REDIS_HOST !== undefined
-      ? await this.messageQueue.add('', { message, connection })
+      ? await this.messageQueue.add({ message, connection })
       : await this.coreMessageService.processMessage(message, connection)
   }
 }
