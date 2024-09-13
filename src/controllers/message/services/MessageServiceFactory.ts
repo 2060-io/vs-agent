@@ -14,8 +14,8 @@ export class MessageServiceFactory {
     private readonly coreMessageService: CoreMessageService,
   ) {}
 
-  async setProcessMessage(redisAvailable: boolean, message: IBaseMessage, connection: ConnectionRecord) {
-    return redisAvailable
+  async processMessage(message: IBaseMessage, connection: ConnectionRecord) {
+    return process.env.REDIS_HOST !== undefined
       ? await this.messageQueue.add('', { message, connection })
       : await this.coreMessageService.processMessage(message, connection)
   }

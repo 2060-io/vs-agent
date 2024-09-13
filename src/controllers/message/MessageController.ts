@@ -1,9 +1,10 @@
-import { ConnectionRecord, DidExchangeState, utils } from '@credo-ts/core'
+import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { IBaseMessage } from '../../model'
 import { AgentService } from '../../services/AgentService'
+import { ServiceAgent } from '../../utils/ServiceAgent'
 
 import { MessageDto } from './MessageDto'
 import { MessageServiceFactory } from './services/MessageServiceFactory'
@@ -49,8 +50,9 @@ export class MessageController {
   })
   public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
     try {
-      let connection: ConnectionRecord | null = null
-      connection = await this.checkForDuplicateId(message)
+      const agent = await this.agentService.getAgent()
+      await this.checkForDuplicateId(agent, message)
+      const connection = await agent.connections.findById(message.connectionId)
 
       if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
 
@@ -60,7 +62,7 @@ export class MessageController {
       const messageId = message.id ?? utils.uuid()
       message.id = messageId
 
-      await this.messageServiceFactory.setProcessMessage(this.isRedisEnabled(), message, connection)
+      await this.messageServiceFactory.processMessage(message, connection)
       return { id: messageId }
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
@@ -77,12 +79,7 @@ export class MessageController {
     }
   }
 
-  private isRedisEnabled(): boolean {
-    return process.env.REDIS_HOST !== undefined
-  }
-
-  private async checkForDuplicateId(message: IBaseMessage): Promise<ConnectionRecord | null> {
-    const agent = await this.agentService.getAgent()
+  private async checkForDuplicateId(agent: ServiceAgent, message: IBaseMessage): Promise<void> {
     const records = message.id
       ? await agent.genericRecords.findAllByQuery({
           messageId: message.id,
@@ -91,6 +88,5 @@ export class MessageController {
       : null
 
     if (records && records.length > 0) throw new Error(`Duplicated ID: ${message.id}`)
-    return await agent.connections.findById(message.connectionId)
   }
 }

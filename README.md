@@ -34,7 +34,7 @@ but likely needed for production and test deployments.
 | POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
 | POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
 | POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
-| REDIS_HOST       | Redis database host user                                                                                       | None                            |
+| REDIS_HOST       | Redis database host user. This system will only function if this variable is defined. (Recommended for production mode)                                                                                       | None                            |
 | REDIS_PASSWORD   | Redis database password                                                                                   | None                            |
 
 
