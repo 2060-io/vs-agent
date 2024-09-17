@@ -16,5 +16,4 @@ export enum MessageType {
   ReceiptsMessage = 'receipts',
   TerminateConnectionMessage = 'terminate-connection',
   TextMessage = 'text',
-  //  = '',
 }
