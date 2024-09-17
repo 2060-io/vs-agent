@@ -1,10 +1,10 @@
 import { JsonTransformer } from '@credo-ts/core'
+import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsEnum, IsUUID, IsOptional, IsString, IsNotEmpty } from 'class-validator'
 import { v4 as uuid } from 'uuid'
 
 import { MessageType } from './MessageType'
-import { ApiProperty } from '@nestjs/swagger'
 
 export interface BaseMessageOptions {
   id?: string

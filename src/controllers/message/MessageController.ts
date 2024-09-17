@@ -6,7 +6,6 @@ import { BaseMessage } from '../../model'
 import { AgentService } from '../../services/AgentService'
 import { ServiceAgent } from '../../utils/ServiceAgent'
 
-import { MessageDto } from './MessageDto'
 import { MessageServiceFactory } from './services/MessageServiceFactory'
 
 @ApiTags('message')
