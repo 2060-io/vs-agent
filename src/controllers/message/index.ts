@@ -1,5 +1,4 @@
 export * from './MessageController'
-export * from './MessageDto'
 export * from './MessageService'
 export * from './services/CoreMessageService'
 export * from './services/MessageServiceFactory'
