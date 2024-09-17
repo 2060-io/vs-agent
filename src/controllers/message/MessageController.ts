@@ -2,7 +2,7 @@ import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { IBaseMessage } from '../../model'
+import { BaseMessage } from '../../model'
 import { AgentService } from '../../services/AgentService'
 import { ServiceAgent } from '../../utils/ServiceAgent'
 
@@ -24,7 +24,7 @@ export class MessageController {
 
   @Post('/')
   @ApiBody({
-    type: MessageDto,
+    type: BaseMessage,
     examples: {
       text: {
         summary: 'Text message',
@@ -48,7 +48,7 @@ export class MessageController {
       },
     },
   })
-  public async sendMessage(@Body() message: IBaseMessage): Promise<{ id: string }> {
+  public async sendMessage(@Body() message: BaseMessage): Promise<{ id: string }> {
     try {
       const agent = await this.agentService.getAgent()
       await this.checkForDuplicateId(agent, message)
@@ -79,7 +79,7 @@ export class MessageController {
     }
   }
 
-  private async checkForDuplicateId(agent: ServiceAgent, message: IBaseMessage): Promise<void> {
+  private async checkForDuplicateId(agent: ServiceAgent, message: BaseMessage): Promise<void> {
     const records = message.id
       ? await agent.genericRecords.findAllByQuery({
           messageId: message.id,

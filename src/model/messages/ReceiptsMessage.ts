@@ -4,6 +4,7 @@ import { IsInstance, IsArray, IsDate, IsString, ValidateNested } from 'class-val
 import { MessageReceipt, MessageState } from 'credo-ts-receipts'
 
 import { BaseMessage } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 // FIXME: Do a better conversion between DIDComm protocol and Service Agent protocol constants
 const didcommMessageState: Record<string, MessageState> = {
@@ -69,7 +70,7 @@ export class ReceiptsMessage extends BaseMessage {
   }
 
   public readonly type = ReceiptsMessage.type
-  public static readonly type = 'receipts'
+  public static readonly type = MessageType.ReceiptsMessage
 
   @Expose()
   @Type(() => ServiceAgentMessageReceipt)

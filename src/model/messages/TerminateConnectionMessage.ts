@@ -1,4 +1,5 @@
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface TerminateConnectionMessageOptions extends BaseMessageOptions {}
 
@@ -15,5 +16,5 @@ export class TerminateConnectionMessage extends BaseMessage {
   }
 
   public readonly type = TerminateConnectionMessage.type
-  public static readonly type = 'terminate-connection'
+  public static readonly type = MessageType.TerminateConnectionMessage
 }

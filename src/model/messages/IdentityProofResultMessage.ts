@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface ProofItemResultOptions {
   id: string
@@ -43,7 +44,7 @@ export class IdentityProofResultMessage extends BaseMessage {
   }
 
   public readonly type = IdentityProofResultMessage.type
-  public static readonly type = 'identity-proof-result'
+  public static readonly type = MessageType.IdentityProofResultMessage
 
   @Expose()
   @Type(() => ProofItemResult)

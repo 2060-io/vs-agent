@@ -3,6 +3,7 @@ import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { Claim, ClaimOptions } from './CredentialIssuanceMessage'
+import { MessageType } from './MessageType'
 
 export interface CredentialRequestMessageOptions extends BaseMessageOptions {
   credentialDefinitionId: string
@@ -24,7 +25,7 @@ export class CredentialRequestMessage extends BaseMessage {
   }
 
   public readonly type = CredentialRequestMessage.type
-  public static readonly type = 'credential-request'
+  public static readonly type = MessageType.CredentialRequestMessage
 
   @Expose()
   @IsString()

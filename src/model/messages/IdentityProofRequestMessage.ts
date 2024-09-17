@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface RequestedProofItemOptions {
   id: string
@@ -43,7 +44,7 @@ export class IdentityProofRequestMessage extends BaseMessage {
   }
 
   public readonly type = IdentityProofRequestMessage.type
-  public static readonly type = 'identity-proof-request'
+  public static readonly type = MessageType.IdentityProofRequestMessage
 
   @Expose()
   @Type(() => RequestedProofItem)

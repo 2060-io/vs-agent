@@ -1,4 +1,5 @@
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface ContextualMenuRequestMessageOptions extends BaseMessageOptions {}
 
@@ -15,5 +16,5 @@ export class ContextualMenuRequestMessage extends BaseMessage {
   }
 
   public readonly type = ContextualMenuRequestMessage.type
-  public static readonly type = 'contextual-menu-request'
+  public static readonly type = MessageType.ContextualMenuRequestMessage
 }

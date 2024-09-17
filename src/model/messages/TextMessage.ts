@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
 
 import { BaseMessage } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface TextMessageOptions {
   id?: string
@@ -25,7 +26,7 @@ export class TextMessage extends BaseMessage {
   }
 
   public readonly type = TextMessage.type
-  public static readonly type = 'text'
+  public static readonly type = MessageType.TextMessage
 
   @Expose()
   @IsString()

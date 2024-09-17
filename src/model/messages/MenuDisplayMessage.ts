@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, IsOptional, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 // TODO: define action types in protocol
 type Action = string
@@ -54,7 +55,7 @@ export class MenuDisplayMessage extends BaseMessage {
   }
 
   public readonly type = MenuDisplayMessage.type
-  public static readonly type = 'menu-display'
+  public static readonly type = MessageType.MenuDisplayMessage
 
   @Expose()
   @IsString()
