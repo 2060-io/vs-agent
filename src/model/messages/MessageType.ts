@@ -1,5 +1,6 @@
 export enum MessageType {
   CallOfferRequestMessage = 'call-offer-request',
+  CallOfferSubmitMessage = 'call-offer-submit',
   ContextualMenuRequestMessage = 'contextual-menu-request',
   ContextualMenuSelectMessage = 'contextual-menu-select',
   ContextualMenuUpdateMessage = 'contextual-menu-update',

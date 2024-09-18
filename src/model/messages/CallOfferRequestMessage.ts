@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsString, IsInstance, ValidateNested } from 'class-validator'
+import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { MessageType } from './MessageType'
@@ -66,7 +66,11 @@ export class RequestedCallItem {
   public peerId!: string
 
   @Expose()
-  public iceserver!: any
+  @Type(() => IceserverItem)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @IsInstance(IceserverItem, { each: true })
+  public iceserver!: IceserverItem[]
 }
 
 export class CallOfferRequestMessage extends BaseMessage {
