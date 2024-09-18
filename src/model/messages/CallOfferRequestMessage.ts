@@ -1,8 +1,8 @@
 import { Expose, Type } from 'class-transformer'
-import { IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
+import { IsString, IsInstance, ValidateNested } from 'class-validator'
 
-import { BaseMessage, BaseMessageOptions } from "./BaseMessage"
-import { MessageType } from "./MessageType"
+import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface CallOfferRequestMessageOptions extends BaseMessageOptions {
   requestedCallItem: RequestedCallItemOptions
@@ -42,7 +42,6 @@ export class IceserverItem {
   @IsString()
   public credential!: string
 }
-
 
 export class RequestedCallItem {
   public constructor(options?: RequestedCallItemOptions) {
