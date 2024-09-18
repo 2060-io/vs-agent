@@ -1,4 +1,5 @@
 import { BaseMessage } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface ProfileMessageOptions {
   id?: string
@@ -22,7 +23,7 @@ export class ProfileMessage extends BaseMessage {
   }
 
   public readonly type = ProfileMessage.type
-  public static readonly type = 'profile'
+  public static readonly type = MessageType.ProfileMessage
 
   public displayName?: string | null
   public displayImageUrl?: string | null

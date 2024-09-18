@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { IsString, IsOptional } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface ContextualMenuSelectMessageOptions extends BaseMessageOptions {
   selectionId?: string
@@ -21,7 +22,7 @@ export class ContextualMenuSelectMessage extends BaseMessage {
   }
 
   public readonly type = ContextualMenuSelectMessage.type
-  public static readonly type = 'contextual-menu-select'
+  public static readonly type = MessageType.ContextualMenuSelectMessage
 
   @Expose()
   @IsString()

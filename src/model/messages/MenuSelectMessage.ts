@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsArray, IsInstance, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface MenuSelectMessageOptions extends BaseMessageOptions {
   menuItems: MenuItemSelectionOptions[]
@@ -35,7 +36,7 @@ export class MenuSelectMessage extends BaseMessage {
   }
 
   public readonly type = MenuSelectMessage.type
-  public static readonly type = 'menu-select'
+  public static readonly type = MessageType.MenuSelectMessage
 
   @Expose()
   @Type(() => MenuItemSelection)

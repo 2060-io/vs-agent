@@ -3,7 +3,7 @@ import 'reflect-metadata'
 import type { ServerConfig } from './utils/ServerConfig'
 
 import { KeyDerivationMethod, LogLevel } from '@credo-ts/core'
-import { VersioningType } from '@nestjs/common'
+import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
@@ -41,6 +41,9 @@ export const startAdminServer = async (agent: ServiceAgent, serverConfig: Server
     .build()
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
+
+  // Dto
+  app.useGlobalPipes(new ValidationPipe())
 
   // Port expose
   await app.listen(serverConfig.port)

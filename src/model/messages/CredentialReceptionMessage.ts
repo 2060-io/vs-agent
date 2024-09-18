@@ -3,6 +3,7 @@ import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface CredentialReceptionMessageOptions extends BaseMessageOptions {
   state: CredentialState
@@ -22,7 +23,7 @@ export class CredentialReceptionMessage extends BaseMessage {
   }
 
   public readonly type = CredentialReceptionMessage.type
-  public static readonly type = 'credential-reception'
+  public static readonly type = MessageType.CredentialReceptionMessage
 
   @Expose()
   @IsString()

@@ -2,6 +2,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsString, IsArray, IsInstance, IsOptional, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface ContextualMenuItemOptions {
   id: string
@@ -53,7 +54,7 @@ export class ContextualMenuUpdateMessage extends BaseMessage {
   }
 
   public readonly type = ContextualMenuUpdateMessage.type
-  public static readonly type = 'contextual-menu-update'
+  public static readonly type = MessageType.ContextualMenuUpdateMessage
 
   @Expose()
   @IsString()

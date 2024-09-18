@@ -1,6 +1,7 @@
 import { IsString, IsOptional } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface InvitationMessageOptions extends BaseMessageOptions {
   label?: string
@@ -24,7 +25,7 @@ export class InvitationMessage extends BaseMessage {
   }
 
   public readonly type = InvitationMessage.type
-  public static readonly type = 'invitation'
+  public static readonly type = MessageType.InvitationMessage
 
   @IsString()
   @IsOptional()

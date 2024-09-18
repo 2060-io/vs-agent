@@ -3,6 +3,7 @@ import { Type } from 'class-transformer'
 import { IsOptional, IsArray, IsInstance, IsString, ValidateNested } from 'class-validator'
 
 import { BaseMessage } from './BaseMessage'
+import { MessageType } from './MessageType'
 
 export interface CipheringInfo {
   algorithm: string
@@ -127,7 +128,7 @@ export class MediaMessage extends BaseMessage {
   }
 
   public readonly type = MediaMessage.type
-  public static readonly type = 'media'
+  public static readonly type = MessageType.MediaMessage
 
   @IsOptional()
   @IsString()
