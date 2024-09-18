@@ -12,8 +12,37 @@ export interface RequestedCallItemOptions {
   wsUrl: string
   roomId: string
   peerId: string
-  iceserver: any
+  iceserver: IceserverItemOptions[]
 }
+
+export interface IceserverItemOptions {
+  urls: string
+  username: string
+  credential: string
+}
+
+export class IceserverItem {
+  public constructor(options?: IceserverItemOptions) {
+    if (options) {
+      this.urls = options.urls
+      this.username = options.username
+      this.credential = options.credential
+    }
+  }
+
+  @Expose()
+  @IsString()
+  public urls!: string
+
+  @Expose()
+  @IsString()
+  public username!: string
+
+  @Expose()
+  @IsString()
+  public credential!: string
+}
+
 
 export class RequestedCallItem {
   public constructor(options?: RequestedCallItemOptions) {
