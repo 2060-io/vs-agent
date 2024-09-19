@@ -35,11 +35,14 @@ import {
   ContextualMenuRequestMessage,
   ContextualMenuSelectMessage,
   MediaMessage,
+  CallOfferRequestMessage,
+  RequestedCallItem,
 } from '../model'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
 
 import { sendWebhookEvent } from './WebhookEvent'
+import { CallAcceptMessage, CallEndMessage, CallOfferMessage, CallRejectMessage } from '@2060.io/credo-ts-didcomm-calls'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
 // as soon as the corresponding extension is added to them
@@ -114,6 +117,34 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       })
 
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    }
+
+    if (message.type === CallOfferMessage.type.messageTypeUri) {
+      const parameters = (message as CallOfferMessage).parameters
+      const msg = new CallOfferRequestMessage({
+        id: message.id,
+        connectionId: connection.id,
+        requestedCallItem: parameters as unknown as RequestedCallItem,
+        threadId: message.thread?.parentThreadId,
+        timestamp: new Date()
+      })
+
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    }
+
+    if (message.type === CallEndMessage.type.messageTypeUri) {
+
+      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    }
+
+    if (message.type === CallAcceptMessage.type.messageTypeUri) {
+
+      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    }
+
+    if (message.type === CallRejectMessage.type.messageTypeUri) {
+
+      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (
