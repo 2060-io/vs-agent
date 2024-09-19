@@ -2,6 +2,12 @@ import type { ServerConfig } from '../utils/ServerConfig'
 import type { CredentialStateChangedEvent } from '@credo-ts/core'
 import type { MessageReceiptsReceivedEvent } from 'credo-ts-receipts'
 
+import {
+  CallAcceptMessage,
+  CallEndMessage,
+  CallOfferMessage,
+  CallRejectMessage,
+} from '@2060.io/credo-ts-didcomm-calls'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
@@ -37,12 +43,13 @@ import {
   MediaMessage,
   CallOfferRequestMessage,
   RequestedCallItem,
+  CallEndRequestMessage,
+  CallRejectRequestMessage,
 } from '../model'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
 
 import { sendWebhookEvent } from './WebhookEvent'
-import { CallAcceptMessage, CallEndMessage, CallOfferMessage, CallRejectMessage } from '@2060.io/credo-ts-didcomm-calls'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
 // as soon as the corresponding extension is added to them
@@ -126,25 +133,47 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         connectionId: connection.id,
         requestedCallItem: parameters as unknown as RequestedCallItem,
         threadId: message.thread?.parentThreadId,
-        timestamp: new Date()
+        timestamp: new Date(),
       })
 
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (message.type === CallEndMessage.type.messageTypeUri) {
+      const thread = (message as CallEndMessage).thread
+      const msg = new CallEndRequestMessage({
+        id: message.id,
+        connectionId: connection.id,
+        threadId: thread?.parentThreadId,
+        timestamp: new Date(),
+      })
 
-      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (message.type === CallAcceptMessage.type.messageTypeUri) {
+      const parameters = (message as CallAcceptMessage).parameters
+      const msg = new CallOfferRequestMessage({
+        id: message.id,
+        connectionId: connection.id,
+        requestedCallItem: parameters as unknown as RequestedCallItem,
+        threadId: message.thread?.parentThreadId,
+        timestamp: new Date(),
+      })
 
-      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (message.type === CallRejectMessage.type.messageTypeUri) {
+      const thread = (message as CallEndMessage).thread
+      const msg = new CallRejectRequestMessage({
+        id: message.id,
+        connectionId: connection.id,
+        threadId: thread?.parentThreadId,
+        timestamp: new Date(),
+      })
 
-      // await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
     if (

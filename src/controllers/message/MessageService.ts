@@ -1,4 +1,3 @@
-import { DidCommCallsService } from '@2060.io/credo-ts-didcomm-calls/build/DidCommCallsService'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import {
@@ -30,6 +29,7 @@ import {
   IdentityProofResultMessage,
   TerminateConnectionMessage,
   CallOfferRequestMessage,
+  CallEndRequestMessage,
 } from '../../model'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
@@ -312,16 +312,21 @@ export class MessageService {
         const callOffer = await agent.modules.calls.offer({
           connectionId: connection.id,
           callType: 'video',
-          parameters: {
-            wsUrl: requestedCallItem.wsUrl,
-            roomId: requestedCallItem.roomId,
-            peerId: requestedCallItem.peerId,
-            iceserver: requestedCallItem.iceserver,
-          },
+          parameters: { ...requestedCallItem },
         })
 
         // TODO
-        messageId = callOffer.threadId
+        // messageId = callOffer.threadId
+      } else if (messageType === CallEndRequestMessage.type) {
+        const msg = JsonTransformer.fromJSON(message, CallEndRequestMessage)
+
+        const hangup = await agent.modules.calls.hangup({
+          connectionId: connection.id,
+          threadId: msg.threadId,
+        })
+
+        // TODO
+        // messageId = hangup.threadId
       }
 
       if (messageId)
