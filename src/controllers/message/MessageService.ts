@@ -308,9 +308,9 @@ export class MessageService {
       } else if (messageType === CallOfferRequestMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CallOfferRequestMessage)
         const { requestedCallItem } = msg
-        const didcommCallsService = await agent.dependencyManager.resolve(DidCommCallsService)
 
-        const callOffer = await didcommCallsService.createOffer({
+        const callOffer = await agent.modules.calls.offer({
+          connectionId: connection.id,
           callType: 'video',
           parameters: {
             wsUrl: requestedCallItem.wsUrl,
@@ -320,6 +320,7 @@ export class MessageService {
           },
         })
 
+        // TODO
         messageId = callOffer.threadId
       }
 

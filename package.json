@@ -58,6 +58,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@2060.io/credo-ts-didcomm-calls": "^0.0.2",
     "@credo-ts/action-menu": "^0.5.2",
     "@credo-ts/anoncreds": "^0.5.2",
     "@credo-ts/askar": "^0.5.2",

@@ -2,6 +2,15 @@
 # yarn lockfile v1
 
 
+"@2060.io/credo-ts-didcomm-calls@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.2.tgz#1a988eddf410186799be400bad3fcb7e46e7a3de"
+  integrity sha512-zG5AkgLV6F1QC9l4ESsxofkZ2dF9u/7RFKe0txT89o4V1oRu2u9eTd5trr1ADXj3QKnqPQVhGJtsiy+NPe0gQQ==
+  dependencies:
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    tsyringe "^4.8.0"
+
 "@2060.io/ffi-napi@^4.0.9":
   version "4.0.9"
   resolved "https://registry.yarnpkg.com/@2060.io/ffi-napi/-/ffi-napi-4.0.9.tgz#194fca2132932ba02e62d716c786d20169b20b8d"

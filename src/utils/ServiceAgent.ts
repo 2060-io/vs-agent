@@ -1,3 +1,4 @@
+import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
   AnonCredsCredentialFormatService,
@@ -36,6 +37,7 @@ type ServiceAgentModules = {
   actionMenu: ActionMenuModule
   dids: DidsModule
   connections: ConnectionsModule
+  calls: DidCommCallsModule
   credentials: CredentialsModule<
     [V2CredentialProtocol<[LegacyIndyCredentialFormatService, AnonCredsCredentialFormatService]>]
   >
@@ -83,6 +85,7 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
           ],
         }),
         actionMenu: new ActionMenuModule(),
+        calls: new DidCommCallsModule(),
         connections: new ConnectionsModule({ autoAcceptConnections: true }),
         credentials: new CredentialsModule({
           autoAcceptCredentials: AutoAcceptCredential.ContentApproved,
