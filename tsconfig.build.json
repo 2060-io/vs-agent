@@ -11,19 +11,13 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    // TODO: we should update code to assume errors are of type 'unknown'
     "useUnknownInCatchVariables": false,
-    "outDir": "./build"
+    "outDir": "./build" 
   },
   "include": ["src/**/*", "src/routes"],
-  "exclude": [
-    "node_modules",
-    "build",
-    "**/*.test.ts",
-    "**/__tests__/*.ts",
-    "**/__mocks__/*.ts",
-    "**/build/**",
-    "scripts"
-  ]
+  "exclude": ["node_modules", "build", "**/*.test.ts", "**/__tests__/*.ts", "**/__mocks__/*.ts", "**/build/**"]
 }
