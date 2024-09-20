@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@2060.io/credo-ts-didcomm-calls@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.2.tgz#1a988eddf410186799be400bad3fcb7e46e7a3de"
-  integrity sha512-zG5AkgLV6F1QC9l4ESsxofkZ2dF9u/7RFKe0txT89o4V1oRu2u9eTd5trr1ADXj3QKnqPQVhGJtsiy+NPe0gQQ==
+"@2060.io/credo-ts-didcomm-calls@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.3.tgz#d47a5700248b0063e90b298876100ce862a0033f"
+  integrity sha512-dmmdGuo76/7xponJv1wUst5i5sSLEDZ3R/GyfYLjU6O3xa2MLLmxI/9cvp2PBbqnVEHcsBsAjMH6mtllIEzp7Q==
   dependencies:
     class-transformer "0.5.1"
     class-validator "0.14.1"
