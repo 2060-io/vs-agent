@@ -42,7 +42,6 @@ import {
   ContextualMenuSelectMessage,
   MediaMessage,
   CallOfferRequestMessage,
-  RequestedCallItem,
   CallEndRequestMessage,
   CallRejectRequestMessage,
 } from '../model'
@@ -131,8 +130,8 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       const msg = new CallOfferRequestMessage({
         id: message.id,
         connectionId: connection.id,
-        requestedCallItem: parameters as unknown as RequestedCallItem,
-        threadId: message.thread?.parentThreadId,
+        parameters: parameters,
+        threadId: message.thread?.threadId,
         timestamp: new Date(),
       })
 
@@ -144,7 +143,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       const msg = new CallEndRequestMessage({
         id: message.id,
         connectionId: connection.id,
-        threadId: thread?.parentThreadId,
+        threadId: thread?.threadId,
         timestamp: new Date(),
       })
 
@@ -156,8 +155,8 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       const msg = new CallOfferRequestMessage({
         id: message.id,
         connectionId: connection.id,
-        requestedCallItem: parameters as unknown as RequestedCallItem,
-        threadId: message.thread?.parentThreadId,
+        parameters: parameters,
+        threadId: message.thread?.threadId,
         timestamp: new Date(),
       })
 
@@ -169,7 +168,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       const msg = new CallRejectRequestMessage({
         id: message.id,
         connectionId: connection.id,
-        threadId: thread?.parentThreadId,
+        threadId: thread?.threadId,
         timestamp: new Date(),
       })
 

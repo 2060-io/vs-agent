@@ -1,13 +1,10 @@
-import { Expose, Type } from 'class-transformer'
-import { IsInstance, ValidateNested } from 'class-validator'
+import { Expose } from 'class-transformer'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
 
-import { RequestedCallItem, RequestedCallItemOptions } from './CallParameters'
-
 export interface CallOfferRequestMessageOptions extends BaseMessageOptions {
-  requestedCallItem: RequestedCallItemOptions
+  parameters: Record<string, unknown>
 }
 
 export class CallOfferRequestMessage extends BaseMessage {
@@ -19,7 +16,7 @@ export class CallOfferRequestMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.requestedCallItem = new RequestedCallItem(options.requestedCallItem)
+      this.parameters = options.parameters
     }
   }
 
@@ -27,8 +24,5 @@ export class CallOfferRequestMessage extends BaseMessage {
   public static readonly type = MessageType.CallOfferRequestMessage
 
   @Expose()
-  @Type(() => RequestedCallItem)
-  @ValidateNested()
-  @IsInstance(RequestedCallItem)
-  public requestedCallItem!: RequestedCallItem
+  public parameters!: Record<string, unknown>
 }

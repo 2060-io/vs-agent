@@ -307,12 +307,11 @@ export class MessageService {
         // FIXME: No message id is returned here
       } else if (messageType === CallOfferRequestMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CallOfferRequestMessage)
-        const { requestedCallItem } = msg
 
         const callOffer = await agent.modules.calls.offer({
           connectionId: connection.id,
-          callType: 'video',
-          parameters: { ...requestedCallItem },
+          callType: 'service',
+          parameters: msg.parameters,
         })
 
         // TODO
