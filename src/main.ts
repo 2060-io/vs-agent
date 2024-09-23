@@ -52,7 +52,7 @@ export const startAdminServer = async (agent: ServiceAgent, serverConfig: Server
 const run = async () => {
   const endpoints = process.env.AGENT_ENDPOINT
     ? [process.env.AGENT_ENDPOINT]
-    : process.env.AGENT_ENDPOINTS?.replace(' ', '').split(',') ?? ['ws://localhost:3001']
+    : (process.env.AGENT_ENDPOINTS?.replace(' ', '').split(',') ?? ['ws://localhost:3001'])
   const { agent } = await setupAgent({
     endpoints,
     port: Number(process.env.AGENT_PORT) || 3001,

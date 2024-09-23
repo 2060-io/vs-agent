@@ -28,6 +28,8 @@ import {
   didcommReceiptFromServiceAgentReceipt,
   IdentityProofResultMessage,
   TerminateConnectionMessage,
+  CallOfferRequestMessage,
+  CallEndRequestMessage,
 } from '../../model'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
@@ -303,6 +305,25 @@ export class MessageService {
         await agent.connections.hangup({ connectionId: connection.id })
 
         // FIXME: No message id is returned here
+      } else if (messageType === CallOfferRequestMessage.type) {
+        const msg = JsonTransformer.fromJSON(message, CallOfferRequestMessage)
+
+        const callOffer = await agent.modules.calls.offer({
+          connectionId: connection.id,
+          callType: 'service',
+          parameters: msg.parameters,
+        })
+
+        messageId = callOffer.messageId
+      } else if (messageType === CallEndRequestMessage.type) {
+        const msg = JsonTransformer.fromJSON(message, CallEndRequestMessage)
+
+        const hangup = await agent.modules.calls.hangup({
+          connectionId: connection.id,
+          threadId: msg.threadId,
+        })
+
+        messageId = hangup.messageId
       }
 
       if (messageId)
