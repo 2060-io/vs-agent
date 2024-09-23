@@ -314,7 +314,6 @@ export class MessageService {
           parameters: msg.parameters,
         })
 
-        // TODO
         messageId = callOffer.messageId
       } else if (messageType === CallEndRequestMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CallEndRequestMessage)
@@ -324,7 +323,6 @@ export class MessageService {
           threadId: msg.threadId,
         })
 
-        // TODO
         messageId = hangup.messageId
       }
 
