@@ -1,8 +1,7 @@
-export const welcomeMessage =
-  'Welcome to our service. Use context menu or write help to see available actions'
+export const welcomeMessage = 'Welcome to our service. Use context menu or write help to see available actions'
 
 export const helpMessage =
-  'Available commands: \n/echo: repeat what you say \n/menu: display main menu \n/media [url]: retrieve image from URL \n/rocky: get an inspiring quote from Rocky \n/context: refresh context menu'
+  'Available commands: \n/echo: repeat what you say \n/menu: display main menu \n/link [url] [title] [desc] [icon] [openingMode]: send link to URL\n/media [url]: retrieve image from URL \n/rocky: get an inspiring quote from Rocky \n/context: refresh context menu'
 
 export const rootContextMenu = {
   title: 'Root menu',
@@ -21,8 +20,12 @@ export const rootContextMenu = {
       id: 'rocky',
     },
     {
-      title: '🗨️ New chat',
-      id: 'chat',
+      title: 'Issue credential',
+      id: 'issue',
+    },
+    {
+      title: 'Request proof',
+      id: 'proof',
     },
     {
       title: '🆘 Help',
@@ -36,7 +39,8 @@ export const rootMenuAsQA = {
   menuItems: [
     { id: 'poll', text: '⚽ World Cup poll' },
     { id: 'rocky', text: '💪 Rocky quotes' },
-    { id: 'chat', text: '🗨️ New chat' },
+    { id: 'issue', text: 'Issue credential' },
+    { id: 'proof', text: 'Request proof' },
     { id: 'help', text: '🆘 Help' },
   ],
 }
