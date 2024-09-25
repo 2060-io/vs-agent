@@ -440,6 +440,56 @@ Terminates a particular connection, notifying the other party through a 'Hangup'
 }
 ```
 
+#### Call Offer
+
+Create a call offer from a service to initiate a WebRTC call and notify the other party of the created request. This message will return a `threadId`, which can be used to track the subsequent status of the call. Additional parameters related to the `wsUrl` of the WebRTC server connection are expected to notify the other party.
+
+```json
+{
+   ...
+   "type": "call-offer",
+   "parameters": {
+      key: value
+   },
+}
+```
+
+#### Call Accept
+
+Accept a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to track the subsequent status of the call. Additional parameters related to the `wsUrl` of the WebRTC server connection are expected to notify the other party.
+
+```json
+{
+   ...
+   "type": "call-accept",
+   "parameters": {
+      key: value
+   },
+}
+```
+
+#### Call Reject
+
+Reject a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to identify which offer has been terminated.
+
+```json
+{
+   ...
+   "type": "call-reject",
+}
+```
+
+#### Call End
+
+End a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to identify which offer has been terminated.
+
+```json
+{
+   ...
+   "type": "call-end",
+}
+```
+
 ### Identity Proof Item types
 
 When a Credential Issuance is requested, the issuer might require the recipient to present certain identity proofing elements.
