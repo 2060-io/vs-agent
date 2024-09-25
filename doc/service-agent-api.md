@@ -32,6 +32,10 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Invitation](#invitation)
       - [Profile](#profile)
       - [Terminate Connection](#terminate-connection)
+      - [Call Offer](#call-offer)
+      - [Call Accept](#call-accept)
+      - [Call Reject](#call-reject)
+      - [Call End](#call-end)
     - [Identity Proof Item types](#identity-proof-item-types)
       - [Verifiable Credential](#verifiable-credential)
         - [Request value](#request-value)
@@ -101,6 +105,10 @@ Currently, the following messages can be submitted and received:
 - Invitation (`invitation`)
 - Profile (`profile`)
 - Terminate Connection (`terminate-connection`)
+- Call Offer (`call-offer`)
+- Call Accept (`call-accept`)
+- Call Reject (`call-reject`)
+- Call End (`call-end`)
 
 > **TODO**: Messages for:
 >
