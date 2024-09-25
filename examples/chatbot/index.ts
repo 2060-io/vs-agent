@@ -371,16 +371,24 @@ app.post('/message-received', async (req, res) => {
       }
       await submitMessage(body)
     } else if (content.startsWith('/call')) {
+      const parsedContents = content.split(' ')
+      let wsUrl = parsedContents[1]
+      let roomId = parsedContents[2]
 
-      // Create a room
-      fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, { headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },method: 'POST', body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }) }).then(async result => {
-        const response = await result.json()
+      try {
+        if (!wsUrl || !roomId) {
+          // Create a room if not given as argument
+          const result = await fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, { headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },method: 'POST', body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }) })
 
-        const wsUrl = response.wsUrl
-        const roomId = response.roomId
+          const response = await result.json()
+
+          wsUrl = response.wsUrl
+          roomId = response.roomId
+        }
+
         const peerId = obj.connectionId // We re-use connection id to simplify
 
 
@@ -391,10 +399,10 @@ app.post('/message-received', async (req, res) => {
           parameters: { wsUrl, roomId, peerId }
         }
         await submitMessage(body)
-      }).catch(reason => {
+      } catch(reason) {
         logger.error(`Cannot create call: ${reason}`)
         sendTextMessage({connectionId: obj.connectionId, content: 'An error has occurred while creating a call' })
-      })
+      }
     }
      else if (content.startsWith('/proof')) {
       const body = {
