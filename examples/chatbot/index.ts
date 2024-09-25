@@ -13,6 +13,8 @@ const logger = new Logger()
 const PORT = Number(process.env.PORT || 5000)
 const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
+const VISION_SERVICE_BASE_URL = process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
+const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
 const app = express()
 
 const staticDir = path.join(__dirname, 'public')
@@ -371,7 +373,7 @@ app.post('/message-received', async (req, res) => {
     } else if (content.startsWith('/call')) {
 
       // Create a room
-      fetch('https://dts-webrtc.dev.2060.io/rooms', { headers: {
+      fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, { headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },method: 'POST', body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }) }).then(async result => {
@@ -462,8 +464,8 @@ app.post('/call-events', async (req, res) => {
   }
 
   if (event === 'peer-joined') {
-        // Ask pymediasoup client demo to join the call
-        await fetch('https://webrtc-pymediasoup-client-demo.dev.2060.io/join-call', { 
+        // Ask Vision service to join the call
+        await fetch(`${VISION_SERVICE_BASE_URL}/join-call`, { 
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -480,16 +482,16 @@ app.post('/call-events', async (req, res) => {
   }
 })
 
-app.put('call-success/:connectionId', (req, res) => {
+app.put('/call-success/:connectionId', (req, res) => {
   logger.info(`Call success for ${req.params.connectionId}: ${JSON.stringify(req.body)}`)
-  
-  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call was succesful'})
+  res.end()
+  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call was succesful'}).catch(error => logger.error(`Cannot send message: ${error}`))
 })
 
-app.put('call-failure/:connectionId', (req, res) => {
+app.put('/call-failure/:connectionId', (req, res) => {
   logger.info(`Call success for ${req.params.connectionId}: ${JSON.stringify(req.body)}`)
-  
-  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call failed'})
+  res.end()
+  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call failed'}).catch(error => logger.error(`Cannot send message: ${error}`))
 })
 
 export { app, server }
