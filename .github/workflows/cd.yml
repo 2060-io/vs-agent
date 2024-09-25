@@ -10,7 +10,7 @@ env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: '2060-service-agent'      
-  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot'
+  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
 
 jobs:
