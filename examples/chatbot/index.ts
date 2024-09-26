@@ -480,7 +480,7 @@ app.post('/call-events', async (req, res) => {
           },
           method: 'POST', 
           body: JSON.stringify({ 
-              ws_url: call.wsUrl, 
+              ws_url: `${call.wsUrl}/?roomId=${call.roomId}&peerId=${randomUUID()}`,
               success_url: `${PUBLIC_BASE_URL}/call-success/${call.connectionId}`, 
               failure_url: `${PUBLIC_BASE_URL}/call-failure/${call.connectionId}` 
             }) 
