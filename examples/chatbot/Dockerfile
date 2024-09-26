@@ -16,6 +16,7 @@ RUN yarn install
 # Copy other depdencies
 COPY ./index.ts ./index.ts
 COPY ./data.ts ./data.ts
+COPY ./phone-cred-def-dev.json ./phone-cred-def-dev.json
 COPY tsconfig.json tsconfig.json
 
 RUN yarn build
