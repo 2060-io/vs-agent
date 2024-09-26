@@ -468,26 +468,30 @@ app.post('/call-events', async (req, res) => {
 
   if (!call) {
     logger.warn('No call matching the event')
+    res.end()
     return
   }
 
   if (event === 'peer-joined') {
         // Ask Vision service to join the call
+        const body = JSON.stringify({ 
+          ws_url: `${call.wsUrl}/?roomId=${call.roomId}&peerId=${randomUUID()}`,
+          success_url: `${PUBLIC_BASE_URL}/call-success/${call.connectionId}`, 
+          failure_url: `${PUBLIC_BASE_URL}/call-failure/${call.connectionId}` 
+        }) 
+        logger.info(`join-call parameters: ${body}`)
         await fetch(`${VISION_SERVICE_BASE_URL}/join-call`, { 
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
           method: 'POST', 
-          body: JSON.stringify({ 
-              ws_url: `${call.wsUrl}/?roomId=${call.roomId}&peerId=${randomUUID()}`,
-              success_url: `${PUBLIC_BASE_URL}/call-success/${call.connectionId}`, 
-              failure_url: `${PUBLIC_BASE_URL}/call-failure/${call.connectionId}` 
-            }) 
+          body,
         })
   } else if (event === 'peer-left') {
     ongoingCalls.splice(ongoingCalls.indexOf(call), 1)
   }
+  res.end()
 })
 
 app.put('/call-success/:connectionId', (req, res) => {
