@@ -18,6 +18,6 @@
     "useUnknownInCatchVariables": false,
     "outDir": "./build" 
   },
-  "include": ["src/**/*", "src/routes"],
+  "include": ["src/**/*", "src/routes, examples/chatbot"],
   "exclude": ["node_modules", "build", "**/*.test.ts", "**/__tests__/*.ts", "**/__mocks__/*.ts", "**/build/**"]
 }
