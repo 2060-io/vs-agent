@@ -392,7 +392,7 @@ app.post('/message-received', async (req, res) => {
         const peerId = obj.connectionId // We re-use connection id to simplify
 
 
-        ongoingCalls.push({ wsUrl, roomId, connectionId: req.body.peerId })
+        ongoingCalls.push({ wsUrl, roomId, connectionId: obj.connectionId })
         const body = {
           type: 'call-offer',
           connectionId: obj.connectionId,
