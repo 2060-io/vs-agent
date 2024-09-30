@@ -376,7 +376,6 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (outOfBandRecordId) {
       const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
       const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
-      await agent.modules.userProfile.requestUserProfile({ connectionId: payload.connection.id })
       if (!parentConnectionId)
         await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
