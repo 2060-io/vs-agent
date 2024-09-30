@@ -1,7 +1,13 @@
 import type { ServerConfig } from '../utils/ServerConfig'
 import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
 
-import { AgentEventTypes, ConnectionEventTypes, ConnectionRepository, DidExchangeState, HangupMessage } from '@credo-ts/core'
+import {
+  AgentEventTypes,
+  ConnectionEventTypes,
+  ConnectionRepository,
+  DidExchangeState,
+  HangupMessage,
+} from '@credo-ts/core'
 
 import { ServiceAgent } from '../utils/ServiceAgent'
 
@@ -24,7 +30,8 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
         }
       }
 
-      if (record.state === DidExchangeState.Completed) await agent.modules.userProfile.requestUserProfile({ connectionId: record.id }) 
+      if (record.state === DidExchangeState.Completed)
+        await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
 
       const body = {
         type: 'connection-state-updated',
