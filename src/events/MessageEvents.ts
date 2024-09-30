@@ -28,7 +28,7 @@ import {
   MediaSharingStateChangedEvent,
 } from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
-import { ProfileEventTypes, UserProfileRequestedEvent } from 'credo-ts-user-profile'
+import { ConnectionProfileUpdatedEvent, ProfileEventTypes, UserProfileRequestedEvent, UserProfileUpdatedEvent } from '@2060.io/credo-ts-didcomm-user-profile'
 
 import {
   BaseMessage,
@@ -362,7 +362,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
   // User profile events
   agent.events.on(ProfileEventTypes.UserProfileRequested, async ({ payload }: UserProfileRequestedEvent) => {
     config.logger.debug(`UserProfileRequestedEvent received. Connection id: ${payload.connection.id} 
-      Query: ${JSON.stringify(payload.query)}`)
+      Query: ${JSON.stringify(payload.query)} Connection: ${JSON.stringify(payload.connection)} - outOfBandId: ${JSON.stringify(payload.connection.outOfBandId)}`)
 
     // TODO: Allow to manually manage this setting
     // Currently we only send the profile if we are using our "main" connection
@@ -370,9 +370,35 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (outOfBandRecordId) {
       const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
       const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
+      config.logger.debug(`UserProfileRequestedEvent received. outOfBandRecordId: ${outOfBandRecordId} 
+        Query: ${JSON.stringify(parentConnectionId)}`)
       if (!parentConnectionId)
         await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
+  })
+  agent.events.on(ProfileEventTypes.ConnectionProfileUpdated, async ({ payload }: ConnectionProfileUpdatedEvent) => {
+    config.logger.debug(`ConnectionProfileUpdatedEvent received. Connection id: ${payload.connection.id} 
+      Profile: ${JSON.stringify(payload.profile)}`)
+
+    // const outOfBandRecordId = payload.connection.outOfBandId
+    // if (outOfBandRecordId) {
+    //   const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
+    //   const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
+    //   if (!parentConnectionId)
+    //     await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
+    // }
+  })
+  agent.events.on(ProfileEventTypes.UserProfileUpdated, async ({ payload }: UserProfileUpdatedEvent) => {
+    config.logger.debug(`ConnectionProfileUpdatedEvent received. Last User Profile: ${payload.previousUserProfileData} 
+      Profile: ${JSON.stringify(payload.userProfile)}`)
+
+    // const outOfBandRecordId = payload.connection.outOfBandId
+    // if (outOfBandRecordId) {
+    //   const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
+    //   const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
+    //   if (!parentConnectionId)
+    //     await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
+    // }
   })
 }
 
