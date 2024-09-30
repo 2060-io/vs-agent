@@ -32,6 +32,10 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Invitation](#invitation)
       - [Profile](#profile)
       - [Terminate Connection](#terminate-connection)
+      - [Call Offer](#call-offer)
+      - [Call Accept](#call-accept)
+      - [Call Reject](#call-reject)
+      - [Call End](#call-end)
     - [Identity Proof Item types](#identity-proof-item-types)
       - [Verifiable Credential](#verifiable-credential)
         - [Request value](#request-value)
@@ -101,6 +105,10 @@ Currently, the following messages can be submitted and received:
 - Invitation (`invitation`)
 - Profile (`profile`)
 - Terminate Connection (`terminate-connection`)
+- Call Offer (`call-offer`)
+- Call Accept (`call-accept`)
+- Call Reject (`call-reject`)
+- Call End (`call-end`)
 
 > **TODO**: Messages for:
 >
@@ -437,6 +445,56 @@ Terminates a particular connection, notifying the other party through a 'Hangup'
 {
    ...
    "type": "terminate-connection",
+}
+```
+
+#### Call Offer
+
+Create a call offer from a service to initiate a WebRTC call and notify the other party of the created request. This message will return a `threadId`, which can be used to track the subsequent status of the call. Additional parameters related to the `wsUrl` of the WebRTC server connection are expected to notify the other party.
+
+```json
+{
+   ...
+   "type": "call-offer",
+   "parameters": {
+      key: value
+   },
+}
+```
+
+#### Call Accept
+
+Accept a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to track the subsequent status of the call. Additional parameters related to the `wsUrl` of the WebRTC server connection are expected to notify the other party.
+
+```json
+{
+   ...
+   "type": "call-accept",
+   "parameters": {
+      key: value
+   },
+}
+```
+
+#### Call Reject
+
+Reject a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to identify which offer has been terminated.
+
+```json
+{
+   ...
+   "type": "call-reject",
+}
+```
+
+#### Call End
+
+End a call offer from a third party to initiate a WebRTC call. This message will return a `threadId`, which can be used to identify which offer has been terminated.
+
+```json
+{
+   ...
+   "type": "call-end",
 }
 ```
 
