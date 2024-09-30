@@ -8,6 +8,11 @@ import {
   CallOfferMessage,
   CallRejectMessage,
 } from '@2060.io/credo-ts-didcomm-calls'
+import {
+  ConnectionProfileUpdatedEvent,
+  ProfileEventTypes,
+  UserProfileRequestedEvent,
+} from '@2060.io/credo-ts-didcomm-user-profile'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
@@ -28,7 +33,6 @@ import {
   MediaSharingStateChangedEvent,
 } from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
-import { ProfileEventTypes, UserProfileRequestedEvent } from 'credo-ts-user-profile'
 
 import {
   BaseMessage,
@@ -44,9 +48,11 @@ import {
   CallOfferRequestMessage,
   CallEndRequestMessage,
   CallRejectRequestMessage,
+  ProfileMessage,
 } from '../model'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
+import { createDataUrl } from '../utils/parsers'
 
 import { sendWebhookEvent } from './WebhookEvent'
 
@@ -374,6 +380,26 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
   })
+
+  agent.events.on(
+    ProfileEventTypes.ConnectionProfileUpdated,
+    async ({ payload: { connection, profile } }: ConnectionProfileUpdatedEvent) => {
+      const { displayName, displayPicture, displayIcon, description, preferredLanguage } = profile
+      config.logger.debug(`ConnectionProfileUpdatedEvent received. Connection id: ${connection.id} 
+        Profile: ${JSON.stringify(profile)}`)
+
+      const msg = new ProfileMessage({
+        connectionId: connection.id,
+        displayName,
+        displayImageUrl: displayPicture && createDataUrl(displayPicture),
+        displayIconUrl: displayIcon && createDataUrl(displayIcon),
+        description,
+        preferredLanguage,
+      })
+
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    },
+  )
 }
 
 const sendMessageReceivedEvent = async (

@@ -11,6 +11,17 @@
     class-validator "0.14.1"
     tsyringe "^4.8.0"
 
+"@2060.io/credo-ts-didcomm-user-profile@0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-user-profile/-/credo-ts-didcomm-user-profile-0.0.6.tgz#6cacd3e3146022589b7d22451953b598352b5c16"
+  integrity sha512-W2UMVc5JcQq1e1AVCJKFIpPcolJknu0/Yg9V3FmSnm1pVSa6ZI6a0K4wNMO/uJvsAtNlWYrDRhbjPWjED/ng8g==
+  dependencies:
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    reflect-metadata "^0.1.13"
+    rxjs "^7.2.0"
+    tsyringe "^4.8.0"
+
 "@2060.io/ffi-napi@^4.0.9":
   version "4.0.9"
   resolved "https://registry.yarnpkg.com/@2060.io/ffi-napi/-/ffi-napi-4.0.9.tgz#194fca2132932ba02e62d716c786d20169b20b8d"
@@ -2855,7 +2866,7 @@ class-transformer@0.5.1, class-transformer@^0.5.1:
   resolved "https://registry.yarnpkg.com/class-transformer/-/class-transformer-0.5.1.tgz#24147d5dffd2a6cea930a3250a677addf96ab336"
   integrity sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw==
 
-class-validator@0.14.1, class-validator@^0.14.0, class-validator@^0.14.1:
+class-validator@0.14.1, class-validator@^0.14.1:
   version "0.14.1"
   resolved "https://registry.yarnpkg.com/class-validator/-/class-validator-0.14.1.tgz#ff2411ed8134e9d76acfeb14872884448be98110"
   integrity sha512-2VEG9JICxIqTpoK1eMzZqaV+u/EiwEJkMGzTrZf6sU/fwsnOITVgYJ8yojSy6CaXtO9V0Cc6ZQZ8h8m4UBuLwQ==
@@ -3137,19 +3148,6 @@ credo-ts-receipts@^0.0.1-alpha.5:
     "@credo-ts/core" "^0.5.0-alpha.116"
     class-transformer "^0.5.1"
     class-validator "^0.14.1"
-    reflect-metadata "^0.1.13"
-    rxjs "^7.2.0"
-    tsyringe "^4.8.0"
-    uuid "^9.0.0"
-
-credo-ts-user-profile@^0.0.1-alpha.6:
-  version "0.0.1-alpha.6"
-  resolved "https://registry.yarnpkg.com/credo-ts-user-profile/-/credo-ts-user-profile-0.0.1-alpha.6.tgz#379cec78a8fcc7f70f963b3162df20af721a9815"
-  integrity sha512-UoPO7bQkSn/qm3a8cI3+iUZCudn80ZIciRbjVcYfRbQ4CkeFYNFxbUvF+3DFXGVXf9RAAAnEcsrrgnysEGREqA==
-  dependencies:
-    "@credo-ts/core" "^0.5.0-alpha.116"
-    class-transformer "^0.5.1"
-    class-validator "^0.14.0"
     reflect-metadata "^0.1.13"
     rxjs "^7.2.0"
     tsyringe "^4.8.0"

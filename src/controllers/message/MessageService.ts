@@ -287,7 +287,7 @@ export class MessageService {
         }
       } else if (messageType === ProfileMessage.type) {
         const msg = JsonTransformer.fromJSON(message, ProfileMessage)
-        const { displayImageUrl, displayName, displayIconUrl } = msg
+        const { displayImageUrl, displayName, displayIconUrl, description, preferredLanguage } = msg
 
         await agent.modules.userProfile.sendUserProfile({
           connectionId: connection.id,
@@ -295,6 +295,8 @@ export class MessageService {
             displayName: displayName ?? undefined,
             displayPicture: displayImageUrl ? parsePictureData(displayImageUrl) : undefined,
             displayIcon: displayIconUrl ? parsePictureData(displayIconUrl) : undefined,
+            description: description ?? undefined,
+            preferredLanguage: preferredLanguage ?? undefined,
           },
         })
 

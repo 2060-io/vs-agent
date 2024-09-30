@@ -1,4 +1,5 @@
 import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
+import { UserProfileModule } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
   AnonCredsCredentialFormatService,
@@ -27,7 +28,6 @@ import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 import { MediaSharingModule } from 'credo-ts-media-sharing'
 import { ReceiptsModule } from 'credo-ts-receipts'
-import { UserProfileModule } from 'credo-ts-user-profile'
 
 import { CachedWebDidResolver } from './CachedWebDidResolver'
 
