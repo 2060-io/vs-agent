@@ -52,6 +52,7 @@ import {
 } from '../model'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
+import { createDataUrl } from '../utils/parsers'
 
 import { sendWebhookEvent } from './WebhookEvent'
 
@@ -380,16 +381,21 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
   })
-  
+
   agent.events.on(
     ProfileEventTypes.ConnectionProfileUpdated,
-    async ({ payload }: ConnectionProfileUpdatedEvent) => {
-      config.logger.debug(`ConnectionProfileUpdatedEvent received. Connection id: ${payload.connection.id} 
-        Profile: ${JSON.stringify(payload.profile)}`)
+    async ({ payload: { connection, profile } }: ConnectionProfileUpdatedEvent) => {
+      const { displayName, displayPicture, displayIcon, description, preferredLanguage } = profile
+      config.logger.debug(`ConnectionProfileUpdatedEvent received. Connection id: ${connection.id} 
+        Profile: ${JSON.stringify(profile)}`)
 
       const msg = new ProfileMessage({
-        connectionId: payload.connection.id,
-        preferredLanguage: payload.profile.preferredLanguage,
+        connectionId: connection.id,
+        displayName,
+        displayImageUrl: displayPicture && createDataUrl(displayPicture),
+        displayIconUrl: displayIcon && createDataUrl(displayIcon),
+        description,
+        preferredLanguage,
       })
 
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
