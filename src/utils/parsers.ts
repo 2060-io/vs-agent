@@ -1,5 +1,5 @@
-import { isUri } from '@credo-ts/core/build/utils'
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
+import { isUri } from '@credo-ts/core/build/utils'
 
 export function parseDataUrl(dataUrl: string) {
   const regex = /^data:(.+);base64,(.*)$/

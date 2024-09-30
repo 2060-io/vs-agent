@@ -7,6 +7,7 @@ export interface ProfileMessageOptions {
   displayName?: string | null
   displayImageUrl?: string | null
   displayIconUrl?: string | null
+  preferredLanguage?: string | null
 }
 
 export class ProfileMessage extends BaseMessage {
@@ -19,6 +20,7 @@ export class ProfileMessage extends BaseMessage {
       this.displayName = options.displayName
       this.displayImageUrl = options.displayImageUrl
       this.displayIconUrl = options.displayIconUrl
+      this.preferredLanguage = options.preferredLanguage
     }
   }
 
@@ -28,4 +30,5 @@ export class ProfileMessage extends BaseMessage {
   public displayName?: string | null
   public displayImageUrl?: string | null
   public displayIconUrl?: string | null
+  public preferredLanguage?: string | null
 }
