@@ -14,6 +14,8 @@ export enum MessageType {
   IdentityProofSubmitMessage = 'identity-proof-submit',
   InvitationMessage = 'invitation',
   MediaMessage = 'media',
+  MrzDataRequestMessage = 'mrz-data-request',
+  MrzDataSubmitMessage = 'mrz-data-submit',
   MenuDisplayMessage = 'menu-display',
   MenuSelectMessage = 'menu-select',
   ProfileMessage = 'profile',

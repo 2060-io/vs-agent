@@ -8,6 +8,7 @@ import {
   CallOfferMessage,
   CallRejectMessage,
 } from '@2060.io/credo-ts-didcomm-calls'
+import { MrtdEventTypes, MrzDataReceivedEvent } from '@2060.io/credo-ts-didcomm-mrtd'
 import {
   ConnectionProfileUpdatedEvent,
   ProfileEventTypes,
@@ -49,6 +50,7 @@ import {
   CallEndRequestMessage,
   CallRejectRequestMessage,
   ProfileMessage,
+  MrzDataSubmitMessage,
 } from '../model'
 import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
@@ -400,6 +402,15 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     },
   )
+
+  // MRTD events
+  agent.events.on(MrtdEventTypes.MrzDataReceived, async ({ payload }: MrzDataReceivedEvent) => {
+    const { connection, mrzData, threadId } = payload
+
+    const msg = new MrzDataSubmitMessage({ connectionId: connection.id, threadId, mrzData })
+
+    await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+  })
 }
 
 const sendMessageReceivedEvent = async (

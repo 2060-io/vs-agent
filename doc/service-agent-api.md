@@ -498,6 +498,47 @@ End a call offer from a third party to initiate a WebRTC call. This message will
 }
 ```
 
+#### MRZ Data Request
+
+Request the other party to provide the Machine Readable Zone string from a valid ID document.
+
+```json
+{
+   ...
+   "type": "mrz-data-request",
+}
+```
+
+#### MRZ Data Submit
+
+Submit Machine Readable Zone data. This message may be sent either individually or as a response to a MRZ Data Request.
+
+```json
+{
+   ...
+   "type": "mrz-data-submit",
+   "mrzData": MrzData
+}
+```
+
+`MrzData` is a JSON object with two basic fields:
+
+- `raw` contains the raw data as sent by the other party (either an array of lines or a single string containing all lines, separated by \n).
+
+- `parsed` interprets the contents and classify the document in a format from ICAO 9303 document (TD1, TD2, TD3, etc.). Example:
+
+```json
+{"raw":["I<UTOD23145890<1233<<<<<<<<<<<","7408122F1204159UTO<<<<<<<<<<<6","ERIKSSON<<ANNA<MARIA<<<<<<<<<<"],
+"parsed":{
+    "valid":false,
+    "fields":
+      {"documentCode":"I","issuingState":null,"documentNumber":"D23145890123","documentNumberCheckDigit":"3","optional1":"1233","birthDate":"740812","birthDateCheckDigit":"2","sex":"female","expirationDate":"120415","expirationDateCheckDigit":"9","nationality":null,"optional2":"","compositeCheckDigit":null,"lastName":"ERIKSSON","firstName":"ANNA MARIA"},
+    "format":"TD1"}
+  }
+```
+
+More info about the meaning of each field (and validity) can be found in [MRZ](https://github.com/cheminfo/mrz), the underlying library we are using for MRZ parsing.
+
 ### Identity Proof Item types
 
 When a Credential Issuance is requested, the issuer might require the recipient to present certain identity proofing elements.
