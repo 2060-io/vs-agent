@@ -403,8 +403,13 @@ app.post('/message-received', async (req, res) => {
         logger.error(`Cannot create call: ${reason}`)
         sendTextMessage({connectionId: obj.connectionId, content: 'An error has occurred while creating a call' })
       }
-    }
-     else if (content.startsWith('/proof')) {
+    } else if (content.startsWith('/mrz')) {
+      const body = {
+        type: 'mrz-data-request',
+        connectionId,
+      }
+      await submitMessage(body)
+    } else if (content.startsWith('/proof')) {
       const body = {
         type: 'identity-proof-request',
         connectionId,
@@ -456,6 +461,9 @@ app.post('/message-received', async (req, res) => {
     }
   } else if (obj.type === 'media') {
     logger.info('media received')
+    await submitMessageReceipt(obj, 'viewed')
+  } else if (obj.type === 'mrz-data-submit') {
+    logger.info(`MRZ Data submit: ${JSON.stringify(obj.mrzData)}`)
     await submitMessageReceipt(obj, 'viewed')
   }
 })

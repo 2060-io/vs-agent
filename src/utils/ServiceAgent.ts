@@ -1,4 +1,5 @@
 import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
+import { DidCommMrtdModule } from '@2060.io/credo-ts-didcomm-mrtd'
 import { UserProfileModule } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
@@ -43,6 +44,7 @@ type ServiceAgentModules = {
   >
   proofs: ProofsModule<[V2ProofProtocol<[LegacyIndyProofFormatService, AnonCredsProofFormatService]>]>
   media: MediaSharingModule
+  mrtd: DidCommMrtdModule
   questionAnswer: QuestionAnswerModule
   receipts: ReceiptsModule
   userProfile: UserProfileModule
@@ -99,6 +101,7 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
           ],
         }),
         dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
+        mrtd: new DidCommMrtdModule(),
         proofs: new ProofsModule({
           autoAcceptProofs: AutoAcceptProof.ContentApproved,
           proofProtocols: [

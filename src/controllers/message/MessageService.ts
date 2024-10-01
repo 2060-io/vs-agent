@@ -30,6 +30,7 @@ import {
   TerminateConnectionMessage,
   CallOfferRequestMessage,
   CallEndRequestMessage,
+  MrzDataRequestMessage,
 } from '../../model'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
@@ -326,6 +327,12 @@ export class MessageService {
         })
 
         messageId = hangup.messageId
+      } else if (messageType === MrzDataRequestMessage.type) {
+        JsonTransformer.fromJSON(message, MrzDataRequestMessage)
+
+        const requestMrz = await agent.modules.mrtd.requestMrzString({ connectionId: connection.id })
+
+        messageId = requestMrz.messageId
       }
 
       if (messageId)

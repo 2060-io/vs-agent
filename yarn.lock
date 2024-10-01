@@ -11,6 +11,16 @@
     class-validator "0.14.1"
     tsyringe "^4.8.0"
 
+"@2060.io/credo-ts-didcomm-mrtd@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.3.tgz#7effebb15ad2ad75cc8a85db5b91d762eeb750ff"
+  integrity sha512-4ylMLKxHTyqcODEIhuyW1R0oArwVweOvfjk7Fc69rfAE1xjH5OvvoGFwbtpuHUIiZXKUtfsAAikKpJrXxAPERw==
+  dependencies:
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    mrz "^4.2.0"
+    tsyringe "^4.8.0"
+
 "@2060.io/credo-ts-didcomm-user-profile@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-user-profile/-/credo-ts-didcomm-user-profile-0.0.6.tgz#6cacd3e3146022589b7d22451953b598352b5c16"
@@ -5783,6 +5793,11 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
+
+mrz@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/mrz/-/mrz-4.2.0.tgz#617784b8f0169b940eb335b34d9981d497f8ff32"
+  integrity sha512-ZK0wXQn69vaQ3RbBKEMxsiAUpS5ygEpDi2VKF4urGoQM7l8CzXK+hB7U+dTjAcw/vT5PwaBTjw0K8B2SKPvmhw==
 
 ms@2.0.0:
   version "2.0.0"
