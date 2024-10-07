@@ -59,8 +59,8 @@
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-calls": "^0.0.3",
-    "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
     "@2060.io/credo-ts-didcomm-mrtd": "^0.0.3",
+    "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
     "@credo-ts/action-menu": "^0.5.11",
     "@credo-ts/anoncreds": "^0.5.11",
     "@credo-ts/askar": "^0.5.11",
@@ -69,6 +69,7 @@
     "@credo-ts/question-answer": "^0.5.11",
     "@hyperledger/anoncreds-nodejs": "^0.2.4",
     "@hyperledger/aries-askar-nodejs": "^0.2.3",
+    "@li0ard/tsemrtd": "^0.2.0",
     "@nestjs/bull": "^10.2.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
