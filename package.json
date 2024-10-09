@@ -43,7 +43,8 @@
     "class-transformer/**"
   ],
   "scripts": {
-    "build": "nest build",
+    "deps": "rm -f esm/bundle.js && esbuild --platform=node esm/index.ts --bundle --outfile=esm/bundle.js",
+    "build": "nest build && npm run deps",
     "clean": "rimraf -rf ./build",
     "check-format": "prettier -c \"src/**/*.ts\"",
     "check-types": "eslint \"{src,apps,libs,test}/**/*.ts\"",
@@ -82,6 +83,7 @@
     "credo-ts-didweb-anoncreds": "^0.0.1-alpha.10",
     "credo-ts-media-sharing": "^0.0.1-alpha.9",
     "credo-ts-receipts": "^0.0.1-alpha.5",
+    "esbuild": "^0.24.0",
     "express": "^4.18.1",
     "qrcode": "^1.5.3",
     "reflect-metadata": "^0.1.13",
