@@ -9,6 +9,8 @@ export enum MessageType {
   CredentialIssuanceMessage = 'credential-issuance',
   CredentialReceptionMessage = 'credential-reception',
   CredentialRequestMessage = 'credential-request',
+  EMrtdDataRequestMessage = 'emrtd-data-request',
+  EMrtdDataSubmitMessage = 'emrtd-data-submit',
   IdentityProofRequestMessage = 'identity-proof-request',
   IdentityProofResultMessage = 'identity-proof-result',
   IdentityProofSubmitMessage = 'identity-proof-submit',

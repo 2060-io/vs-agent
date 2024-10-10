@@ -11,10 +11,10 @@
     class-validator "0.14.1"
     tsyringe "^4.8.0"
 
-"@2060.io/credo-ts-didcomm-mrtd@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.3.tgz#7effebb15ad2ad75cc8a85db5b91d762eeb750ff"
-  integrity sha512-4ylMLKxHTyqcODEIhuyW1R0oArwVweOvfjk7Fc69rfAE1xjH5OvvoGFwbtpuHUIiZXKUtfsAAikKpJrXxAPERw==
+"@2060.io/credo-ts-didcomm-mrtd@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.5.tgz#b027f5ff1e4ab971f8d37cd287ff3f7e713a3733"
+  integrity sha512-XKndtIbTeqzpjGArrVCdkTOZaLx/eWs9qW0nUI7ksLuwvvaiFSvuMNnUILdsSbAu5MnpgqAJkaIaA+fBpRqm8g==
   dependencies:
     class-transformer "0.5.1"
     class-validator "0.14.1"

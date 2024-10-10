@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-calls": "^0.0.3",
-    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.3",
+    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.5",
     "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
     "@credo-ts/action-menu": "^0.5.11",
     "@credo-ts/anoncreds": "^0.5.11",
