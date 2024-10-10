@@ -1073,16 +1073,6 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@li0ard/tsemrtd@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@li0ard/tsemrtd/-/tsemrtd-0.2.0.tgz#07059479b7631644e40ed5cbffcddf9a0874c60d"
-  integrity sha512-wRaV6v7SPITHCfIbx9gjvpNjhOssElxMUWUzZGPD0jr5xwRijAOS53Pn2jkoRYwcFzf4XHXyAqfCWknZMcHKcw==
-  dependencies:
-    "@peculiar/asn1-cms" "^2.3.13"
-    "@peculiar/asn1-schema" "^2.3.13"
-    "@peculiar/asn1-x509" "^2.3.13"
-    node-tlv "^1.5.14"
-
 "@ljharb/through@^2.3.12":
   version "2.3.13"
   resolved "https://registry.yarnpkg.com/@ljharb/through/-/through-2.3.13.tgz#b7e4766e0b65aa82e529be945ab078de79874edc"
@@ -5970,11 +5960,6 @@ node-releases@^2.0.18:
   version "2.0.18"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.18.tgz#f010e8d35e2fe8d6b2944f03f70213ecedc4ca3f"
   integrity sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==
-
-node-tlv@^1.5.14:
-  version "1.5.14"
-  resolved "https://registry.yarnpkg.com/node-tlv/-/node-tlv-1.5.14.tgz#88bf0f156f2e6cdad195038d71310723331ddce6"
-  integrity sha512-mazCWLJl0Z4TYfIx1DN7CwmQ4bZGyrobBjXxg2i6QoB/idkL2u5GgQvbAYfoe4T68+rpM0gNniwzA/dfIONiRA==
 
 nopt@^5.0.0:
   version "5.0.0"

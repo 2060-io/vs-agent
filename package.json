@@ -69,7 +69,6 @@
     "@credo-ts/question-answer": "^0.5.11",
     "@hyperledger/anoncreds-nodejs": "^0.2.4",
     "@hyperledger/aries-askar-nodejs": "^0.2.3",
-    "@li0ard/tsemrtd": "^0.2.0",
     "@nestjs/bull": "^10.2.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
