@@ -31,6 +31,7 @@ import {
   CallOfferRequestMessage,
   CallEndRequestMessage,
   MrzDataRequestMessage,
+  EMrtdDataRequestMessage,
 } from '../../model'
 import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
 import { AgentService } from '../../services/AgentService'
@@ -333,6 +334,12 @@ export class MessageService {
         const requestMrz = await agent.modules.mrtd.requestMrzString({ connectionId: connection.id })
 
         messageId = requestMrz.messageId
+      } else if (messageType === EMrtdDataRequestMessage.type) {
+        JsonTransformer.fromJSON(message, EMrtdDataRequestMessage)
+
+        const requestEMrtdData = await agent.modules.mrtd.requestEMrtdData({ connectionId: connection.id })
+
+        messageId = requestEMrtdData.messageId
       }
 
       if (messageId)

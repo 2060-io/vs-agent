@@ -1,11 +1,11 @@
-import express from 'express'
 import cors from 'cors'
-import path from 'path'
-import fetch from 'node-fetch'
-import { Logger } from 'tslog'
-import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
 import { randomUUID } from 'crypto'
+import express from 'express'
+import fetch from 'node-fetch'
+import path from 'path'
+import { Logger } from 'tslog'
 
+import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
 import phoneCredDefData from './phone-cred-def-dev.json'
 
 const logger = new Logger()
@@ -13,7 +13,8 @@ const logger = new Logger()
 const PORT = Number(process.env.PORT || 5000)
 const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
-const VISION_SERVICE_BASE_URL = process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
+const VISION_SERVICE_BASE_URL =
+  process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
 const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
 const app = express()
 
@@ -28,13 +29,13 @@ app.set('json spaces', 2)
 
 let phoneNumberCredentialDefinitionId: string | undefined
 
-type OngoingCall = { 
-  wsUrl: string, 
-  roomId: string,
+type OngoingCall = {
+  wsUrl: string
+  roomId: string
   connectionId: string
- }
+}
 
-let ongoingCalls: OngoingCall[] = []
+const ongoingCalls: OngoingCall[] = []
 
 export interface CredentialTypeInfo {
   id: string
@@ -55,7 +56,7 @@ export const getCredentialTypes = async () => {
   if (!Array.isArray(types)) {
     throw new Error('Invalid response from Service Agent')
   }
-  return types.map((value) => value as CredentialTypeInfo)
+  return types.map(value => value as CredentialTypeInfo)
 }
 
 export const importCredentialType = async (importData: Record<string, unknown>) => {
@@ -84,13 +85,14 @@ const server = app.listen(PORT, async () => {
   }
 
   const phoneNumberCredentialType = credentialTypes.find(
-    (type) => type.name === 'phoneNumber' && type.version === '1.0'
+    type => type.name === 'phoneNumber' && type.version === '1.0',
   )
 
   try {
-    phoneNumberCredentialDefinitionId = phoneNumberCredentialType?.id ?? (await importCredentialType(phoneCredDefData))
+    phoneNumberCredentialDefinitionId =
+      phoneNumberCredentialType?.id ?? (await importCredentialType(phoneCredDefData))
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
-  } catch(error) {
+  } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
   }
 })
@@ -225,7 +227,10 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   // Rocky quotes
   if (selectedItem === 'rocky' || selectedItem === '💪 Rocky quotes' || selectedItem === 'Inspire me!') {
     // send random Rocky quote
-    await sendTextMessage({ connectionId, content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)] })
+    await sendTextMessage({
+      connectionId,
+      content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)],
+    })
     await sendQuestion({
       connectionId,
       question: {
@@ -378,10 +383,14 @@ app.post('/message-received', async (req, res) => {
       try {
         if (!wsUrl || !roomId) {
           // Create a room if not given as argument
-          const result = await fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, { headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-            },method: 'POST', body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }) })
+          const result = await fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }),
+          })
 
           const response = await result.json()
 
@@ -391,21 +400,29 @@ app.post('/message-received', async (req, res) => {
 
         const peerId = obj.connectionId // We re-use connection id to simplify
 
-
         ongoingCalls.push({ wsUrl, roomId, connectionId: obj.connectionId })
         const body = {
           type: 'call-offer',
           connectionId: obj.connectionId,
-          parameters: { wsUrl, roomId, peerId }
+          parameters: { wsUrl, roomId, peerId },
         }
         await submitMessage(body)
-      } catch(reason) {
+      } catch (reason) {
         logger.error(`Cannot create call: ${reason}`)
-        sendTextMessage({connectionId: obj.connectionId, content: 'An error has occurred while creating a call' })
+        sendTextMessage({
+          connectionId: obj.connectionId,
+          content: 'An error has occurred while creating a call',
+        })
       }
     } else if (content.startsWith('/mrz')) {
       const body = {
         type: 'mrz-data-request',
+        connectionId,
+      }
+      await submitMessage(body)
+    } else if (content.startsWith('/emrtd')) {
+      const body = {
+        type: 'emrtd-data-request',
         connectionId,
       }
       await submitMessage(body)
@@ -423,7 +440,10 @@ app.post('/message-received', async (req, res) => {
       }
       await submitMessage(body)
     } else if (content.startsWith('/rocky')) {
-      await sendTextMessage({ connectionId, content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)] })
+      await sendTextMessage({
+        connectionId,
+        content: rockyQuotes[Math.floor(Math.random() * rockyQuotes.length)],
+      })
     } else if (content.startsWith('/help')) {
       await sendTextMessage({ connectionId, content: helpMessage })
     } else if (content.startsWith('/terminate')) {
@@ -465,6 +485,9 @@ app.post('/message-received', async (req, res) => {
   } else if (obj.type === 'mrz-data-submit') {
     logger.info(`MRZ Data submit: ${JSON.stringify(obj.mrzData)}`)
     await submitMessageReceipt(obj, 'viewed')
+  } else if (obj.type === 'emrtd-data-submit') {
+    logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
+    await submitMessageReceipt(obj, 'viewed')
   }
 })
 
@@ -481,21 +504,21 @@ app.post('/call-events', async (req, res) => {
   }
 
   if (event === 'peer-joined') {
-        // Ask Vision service to join the call
-        const body = JSON.stringify({ 
-          ws_url: `${call.wsUrl}/?roomId=${call.roomId}&peerId=${randomUUID()}`,
-          success_url: `${PUBLIC_BASE_URL}/call-success/${call.connectionId}`, 
-          failure_url: `${PUBLIC_BASE_URL}/call-failure/${call.connectionId}` 
-        }) 
-        logger.info(`join-call parameters: ${body}`)
-        await fetch(`${VISION_SERVICE_BASE_URL}/join-call`, { 
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'POST', 
-          body,
-        })
+    // Ask Vision service to join the call
+    const body = JSON.stringify({
+      ws_url: `${call.wsUrl}/?roomId=${call.roomId}&peerId=${randomUUID()}`,
+      success_url: `${PUBLIC_BASE_URL}/call-success/${call.connectionId}`,
+      failure_url: `${PUBLIC_BASE_URL}/call-failure/${call.connectionId}`,
+    })
+    logger.info(`join-call parameters: ${body}`)
+    await fetch(`${VISION_SERVICE_BASE_URL}/join-call`, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body,
+    })
   } else if (event === 'peer-left') {
     ongoingCalls.splice(ongoingCalls.indexOf(call), 1)
   }
@@ -505,13 +528,17 @@ app.post('/call-events', async (req, res) => {
 app.put('/call-success/:connectionId', (req, res) => {
   logger.info(`Call success for ${req.params.connectionId}: ${JSON.stringify(req.body)}`)
   res.end()
-  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call was succesful'}).catch(error => logger.error(`Cannot send message: ${error}`))
+  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call was succesful' }).catch(error =>
+    logger.error(`Cannot send message: ${error}`),
+  )
 })
 
 app.put('/call-failure/:connectionId', (req, res) => {
   logger.info(`Call success for ${req.params.connectionId}: ${JSON.stringify(req.body)}`)
   res.end()
-  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call failed'}).catch(error => logger.error(`Cannot send message: ${error}`))
+  sendTextMessage({ connectionId: req.params.connectionId, content: 'Call failed' }).catch(error =>
+    logger.error(`Cannot send message: ${error}`),
+  )
 })
 
 export { app, server }
