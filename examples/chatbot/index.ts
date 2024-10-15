@@ -485,6 +485,14 @@ app.post('/message-received', async (req, res) => {
   } else if (obj.type === 'mrz-data-submit') {
     logger.info(`MRZ Data submit: ${JSON.stringify(obj.mrzData)}`)
     await submitMessageReceipt(obj, 'viewed')
+
+    // Request eEMRTD data to continue the flow
+    const body = {
+      type: 'emrtd-data-request',
+      connectionId: obj.connectionId,
+      threadId: obj.threadId,
+    }
+    await submitMessage(body)
   } else if (obj.type === 'emrtd-data-submit') {
     logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
     await submitMessageReceipt(obj, 'viewed')

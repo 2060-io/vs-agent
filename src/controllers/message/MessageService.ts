@@ -329,15 +329,21 @@ export class MessageService {
 
         messageId = hangup.messageId
       } else if (messageType === MrzDataRequestMessage.type) {
-        JsonTransformer.fromJSON(message, MrzDataRequestMessage)
+        const msg = JsonTransformer.fromJSON(message, MrzDataRequestMessage)
 
-        const requestMrz = await agent.modules.mrtd.requestMrzString({ connectionId: connection.id })
+        const requestMrz = await agent.modules.mrtd.requestMrzString({
+          connectionId: connection.id,
+          parentThreadId: msg.threadId,
+        })
 
         messageId = requestMrz.messageId
       } else if (messageType === EMrtdDataRequestMessage.type) {
-        JsonTransformer.fromJSON(message, EMrtdDataRequestMessage)
+        const msg = JsonTransformer.fromJSON(message, EMrtdDataRequestMessage)
 
-        const requestEMrtdData = await agent.modules.mrtd.requestEMrtdData({ connectionId: connection.id })
+        const requestEMrtdData = await agent.modules.mrtd.requestEMrtdData({
+          connectionId: connection.id,
+          parentThreadId: msg.threadId,
+        })
 
         messageId = requestEMrtdData.messageId
       }
