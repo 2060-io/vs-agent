@@ -1,10 +1,11 @@
+import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Expose } from 'class-transformer'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
 
 export interface EMrtdDataSubmitMessageOptions extends BaseMessageOptions {
-  dataGroups: Record<string, string>
+  dataGroups: EMrtdData
 }
 
 export class EMrtdDataSubmitMessage extends BaseMessage {
@@ -24,5 +25,5 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
   public static readonly type = MessageType.EMrtdDataSubmitMessage
 
   @Expose()
-  public dataGroups!: Record<string, string>
+  public dataGroups!: EMrtdData
 }
