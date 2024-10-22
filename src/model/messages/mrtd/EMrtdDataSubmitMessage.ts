@@ -1,5 +1,6 @@
 import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Expose } from 'class-transformer'
+import * as Mrz from 'mrz'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
@@ -7,19 +8,42 @@ import { MessageType } from '../MessageType'
 export type EMrtdRawData = {
   raw: Record<string, string>
   processed: {
-    fields?: EMrtdProcessedData
+    ef_dg1: EF_DG1
+    ef_dg2: EF_DG2
+    ef_dg11?: EF_DG11
   }
 }
 
-export type EMrtdProcessedData = {
-  mrzData: string
-  firstName: string
-  lastName: string
-  faceDataUrl: string
-  fingerprintDataUrl?: string
-  birthDate: number
-  placeOfBirth: string
-  issuanceDate: number
+export type EF_DG1 = {
+  documentType: string
+  documentNumber: string | null
+  issuingState?: string | null
+  dateOfBirth?: string | null
+  dateOfExpiry?: string | null
+  sex?: string | null
+  nationality?: string | null
+  lastName?: string | null
+  firstName?: string | null
+  nameOfHolder?: string
+  mrzOptionalData?: string | null
+}
+
+export type EF_DG2 = {
+  faceImages: string[]
+}
+
+export type EF_DG11 = {
+  nameOfHolder?: string
+  dateOfBirth?: number
+  otherNames?: string[]
+  personalNumber?: string
+  placeOfBirth?: string[]
+  permanentAddress?: string[]
+  telephone?: string
+  profession?: string
+  title?: string
+  personalSummary?: string
+  custodyInformation?: string
 }
 
 export interface EMrtdDataSubmitMessageOptions extends BaseMessageOptions {
@@ -48,20 +72,44 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
   public parseDataGroups({ raw, parsed }: EMrtdData): EMrtdRawData {
     if (!parsed || !parsed.fields) return this.dataGroups
 
-    const [lastName, firstName] = parsed.fields.additionalPersonalData?.nameOfHolder.split('<<') || []
-    const faceMimeType = parsed.fields.images[0].imageType === 1 ? 'image/jp2' : 'image/jpeg'
+    const dataUrls = parsed.fields.images.map(image => {
+      const faceMimeType = image.imageType === 1 ? 'image/jp2' : 'image/jpeg'
+      return `data:${faceMimeType};base64,${image.imageData.toString('base64')}`
+    })
+
+    const parsedMrz = Mrz.parse(parsed.fields.mrzData)
 
     const newEmrtdData: EMrtdRawData = {
       raw: raw,
       processed: {
-        fields: {
-          mrzData: parsed.fields.mrzData ?? 'null',
-          firstName: firstName ? firstName.replace('<', ' ').trim() : 'null',
-          lastName: lastName ? lastName.replace('<', ' ').trim() : 'null',
-          faceDataUrl: `data:${faceMimeType};base64,${parsed.fields.images[0].imageData.toString('base64')}`,
-          birthDate: parsed.fields.additionalPersonalData?.fullDateOfBirth ?? 0,
-          placeOfBirth: parsed.fields.additionalPersonalData?.placeOfBirth[0] ?? 'null',
-          issuanceDate: parsed.fields.additionalDocumentData?.dateOfIssue ?? 0,
+        ef_dg1: {
+          documentType: parsedMrz.format,
+          documentNumber: parsedMrz.documentNumber,
+          issuingState: parsedMrz.fields.issuingState,
+          dateOfBirth: parsedMrz.fields.birthDate,
+          dateOfExpiry: parsedMrz.fields.expirationDate,
+          sex: parsedMrz.fields.sex,
+          nationality: parsedMrz.fields.nationality,
+          lastName: parsedMrz.fields.lastName,
+          firstName: parsedMrz.fields.firstName,
+          nameOfHolder: parsed.fields.additionalPersonalData?.nameOfHolder,
+          mrzOptionalData: parsedMrz.fields.optional1,
+        },
+        ef_dg2: {
+          faceImages: dataUrls,
+        },
+        ef_dg11: {
+          nameOfHolder: parsed.fields.additionalPersonalData?.nameOfHolder,
+          dateOfBirth: parsed.fields.additionalPersonalData?.fullDateOfBirth,
+          otherNames: parsed.fields.additionalPersonalData?.otherNames,
+          personalNumber: parsed.fields.additionalPersonalData?.personalNumber,
+          placeOfBirth: parsed.fields.additionalPersonalData?.placeOfBirth,
+          permanentAddress: parsed.fields.additionalPersonalData?.permanentAddress,
+          telephone: parsed.fields.additionalPersonalData?.telephone,
+          profession: parsed.fields.additionalPersonalData?.profession,
+          title: parsed.fields.additionalPersonalData?.title,
+          personalSummary: parsed.fields.additionalPersonalData?.personalSummary,
+          custodyInformation: parsed.fields.additionalPersonalData?.custodyInformation,
         },
       },
     }
