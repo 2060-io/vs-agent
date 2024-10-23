@@ -78,16 +78,22 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
     })
 
     const mrzString = parsed.fields.mrzData
-    const formattedMrz = ((len) => {
-      switch(len) {
-        case 88: return mrzString.slice(0, 44) + '\n' + mrzString.slice(44);
-        case 72: return mrzString.slice(0, 36) + '\n' + mrzString.slice(36);
-        case 90: return mrzString.slice(0, 30) + '\n' + mrzString.slice(30, 60) + '\n' + mrzString.slice(60);
-        case 30: return mrzString;
-        case 18: return mrzString.slice(0, 9) + '\n' + mrzString.slice(9);
-        default: throw new Error(`Unrecognized MRZ length: ${len}`);
+    const formattedMrz = (len => {
+      switch (len) {
+        case 88:
+          return mrzString.slice(0, 44) + '\n' + mrzString.slice(44)
+        case 72:
+          return mrzString.slice(0, 36) + '\n' + mrzString.slice(36)
+        case 90:
+          return mrzString.slice(0, 30) + '\n' + mrzString.slice(30, 60) + '\n' + mrzString.slice(60)
+        case 30:
+          return mrzString
+        case 18:
+          return mrzString.slice(0, 9) + '\n' + mrzString.slice(9)
+        default:
+          throw new Error(`Unrecognized MRZ length: ${len}`)
       }
-    })(mrzString.length);
+    })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
 
     const newEmrtdData: EMrtdRawData = {
