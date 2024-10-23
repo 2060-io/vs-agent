@@ -82,6 +82,7 @@
     "credo-ts-media-sharing": "^0.0.1-alpha.9",
     "credo-ts-receipts": "^0.0.1-alpha.5",
     "express": "^4.18.1",
+    "mrz": "^4.2.0",
     "qrcode": "^1.5.3",
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.4.0",
