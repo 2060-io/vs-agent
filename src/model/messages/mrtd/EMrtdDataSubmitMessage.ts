@@ -99,7 +99,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
           parsed.fields.additionalPersonalData?.nameOfHolder ??
           `${parsedMrz.fields.lastName} ${parsedMrz.fields.firstName}`,
         dateOfBirth:
-          parsed.fields.additionalPersonalData?.fullDateOfBirth.toString() ??
+          parsed.fields.additionalPersonalData?.fullDateOfBirth.toString().slice(2) ??
           parsedMrz.fields.birthDate ??
           undefined, // TODO: Check and specify date format
         otherNames: parsed.fields.additionalPersonalData?.otherNames,
