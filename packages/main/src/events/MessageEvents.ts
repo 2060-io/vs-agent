@@ -14,6 +14,25 @@ import {
   ProfileEventTypes,
   UserProfileRequestedEvent,
 } from '@2060.io/credo-ts-didcomm-user-profile'
+import {
+  BaseMessage,
+  Claim,
+  MenuSelectMessage,
+  IdentityProofSubmitMessage,
+  TextMessage,
+  CredentialRequestMessage,
+  CredentialReceptionMessage,
+  ContextualMenuRequestMessage,
+  ContextualMenuSelectMessage,
+  MediaMessage,
+  CallOfferRequestMessage,
+  CallEndRequestMessage,
+  CallRejectRequestMessage,
+  ProfileMessage,
+  MrzDataSubmitMessage,
+  EMrtdDataSubmitMessage,
+  VerifiableCredentialSubmittedProofItem,
+} from '@2060.io/models'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
@@ -35,25 +54,6 @@ import {
 } from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
 
-import {
-  BaseMessage,
-  Claim,
-  MenuSelectMessage,
-  IdentityProofSubmitMessage,
-  TextMessage,
-  CredentialRequestMessage,
-  CredentialReceptionMessage,
-  ContextualMenuRequestMessage,
-  ContextualMenuSelectMessage,
-  MediaMessage,
-  CallOfferRequestMessage,
-  CallEndRequestMessage,
-  CallRejectRequestMessage,
-  ProfileMessage,
-  MrzDataSubmitMessage,
-  EMrtdDataSubmitMessage,
-} from '../model'
-import { VerifiableCredentialSubmittedProofItem } from '../model/messages/proofs/vc/VerifiableCredentialSubmittedProofItem'
 import { ServiceAgent } from '../utils/ServiceAgent'
 import { createDataUrl } from '../utils/parsers'
 

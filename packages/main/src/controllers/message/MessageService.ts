@@ -1,19 +1,3 @@
-import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
-import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import {
-  JsonTransformer,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  utils,
-  MessageSender,
-  OutboundMessageContext,
-  OutOfBandRepository,
-  OutOfBandInvitation,
-  ConnectionRecord,
-} from '@credo-ts/core'
-import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Injectable, Logger } from '@nestjs/common'
-
 import {
   TextMessage,
   ReceiptsMessage,
@@ -32,8 +16,24 @@ import {
   CallEndRequestMessage,
   MrzDataRequestMessage,
   EMrtdDataRequestMessage,
-} from '../../model'
-import { VerifiableCredentialRequestedProofItem } from '../../model/messages/proofs/vc/VerifiableCredentialRequestedProofItem'
+  VerifiableCredentialRequestedProofItem,
+} from '@2060.io/models'
+import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
+import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
+import {
+  JsonTransformer,
+  AutoAcceptCredential,
+  AutoAcceptProof,
+  utils,
+  MessageSender,
+  OutboundMessageContext,
+  OutOfBandRepository,
+  OutOfBandInvitation,
+  ConnectionRecord,
+} from '@credo-ts/core'
+import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
+import { Injectable, Logger } from '@nestjs/common'
+
 import { AgentService } from '../../services/AgentService'
 import { parsePictureData } from '../../utils/parsers'
 import { RequestedCredential } from '../types'

@@ -1,8 +1,8 @@
+import { BaseMessage } from '@2060.io/models'
 import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { BaseMessage } from '../../model'
 import { AgentService } from '../../services/AgentService'
 import { ServiceAgent } from '../../utils/ServiceAgent'
 

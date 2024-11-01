@@ -1,3 +1,4 @@
+import { Claim } from '@2060.io/models'
 import { ProofExchangeRecord } from '@credo-ts/core'
 import {
   BadRequestException,
@@ -11,7 +12,6 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { Claim } from '../../model'
 import { AgentService } from '../../services/AgentService'
 import { PresentationData, RequestedCredential } from '../types'
 

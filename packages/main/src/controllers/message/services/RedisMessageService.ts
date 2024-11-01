@@ -1,9 +1,9 @@
+import { IBaseMessage } from '@2060.io/models'
 import { ConnectionRecord, utils } from '@credo-ts/core'
 import { Process, Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
 import { Job } from 'bull'
 
-import { IBaseMessage } from '../../../model'
 import { MessageService } from '../MessageService'
 
 @Processor('message')
