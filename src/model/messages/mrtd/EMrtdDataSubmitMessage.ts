@@ -81,6 +81,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       }
     })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
+    const birthDateFromNfc = parsed.fields.additionalPersonalData?.fullDateOfBirth
 
     const newEmrtdData: EMrtdRawData = {
       raw: raw,
@@ -99,12 +100,9 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
           parsed.fields.additionalPersonalData?.nameOfHolder ??
           `${parsedMrz.fields.lastName} ${parsedMrz.fields.firstName}`,
         dateOfBirth:
-          parsed.fields.additionalPersonalData?.fullDateOfBirth &&
-          parsed.fields.additionalPersonalData?.fullDateOfBirth !== 0
-            ? parsed.fields.additionalPersonalData.fullDateOfBirth.toString().slice(2)
-            : parsedMrz.fields.birthDate && parsedMrz.fields.birthDate !== '0'
-              ? parsedMrz.fields.birthDate
-              : undefined, // TODO: Check and specify date format
+          birthDateFromNfc && birthDateFromNfc !== 0
+            ? birthDateFromNfc.toString().slice(2)
+            : (parsedMrz.fields.birthDate ?? undefined), // TODO: Check and specify date format
         otherNames: parsed.fields.additionalPersonalData?.otherNames,
         personalNumber: parsed.fields.additionalPersonalData?.personalNumber,
         placeOfBirth: parsed.fields.additionalPersonalData?.placeOfBirth,
