@@ -81,7 +81,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       }
     })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
-    const birthDateFromNfc = parsed.fields.additionalPersonalData?.fullDateOfBirth
+    const birthDateFromAdditionalPersonalData = parsed.fields.additionalPersonalData?.fullDateOfBirth
 
     const newEmrtdData: EMrtdRawData = {
       raw: raw,
