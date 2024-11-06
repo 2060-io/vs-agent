@@ -1,4 +1,4 @@
-import { Claim } from '@2060.io/models'
+import { Claim } from '@2060.io/model'
 import { ProofExchangeRecord } from '@credo-ts/core'
 import {
   BadRequestException,

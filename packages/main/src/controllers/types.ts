@@ -5,7 +5,7 @@ import type {
   ProofState,
 } from '@credo-ts/core'
 
-import { Claim } from '@2060.io/models'
+import { Claim } from '@2060.io/model'
 
 export interface AgentInfo {
   label: string
