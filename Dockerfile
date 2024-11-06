@@ -6,7 +6,7 @@ ENV RUN_MODE="docker"
 
 COPY package.json yarn.lock ./
 
-COPY packages/models/package.json packages/models/package.json
+COPY packages/model/package.json packages/model/package.json
 COPY packages/main/package.json packages/main/package.json
 # COPY ./patches ./patches
 
@@ -15,15 +15,15 @@ COPY packages/main/package.json packages/main/package.json
 RUN yarn install
 
 # Copy other depdencies
-COPY packages/models/src ./packages/models/src
+COPY packages/model/src ./packages/model/src
 COPY packages/main/src ./packages/main/src
 COPY ./public ./public
 
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.build.json tsconfig.build.json
 
-COPY packages/models/tsconfig.json packages/models/tsconfig.json
-COPY packages/models/tsconfig.build.json packages/models/tsconfig.build.json
+COPY packages/model/tsconfig.json packages/model/tsconfig.json
+COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
 
 COPY packages/main/tsconfig.json packages/main/tsconfig.json
 COPY packages/main/tsconfig.build.json packages/main/tsconfig.build.json
