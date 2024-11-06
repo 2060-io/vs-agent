@@ -12,7 +12,7 @@
     "url": "https://github.com/2060-io/2060-service-agent"
   },
   "scripts": {
-    "build": "yarn workspace models run build && yarn workspace main run build",
+    "build": "yarn workspaces run build",
     "start": "yarn workspace main run start",
     "check-types": "yarn check-types:build && yarn check-types:tests",
     "check-types:tests": "tsc -p tsconfig.test.json --noEmit",

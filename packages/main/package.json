@@ -57,7 +57,7 @@
     "@2060.io/credo-ts-didcomm-calls": "^0.0.3",
     "@2060.io/credo-ts-didcomm-mrtd": "^0.0.8",
     "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
-    "@2060.io/models": "file:../models",
+    "@2060.io/models": "^0.0.1",
     "@credo-ts/action-menu": "^0.5.11",
     "@credo-ts/anoncreds": "^0.5.11",
     "@credo-ts/askar": "^0.5.11",
@@ -101,7 +101,8 @@
     "@types/uuid": "^8.3.4",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
-    "supertest": "^6.2.3"
+    "supertest": "^6.2.3",
+    "typescript": "^5.6.2"
   },
   "resolutions": {
     "tsyringe": "4.8.0",

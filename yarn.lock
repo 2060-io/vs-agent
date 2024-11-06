@@ -416,7 +416,7 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@credo-ts/action-menu@0.5.11", "@credo-ts/action-menu@^0.5.11":
+"@credo-ts/action-menu@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/action-menu/-/action-menu-0.5.11.tgz#ccd5da4ffc4ee7d1cf67a4ad1fd867c9c14566ce"
   integrity sha512-J8rnsk5av3ja2P8yxOP9hEgHRaxCfsSxWUQAzQME82uXI4at6MGENmu7LYO/TXqRzrAirgDNi0wduxYQso9+hA==
@@ -426,7 +426,7 @@
     class-validator "0.14.1"
     rxjs "^7.8.0"
 
-"@credo-ts/anoncreds@0.5.11", "@credo-ts/anoncreds@^0.5.11":
+"@credo-ts/anoncreds@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/anoncreds/-/anoncreds-0.5.11.tgz#1ecbb04268957e674d6bcacc671ca05eb7768236"
   integrity sha512-CEB1QxQQP/J++Y3t4hTyZq7KVo94hQPM2wZ0MIOq+TsM8Wp0/0CMogDsWPtBJDi+jk7JZRbb7qPiOzBHo2hDtg==
@@ -440,7 +440,7 @@
     class-validator "0.14.1"
     reflect-metadata "^0.1.13"
 
-"@credo-ts/askar@0.5.11", "@credo-ts/askar@^0.5.11":
+"@credo-ts/askar@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/askar/-/askar-0.5.11.tgz#bb8fd7ab59219501be8cb194fb29d801065848cb"
   integrity sha512-KIBNOhEqF8mOWuFYEolPo/qU8hrHR+X4othq3WrzRWJoApJKe7OQk9mI6H9yjQ4H3eD2By7oHWEqgZCB4IDcwg==
@@ -498,7 +498,7 @@
     web-did-resolver "^2.0.21"
     webcrypto-core "^1.8.0"
 
-"@credo-ts/node@0.5.11", "@credo-ts/node@^0.5.11":
+"@credo-ts/node@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/node/-/node-0.5.11.tgz#18fc04cba3e91b81737f1ad83298d74326a8f227"
   integrity sha512-zrm+IujCAkSzSPj3Je5iZCsPkwUC8IDfStuSLJ0wiYjDaXzjYtUGn320bDE13VMJ56i/AdW1rv49/PWSGpebVA==
@@ -510,7 +510,7 @@
     express "^4.17.1"
     ws "^8.13.0"
 
-"@credo-ts/question-answer@0.5.11", "@credo-ts/question-answer@^0.5.11":
+"@credo-ts/question-answer@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/question-answer/-/question-answer-0.5.11.tgz#5184495261d8b1c9914f018195fe3bfb1ffcfc89"
   integrity sha512-ls/NFaWCh+iHR4U88BcJZ8l2hhZ1dUI+cZu6irBnWhKMz4www4x+azhX9BZ9Ejq3BM7CcTvGYaTvUJjskhnN5Q==
@@ -875,7 +875,7 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@hyperledger/anoncreds-nodejs@0.2.4", "@hyperledger/anoncreds-nodejs@^0.2.4":
+"@hyperledger/anoncreds-nodejs@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@hyperledger/anoncreds-nodejs/-/anoncreds-nodejs-0.2.4.tgz#79c4eea016409fe08bc5fd4014d36a0d29fbdd49"
   integrity sha512-CaWYwV8DOTfgXS8n15TIAzdCkAyI+g+r/hgUMq7qMGesy0wfOokDDUC+7WPgNuG4am6jscETUgGbicWr95WInA==
@@ -892,7 +892,7 @@
   resolved "https://registry.yarnpkg.com/@hyperledger/anoncreds-shared/-/anoncreds-shared-0.2.4.tgz#14577c3290a17aa5c5fbd3721de59774ff928704"
   integrity sha512-OKw8/KXU5bAVA2fhm8pI3BLyJOIzOrEWz6sqX8QQSILNgx2hrEcN1OCSYTudcLAfID3fGRvr1X3vLzlRo19IVg==
 
-"@hyperledger/aries-askar-nodejs@0.2.3", "@hyperledger/aries-askar-nodejs@^0.2.3":
+"@hyperledger/aries-askar-nodejs@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@hyperledger/aries-askar-nodejs/-/aries-askar-nodejs-0.2.3.tgz#f939c19047c78b9903b422f992b4f5406ac3aae3"
   integrity sha512-2BnGqK08Y96DEB8tDuXy2x+soetChyMGB0+L1yqdHx1Xv5FvRerYrTXdTjJXTW6ANb48k2Np8WlJ4YNePSo6ww==
@@ -1948,7 +1948,7 @@
   dependencies:
     "@types/express" "*"
 
-"@types/node-fetch@^2.6.4":
+"@types/node-fetch@^2.6.2", "@types/node-fetch@^2.6.4":
   version "2.6.11"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.11.tgz#9b39b78665dae0e82a08f02f4967d62c66f95d24"
   integrity sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==
@@ -1956,19 +1956,12 @@
     "@types/node" "*"
     form-data "^4.0.0"
 
-"@types/node@*", "@types/node@20.11.19":
+"@types/node@*", "@types/node@20.11.19", "@types/node@^16.7.10", "@types/node@^20.11.19":
   version "20.11.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.19.tgz#b466de054e9cb5b3831bee38938de64ac7f81195"
   integrity sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==
   dependencies:
     undici-types "~5.26.4"
-
-"@types/node@^20.11.19":
-  version "20.16.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.16.5.tgz#d43c7f973b32ffdf9aa7bd4f80e1072310fd7a53"
-  integrity sha512-VwYCweNo3ERajwy0IUlqqcyZ8/A7Zwa9ZP3MnENWcB11AejO+tLy3pu850goUW2FC/IJMdZUfKpX/yxL1gymCA==
-  dependencies:
-    undici-types "~6.19.2"
 
 "@types/qrcode@^1.5.0":
   version "1.5.5"
@@ -7504,6 +7497,11 @@ tslib@^1.9.3:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
+tslog@^4.8.2:
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/tslog/-/tslog-4.9.3.tgz#d4167d5f51748bdeab593945bc2d8f9827ea0dba"
+  integrity sha512-oDWuGVONxhVEBtschLf2cs/Jy8i7h1T+CpdkTNWQgdAF7DhRo2G8vMCgILKe7ojdEkLhICWgI1LYSSKaJsRgcw==
+
 tsyringe@4.8.0, tsyringe@^4.8.0:
   version "4.8.0"
   resolved "https://registry.yarnpkg.com/tsyringe/-/tsyringe-4.8.0.tgz#d599651b36793ba872870fee4f845bd484a5cac1"
@@ -7602,6 +7600,11 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
+typescript@4.7.4:
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
+  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
+
 typescript@5.3.3:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
@@ -7645,11 +7648,6 @@ undici-types@~5.26.4:
   version "5.26.5"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
-
-undici-types@~6.19.2:
-  version "6.19.8"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.19.8.tgz#35111c9d1437ab83a7cdc0abae2f26d88eda0a02"
-  integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
 
 undici@^5.21.2:
   version "5.28.4"
