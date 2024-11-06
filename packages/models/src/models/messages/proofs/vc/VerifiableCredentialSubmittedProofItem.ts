@@ -1,7 +1,6 @@
-import { utils } from '@credo-ts/core'
-
 import { Claim } from '../../CredentialIssuanceMessage'
 import { SubmittedProofItem } from '../../IdentityProofSubmitMessage'
+import { v4 as uuid } from 'uuid'
 
 export interface VerifiableCredentialSubmittedProofItemOptions {
   id: string
@@ -26,7 +25,7 @@ export class VerifiableCredentialSubmittedProofItem extends SubmittedProofItem {
   public constructor(options: VerifiableCredentialSubmittedProofItemOptions) {
     super()
     if (options) {
-      this.id = options.id ?? utils.uuid()
+      this.id = options.id ?? uuid()
       this.proofExchangeId = options.proofExchangeId
       this.claims = options.claims
       this.verified = options.verified ?? false

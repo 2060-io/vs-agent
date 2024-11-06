@@ -1,6 +1,5 @@
-import { utils } from '@credo-ts/core'
-
 import { RequestedProofItem } from '../../IdentityProofRequestMessage'
+import { v4 as uuid } from 'uuid'
 
 export interface VerifiableCredentialRequestedProofItemOptions {
   id?: string
@@ -22,7 +21,7 @@ export class VerifiableCredentialRequestedProofItem extends RequestedProofItem {
   public constructor(options: VerifiableCredentialRequestedProofItem) {
     super()
     if (options) {
-      this.id = options.id ?? utils.uuid()
+      this.id = options.id ?? uuid()
       this.description = options.description
       this.credentialDefinitionId = options.credentialDefinitionId
       this.attributes = options.attributes
