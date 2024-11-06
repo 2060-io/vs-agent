@@ -35,7 +35,7 @@
       "@2060.io/credo-ts-didcomm-mrtd": "^0.0.8",
       "@credo-ts/core": "^0.5.11",
       "credo-ts-receipts": "^0.0.1-alpha.5",
-      "@nestjs/swagger": "^7.3.0",
+      "mrz": "^4.2.0",
       "uuid": "^9.0.0"
     },
     "devDependencies": {
