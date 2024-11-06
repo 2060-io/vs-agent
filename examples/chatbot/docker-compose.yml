@@ -21,7 +21,9 @@ services:
     volumes:
       - ./afj:/root/.afj
   chatbot-backend:
-    build: .
+    build: 
+      context: ../../
+      dockerfile: ./examples/chatbot/Dockerfile
     image: 2060-service-agent-chatbot
     container_name: chatbot-backend
     restart: always
