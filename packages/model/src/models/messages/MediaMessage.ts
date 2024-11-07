@@ -1,6 +1,6 @@
+import { utils } from '@credo-ts/core'
 import { Type } from 'class-transformer'
 import { IsOptional, IsArray, IsInstance, IsString, ValidateNested } from 'class-validator'
-import { v4 as uuid } from 'uuid'
 
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'
@@ -32,7 +32,7 @@ export interface MediaItemOptions {
 export class MediaItem {
   public constructor(options: MediaItemOptions) {
     if (options) {
-      this.id = options.id ?? uuid()
+      this.id = options.id ?? utils.uuid()
       this.description = options.description
       this.mimeType = options.mimeType
       this.filename = options.filename

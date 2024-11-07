@@ -1,7 +1,6 @@
-import { JsonTransformer } from '@credo-ts/core'
+import { JsonTransformer, utils } from '@credo-ts/core'
 import { Expose } from 'class-transformer'
 import { IsEnum, IsUUID, IsOptional, IsString, IsNotEmpty } from 'class-validator'
-import { v4 as uuid } from 'uuid'
 
 import { MessageType } from './MessageType'
 
@@ -48,7 +47,7 @@ export class BaseMessage implements IBaseMessage {
   public threadId?: string
 
   public generateId() {
-    return uuid()
+    return utils.uuid()
   }
 
   public toJSON() {
