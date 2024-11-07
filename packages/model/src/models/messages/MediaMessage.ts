@@ -1,9 +1,9 @@
 import { Type } from 'class-transformer'
 import { IsOptional, IsArray, IsInstance, IsString, ValidateNested } from 'class-validator'
+import { v4 as uuid } from 'uuid'
 
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'
-import { v4 as uuid } from 'uuid'
 
 export interface CipheringInfo {
   algorithm: string

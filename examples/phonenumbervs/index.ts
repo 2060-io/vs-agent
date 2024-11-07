@@ -1,7 +1,7 @@
-import express from 'express'
 import cors from 'cors'
-import path from 'path'
+import express from 'express'
 import fetch from 'node-fetch'
+import path from 'path'
 
 const PORT = Number(process.env.PORT || 3002)
 const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000'

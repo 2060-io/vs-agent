@@ -1,6 +1,7 @@
+import { v4 as uuid } from 'uuid'
+
 import { Claim } from '../../CredentialIssuanceMessage'
 import { SubmittedProofItem } from '../../IdentityProofSubmitMessage'
-import { v4 as uuid } from 'uuid'
 
 export interface VerifiableCredentialSubmittedProofItemOptions {
   id: string

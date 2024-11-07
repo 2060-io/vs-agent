@@ -1,5 +1,6 @@
-import { RequestedProofItem } from '../../IdentityProofRequestMessage'
 import { v4 as uuid } from 'uuid'
+
+import { RequestedProofItem } from '../../IdentityProofRequestMessage'
 
 export interface VerifiableCredentialRequestedProofItemOptions {
   id?: string
