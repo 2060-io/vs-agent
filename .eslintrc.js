@@ -7,6 +7,11 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
+  ignorePatterns: ["**build**", "**dist**"],
+  env: {
+    node: true,
+    jest: true,
+  },
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.eslint.json'],
