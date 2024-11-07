@@ -1,3 +1,27 @@
+import {
+  CallOfferRequestMessage,
+  ContextualMenuSelectMessage,
+  ContextualMenuUpdateMessage,
+  CredentialIssuanceMessage,
+  EMrtdDataRequestMessage,
+  EMrtdDataSubmitMessage,
+  EventType,
+  IdentityProofRequestMessage,
+  IdentityProofSubmitMessage,
+  InvitationMessage,
+  MenuDisplayMessage,
+  MenuItem,
+  MenuSelectMessage,
+  MrzDataRequestMessage,
+  MrzDataSubmitMessage,
+  ProfileMessage,
+  ReceiptsMessage,
+  TerminateConnectionMessage,
+  TextMessage,
+  VerifiableCredentialRequestedProofItem,
+  VerifiableCredentialSubmittedProofItem,
+  MediaMessage,
+} from '@2060.io/model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'
@@ -108,48 +132,49 @@ export const submitMessage = async (body: unknown) => {
 }
 
 const submitMessageReceipt = async (receivedMessage: any, messageState: 'received' | 'viewed') => {
-  const body = {
-    type: 'receipts',
+  const body = new ReceiptsMessage({
     connectionId: receivedMessage.connectionId,
     receipts: [
       {
         messageId: receivedMessage.id,
         state: messageState,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
       },
     ],
-  }
+  })
   await submitMessage(body)
 }
 
 const sendRootMenu = async (connectionId: string) => {
-  const body = {
-    type: 'contextual-menu-update',
+  const body = new ContextualMenuUpdateMessage({
     connectionId,
     ...rootContextMenu,
-  }
+  })
   await submitMessage(body)
 }
 
 const sendTextMessage = async (options: { connectionId: string; content: string }) => {
-  const body = {
-    type: 'text',
+  const body = new TextMessage({
     connectionId: options.connectionId,
     content: options.content,
-  }
+  })
 
   await submitMessage(body)
 }
 
 const sendQuestion = async (options: {
   connectionId: string
-  question: { prompt: string; menuItems: { id: string; text: string }[] }
+  question: { prompt: string; menuItems: MenuItem[] }
 }) => {
-  const body = {
-    type: 'menu-display',
+  const updatedMenuItems = options.question.menuItems.map(item => ({
+    ...item,
+    action: item.action || '',
+  }))
+  const body = new MenuDisplayMessage({
     connectionId: options.connectionId,
-    ...options.question,
-  }
+    prompt: options.question.prompt,
+    menuItems: updatedMenuItems,
+  })
   await submitMessage(body)
 }
 
@@ -175,8 +200,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
         content: 'Service not available',
       })
     } else {
-      const body = {
-        type: 'credential-issuance',
+      const body = new CredentialIssuanceMessage({
         connectionId,
         credentialDefinitionId: phoneNumberCredentialDefinitionId,
         claims: [
@@ -186,7 +210,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
             value: '+5712345678',
           },
         ],
-      }
+      })
       await submitMessage(body)
     }
   }
@@ -203,18 +227,17 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
         connectionId,
         content: 'In order to start a new chat, we need some verifiable information from you',
       })
-      const body = {
-        type: 'identity-proof-request',
+      const body = new IdentityProofRequestMessage({
         connectionId,
         requestedProofItems: [
-          {
+          new VerifiableCredentialRequestedProofItem({
             id: '1',
             type: 'verifiable-credential',
             credentialDefinitionId: phoneNumberCredentialDefinitionId,
             attributes: ['phoneNumber'],
-          },
+          }),
         ],
-      }
+      })
       await submitMessage(body)
     }
   }
@@ -280,7 +303,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   }
 }
 
-app.post('/connection-state-updated', async (req, res) => {
+app.post(`/${EventType.ConnectionState}`, async (req, res) => {
   const obj = req.body
   logger.info(`connection state updated: ${JSON.stringify(obj)}`)
   if (obj.state === 'completed') {
@@ -293,13 +316,13 @@ app.post('/connection-state-updated', async (req, res) => {
   res.json({ message: 'ok' })
 })
 
-app.post('/message-state-updated', async (req, res) => {
+app.post(`/${EventType.MessageStateUpdated}`, async (req, res) => {
   const obj = req.body
   logger.info(`message state updated: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' })
 })
 
-app.post('/message-received', async (req, res) => {
+app.post(`/${EventType.MessageReceived}`, async (req, res) => {
   const obj = req.body.message
   logger.info(`received message: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' }).send()
@@ -318,8 +341,7 @@ app.post('/message-received', async (req, res) => {
     } else if (content.startsWith('/media')) {
       const mediaParametersRegExp = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|[^\s]+/g
       const parsedContents = content.substring(7).match(mediaParametersRegExp)
-      const body = {
-        type: 'media',
+      const body = new MediaMessage({
         connectionId: obj.connectionId,
         description: parsedContents?.slice(1).join(' ') ?? 'An image',
         items: [
@@ -331,7 +353,7 @@ app.post('/message-received', async (req, res) => {
             byteCount: 6576,
           },
         ],
-      }
+      })
       await submitMessage(body)
       // Format: /link URL (opt)title (opt)description (opt)iconUrl (opt)openingMode
     } else if (content.startsWith('/link')) {
@@ -339,8 +361,7 @@ app.post('/message-received', async (req, res) => {
       const parsedContents = content.substring(6).match(linkParametersRegExp)
 
       if (parsedContents) {
-        const body = {
-          type: 'media',
+        const body = new MediaMessage({
           connectionId: obj.connectionId,
           description: parsedContents[2],
           items: [
@@ -352,28 +373,26 @@ app.post('/message-received', async (req, res) => {
               openingMode: parsedContents[4] || 'normal',
             },
           ],
-        }
+        })
         await submitMessage(body)
       }
     } else if (content.startsWith('/invitation')) {
       const parsedContents = content.split(' ')
-      const body = {
-        type: 'invitation',
+      const body = new InvitationMessage({
         connectionId: obj.connectionId,
         label: parsedContents[1],
         imageUrl: parsedContents[2],
         did: parsedContents[3],
-      }
+      })
       await submitMessage(body)
     } else if (content.startsWith('/profile')) {
       const parsedContents = content.split(' ')
-      const body = {
-        type: 'profile',
+      const body = new ProfileMessage({
         connectionId: obj.connectionId,
         displayName: parsedContents[1],
         displayImageUrl: parsedContents[2],
         displayIconUrl: parsedContents[3],
-      }
+      })
       await submitMessage(body)
     } else if (content.startsWith('/call')) {
       const parsedContents = content.split(' ')
@@ -401,11 +420,10 @@ app.post('/message-received', async (req, res) => {
         const peerId = obj.connectionId // We re-use connection id to simplify
 
         ongoingCalls.push({ wsUrl, roomId, connectionId: obj.connectionId })
-        const body = {
-          type: 'call-offer',
+        const body = new CallOfferRequestMessage({
           connectionId: obj.connectionId,
           parameters: { wsUrl, roomId, peerId },
-        }
+        })
         await submitMessage(body)
       } catch (reason) {
         logger.error(`Cannot create call: ${reason}`)
@@ -415,29 +433,26 @@ app.post('/message-received', async (req, res) => {
         })
       }
     } else if (content.startsWith('/mrz')) {
-      const body = {
-        type: 'mrz-data-request',
+      const body = new MrzDataRequestMessage({
         connectionId,
-      }
+      })
       await submitMessage(body)
     } else if (content.startsWith('/emrtd')) {
-      const body = {
-        type: 'emrtd-data-request',
+      const body = new EMrtdDataRequestMessage({
         connectionId,
-      }
+      })
       await submitMessage(body)
     } else if (content.startsWith('/proof')) {
-      const body = {
-        type: 'identity-proof-request',
+      const body = new IdentityProofRequestMessage({
         connectionId,
         requestedProofItems: [
-          {
+          new VerifiableCredentialRequestedProofItem({
             id: '1',
             type: 'verifiable-credential',
             credentialDefinitionId: phoneNumberCredentialDefinitionId,
-          },
+          }),
         ],
-      }
+      })
       await submitMessage(body)
     } else if (content.startsWith('/rocky')) {
       await sendTextMessage({
@@ -447,10 +462,9 @@ app.post('/message-received', async (req, res) => {
     } else if (content.startsWith('/help')) {
       await sendTextMessage({ connectionId, content: helpMessage })
     } else if (content.startsWith('/terminate')) {
-      const body = {
-        type: 'terminate-connection',
+      const body = new TerminateConnectionMessage({
         connectionId,
-      }
+      })
       await submitMessage(body)
     } else {
       // Text message received but not understood
@@ -459,18 +473,21 @@ app.post('/message-received', async (req, res) => {
         content: 'I do not understand what you say. Write /help to get available commands',
       })
     }
-  } else if (obj.type === 'menu-select') {
+  } else if (obj instanceof MenuSelectMessage) {
     await submitMessageReceipt(obj, 'viewed')
     await handleMenuSelection({ connectionId: obj.connectionId, item: obj.menuItems[0]?.id ?? 'nothing' })
-  } else if (obj.type === 'contextual-menu-select') {
+  } else if (obj instanceof ContextualMenuSelectMessage) {
     await submitMessageReceipt(obj, 'viewed')
     // Refresh context menu
     await sendRootMenu(obj.connectionId)
 
     await handleMenuSelection({ connectionId: obj.connectionId, item: obj.selectionId ?? 'nothing' })
-  } else if (obj.type === 'identity-proof-submit') {
+  } else if (obj instanceof IdentityProofSubmitMessage) {
     await submitMessageReceipt(obj, 'viewed')
-    const errorCode = obj.submittedProofItems[0].errorCode
+    const errorCode =
+      obj.submittedProofItems[0] instanceof VerifiableCredentialSubmittedProofItem
+        ? obj.submittedProofItems[0].errorCode
+        : null
     if (errorCode) {
       await sendTextMessage({ connectionId: obj.connectionId, content: `Error code received: ${errorCode}` })
     } else {
@@ -479,21 +496,20 @@ app.post('/message-received', async (req, res) => {
         content: 'We have successfully received your proof submission. Enjoy the service!',
       })
     }
-  } else if (obj.type === 'media') {
+  } else if (obj instanceof MediaMessage) {
     logger.info('media received')
     await submitMessageReceipt(obj, 'viewed')
-  } else if (obj.type === 'mrz-data-submit') {
+  } else if (obj instanceof MrzDataSubmitMessage) {
     logger.info(`MRZ Data submit: ${JSON.stringify(obj.mrzData)}`)
     await submitMessageReceipt(obj, 'viewed')
 
     // Request eEMRTD data to continue the flow
-    const body = {
-      type: 'emrtd-data-request',
+    const body = new EMrtdDataRequestMessage({
       connectionId: obj.connectionId,
       threadId: obj.threadId,
-    }
+    })
     await submitMessage(body)
-  } else if (obj.type === 'emrtd-data-submit') {
+  } else if (obj instanceof EMrtdDataSubmitMessage) {
     logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
     await submitMessageReceipt(obj, 'viewed')
   }
