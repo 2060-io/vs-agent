@@ -6,10 +6,10 @@
   },
   "compilerOptions": {
     "baseUrl": ".",
-    "types": ["jest", "node"],
     "paths": {
       "@2060.io/*": ["packages/*/src"]
     },
+    "types": ["jest", "node"]
   },
-  "exclude": ["node_modules", "**/build/**"]
+  "exclude": ["node_modules", "build"]
 }

@@ -1,8 +1,6 @@
 {
-	"extends": "../../tsconfig.json",
-	"compilerOptions": {
-		"allowJs": false,
-		"typeRoots": ["../../node_modules/@types", "build/types"],
-		"types": ["jest", "node"],
-	}
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest"]
+  }
 }

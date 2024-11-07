@@ -7,7 +7,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
-  ignorePatterns: ["**build**", "**dist**"],
+  ignorePatterns: ['**build**', '**dist**'],
   env: {
     node: true,
     jest: true,

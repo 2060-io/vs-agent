@@ -16,7 +16,15 @@
     "emitDecoratorMetadata": true,
     // TODO: we should update code to assume errors are of type 'unknown'
     "useUnknownInCatchVariables": false,
-    "outDir": "./build" 
+    "outDir": "./build"
   },
-  "exclude": ["node_modules", "build", "**/*.test.ts", "**/__tests__/*.ts", "**/__mocks__/*.ts", "**/build/**"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "**/*.test.ts",
+    "**/__tests__/*.ts",
+    "**/__mocks__/*.ts",
+    "**/build/**",
+    "scripts"
+  ]
 }
