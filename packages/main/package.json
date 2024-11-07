@@ -101,7 +101,7 @@
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "supertest": "^6.2.3",
-    "typescript": "^5.6.2"
+    "ts-node-dev": "^2.0.0"
   },
   "resolutions": {
     "tsyringe": "4.8.0",
