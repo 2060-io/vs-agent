@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 import { Expose, Type } from 'class-transformer'
 import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 

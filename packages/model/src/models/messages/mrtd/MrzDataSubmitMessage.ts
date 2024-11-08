@@ -1,4 +1,4 @@
-import { MrzData } from '@2060.io/credo-ts-didcomm-mrtd'
+import { MrzData } from '@2060.io/credo-ts-didcomm-mrtd/build/models/MrzData'
 import { Expose } from 'class-transformer'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'

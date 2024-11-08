@@ -1,4 +1,4 @@
-import { JsonTransformer, utils } from '@credo-ts/core'
+import { JsonTransformer, utils } from '@credo-ts/core/build'
 import { Expose } from 'class-transformer'
 import { IsEnum, IsUUID, IsOptional, IsString, IsNotEmpty } from 'class-validator'
 

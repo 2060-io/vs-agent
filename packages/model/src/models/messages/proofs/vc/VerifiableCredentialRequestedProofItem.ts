@@ -1,4 +1,4 @@
-import { utils } from '@credo-ts/core'
+import { utils } from '@credo-ts/core/build'
 
 import { RequestedProofItem } from '../../IdentityProofRequestMessage'
 
