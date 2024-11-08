@@ -24,7 +24,7 @@
     "validate": "yarn lint && yarn check-types && yarn check-format"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -35,7 +35,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
     "prettier": "^3.2.5",
-    "ts-jest": "^27.0.7",
+    "ts-jest": "^29.0.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.1.0",
     "typescript": "^5.6.2"

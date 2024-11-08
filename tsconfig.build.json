@@ -15,8 +15,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     // TODO: we should update code to assume errors are of type 'unknown'
-    "useUnknownInCatchVariables": false,
-    "outDir": "./build"
+    "useUnknownInCatchVariables": false
   },
   "exclude": [
     "node_modules",

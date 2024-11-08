@@ -26,6 +26,7 @@
     "mrz": "^4.2.0"
   },
   "devDependencies": {
+    "@types/node-tlv": "^1.5.4",
     "ts-node-dev": "^2.0.0"
   }
 }
