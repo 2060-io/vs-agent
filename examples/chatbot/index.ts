@@ -229,15 +229,15 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
       })
       const body = new IdentityProofRequestMessage({
         connectionId,
-        requestedProofItems: [
-          new VerifiableCredentialRequestedProofItem({
-            id: '1',
-            type: 'verifiable-credential',
-            credentialDefinitionId: phoneNumberCredentialDefinitionId,
-            attributes: ['phoneNumber'],
-          }),
-        ],
+        requestedProofItems: [],
       })
+      const requestedProofItem = new VerifiableCredentialRequestedProofItem({
+        id: '1',
+        type: 'verifiable-credential',
+        credentialDefinitionId: phoneNumberCredentialDefinitionId,
+        attributes: ['phoneNumber'],
+      })
+      body.requestedProofItems.push(requestedProofItem)
       await submitMessage(body)
     }
   }
@@ -445,14 +445,14 @@ app.post(`/${EventType.MessageReceived}`, async (req, res) => {
     } else if (content.startsWith('/proof')) {
       const body = new IdentityProofRequestMessage({
         connectionId,
-        requestedProofItems: [
-          new VerifiableCredentialRequestedProofItem({
-            id: '1',
-            type: 'verifiable-credential',
-            credentialDefinitionId: phoneNumberCredentialDefinitionId,
-          }),
-        ],
+        requestedProofItems: [],
       })
+      const requestedProofItem = new VerifiableCredentialRequestedProofItem({
+        id: '1',
+        type: 'verifiable-credential',
+        credentialDefinitionId: phoneNumberCredentialDefinitionId,
+      })
+      body.requestedProofItems.push(requestedProofItem)
       await submitMessage(body)
     } else if (content.startsWith('/rocky')) {
       await sendTextMessage({
