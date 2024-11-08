@@ -9,7 +9,6 @@ import {
   ProfileMessage,
   MediaMessage,
   IBaseMessage,
-  didcommReceiptFromServiceAgentReceipt,
   IdentityProofResultMessage,
   TerminateConnectionMessage,
   CallOfferRequestMessage,
@@ -35,7 +34,7 @@ import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answ
 import { Injectable, Logger } from '@nestjs/common'
 
 import { AgentService } from '../../services/AgentService'
-import { parsePictureData } from '../../utils/parsers'
+import { didcommReceiptFromServiceAgentReceipt, parsePictureData } from '../../utils/parsers'
 import { RequestedCredential } from '../types'
 
 @Injectable()

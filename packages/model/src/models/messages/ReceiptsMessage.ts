@@ -1,13 +1,13 @@
 import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Type, Transform } from 'class-transformer'
 import { IsInstance, IsArray, IsDate, IsString, ValidateNested } from 'class-validator'
-import { MessageReceipt, MessageState } from 'credo-ts-receipts'
+import { MessageState } from 'credo-ts-receipts/build/messages/MessageState'
 
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'
 
 // FIXME: Do a better conversion between DIDComm protocol and Service Agent protocol constants
-const didcommMessageState: Record<string, MessageState> = {
+export const didcommMessageState: Record<string, MessageState> = {
   created: MessageState.Created,
   deleted: MessageState.Deleted,
   received: MessageState.Received,
@@ -18,7 +18,7 @@ const didcommMessageState: Record<string, MessageState> = {
 export interface ServiceAgentMessageReceiptOptions {
   messageId: string
   state: string
-  timestamp?: Date
+  timestamp: Date
 }
 
 export class ServiceAgentMessageReceipt {
@@ -50,9 +50,6 @@ export interface ReceiptsMessageOptions {
   receipts: ServiceAgentMessageReceiptOptions[]
 }
 
-export const didcommReceiptFromServiceAgentReceipt = (receipt: ServiceAgentMessageReceipt) =>
-  new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()] })
-
 export class ReceiptsMessage extends BaseMessage {
   public constructor(options: ReceiptsMessageOptions) {
     super()
@@ -62,10 +59,7 @@ export class ReceiptsMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.receipts = options.receipts.map(
-        receipt =>
-          new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()] }),
-      )
+      this.receipts = options.receipts
     }
   }
 

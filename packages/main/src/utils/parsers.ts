@@ -1,5 +1,7 @@
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
+import { didcommMessageState, ServiceAgentMessageReceipt } from '@2060.io/model'
 import { isUri } from '@credo-ts/core/build/utils'
+import { MessageReceipt } from 'credo-ts-receipts'
 
 export function parseDataUrl(dataUrl: string) {
   const regex = /^data:(.+);base64,(.*)$/
@@ -26,3 +28,6 @@ export function createDataUrl(pictureData: PictureData): string | undefined {
     return pictureData.links[0]
   }
 }
+
+export const didcommReceiptFromServiceAgentReceipt = (receipt: ServiceAgentMessageReceipt) =>
+  new MessageReceipt({ ...receipt, state: didcommMessageState[receipt.state.toLowerCase()] })
