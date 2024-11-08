@@ -327,7 +327,7 @@ app.post(`/${EventType.MessageReceived}`, async (req, res) => {
   logger.info(`received message: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' }).send()
 
-  if (obj.type === 'text') {
+  if (obj.type === TextMessage.type) {
     await submitMessageReceipt(obj, 'viewed')
     const connectionId = obj.connectionId
     const content = obj.content as string
@@ -473,19 +473,19 @@ app.post(`/${EventType.MessageReceived}`, async (req, res) => {
         content: 'I do not understand what you say. Write /help to get available commands',
       })
     }
-  } else if (obj instanceof MenuSelectMessage) {
+  } else if (obj.type === MenuSelectMessage.type) {
     await submitMessageReceipt(obj, 'viewed')
     await handleMenuSelection({ connectionId: obj.connectionId, item: obj.menuItems[0]?.id ?? 'nothing' })
-  } else if (obj instanceof ContextualMenuSelectMessage) {
+  } else if (obj.type === ContextualMenuSelectMessage.type) {
     await submitMessageReceipt(obj, 'viewed')
     // Refresh context menu
     await sendRootMenu(obj.connectionId)
 
     await handleMenuSelection({ connectionId: obj.connectionId, item: obj.selectionId ?? 'nothing' })
-  } else if (obj instanceof IdentityProofSubmitMessage) {
+  } else if (obj.type === IdentityProofSubmitMessage.type) {
     await submitMessageReceipt(obj, 'viewed')
     const errorCode =
-      obj.submittedProofItems[0] instanceof VerifiableCredentialSubmittedProofItem
+      obj.submittedProofItems[0].type === VerifiableCredentialSubmittedProofItem.type
         ? obj.submittedProofItems[0].errorCode
         : null
     if (errorCode) {
@@ -496,10 +496,10 @@ app.post(`/${EventType.MessageReceived}`, async (req, res) => {
         content: 'We have successfully received your proof submission. Enjoy the service!',
       })
     }
-  } else if (obj instanceof MediaMessage) {
+  } else if (obj.type === MediaMessage.type) {
     logger.info('media received')
     await submitMessageReceipt(obj, 'viewed')
-  } else if (obj instanceof MrzDataSubmitMessage) {
+  } else if (obj.type === MrzDataSubmitMessage.type) {
     logger.info(`MRZ Data submit: ${JSON.stringify(obj.mrzData)}`)
     await submitMessageReceipt(obj, 'viewed')
 
@@ -509,7 +509,7 @@ app.post(`/${EventType.MessageReceived}`, async (req, res) => {
       threadId: obj.threadId,
     })
     await submitMessage(body)
-  } else if (obj instanceof EMrtdDataSubmitMessage) {
+  } else if (obj.type === EMrtdDataSubmitMessage.type) {
     logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
     await submitMessageReceipt(obj, 'viewed')
   }
