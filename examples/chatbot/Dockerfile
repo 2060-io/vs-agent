@@ -2,16 +2,11 @@ FROM node:18 as base
 
 COPY package.json yarn.lock tsconfig.json tsconfig.build.json ./
 COPY packages/model/package.json packages/model/package.json
-COPY packages/main/package.json packages/main/package.json
 
 COPY packages/model/src ./packages/model/src
-COPY packages/main/src ./packages/main/src
 
 COPY packages/model/tsconfig.json packages/model/tsconfig.json
 COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
-
-COPY packages/main/tsconfig.json packages/main/tsconfig.json
-COPY packages/main/tsconfig.build.json packages/main/tsconfig.build.json
 
 RUN yarn install
 RUN yarn build
