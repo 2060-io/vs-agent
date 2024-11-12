@@ -28,5 +28,8 @@
   "devDependencies": {
     "@types/node-tlv": "^1.5.4",
     "ts-node-dev": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@credo-ts/core": "^0.5.11"
   }
 }

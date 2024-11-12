@@ -1,4 +1,4 @@
-import { utils } from '@credo-ts/core/build'
+import { utils } from '@credo-ts/core'
 import { Type } from 'class-transformer'
 import { IsOptional, IsArray, IsInstance, IsString, ValidateNested } from 'class-validator'
 

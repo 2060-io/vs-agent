@@ -1,4 +1,4 @@
-import { CredentialState } from '@credo-ts/core/build/modules/credentials/models/CredentialState'
+import { CredentialState } from '@credo-ts/core'
 import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
 

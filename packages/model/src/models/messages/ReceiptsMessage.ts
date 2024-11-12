@@ -1,7 +1,7 @@
 import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Type, Transform } from 'class-transformer'
 import { IsInstance, IsArray, IsDate, IsString, ValidateNested } from 'class-validator'
-import { MessageState } from 'credo-ts-receipts/build/messages/MessageState'
+import { MessageState } from 'credo-ts-receipts'
 
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'

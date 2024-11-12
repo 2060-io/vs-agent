@@ -1,4 +1,4 @@
-import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd/build/models/EMrtdData'
+import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Expose } from 'class-transformer'
 import * as Mrz from 'mrz'
 
