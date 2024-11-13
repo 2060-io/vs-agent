@@ -1,3 +1,4 @@
+import { CreateCredentialOfferResult, CreatePresentationRequestResult } from '@2060.io/model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
@@ -5,7 +6,6 @@ import { ApiBody, ApiTags } from '@nestjs/swagger'
 import { AgentService } from '../../services/AgentService'
 import { UrlShorteningService } from '../../services/UrlShorteningService'
 import { createInvitation } from '../../utils/agent'
-import { CreateCredentialOfferResult, CreatePresentationRequestResult } from '../types'
 
 import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
 

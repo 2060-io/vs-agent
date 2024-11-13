@@ -1,12 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty } from 'class-validator'
-
 import {
   ClaimOptions,
   CreateCredentialOfferOptions,
   CreatePresentationRequestOptions,
   RequestedCredential,
-} from '../types'
+} from '@2060.io/model'
+import { ApiProperty } from '@nestjs/swagger'
+import { IsNotEmpty } from 'class-validator'
 
 export class CreatePresentationRequestDto implements CreatePresentationRequestOptions {
   @ApiProperty({

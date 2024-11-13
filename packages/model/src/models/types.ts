@@ -5,7 +5,7 @@ import type {
   ProofState,
 } from '@credo-ts/core'
 
-import { Claim } from '@2060.io/model'
+import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
 
 export interface AgentInfo {
   label: string
@@ -69,12 +69,6 @@ export interface PresentationData {
   proofExchangeId: string
   threadId: string
   updatedAt: Date | undefined
-}
-
-export interface ClaimOptions {
-  name: string
-  mimeType?: string
-  value: string
 }
 
 export interface CreateCredentialOfferOptions {

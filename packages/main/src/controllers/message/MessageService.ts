@@ -16,6 +16,7 @@ import {
   MrzDataRequestMessage,
   EMrtdDataRequestMessage,
   VerifiableCredentialRequestedProofItem,
+  RequestedCredential,
 } from '@2060.io/model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
@@ -35,7 +36,6 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { AgentService } from '../../services/AgentService'
 import { didcommReceiptFromServiceAgentReceipt, parsePictureData } from '../../utils/parsers'
-import { RequestedCredential } from '../types'
 
 @Injectable()
 export class MessageService {

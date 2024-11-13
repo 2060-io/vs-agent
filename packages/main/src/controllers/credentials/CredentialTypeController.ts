@@ -1,3 +1,4 @@
+import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
@@ -26,7 +27,6 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { AgentService } from '../../services/AgentService'
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '../types'
 
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
 

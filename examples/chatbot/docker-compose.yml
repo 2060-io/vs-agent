@@ -20,6 +20,7 @@ services:
       - EVENTS_BASE_URL=http://chatbot-backend:5000
     volumes:
       - ./afj:/root/.afj
+
   chatbot-backend:
     build: 
       context: ../../
