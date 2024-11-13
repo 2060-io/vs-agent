@@ -1,0 +1,32 @@
+{
+  "name": "@2060.io/client",
+  "main": "build/index",
+  "types": "build/index",
+  "version": "0.0.1",
+  "files": [
+    "build"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "yarn run clean && yarn run compile",
+    "clean": "rimraf -rf ./build",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn run build",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@2060.io/model": "*",
+    "class-transformer": "0.5.1",
+    "tslog": "^4.8.2",
+    "class-validator": "0.14.1"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@credo-ts/core": "^0.5.11"
+  }
+}
