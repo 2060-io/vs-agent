@@ -10,7 +10,7 @@
     "sourceMap": true,
     "strict": true,
     "noEmitOnError": true,
-    "lib": [],
+    "lib": ["dom"],
     "types": ["node"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

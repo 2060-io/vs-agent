@@ -1,0 +1,7 @@
+node_modules
+build
+.npmrc
+.yalc
+*.txn
+logs.txt
+examples/**/afj
