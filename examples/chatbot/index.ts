@@ -264,7 +264,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   }
 }
 
-expressHandler.ConnectionState(async (req, res) => {
+expressHandler.connectionState(async (req, res) => {
   const obj = req.body
   logger.info(`connection state updated: ${JSON.stringify(obj)}`)
   if (obj.state === 'completed') {
@@ -277,13 +277,13 @@ expressHandler.ConnectionState(async (req, res) => {
   res.json({ message: 'ok' })
 })
 
-expressHandler.MessageStateUpdated(async (req, res) => {
+expressHandler.messageStateUpdated(async (req, res) => {
   const obj = req.body
   logger.info(`message state updated: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' })
 })
 
-expressHandler.MessageReceived(async (req, res) => {
+expressHandler.messageReceived(async (req, res) => {
   const obj = req.body.message
   logger.info(`received message: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' }).send()

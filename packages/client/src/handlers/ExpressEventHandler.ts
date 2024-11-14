@@ -36,7 +36,7 @@ export class ExpressEventHandler {
    *   state: "completed",
    * }
    */
-  public ConnectionState(handler: Handler) {
+  public connectionState(handler: Handler) {
     this.app.post(`/${EventType.ConnectionState}`, async (req: Request, res: Response) => {
       try {
         await handler(req, res)
@@ -63,7 +63,7 @@ export class ExpressEventHandler {
    *   connectionId: "conn123"
    * }
    */
-  public MessageStateUpdated(handler: Handler) {
+  public messageStateUpdated(handler: Handler) {
     this.app.post(`/${EventType.MessageStateUpdated}`, async (req: Request, res: Response) => {
       try {
         await handler(req, res)
@@ -91,7 +91,7 @@ export class ExpressEventHandler {
    *   timestamp: "2023-10-01T12:00:00Z",
    * }
    */
-  public MessageReceived(handler: Handler) {
+  public messageReceived(handler: Handler) {
     this.app.post(`/${EventType.MessageReceived}`, async (req: Request, res: Response) => {
       try {
         await handler(req, res)
