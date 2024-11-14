@@ -7,6 +7,13 @@ import { ApiVersion } from '../types/enums'
 
 const logger = new Logger()
 
+/**
+ * `MessageService` class for handling message-related endpoints in the Agent Service.
+ * This class is based on the `BaseMessage` from the `@2060.io/model` library.
+ *
+ * The methods in this class allow for sending messages and managing related tasks.
+ * For more details on the `BaseMessage` structure and usage, refer to the `@2060.io/model` library.
+ */
 export class MessageService {
   private url: string
 

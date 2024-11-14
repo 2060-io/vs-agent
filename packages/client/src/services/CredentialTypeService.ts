@@ -7,6 +7,13 @@ import { ApiVersion } from '../types/enums'
 
 const logger = new Logger()
 
+/**
+ * `CredentialTypeService` class for managing credential types and interacting with
+ * the available endpoints related to credential types in the Agent Service.
+ *
+ * This class provides methods for querying, creating, and managing credential types.
+ * For a list of available endpoints and functionality, refer to the methods within this class.
+ */
 export class CredentialTypeService {
   private url: string
 

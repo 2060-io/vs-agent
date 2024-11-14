@@ -32,7 +32,7 @@ import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
 import phoneCredDefData from './phone-cred-def-dev.json'
-import { ApiClient, ApiVersion } from '@2060.io/client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/client'
 
 const logger = new Logger()
 
@@ -44,9 +44,9 @@ const VISION_SERVICE_BASE_URL =
 const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
 const app = express()
 
-const [baseUrl, versionPath] = SERVICE_AGENT_BASE_URL.split('/v');
-const version = versionPath ? `v${versionPath}` : ApiVersion.V1;
-const apiClient = new ApiClient(baseUrl, version as ApiVersion);
+const [baseUrl, versionPath] = SERVICE_AGENT_BASE_URL.split('/v')
+const version = versionPath ? `v${versionPath}` : ApiVersion.V1
+const apiClient = new ApiClient(baseUrl, version as ApiVersion)
 
 const staticDir = path.join(__dirname, 'public')
 app.use(express.static(staticDir))
@@ -56,6 +56,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.set('json spaces', 2)
+const expressHandler = new ExpressEventHandler(app)
 
 let phoneNumberCredentialDefinitionId: string | undefined
 
@@ -263,7 +264,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
   }
 }
 
-app.post(`/${EventType.ConnectionState}`, async (req, res) => {
+expressHandler.ConnectionState(async (req, res) => {
   const obj = req.body
   logger.info(`connection state updated: ${JSON.stringify(obj)}`)
   if (obj.state === 'completed') {
@@ -276,13 +277,13 @@ app.post(`/${EventType.ConnectionState}`, async (req, res) => {
   res.json({ message: 'ok' })
 })
 
-app.post(`/${EventType.MessageStateUpdated}`, async (req, res) => {
+expressHandler.MessageStateUpdated(async (req, res) => {
   const obj = req.body
   logger.info(`message state updated: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' })
 })
 
-app.post(`/${EventType.MessageReceived}`, async (req, res) => {
+expressHandler.MessageReceived(async (req, res) => {
   const obj = req.body.message
   logger.info(`received message: ${JSON.stringify(obj)}`)
   res.json({ message: 'ok' }).send()
