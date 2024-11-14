@@ -38,5 +38,5 @@ COPY examples/chatbot/phone-cred-def-dev.json examples/chatbot/phone-cred-def-de
 COPY examples/chatbot/tsconfig.json examples/chatbot/tsconfig.json
 
 RUN yarn --cwd examples/chatbot build
-COPY ./examples/chatbot/public ./examples/chatbot/build/public
+COPY examples/chatbot/public examples/chatbot/build/public
 CMD yarn --cwd examples/chatbot start
