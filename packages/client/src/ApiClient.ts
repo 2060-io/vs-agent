@@ -1,6 +1,7 @@
 // src/ApiClient.ts
 
 import { Logger } from 'tslog'
+
 import { CredentialTypeService } from './services/CredentialTypeService'
 import { MessageService } from './services/MessageService'
 import { ApiVersion } from './types/enums'

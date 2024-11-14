@@ -1,8 +1,9 @@
 // src/services/CredentialTypeService.ts
 
 import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/model'
-import { ApiVersion } from '../types/enums'
 import { Logger } from 'tslog'
+
+import { ApiVersion } from '../types/enums'
 
 const logger = new Logger()
 
@@ -24,8 +25,8 @@ export class CredentialTypeService {
       headers: { accept: 'application/json', 'Content-Type': 'application/json' },
     })
     if (!response.ok) throw new Error(`Cannot import credential type: status ${response.status}`)
-    
-    return (await response.json() as CredentialTypeInfo)
+
+    return (await response.json()) as CredentialTypeInfo
   }
 
   public async createCredentialType(credentialType: CredentialTypeInfo): Promise<any> {
@@ -44,7 +45,7 @@ export class CredentialTypeService {
     })
 
     const types = await response.json()
-    
+
     if (!Array.isArray(types)) {
       throw new Error('Invalid response from Service Agent')
     }
