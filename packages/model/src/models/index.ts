@@ -1,4 +1,3 @@
 export * from './messages'
-export * from './Event'
-export * from './EventType'
+export * from './events'
 export * from './types'

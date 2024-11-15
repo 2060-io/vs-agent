@@ -1,3 +1,4 @@
+import { VCAuthnEvent } from '@2060.io/model'
 import { ProofEventTypes, ProofState, ProofStateChangedEvent } from '@credo-ts/core'
 
 import { ServerConfig } from '../utils/ServerConfig'
@@ -17,12 +18,12 @@ export const vcAuthnEvents = async (agent: ServiceAgent, config: ServerConfig) =
       return state
     }
 
-    const body = {
+    const body = new VCAuthnEvent({
       presentation_exchange_id: record.id,
       state: stateMap(record.state),
       verified: record.isVerified ? 'true' : 'false',
       error_msg: record.errorMessage,
-    }
+    })
 
     await sendWebhookEvent(config.webhookUrl + '/topic/present_proof', body, config.logger)
   })
