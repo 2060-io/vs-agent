@@ -1,12 +1,9 @@
+import { Event } from '@2060.io/model'
 import fetch from 'node-fetch'
 
 import { TsLogger } from '../utils/logger'
 
-export const sendWebhookEvent = async (
-  webhookUrl: string,
-  body: Record<string, unknown>,
-  logger: TsLogger,
-) => {
+export const sendWebhookEvent = async (webhookUrl: string, body: Event, logger: TsLogger) => {
   try {
     logger.debug(`sending webhook event to ${webhookUrl}: ${JSON.stringify(body)}`)
     await fetch(webhookUrl, {

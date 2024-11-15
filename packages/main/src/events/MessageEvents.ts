@@ -1,6 +1,6 @@
 import type { ServerConfig } from '../utils/ServerConfig'
 import type { CredentialStateChangedEvent } from '@credo-ts/core'
-import type { MessageReceiptsReceivedEvent } from 'credo-ts-receipts'
+import type { MessageReceiptsReceivedEvent, MessageState } from 'credo-ts-receipts'
 
 import {
   CallAcceptMessage,
@@ -32,6 +32,8 @@ import {
   MrzDataSubmitMessage,
   EMrtdDataSubmitMessage,
   VerifiableCredentialSubmittedProofItem,
+  MessageStateUpdated,
+  MessageReceived,
 } from '@2060.io/model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
@@ -430,11 +432,10 @@ const sendMessageReceivedEvent = async (
 ) => {
   const recordId = await agent.genericRecords.findById(message.id)
   if (recordId?.getTag('messageId') as string) message.id = recordId?.getTag('messageId') as string
-  const body = {
+  const body = new MessageReceived({
     timestamp,
-    type: 'message-received',
-    message: message.toJSON(),
-  }
+    message: message,
+  })
 
   await sendWebhookEvent(config.webhookUrl + '/message-received', body, config.logger)
 }
@@ -443,19 +444,18 @@ const sendMessageStateUpdatedEvent = async (options: {
   agent: ServiceAgent
   messageId: string
   connectionId: string
-  state: string
+  state: MessageState
   timestamp: Date
   config: ServerConfig
 }) => {
   const { agent, messageId, connectionId, state, timestamp, config } = options
   const recordId = await agent.genericRecords.findById(messageId)
 
-  const body = {
-    type: 'message-state-updated',
+  const body = new MessageStateUpdated({
     messageId: (recordId?.getTag('messageId') as string) ?? messageId,
     state,
     timestamp,
     connectionId,
-  }
+  })
   await sendWebhookEvent(config.webhookUrl + '/message-state-updated', body, config.logger)
 }

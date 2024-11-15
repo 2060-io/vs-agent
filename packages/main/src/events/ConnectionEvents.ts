@@ -1,6 +1,7 @@
 import type { ServerConfig } from '../utils/ServerConfig'
 import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
 
+import { ConnectionStateUpdated } from '@2060.io/model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,
@@ -33,12 +34,11 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
       if (record.state === DidExchangeState.Completed)
         await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
 
-      const body = {
-        type: 'connection-state-updated',
+      const body = new ConnectionStateUpdated({
         connectionId: record.id,
         invitationId: record.outOfBandId,
         state: record.state,
-      }
+      })
 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     },
@@ -50,12 +50,11 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
     const { message, connection } = payload
 
     if (message.type === HangupMessage.type.messageTypeUri && connection) {
-      const body = {
-        type: 'connection-state-updated',
+      const body = new ConnectionStateUpdated({
         connectionId: connection.id,
         invitationId: connection.outOfBandId,
         state: 'terminated',
-      }
+      })
 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     }
