@@ -5,7 +5,6 @@ import {
   CredentialIssuanceMessage,
   EMrtdDataRequestMessage,
   EMrtdDataSubmitMessage,
-  EventType,
   IdentityProofRequestMessage,
   IdentityProofSubmitMessage,
   InvitationMessage,
