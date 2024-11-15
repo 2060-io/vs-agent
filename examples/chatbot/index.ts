@@ -21,7 +21,6 @@ import {
   VerifiableCredentialRequestedProofItem,
   VerifiableCredentialSubmittedProofItem,
   MediaMessage,
-  CredentialTypeInfo,
 } from '@2060.io/model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
