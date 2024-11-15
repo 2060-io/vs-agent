@@ -33,14 +33,14 @@ import { ApiVersion } from './types/enums'
  * - `credentialType`: Query and manage credential types.
  */
 export class ApiClient {
-  public readonly message: MessageService
-  public readonly credentialType: CredentialTypeService
+  public readonly messages: MessageService
+  public readonly credentialTypes: CredentialTypeService
 
   constructor(
     private baseURL: string,
     private version: ApiVersion = ApiVersion.V1,
   ) {
-    this.message = new MessageService(baseURL, version)
-    this.credentialType = new CredentialTypeService(baseURL, version)
+    this.messages = new MessageService(baseURL, version)
+    this.credentialTypes = new CredentialTypeService(baseURL, version)
   }
 }

@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@2060.io/client@file:../../packages/client/build":
+"@2060.io/service-agent-client@file:../../packages/client/build":
   version "0.0.0"
 
 "@2060.io/model@file:../../packages/model/build":

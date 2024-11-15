@@ -31,7 +31,7 @@ import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
 import phoneCredDefData from './phone-cred-def-dev.json'
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
 
 const logger = new Logger()
 
@@ -72,7 +72,7 @@ const server = app.listen(PORT, async () => {
 
   // Ensure that phone credential type is created. If it does not exist, import it from
   // JSON (Note: This is only for dev purposes. Should not be done in production)
-  const credentialTypes = await apiClient.credentialType.getAllCredentialTypes()
+  const credentialTypes = await apiClient.credentialTypes.getAll()
 
   if (credentialTypes.length === 0) {
     logger.info('No credential types have been found')
@@ -84,7 +84,7 @@ const server = app.listen(PORT, async () => {
 
   try {
     phoneNumberCredentialDefinitionId =
-      phoneNumberCredentialType?.id ?? (await apiClient.credentialType.importCredentialType(phoneCredDefData)).id
+      phoneNumberCredentialType?.id ?? (await apiClient.credentialTypes.import(phoneCredDefData)).id
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
@@ -102,7 +102,7 @@ const submitMessageReceipt = async (receivedMessage: any, messageState: 'receive
       },
     ],
   })
-  await apiClient.message.sendMessage(body)
+  await apiClient.messages.send(body)
 }
 
 const sendRootMenu = async (connectionId: string) => {
@@ -110,7 +110,7 @@ const sendRootMenu = async (connectionId: string) => {
     connectionId,
     ...rootContextMenu,
   })
-  await apiClient.message.sendMessage(body)
+  await apiClient.messages.send(body)
 }
 
 const sendTextMessage = async (options: { connectionId: string; content: string }) => {
@@ -119,7 +119,7 @@ const sendTextMessage = async (options: { connectionId: string; content: string 
     content: options.content,
   })
 
-  await apiClient.message.sendMessage(body)
+  await apiClient.messages.send(body)
 }
 
 const sendQuestion = async (options: {
@@ -135,7 +135,7 @@ const sendQuestion = async (options: {
     prompt: options.question.prompt,
     menuItems: updatedMenuItems,
   })
-  await apiClient.message.sendMessage(body)
+  await apiClient.messages.send(body)
 }
 
 const handleMenuSelection = async (options: { connectionId: string; item: string }) => {
@@ -171,7 +171,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
           },
         ],
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     }
   }
 
@@ -198,7 +198,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
         attributes: ['phoneNumber'],
       })
       body.requestedProofItems.push(requestedProofItem)
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     }
   }
 
@@ -314,7 +314,7 @@ expressHandler.messageReceived(async (req, res) => {
           },
         ],
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
       // Format: /link URL (opt)title (opt)description (opt)iconUrl (opt)openingMode
     } else if (content.startsWith('/link')) {
       const linkParametersRegExp = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|[^\s]+/g
@@ -334,7 +334,7 @@ expressHandler.messageReceived(async (req, res) => {
             },
           ],
         })
-        await apiClient.message.sendMessage(body)
+        await apiClient.messages.send(body)
       }
     } else if (content.startsWith('/invitation')) {
       const parsedContents = content.split(' ')
@@ -344,7 +344,7 @@ expressHandler.messageReceived(async (req, res) => {
         imageUrl: parsedContents[2],
         did: parsedContents[3],
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else if (content.startsWith('/profile')) {
       const parsedContents = content.split(' ')
       const body = new ProfileMessage({
@@ -353,7 +353,7 @@ expressHandler.messageReceived(async (req, res) => {
         displayImageUrl: parsedContents[2],
         displayIconUrl: parsedContents[3],
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else if (content.startsWith('/call')) {
       const parsedContents = content.split(' ')
       let wsUrl = parsedContents[1]
@@ -384,7 +384,7 @@ expressHandler.messageReceived(async (req, res) => {
           connectionId: obj.connectionId,
           parameters: { wsUrl, roomId, peerId },
         })
-        await apiClient.message.sendMessage(body)
+        await apiClient.messages.send(body)
       } catch (reason) {
         logger.error(`Cannot create call: ${reason}`)
         sendTextMessage({
@@ -396,12 +396,12 @@ expressHandler.messageReceived(async (req, res) => {
       const body = new MrzDataRequestMessage({
         connectionId,
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else if (content.startsWith('/emrtd')) {
       const body = new EMrtdDataRequestMessage({
         connectionId,
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else if (content.startsWith('/proof')) {
       const body = new IdentityProofRequestMessage({
         connectionId,
@@ -413,7 +413,7 @@ expressHandler.messageReceived(async (req, res) => {
         credentialDefinitionId: phoneNumberCredentialDefinitionId,
       })
       body.requestedProofItems.push(requestedProofItem)
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else if (content.startsWith('/rocky')) {
       await sendTextMessage({
         connectionId,
@@ -425,7 +425,7 @@ expressHandler.messageReceived(async (req, res) => {
       const body = new TerminateConnectionMessage({
         connectionId,
       })
-      await apiClient.message.sendMessage(body)
+      await apiClient.messages.send(body)
     } else {
       // Text message received but not understood
       await sendTextMessage({
@@ -468,7 +468,7 @@ expressHandler.messageReceived(async (req, res) => {
       connectionId: obj.connectionId,
       threadId: obj.threadId,
     })
-    await apiClient.message.sendMessage(body)
+    await apiClient.messages.send(body)
   } else if (obj.type === EMrtdDataSubmitMessage.type) {
     logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
     await submitMessageReceipt(obj, 'viewed')

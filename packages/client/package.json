@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/client",
+  "name": "@2060.io/service-agent-client",
   "main": "build/index",
   "types": "build/index",
   "version": "0.0.1",

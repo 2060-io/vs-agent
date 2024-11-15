@@ -24,7 +24,7 @@ export class MessageService {
     this.url = `${this.baseURL}/${this.version}/message`
   }
 
-  public async sendMessage(message: BaseMessage): Promise<{ id: string }> {
+  public async send(message: BaseMessage): Promise<{ id: string }> {
     try {
       // Log the message content before sending
       logger.info(`submitMessage: ${JSON.stringify(message)}`)
@@ -40,8 +40,19 @@ export class MessageService {
       const responseText = await response.text()
       logger.info(`response: ${responseText}`)
 
+      let jsonResponse
+      try {
+        jsonResponse = JSON.parse(responseText)
+      } catch (e) {
+        throw new Error('Invalid JSON response')
+      }
+
+      if (!jsonResponse || typeof jsonResponse.id !== 'string') {
+        throw new Error('Invalid response structure: Missing or invalid "id"')
+      }
+
       // Parse and return the JSON response as expected
-      return JSON.parse(responseText) as { id: string }
+      return jsonResponse as { id: string }
     } catch (error) {
       logger.error(`Failed to send message: ${error}`)
       throw new Error('Failed to send message')

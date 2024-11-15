@@ -24,7 +24,7 @@ export class CredentialTypeService {
     this.url = `${this.baseURL.replace(/\/$/, '')}/${this.version}/credential-types`
   }
 
-  public async importCredentialType(importData: ImportCredentialTypeOptions): Promise<CredentialTypeInfo> {
+  public async import(importData: ImportCredentialTypeOptions): Promise<CredentialTypeInfo> {
     logger.info(`Importing credential type ${importData.id}`)
     const response = await fetch(`${this.url}/import`, {
       method: 'POST',
@@ -36,7 +36,7 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
-  public async createCredentialType(credentialType: CredentialTypeInfo): Promise<any> {
+  public async create(credentialType: CredentialTypeInfo): Promise<any> {
     const response = await fetch(`${this.url}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ export class CredentialTypeService {
     return response.json()
   }
 
-  public async getAllCredentialTypes(): Promise<CredentialTypeInfo[]> {
+  public async getAll(): Promise<CredentialTypeInfo[]> {
     const response = await fetch(this.url, {
       method: 'GET',
       headers: { accept: 'application/json', 'Content-Type': 'application/json' },
