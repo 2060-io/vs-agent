@@ -1,3 +1,3 @@
 export * from './connections'
 export * from './interfaces'
-export * from './message'
+export * from './messages'

@@ -1,7 +1,7 @@
 import { Module, DynamicModule } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
-import { MessageEventModule } from './message'
+import { MessageEventModule } from './messages'
 
 export interface EventsModuleOptions {
   prefix?: string
