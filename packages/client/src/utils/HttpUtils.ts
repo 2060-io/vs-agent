@@ -1,13 +1,12 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common'
 
 export class HttpUtils {
   static handleException(
     logger: Logger,
     error: any,
-    defaultMessage: string = 'Internal server error'
+    defaultMessage: string = 'Internal server error',
   ): never {
-    logger.error(`Error: ${error.stack}`);
+    logger.error(`Error: ${error.stack}`)
 
     throw new HttpException(
       {
@@ -18,6 +17,6 @@ export class HttpUtils {
       {
         cause: error,
       },
-    );
+    )
   }
 }
