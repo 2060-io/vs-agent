@@ -15,7 +15,7 @@ export class MessageEventService {
 
   constructor(@Optional() @Inject(MESSAGE_HANDLER) private messageHandler?: MessageHandler) {}
 
-  async messageReceived(event: MessageReceived): Promise<any> {
+  async received(event: MessageReceived): Promise<any> {
     const body = new ReceiptsMessage({
       connectionId: event.message.connectionId,
       receipts: [
@@ -37,7 +37,7 @@ export class MessageEventService {
     return null
   }
 
-  async messageStateUpdated(event: MessageStateUpdated): Promise<any> {
+  async updated(event: MessageStateUpdated): Promise<any> {
     return event
   }
 }

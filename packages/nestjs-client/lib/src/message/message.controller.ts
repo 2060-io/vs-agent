@@ -11,11 +11,11 @@ export class MessageEventController {
   constructor(private readonly message: MessageEventService) {}
 
   @Post(`/${EventType.MessageReceived}`)
-  async messageReceived(@Body() body: MessageReceived): Promise<{ message: string }> {
+  async received(@Body() body: MessageReceived): Promise<{ message: string }> {
     try {
       this.logger.log(`messageReceived event: ${JSON.stringify(body)}`)
 
-      await this.message.messageReceived(body)
+      await this.message.received(body)
       return { message: 'Message received updated successfully' }
     } catch (error) {
       HttpUtils.handleException(this.logger, error, 'Failed to received message state')
@@ -23,11 +23,11 @@ export class MessageEventController {
   }
 
   @Post(`/${EventType.MessageStateUpdated}`)
-  async messageStateUpdated(@Body() body: MessageStateUpdated): Promise<{ message: string }> {
+  async updated(@Body() body: MessageStateUpdated): Promise<{ message: string }> {
     try {
       this.logger.log(`messageStateUpdated event: ${JSON.stringify(body)}`)
 
-      await this.message.messageStateUpdated(body)
+      await this.message.updated(body)
       return { message: 'Message state updated successfully' }
     } catch (error) {
       HttpUtils.handleException(this.logger, error, 'Failed to update message state')
