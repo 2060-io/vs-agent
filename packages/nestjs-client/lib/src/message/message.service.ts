@@ -1,12 +1,11 @@
-import {
-  Event,
-  MessageReceived,
-  MessageStateUpdated,
-  ReceiptsMessage,
-} from '@2060.io/model'
-import { Injectable, Logger } from '@nestjs/common'
-import { MessageState } from 'credo-ts-receipts'
+import { MessageReceived, MessageStateUpdated, ReceiptsMessage } from '@2060.io/model'
 import { ApiClient } from '@2060.io/service-agent-client'
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
+import { MessageState } from 'credo-ts-receipts'
+
+import { MessageHandler } from '../interfaces'
+
+import { MESSAGE_HANDLER } from './message.config'
 
 const apiClient = new ApiClient('') //TODO: add baseURL
 
@@ -14,8 +13,9 @@ const apiClient = new ApiClient('') //TODO: add baseURL
 export class MessageEventService {
   private readonly logger = new Logger(MessageEventService.name)
 
-  async messageReceived(event: MessageReceived): Promise<any> {
+  constructor(@Optional() @Inject(MESSAGE_HANDLER) private messageHandler?: MessageHandler) {}
 
+  async messageReceived(event: MessageReceived): Promise<any> {
     const body = new ReceiptsMessage({
       connectionId: event.message.connectionId,
       receipts: [
@@ -30,10 +30,14 @@ export class MessageEventService {
 
     await apiClient.messages.send(body)
 
+    if (this.messageHandler) {
+      await this.messageHandler.inputMessage(event.message)
+    }
+
     return null
   }
 
   async messageStateUpdated(event: MessageStateUpdated): Promise<any> {
-    return null
+    return event
   }
 }

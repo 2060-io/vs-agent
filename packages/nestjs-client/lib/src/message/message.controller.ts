@@ -1,8 +1,8 @@
 import { EventType, MessageReceived, MessageStateUpdated } from '@2060.io/model'
+import { HttpUtils } from '@2060.io/service-agent-client'
 import { Body, Controller, Logger, Post } from '@nestjs/common'
 
 import { MessageEventService } from './message.service'
-import { HttpUtils } from '@2060.io/service-agent-client'
 
 @Controller('')
 export class MessageEventController {
@@ -16,9 +16,9 @@ export class MessageEventController {
       this.logger.log(`messageReceived event: ${JSON.stringify(body)}`)
 
       await this.message.messageReceived(body)
-      return { message: 'Message received updated successfully' }      
+      return { message: 'Message received updated successfully' }
     } catch (error) {
-      HttpUtils.handleException(this.logger, error, 'Failed to received message state');  
+      HttpUtils.handleException(this.logger, error, 'Failed to received message state')
     }
   }
 
@@ -30,7 +30,7 @@ export class MessageEventController {
       await this.message.messageStateUpdated(body)
       return { message: 'Message state updated successfully' }
     } catch (error) {
-      HttpUtils.handleException(this.logger, error, 'Failed to update message state');
+      HttpUtils.handleException(this.logger, error, 'Failed to update message state')
     }
   }
 }

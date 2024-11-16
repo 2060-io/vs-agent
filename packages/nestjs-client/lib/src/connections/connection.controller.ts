@@ -1,8 +1,8 @@
 import { ConnectionStateUpdated, EventType } from '@2060.io/model'
+import { HttpUtils } from '@2060.io/service-agent-client'
 import { Body, Controller, Logger, Post } from '@nestjs/common'
 
 import { ConnectionsEventService } from './connection.service'
-import { HttpUtils } from '@2060.io/service-agent-client'
 
 @Controller('')
 export class ConnectionsEventController {
@@ -10,16 +10,16 @@ export class ConnectionsEventController {
 
   constructor(private readonly service: ConnectionsEventService) {}
 
-  @Post(`/${EventType.MessageStateUpdated}`)
-  async connectionState(@Body() body: ConnectionStateUpdated): Promise<{ message: string }> {
+  @Post(`/${EventType.ConnectionState}`)
+  async update(@Body() body: ConnectionStateUpdated): Promise<{ message: string }> {
     try {
       this.logger.log(`connectionStateUpdated event: ${JSON.stringify(body)}`)
 
-      await this.service.createConnection(body)
+      await this.service.update(body)
 
-      return { message: 'Connection state updated successfully' }      
+      return { message: 'Connection state updated successfully' }
     } catch (error) {
-      HttpUtils.handleException(this.logger, error, 'Failed to update connection state');  
+      HttpUtils.handleException(this.logger, error, 'Failed to update connection state')
     }
   }
 }
