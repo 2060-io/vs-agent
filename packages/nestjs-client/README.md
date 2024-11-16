@@ -54,6 +54,8 @@ export class AppModule {}
   imports: [
     MessageEventModule.register({
       messageHandler: CustomMessageHandler, // Class with input method
+      url: 'http://sa-url.com',
+      version: ApiVersion.V1,
     }),
     // Handler for input messages
     MessageEventModule.register({

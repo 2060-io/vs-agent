@@ -1,3 +1,4 @@
+import { ApiVersion } from '@2060.io/service-agent-client'
 import { DynamicModule, Module, Provider, Type } from '@nestjs/common'
 
 import { MessageHandler } from '../interfaces'
@@ -8,10 +9,17 @@ import { MessageEventService } from './message.service'
 
 @Module({})
 export class MessageEventModule {
-  static register(options: MessageModuleOptions = {}): DynamicModule {
+  static register(
+    options: MessageModuleOptions = {
+      url: 'http://localhost',
+      version: ApiVersion.V1,
+    },
+  ): DynamicModule {
     const optionsProvider: Provider = {
       provide: MESSAGE_MODULE_OPTIONS,
-      useValue: options,
+      useValue: {
+        ...options,
+      },
     }
 
     const messageHandlerProvider: Provider = {
