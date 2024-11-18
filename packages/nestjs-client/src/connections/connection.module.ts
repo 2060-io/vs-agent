@@ -10,16 +10,17 @@ import { ConnectionsEventController } from './connection.controller'
 import { ConnectionEntity } from './connection.entity'
 import { InMemoryConnectionsRepository, TypeOrmConnectionsRepository } from './connection.repository'
 import { ConnectionsEventService } from './connection.service'
-import { getTypeOrmConfig } from './database.utils'
+import { ensureDatabaseExists, getTypeOrmConfig } from './database.utils'
 
 @Module({})
 export class ConnectionsEventModule {
-  static register(options: ConnectionsModuleOptions = {}): DynamicModule {
+  static async register(options: ConnectionsModuleOptions = {}): Promise<DynamicModule> {
     const imports = []
     let repositoryProvider: Provider
 
     if (options.useTypeOrm && options.database) {
       const typeOrmConfig = getTypeOrmConfig(options.database)
+      await ensureDatabaseExists(options.database)
 
       imports.push(TypeOrmModule.forFeature([ConnectionEntity]), TypeOrmModule.forRoot(typeOrmConfig))
 

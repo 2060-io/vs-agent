@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
+    "@nestjs/common": "^10.0.0",
     "ts-node-dev": "^2.0.0"
   },
   "peerDependencies": {
