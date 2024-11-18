@@ -13,7 +13,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "yarn clean && nest build",
+    "build": "yarn run clean && yarn run compile",
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
     "test": "jest",
