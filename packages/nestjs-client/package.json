@@ -4,7 +4,6 @@
   "description": "",
   "main": "build/index",
   "types": "build/index",
-  "author": "",
   "license": "Apache-2.0",
   "files": [
     "build"
@@ -16,12 +15,8 @@
     "build": "yarn run clean && yarn run compile",
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "test": "jest"
   },
   "dependencies": {
     "@2060.io/model": "*",
