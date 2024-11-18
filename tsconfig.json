@@ -7,6 +7,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@2060.io/service-agent-client": ["packages/client/src"],
       "@2060.io/*": ["packages/*/src"]
     },
     "types": ["jest", "node"]
