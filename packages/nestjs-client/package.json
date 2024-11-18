@@ -4,12 +4,6 @@
   "description": "",
   "main": "build/index",
   "types": "build/index",
-  "exports": {
-    ".": {
-      "import": "./build/index.js",
-      "require": "./build/index.cjs"
-    }
-  },
   "author": "",
   "license": "Apache-2.0",
   "files": [
@@ -26,7 +20,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@2060.io/model": "*",
