@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { SessionModule, SessionEntity } from './models';
-import { ConnectionsEventModule, MessageEventModule, PostgresOptions } from '@2060.io/nestjs-client';
+import { SessionEntity } from './models';
+import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2060.io/nestjs-client';
 import { CoreService } from './app.service';
 import { ApiVersion } from '@2060.io/service-agent-client';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 const defaultOptions = {
   type: 'postgres',
@@ -16,16 +16,11 @@ const defaultOptions = {
   synchronize: true,
   ssl: false,
   logging: true
-} as PostgresOptions;
+} as TypeOrmModuleOptions
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      ...defaultOptions,
-      entities: [SessionEntity],
-      autoLoadEntities: true
-    }),
-    SessionModule,
+    TypeOrmModule.forFeature([SessionEntity]),
     MessageEventModule.register({
       eventHandler: CoreService,
       url: process.env.SERVICE_AGENT_ADMIN_BASE_URL,
@@ -34,10 +29,11 @@ const defaultOptions = {
     ConnectionsEventModule.register({
       eventHandler: CoreService,
       useTypeOrm: true,
-      database: {
-        ...defaultOptions,
-      }
-    })
+    }),
+    TypeOrmModule.forRoot({
+      ...defaultOptions,
+      entities: [SessionEntity, ConnectionEntity]
+    }),
   ],
   controllers: [],
   providers: [CoreService],

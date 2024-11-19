@@ -3,16 +3,20 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { StateStep } from '../../common';
+import { StateStep } from '../common';
 
 @Entity({ name: 'session' })
 export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
-  id?: string
+  id: string
 
+  @Column({ type: 'varchar', nullable: false })
   connectionId: string;
 
+  @Column({ type: 'varchar', length: 10, nullable: true })
   lang: string;
 
   @Column({
@@ -20,6 +24,12 @@ export class SessionEntity {
     enum: StateStep,
   })
   state: StateStep;
+
+  @CreateDateColumn()
+  createdTs?: Date
+
+  @UpdateDateColumn()
+  updatedTs?: Date
 
   /**
    * More params...

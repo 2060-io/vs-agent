@@ -2,16 +2,19 @@ import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from
 import { EventHandler } from '@2060.io/nestjs-client';
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client';
 import { Injectable } from '@nestjs/common';
-import { SessionEntity, SessionRepository } from './models';
-import { JsonTransformer } from '@credo-ts/core';
+import { SessionEntity } from './models';
+import { JsonTransformer, utils } from '@credo-ts/core';
 import { StateStep } from './common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CoreService implements EventHandler {
   private readonly apiClient: ApiClient;
 
   constructor(
-    private readonly sessionRepository: SessionRepository
+    @InjectRepository(SessionEntity)
+    private readonly sessionRepository: Repository<SessionEntity>,
   ) {
     const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || '';
     const apiVersion = (process.env.API_VERSION as ApiVersion) || ApiVersion.V1;
@@ -25,11 +28,11 @@ export class CoreService implements EventHandler {
         break
       case ProfileMessage.type:
         const msg = JsonTransformer.fromJSON(message, ProfileMessage)
-        const session = new SessionEntity()
-        session.connectionId = msg.connectionId
-        session.lang = msg.preferredLanguage
-        session.state = StateStep.START
-        await this.sessionRepository.save(session)
+        await this.sessionRepository.save({
+          connectionId: msg.connectionId,
+          lang: msg.preferredLanguage,
+          state: StateStep.START
+        })
         break
       default:
         break

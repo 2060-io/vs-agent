@@ -12,7 +12,6 @@ import { ConnectionsEventController } from './connection.controller'
 import { ConnectionEntity } from './connection.entity'
 import { InMemoryConnectionsRepository, TypeOrmConnectionsRepository } from './connection.repository'
 import { ConnectionsEventService } from './connection.service'
-import { ensureDatabaseExists, getTypeOrmConfig } from './database.utils'
 
 @Module({})
 export class ConnectionsEventModule {
@@ -20,11 +19,8 @@ export class ConnectionsEventModule {
     const imports = []
     let repositoryProvider: Provider
 
-    if (options.useTypeOrm && options.database) {
-      const typeOrmConfig = getTypeOrmConfig(options.database)
-      await ensureDatabaseExists(options.database)
-
-      imports.push(TypeOrmModule.forFeature([ConnectionEntity]), TypeOrmModule.forRoot(typeOrmConfig))
+    if (options.useTypeOrm) {
+      imports.push(TypeOrmModule.forFeature([ConnectionEntity]))
 
       repositoryProvider = {
         provide: CONNECTIONS_REPOSITORY,
