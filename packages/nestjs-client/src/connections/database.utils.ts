@@ -65,11 +65,26 @@ export async function ensureDatabaseExists(options: DatabaseOptions): Promise<vo
   await tempDataSource.initialize()
 
   const queryRunner = tempDataSource.createQueryRunner()
+
   try {
+    let databaseExists = false
+
     if (options.type === 'postgres') {
-      await queryRunner.query(`CREATE DATABASE "${options.database}"`)
+      const result = await queryRunner.query(
+        `SELECT 1 FROM pg_database WHERE datname = '${options.database}'`,
+      )
+      databaseExists = result.length > 0
     } else if (options.type === 'mysql' || options.type === 'mariadb') {
-      await queryRunner.query(`CREATE DATABASE IF NOT EXISTS \`${options.database}\``)
+      const result = await queryRunner.query(`SHOW DATABASES LIKE '${options.database}'`)
+      databaseExists = result.length > 0
+    }
+
+    if (!databaseExists) {
+      if (options.type === 'postgres') {
+        await queryRunner.query(`CREATE DATABASE "${options.database}"`)
+      } else if (options.type === 'mysql' || options.type === 'mariadb') {
+        await queryRunner.query(`CREATE DATABASE IF NOT EXISTS \`${options.database}\``)
+      }
     }
   } catch (error) {
     if (!error.message.includes('already exists')) {

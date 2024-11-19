@@ -21,7 +21,7 @@ export class ConnectionsEventService {
         newConnection.id = event.connectionId
         newConnection.createdTs = event.timestamp
         newConnection.status = event.state
-        this.repository.create(newConnection)
+        await this.repository.create(newConnection)
         break
       case ExtendedDidExchangeState.Terminated:
         await this.repository.updateStatus(event.connectionId, event.state)

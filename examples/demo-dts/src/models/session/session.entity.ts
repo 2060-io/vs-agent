@@ -7,11 +7,13 @@ import {
 import { StateStep } from '../../common';
 
 @Entity({ name: 'session' })
-export class Session {
+export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id?: string
 
   connectionId: string;
+
+  lang: string;
 
   @Column({
     type: 'enum',

@@ -1,11 +1,11 @@
 // session.repository.ts
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Session } from './session.entity';
+import { SessionEntity } from './session.entity';
 
 @Injectable()
-export class SessionRepository extends Repository<Session> {
+export class SessionRepository extends Repository<SessionEntity> {
   constructor(private dataSource: DataSource) {
-    super(Session, dataSource.createEntityManager());
+    super(SessionEntity, dataSource.createEntityManager());
   }
 }
