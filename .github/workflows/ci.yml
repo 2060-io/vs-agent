@@ -25,6 +25,10 @@ jobs:
         run: |
           yarn install --frozen-lockfile
 
+      - name: Build
+        run: |
+          yarn build
+
       - name: Check Format
         run: |
           yarn check-format
@@ -32,7 +36,3 @@ jobs:
       - name: Check Types
         run: |
           yarn check-types
-
-      - name: Build
-        run: |
-          yarn build
