@@ -4,22 +4,34 @@ import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2
 import { CoreService } from './app.service';
 import { ApiVersion } from '@2060.io/service-agent-client';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import appConfig from './config/app.config';
 
-const defaultOptions = {
-  type: 'postgres',
-  host: process.env.POSTGRES_HOST,
-  port: 5432,
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_USER,
-  schema: 'public',
-  synchronize: true,
-  ssl: false,
-  logging: true
-} as TypeOrmModuleOptions
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
+        type: 'postgres',
+        host: configService.get<string>('appConfig.postgresHost'),
+        port: 5432,
+        username: configService.get<string>('appConfig.postgresUser'),
+        password: configService.get<string>('appConfig.postgresPassword'),
+        database: configService.get<string>('appConfig.postgresUser'),
+        schema: 'public',
+        synchronize: true,
+        ssl: false,
+        logging: false,
+        entities: [SessionEntity, ConnectionEntity],
+      }),
+    }),
+
     TypeOrmModule.forFeature([SessionEntity]),
     MessageEventModule.register({
       eventHandler: CoreService,
@@ -29,10 +41,6 @@ const defaultOptions = {
     ConnectionsEventModule.register({
       eventHandler: CoreService,
       useTypeOrm: true,
-    }),
-    TypeOrmModule.forRoot({
-      ...defaultOptions,
-      entities: [SessionEntity, ConnectionEntity]
     }),
   ],
   controllers: [],

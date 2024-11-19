@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { StateStep } from '../common';
 
-@Entity({ name: 'session' })
+@Entity('session')
 export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -17,13 +17,13 @@ export class SessionEntity {
   connectionId: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  lang: string;
+  lang?: string;
 
   @Column({
     type: 'enum',
     enum: StateStep,
   })
-  state: StateStep;
+  state?: StateStep;
 
   @CreateDateColumn()
   createdTs?: Date
