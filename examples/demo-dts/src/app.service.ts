@@ -1,12 +1,12 @@
 import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model';
-import { EventHandler } from '@2060.io/nestjs-client';
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client';
+import { ApiClient, ApiVersion, EventHandler } from '@2060.io/service-agent-client';
 import { Injectable } from '@nestjs/common';
 import { SessionEntity } from './models';
 import { JsonTransformer, utils } from '@credo-ts/core';
 import { StateStep } from './common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class CoreService implements EventHandler {
@@ -15,6 +15,7 @@ export class CoreService implements EventHandler {
   constructor(
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
+    private readonly i18n: I18nService
   ) {
     const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || '';
     const apiVersion = (process.env.API_VERSION as ApiVersion) || ApiVersion.V1;
@@ -40,9 +41,11 @@ export class CoreService implements EventHandler {
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
+    console.log("TEST TEST TEST: begin")
+    console.log("TEST TEST TEST: "+ this.i18n.t('msg.WELCOME', { lang: 'es' }))
     const welcome = new TextMessage({
       connectionId: event.connectionId,
-      content: 'Bienvenido'
+      content: this.i18n.t('msg.WELCOME', { lang: 'es' })
     })
     await this.apiClient.messages.send(welcome)
   }
