@@ -1,5 +1,5 @@
-import { BaseMessage, ProfileMessage, TextMessage } from '@2060.io/model';
-import { MessageHandler } from '@2060.io/nestjs-client';
+import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model';
+import { EventHandler } from '@2060.io/nestjs-client';
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client';
 import { Injectable } from '@nestjs/common';
 import { SessionEntity, SessionRepository } from './models';
@@ -7,7 +7,7 @@ import { JsonTransformer } from '@credo-ts/core';
 import { StateStep } from './common';
 
 @Injectable()
-export class CoreService implements MessageHandler {
+export class CoreService implements EventHandler {
   private readonly apiClient: ApiClient;
 
   constructor(
@@ -34,6 +34,14 @@ export class CoreService implements MessageHandler {
       default:
         break
     }
+  }
+
+  async newConnection(event: ConnectionStateUpdated): Promise<void> {
+    const welcome = new TextMessage({
+      connectionId: event.connectionId,
+      content: 'Bienvenido'
+    })
+    await this.apiClient.messages.send(welcome)
   }
 
 }

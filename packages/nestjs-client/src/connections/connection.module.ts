@@ -1,5 +1,7 @@
-import { Module, DynamicModule, Provider } from '@nestjs/common'
+import { Module, DynamicModule, Provider, Type } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
+
+import { EventHandler, EVENT_HANDLER } from '../interfaces'
 
 import {
   CONNECTIONS_MODULE_OPTIONS,
@@ -35,6 +37,22 @@ export class ConnectionsEventModule {
       }
     }
 
+    const eventHandlerProvider: Provider = {
+      provide: EVENT_HANDLER,
+      useFactory: async (...args: any[]) => {
+        if (!options.eventHandler) {
+          return null
+        }
+
+        if (typeof options.eventHandler === 'object') {
+          return options.eventHandler
+        }
+
+        const handler = new (options.eventHandler as Type<EventHandler>)(...args)
+        return handler
+      },
+      inject: [],
+    }
     return {
       module: ConnectionsEventModule,
       imports,
@@ -46,6 +64,7 @@ export class ConnectionsEventModule {
           provide: CONNECTIONS_MODULE_OPTIONS,
           useValue: options,
         },
+        eventHandlerProvider,
       ],
       exports: [ConnectionsEventService],
     }

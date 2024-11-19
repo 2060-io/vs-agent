@@ -1,9 +1,9 @@
 import { ApiVersion } from '@2060.io/service-agent-client'
 import { DynamicModule, Module, Provider, Type } from '@nestjs/common'
 
-import { MessageHandler } from '../interfaces'
+import { EVENT_HANDLER, EventHandler } from '../interfaces'
 
-import { MESSAGE_HANDLER, MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
+import { MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
 import { MessageEventController } from './message.controller'
 import { MessageEventService } from './message.service'
 
@@ -22,18 +22,18 @@ export class MessageEventModule {
       },
     }
 
-    const messageHandlerProvider: Provider = {
-      provide: MESSAGE_HANDLER,
+    const eventHandlerProvider: Provider = {
+      provide: EVENT_HANDLER,
       useFactory: async (...args: any[]) => {
-        if (!options.messageHandler) {
+        if (!options.eventHandler) {
           return null
         }
 
-        if (typeof options.messageHandler === 'object') {
-          return options.messageHandler
+        if (typeof options.eventHandler === 'object') {
+          return options.eventHandler
         }
 
-        const handler = new (options.messageHandler as Type<MessageHandler>)(...args)
+        const handler = new (options.eventHandler as Type<EventHandler>)(...args)
         return handler
       },
       inject: [],
@@ -42,7 +42,7 @@ export class MessageEventModule {
     return {
       module: MessageEventModule,
       controllers: [MessageEventController],
-      providers: [MessageEventService, optionsProvider, messageHandlerProvider],
+      providers: [MessageEventService, optionsProvider, eventHandlerProvider],
       exports: [MessageEventService],
     }
   }

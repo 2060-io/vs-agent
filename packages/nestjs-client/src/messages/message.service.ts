@@ -3,9 +3,9 @@ import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'
 
-import { MessageHandler } from '../interfaces'
+import { EVENT_HANDLER, EventHandler } from '../interfaces'
 
-import { MESSAGE_HANDLER, MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
+import { MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
 
 @Injectable()
 export class MessageEventService {
@@ -16,7 +16,7 @@ export class MessageEventService {
 
   constructor(
     @Inject(MESSAGE_MODULE_OPTIONS) private options: MessageModuleOptions,
-    @Optional() @Inject(MESSAGE_HANDLER) private messageHandler?: MessageHandler,
+    @Optional() @Inject(EVENT_HANDLER) private eventHandler?: EventHandler,
   ) {
     this.url = options.url
     this.version = options.version
@@ -41,8 +41,8 @@ export class MessageEventService {
 
     await this.apiClient.messages.send(body)
 
-    if (this.messageHandler) {
-      await this.messageHandler.inputMessage(event.message)
+    if (this.eventHandler) {
+      await this.eventHandler.inputMessage(event.message)
     }
 
     return null

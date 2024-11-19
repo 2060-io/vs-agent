@@ -1,3 +1,7 @@
+import { Type } from '@nestjs/common'
+
+import { EventHandler } from '../interfaces'
+
 export type SupportedDatabase = 'postgres' | 'mysql' | 'mariadb' | 'sqlite'
 
 export interface TypeOrmBaseOptions {
@@ -28,6 +32,7 @@ export interface SqliteOptions extends TypeOrmBaseOptions {
 export type DatabaseOptions = PostgresOptions | MySqlOptions | SqliteOptions
 
 export interface ConnectionsModuleOptions {
+  eventHandler?: EventHandler | Type<EventHandler>
   useTypeOrm?: boolean
   database?: DatabaseOptions
 }

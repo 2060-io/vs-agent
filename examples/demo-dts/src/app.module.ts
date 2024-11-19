@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ModelsModule, SessionEntity } from './models';
+import { SessionModule, SessionEntity } from './models';
 import { ConnectionsEventModule, MessageEventModule, PostgresOptions } from '@2060.io/nestjs-client';
 import { CoreService } from './app.service';
 import { ApiVersion } from '@2060.io/service-agent-client';
@@ -22,15 +22,17 @@ const defaultOptions = {
   imports: [
     TypeOrmModule.forRoot({
       ...defaultOptions,
-      entities: [SessionEntity]
+      entities: [SessionEntity],
+      autoLoadEntities: true
     }),
-    ModelsModule,
+    SessionModule,
     MessageEventModule.register({
-      messageHandler: CoreService,
+      eventHandler: CoreService,
       url: process.env.SERVICE_AGENT_ADMIN_BASE_URL,
       version: process.env.API_VERSION as ApiVersion || ApiVersion.V1,
     }),
     ConnectionsEventModule.register({
+      eventHandler: CoreService,
       useTypeOrm: true,
       database: {
         ...defaultOptions,
@@ -38,6 +40,6 @@ const defaultOptions = {
     })
   ],
   controllers: [],
-  providers: [],
+  providers: [CoreService],
 })
 export class AppModule {}
