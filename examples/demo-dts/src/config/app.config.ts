@@ -8,10 +8,10 @@ import { registerAs } from '@nestjs/config'
 export default registerAs('appConfig', () => ({
   /**
    * The port number on which the application will run.
-   * Defaults to 3500 if APP_PORT is not set in the environment variables.
+   * Defaults to 5000 if APP_PORT is not set in the environment variables.
    * @type {number}
    */
-  appPort: parseInt(process.env.APP_PORT, 10) || 3000,
+  appPort: parseInt(process.env.AGENT_PORT, 5000) || 5000,
 
   /**
    * Hostname or IP address for the PostgreSQL database.
