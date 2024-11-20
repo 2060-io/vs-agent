@@ -1,5 +1,6 @@
 import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model'
-import { ApiClient, ApiVersion, EventHandler } from '@2060.io/service-agent-client'
+import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
+import { EventHandler } from '@2060.io/nestjs-client'
 import { Injectable } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'
@@ -41,8 +42,6 @@ export class CoreService implements EventHandler {
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    console.log('TEST TEST TEST: begin')
-    console.log('TEST TEST TEST: ' + this.i18n.t('msg.WELCOME', { lang: 'es' }))
     const welcome = new TextMessage({
       connectionId: event.connectionId,
       content: this.i18n.t('msg.WELCOME', { lang: 'es' }),

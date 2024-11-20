@@ -1,5 +1,6 @@
-import { EventHandler } from '@2060.io/service-agent-client'
 import { DynamicModule, Type } from '@nestjs/common'
+
+import { EventHandler } from '../interfaces'
 
 export interface ConnectionsModuleOptions {
   eventHandler: Type<EventHandler>

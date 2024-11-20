@@ -1,6 +1,7 @@
 import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/model'
-import { EventHandler } from '@2060.io/service-agent-client'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
+
+import { EventHandler } from '../interfaces'
 
 import { CONNECTIONS_EVENT } from './connection.config'
 import { ConnectionEntity } from './connection.entity'
