@@ -1,25 +1,18 @@
-import { Module, DynamicModule, Provider, Type } from '@nestjs/common'
+import { Module, DynamicModule } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import {
-  CONNECTIONS_EVENT,
-  ConnectionsModuleOptions,
-} from './connection.config'
+import { CONNECTIONS_EVENT, ConnectionsModuleOptions } from './connection.config'
 import { ConnectionsEventController } from './connection.controller'
 import { ConnectionEntity } from './connection.entity'
-import { ConnectionsEventService } from './connection.service'
 import { ConnectionsRepository } from './connection.repository'
+import { ConnectionsEventService } from './connection.service'
 
 @Module({})
 export class ConnectionsEventModule {
   static forRoot(options: ConnectionsModuleOptions): DynamicModule {
-
     return {
       module: ConnectionsEventModule,
-      imports: [
-        TypeOrmModule.forFeature([ConnectionEntity]),
-        ...options.imports,
-      ],
+      imports: [TypeOrmModule.forFeature([ConnectionEntity]), ...options.imports],
       controllers: [ConnectionsEventController],
       providers: [
         ConnectionsEventService,
@@ -29,6 +22,6 @@ export class ConnectionsEventModule {
           useClass: options.eventHandler,
         },
       ],
-    };
+    }
   }
 }
