@@ -1,11 +1,9 @@
-import { Type } from '@nestjs/common'
-
-import { EventHandler } from '../interfaces'
+import { EventHandler } from '@2060.io/service-agent-client'
+import { DynamicModule, Type } from '@nestjs/common'
 
 export interface ConnectionsModuleOptions {
-  eventHandler?: EventHandler | Type<EventHandler>
-  useTypeOrm?: boolean
+  eventHandler: Type<EventHandler>
+  imports: DynamicModule[]
 }
 
-export const CONNECTIONS_MODULE_OPTIONS = 'CONNECTIONS_MODULE_OPTIONS'
-export const CONNECTIONS_REPOSITORY = 'CONNECTIONS_REPOSITORY'
+export const CONNECTIONS_EVENT = 'CONNECTIONS_EVENT'

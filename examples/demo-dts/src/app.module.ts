@@ -4,9 +4,10 @@ import { CoreService } from './app.service';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import appConfig from './config/app.config';
-import { AcceptLanguageResolver, HeaderResolver, I18nJsonLoader, I18nModule, I18nService, QueryResolver } from 'nestjs-i18n';
+import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import * as path from 'path';
-import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from './events';
+import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2060.io/nestjs-client';
+import { ApiVersion } from '@2060.io/service-agent-client';
 
 const defaultOptions = {
   type: 'postgres',
@@ -40,8 +41,16 @@ const defaultOptions = {
       load: [appConfig],
     }),
     TypeOrmModule.forFeature([SessionEntity]),
-    MessageEventModule,
-    ConnectionsEventModule,
+    MessageEventModule.forRoot({
+      eventHandler: CoreService,
+      imports: [TypeOrmModule.forFeature([SessionEntity])],
+      url: process.env.SERVICE_AGENT_ADMIN_BASE_URL,
+      version: process.env.API_VERSION as ApiVersion,
+    }),
+    ConnectionsEventModule.forRoot({
+      eventHandler: CoreService,
+      imports: [TypeOrmModule.forFeature([SessionEntity])],
+    }),
     TypeOrmModule.forRoot({
       ...defaultOptions,
       entities: [SessionEntity, ConnectionEntity]

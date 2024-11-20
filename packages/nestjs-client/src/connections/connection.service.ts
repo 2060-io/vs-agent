@@ -1,20 +1,20 @@
 import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/model'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
-import { EVENT_HANDLER, EventHandler } from '../interfaces'
 
-import { CONNECTIONS_REPOSITORY } from './connection.config'
+import { CONNECTIONS_EVENT } from './connection.config'
 import { ConnectionEntity } from './connection.entity'
-import { IConnectionsRepository } from './connection.repository'
+import { ConnectionsRepository } from './connection.repository'
+import { EventHandler } from '@2060.io/service-agent-client'
 
 @Injectable()
 export class ConnectionsEventService {
   private readonly logger = new Logger(ConnectionsEventService.name)
 
   constructor(
-    @Inject(CONNECTIONS_REPOSITORY)
-    private readonly repository: IConnectionsRepository,
-    @Optional() @Inject(EVENT_HANDLER) private eventHandler?: EventHandler,
+    @Inject()
+    private readonly repository: ConnectionsRepository,
+    @Optional() @Inject(CONNECTIONS_EVENT) private eventHandler?: EventHandler,
   ) {}
 
   async update(event: ConnectionStateUpdated): Promise<any> {
