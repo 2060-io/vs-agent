@@ -1,12 +1,6 @@
 // session.entity.ts
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { StateStep } from '../common';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import { StateStep } from '../common'
 
 @Entity('session')
 export class SessionEntity {
@@ -14,16 +8,16 @@ export class SessionEntity {
   id: string
 
   @Column({ type: 'varchar', nullable: false })
-  connectionId: string;
+  connectionId: string
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  lang?: string;
+  lang?: string
 
   @Column({
     type: 'enum',
     enum: StateStep,
   })
-  state?: StateStep;
+  state?: StateStep
 
   @CreateDateColumn()
   createdTs?: Date

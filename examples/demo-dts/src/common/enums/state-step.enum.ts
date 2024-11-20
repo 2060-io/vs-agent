@@ -1,4 +1,4 @@
 export enum StateStep {
-    START,
-    ISSUE
-  }
+  START,
+  ISSUE,
+}

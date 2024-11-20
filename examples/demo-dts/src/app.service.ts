@@ -1,25 +1,25 @@
-import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model';
-import { ApiClient, ApiVersion, EventHandler } from '@2060.io/service-agent-client';
-import { Injectable } from '@nestjs/common';
-import { SessionEntity } from './models';
-import { JsonTransformer, utils } from '@credo-ts/core';
-import { StateStep } from './common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { I18nContext, I18nService } from 'nestjs-i18n';
+import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model'
+import { ApiClient, ApiVersion, EventHandler } from '@2060.io/service-agent-client'
+import { Injectable } from '@nestjs/common'
+import { SessionEntity } from './models'
+import { JsonTransformer } from '@credo-ts/core'
+import { StateStep } from './common'
+import { Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
+import { I18nService } from 'nestjs-i18n'
 
 @Injectable()
 export class CoreService implements EventHandler {
-  private readonly apiClient: ApiClient;
+  private readonly apiClient: ApiClient
 
   constructor(
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
-    private readonly i18n: I18nService
+    private readonly i18n: I18nService,
   ) {
-    const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || '';
-    const apiVersion = (process.env.API_VERSION as ApiVersion) || ApiVersion.V1;
-    this.apiClient = new ApiClient(baseUrl, apiVersion);
+    const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || ''
+    const apiVersion = (process.env.API_VERSION as ApiVersion) || ApiVersion.V1
+    this.apiClient = new ApiClient(baseUrl, apiVersion)
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
@@ -32,7 +32,7 @@ export class CoreService implements EventHandler {
         await this.sessionRepository.save({
           connectionId: msg.connectionId,
           lang: msg.preferredLanguage,
-          state: StateStep.START
+          state: StateStep.START,
         })
         break
       default:
@@ -41,13 +41,12 @@ export class CoreService implements EventHandler {
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    console.log("TEST TEST TEST: begin")
-    console.log("TEST TEST TEST: "+ this.i18n.t('msg.WELCOME', { lang: 'es' }))
+    console.log('TEST TEST TEST: begin')
+    console.log('TEST TEST TEST: ' + this.i18n.t('msg.WELCOME', { lang: 'es' }))
     const welcome = new TextMessage({
       connectionId: event.connectionId,
-      content: this.i18n.t('msg.WELCOME', { lang: 'es' })
+      content: this.i18n.t('msg.WELCOME', { lang: 'es' }),
     })
     await this.apiClient.messages.send(welcome)
   }
-
 }

@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { SessionEntity } from './models';
-import { CoreService } from './app.service';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import appConfig from './config/app.config';
-import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
-import * as path from 'path';
-import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2060.io/nestjs-client';
-import { ApiVersion } from '@2060.io/service-agent-client';
+import { Module } from '@nestjs/common'
+import { SessionEntity } from './models'
+import { CoreService } from './app.service'
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { ConfigModule } from '@nestjs/config'
+import appConfig from './config/app.config'
+import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
+import * as path from 'path'
+import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2060.io/nestjs-client'
+import { ApiVersion } from '@2060.io/service-agent-client'
 
 const defaultOptions = {
   type: 'postgres',
@@ -19,7 +19,7 @@ const defaultOptions = {
   schema: 'public',
   synchronize: true,
   ssl: false,
-  logging: false
+  logging: false,
 } as TypeOrmModuleOptions
 
 @Module({
@@ -53,7 +53,7 @@ const defaultOptions = {
     }),
     TypeOrmModule.forRoot({
       ...defaultOptions,
-      entities: [SessionEntity, ConnectionEntity]
+      entities: [SessionEntity, ConnectionEntity],
     }),
   ],
   controllers: [],
