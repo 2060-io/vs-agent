@@ -48,6 +48,7 @@ export class CoreService implements EventHandler {
     if (!session) {
       session = this.sessionRepository.create({
         connectionId: message.connectionId,
+        state: StateStep.START
       })
       
       await this.sessionRepository.save(session)
@@ -73,10 +74,9 @@ export class CoreService implements EventHandler {
         break
       case ProfileMessage.type:
         inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
-        await this.sessionRepository.save({
-          connectionId: inMsg.connectionId,
-          lang: inMsg.preferredLanguage,
-          state: StateStep.START,
+        await this.sessionRepository.update(session.id, {
+          ...session,
+          lang: inMsg.preferredLanguage
         })
         break
       case MrzDataSubmitMessage.type:
@@ -115,7 +115,7 @@ export class CoreService implements EventHandler {
   }
 }
 
-function handleContextualAction(selectionId: any, state: any) {
+function handleContextualAction(selectionId: string, state: StateStep) {
   throw new Error('Function not implemented.')
 }
 
