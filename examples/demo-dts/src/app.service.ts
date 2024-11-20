@@ -61,7 +61,6 @@ export class CoreService implements EventHandler {
         break
       case ContextualMenuSelectMessage.type:
         inMsg = JsonTransformer.fromJSON(message, ContextualMenuSelectMessage)
-        content = inMsg.selectionId
         handleContextualAction(inMsg.selectionId, session.state)
         break
       case MenuSelectMessage.type:
