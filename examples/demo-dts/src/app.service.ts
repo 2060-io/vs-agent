@@ -38,30 +38,17 @@ export class CoreService implements EventHandler {
   async inputMessage(message: BaseMessage): Promise<void> {
     let content = null
     let inMsg = null
-    let session = null
+    let session: SessionEntity = null
 
-    session = await this.sessionRepository.findOneBy({
-      connectionId: message.connectionId,
-    })
-    this.logger.log('inputMessage session: ' + session)
-
-    if (!session) {
-      session = this.sessionRepository.create({
-        connectionId: message.connectionId,
-        state: StateStep.START
-      })
-      
-      await this.sessionRepository.save(session)
-      this.logger.log('New session: ' + session)
-    }
+    session = await this.handleSession(message.connectionId)
 
     switch (message.type) {
       case TextMessage.type:
-        await this.apiClient.messages.send(message)
+        content = JsonTransformer.fromJSON(message, TextMessage)
         break
       case ContextualMenuSelectMessage.type:
         inMsg = JsonTransformer.fromJSON(message, ContextualMenuSelectMessage)
-        handleContextualAction(inMsg.selectionId, session.state)
+        this.handleContextualAction(inMsg.selectionId, session.state)
         break
       case MenuSelectMessage.type:
         inMsg = JsonTransformer.fromJSON(message, MenuSelectMessage)
@@ -75,7 +62,7 @@ export class CoreService implements EventHandler {
         inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
         await this.sessionRepository.update(session.id, {
           ...session,
-          lang: inMsg.preferredLanguage
+          lang: inMsg.preferredLanguage,
         })
         break
       case MrzDataSubmitMessage.type:
@@ -103,18 +90,56 @@ export class CoreService implements EventHandler {
       content = content.trim()
       if (content.length === 0) content = null
     }
+    if (content == null) return
+
+    await this.handleStateInput(content, session)
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    const welcome = new TextMessage({
-      connectionId: event.connectionId,
-      content: this.i18n.t('msg.WELCOME', { lang: 'es' }),
-    })
-    await this.apiClient.messages.send(welcome)
+    await this.welcomeMessage(event.connectionId)
+    await this.handleSession(event.connectionId)
   }
-}
 
-function handleContextualAction(selectionId: string, state: StateStep) {
-  throw new Error('Function not implemented.')
+  private handleContextualAction(selectionId: string, state: StateStep) {
+    throw new Error('Function not implemented.')
+  }
+  
+  private async handleStateInput(content: any, session: SessionEntity) {
+    switch (session.state) {
+      case StateStep.START:
+        await this.welcomeMessage(session.connectionId)
+        break
+      default:
+        break
+    }
+  }
+  
+  private async welcomeMessage(connectionId: string) {
+    const lang = (await this.handleSession(connectionId)).lang
+    await this.apiClient.messages.send(
+      new TextMessage({
+        connectionId: connectionId,
+        content: this.i18n.t('msg.WELCOME', { lang: lang }),
+      })
+    )
+  }
+  
+  private async handleSession(connectionId: string): Promise<SessionEntity> {
+    let session = await this.sessionRepository.findOneBy({
+      connectionId: connectionId,
+    })
+    this.logger.log('inputMessage session: ' + session)
+  
+    if (!session) {
+      session = this.sessionRepository.create({
+        connectionId: connectionId,
+        state: StateStep.START,
+      })
+  
+      await this.sessionRepository.save(session)
+      this.logger.log('New session: ' + session)
+    }
+    return session
+  }
 }
 
