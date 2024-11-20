@@ -116,7 +116,7 @@ export class CoreService implements EventHandler {
   
   private async welcomeMessage(connectionId: string) {
     const lang = (await this.handleSession(connectionId)).lang
-    await this.sendText(connectionId, 'msg.WELCOME', lang)
+    await this.sendText(connectionId, 'WELCOME', lang)
   }
   
   private async handleSession(connectionId: string): Promise<SessionEntity> {
@@ -141,9 +141,13 @@ export class CoreService implements EventHandler {
     await this.apiClient.messages.send(
       new TextMessage({
         connectionId: connectionId,
-        content: this.i18n.t(`msg.${text}`, { lang: lang }),
+        content: this.getText(text, lang),
       })
     )
+  }
+
+  private getText(text: string, lang: string): string {
+    return this.i18n.t(`msg.${text}`, { lang: lang })
   }
 }
 
