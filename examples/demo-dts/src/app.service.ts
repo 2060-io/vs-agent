@@ -1,9 +1,20 @@
-import { BaseMessage, ConnectionStateUpdated, ProfileMessage, TextMessage } from '@2060.io/model'
+import {
+  BaseMessage,
+  ConnectionStateUpdated,
+  ContextualMenuSelectMessage,
+  CredentialReceptionMessage,
+  EMrtdDataSubmitMessage,
+  MediaMessage,
+  MenuSelectMessage,
+  MrzDataSubmitMessage,
+  ProfileMessage,
+  TextMessage,
+} from '@2060.io/model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/nestjs-client'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { SessionEntity } from './models'
-import { JsonTransformer } from '@credo-ts/core'
+import { CredentialState, JsonTransformer } from '@credo-ts/core'
 import { StateStep } from './common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -12,6 +23,7 @@ import { I18nService } from 'nestjs-i18n'
 @Injectable()
 export class CoreService implements EventHandler {
   private readonly apiClient: ApiClient
+  private readonly logger = new Logger(CoreService.name)
 
   constructor(
     @InjectRepository(SessionEntity)
@@ -24,20 +36,73 @@ export class CoreService implements EventHandler {
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
+    let content = null
+    let inMsg = null
+    let session = null
+
+    session = await this.sessionRepository.findOneBy({
+      connectionId: message.connectionId,
+    })
+    this.logger.log('inputMessage session: ' + session)
+
+    if (!session) {
+      session = this.sessionRepository.create({
+        connectionId: message.connectionId,
+      })
+      
+      await this.sessionRepository.save(session)
+      this.logger.log('New session: ' + session)
+    }
+
     switch (message.type) {
       case TextMessage.type:
         await this.apiClient.messages.send(message)
         break
+      case ContextualMenuSelectMessage.type:
+        inMsg = JsonTransformer.fromJSON(message, ContextualMenuSelectMessage)
+        content = inMsg.selectionId
+        handleContextualAction(inMsg.selectionId, session.state)
+        break
+      case MenuSelectMessage.type:
+        inMsg = JsonTransformer.fromJSON(message, MenuSelectMessage)
+        content = inMsg.menuItems[0].id ?? null
+        break
+      case MediaMessage.type:
+        inMsg = JsonTransformer.fromJSON(message, MediaMessage)
+        content = 'media'
+        break
       case ProfileMessage.type:
-        const msg = JsonTransformer.fromJSON(message, ProfileMessage)
+        inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
         await this.sessionRepository.save({
-          connectionId: msg.connectionId,
-          lang: msg.preferredLanguage,
+          connectionId: inMsg.connectionId,
+          lang: inMsg.preferredLanguage,
           state: StateStep.START,
         })
         break
+      case MrzDataSubmitMessage.type:
+        content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
+        break
+      case EMrtdDataSubmitMessage.type:
+        content = JsonTransformer.fromJSON(message, EMrtdDataSubmitMessage)
+        break
+      case CredentialReceptionMessage.type:
+        inMsg = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
+        switch (inMsg.state) {
+          case CredentialState.Done:
+            break
+          case CredentialState.Declined:
+            break
+          default:
+            break
+        }
+        break
       default:
         break
+    }
+
+    if (content != null) {
+      content = content.trim()
+      if (content.length === 0) content = null
     }
   }
 
@@ -49,3 +114,8 @@ export class CoreService implements EventHandler {
     await this.apiClient.messages.send(welcome)
   }
 }
+
+function handleContextualAction(selectionId: any, state: any) {
+  throw new Error('Function not implemented.')
+}
+
