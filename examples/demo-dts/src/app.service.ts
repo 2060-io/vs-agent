@@ -64,6 +64,7 @@ export class CoreService implements EventHandler {
           ...session,
           lang: inMsg.preferredLanguage,
         })
+        await this.welcomeMessage(session.connectionId)
         break
       case MrzDataSubmitMessage.type:
         content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
@@ -96,7 +97,6 @@ export class CoreService implements EventHandler {
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    await this.welcomeMessage(event.connectionId)
     await this.handleSession(event.connectionId)
   }
 
@@ -116,12 +116,7 @@ export class CoreService implements EventHandler {
   
   private async welcomeMessage(connectionId: string) {
     const lang = (await this.handleSession(connectionId)).lang
-    await this.apiClient.messages.send(
-      new TextMessage({
-        connectionId: connectionId,
-        content: this.i18n.t('msg.WELCOME', { lang: lang }),
-      })
-    )
+    await this.sendText(connectionId, 'msg.WELCOME', lang)
   }
   
   private async handleSession(connectionId: string): Promise<SessionEntity> {
@@ -140,6 +135,15 @@ export class CoreService implements EventHandler {
       this.logger.log('New session: ' + session)
     }
     return session
+  }
+
+  private async sendText(connectionId: string, text: string, lang: string) {
+    await this.apiClient.messages.send(
+      new TextMessage({
+        connectionId: connectionId,
+        content: this.i18n.t(`msg.${text}`, { lang: lang }),
+      })
+    )
   }
 }
 
