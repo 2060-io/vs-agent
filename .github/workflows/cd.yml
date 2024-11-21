@@ -106,7 +106,7 @@ jobs:
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
         run: |
           yarn publish ./packages/model --new-version $RELEASE_VERSION
           yarn publish ./packages/client --new-version $RELEASE_VERSION
