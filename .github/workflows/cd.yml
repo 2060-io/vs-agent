@@ -108,7 +108,10 @@ jobs:
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
         run: |
-          yarn publish ./packages/model --new-version $RELEASE_VERSION
-          yarn publish ./packages/client --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-model version --no-git-tag-version --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-model publish --non-interactive
+          yarn workspace @2060.io/service-agent-client version --no-git-tag-version --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-client publish --non-interactive
+          
 
 
