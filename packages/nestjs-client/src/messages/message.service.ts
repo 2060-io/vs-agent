@@ -26,7 +26,7 @@ export class MessageEventService {
     this.logger.debug(`Initialized with url: ${this.url}, version: ${this.version}`)
   }
 
-  async received(event: MessageReceived): Promise<any> {
+  async received(event: MessageReceived): Promise<void> {
     const body = new ReceiptsMessage({
       connectionId: event.message.connectionId,
       receipts: [
@@ -44,11 +44,8 @@ export class MessageEventService {
     if (this.eventHandler) {
       await this.eventHandler.inputMessage(event.message)
     }
-
-    return null
   }
 
-  async updated(event: MessageStateUpdated): Promise<any> {
-    return event
+  async updated(event: MessageStateUpdated): Promise<void> {
   }
 }
