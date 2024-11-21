@@ -18,7 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/model": "*",
+    "@2060.io/service-agent-model": "*",
     "class-transformer": "0.5.1",
     "tslog": "^4.8.2",
     "express": "^4.18.1",

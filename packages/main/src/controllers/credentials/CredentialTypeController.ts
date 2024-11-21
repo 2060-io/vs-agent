@@ -1,4 +1,4 @@
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/model'
+import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/service-agent-model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,

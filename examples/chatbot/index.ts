@@ -20,7 +20,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   VerifiableCredentialSubmittedProofItem,
   MediaMessage,
-} from '@2060.io/model'
+} from '@2060.io/service-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'

@@ -1,7 +1,7 @@
 import type { ServerConfig } from '../utils/ServerConfig'
 import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
 
-import { ConnectionStateUpdated } from '@2060.io/model'
+import { ConnectionStateUpdated } from '@2060.io/service-agent-model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,

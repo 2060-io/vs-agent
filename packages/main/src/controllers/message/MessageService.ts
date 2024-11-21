@@ -17,7 +17,7 @@ import {
   EMrtdDataRequestMessage,
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
-} from '@2060.io/model'
+} from '@2060.io/service-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import {
