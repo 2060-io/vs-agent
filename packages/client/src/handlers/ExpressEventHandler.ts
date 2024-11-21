@@ -1,4 +1,4 @@
-import { EventType } from '@2060.io/model'
+import { EventType } from '@2060.io/service-agent-model'
 import { Express, Request, Response } from 'express'
 
 type Handler = (req: Request, res: Response) => Promise<void>

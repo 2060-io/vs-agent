@@ -75,7 +75,7 @@ jobs:
           docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
  
       - name: Add tags to Docker image and push to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'      
+        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
             docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}-$IMAGE_TAG
             docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}-$IMAGE_TAG
@@ -98,7 +98,17 @@ jobs:
             docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}
 
       - name: Build and push Chatbot Demo Docker image
+        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
+
+      - name: Publish NPM packages
+        if: steps.semantic.outputs.new-release-published == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
+        run: |
+          yarn publish ./packages/model --new-version $RELEASE_VERSION
+          yarn publish ./packages/client --new-version $RELEASE_VERSION
+
 

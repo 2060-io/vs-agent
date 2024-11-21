@@ -1,4 +1,4 @@
-import { IBaseMessage } from '@2060.io/model'
+import { IBaseMessage } from '@2060.io/service-agent-model'
 import { ConnectionRecord } from '@credo-ts/core'
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable, Optional } from '@nestjs/common'

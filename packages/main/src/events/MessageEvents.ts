@@ -34,7 +34,7 @@ import {
   VerifiableCredentialSubmittedProofItem,
   MessageStateUpdated,
   MessageReceived,
-} from '@2060.io/model'
+} from '@2060.io/service-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'

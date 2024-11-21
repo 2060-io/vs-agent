@@ -1,6 +1,6 @@
 // src/services/CredentialTypeService.ts
 
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/model'
+import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/service-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'
