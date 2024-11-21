@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/nestjs-client",
+  "name": "@2060.io/service-agent-nestjs-client",
   "version": "0.0.1",
   "description": "",
   "main": "build/index",
