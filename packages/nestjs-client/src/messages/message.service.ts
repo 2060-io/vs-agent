@@ -1,5 +1,5 @@
-import { MessageReceived, MessageStateUpdated, ReceiptsMessage } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
+import { MessageReceived, ReceiptsMessage } from '@2060.io/service-agent-model'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'
 
@@ -46,6 +46,5 @@ export class MessageEventService {
     }
   }
 
-  async updated(event: MessageStateUpdated): Promise<void> {
-  }
+  async updated(): Promise<void> {}
 }

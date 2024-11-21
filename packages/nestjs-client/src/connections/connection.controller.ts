@@ -1,5 +1,5 @@
-import { ConnectionStateUpdated, EventType } from '@2060.io/service-agent-model'
 import { HttpUtils } from '@2060.io/service-agent-client'
+import { ConnectionStateUpdated, EventType } from '@2060.io/service-agent-model'
 import { Body, Controller, Logger, Post } from '@nestjs/common'
 
 import { ConnectionsEventService } from './connection.service'
