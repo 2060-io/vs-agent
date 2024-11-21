@@ -1,4 +1,4 @@
-import { ExtendedDidExchangeState } from '@2060.io/model'
+import { ExtendedDidExchangeState } from '@2060.io/service-agent-model'
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('connections')

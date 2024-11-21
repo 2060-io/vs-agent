@@ -1,4 +1,4 @@
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { EventHandler } from '../interfaces'

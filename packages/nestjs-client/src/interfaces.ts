@@ -1,4 +1,4 @@
-import { BaseMessage, ConnectionStateUpdated } from '@2060.io/model'
+import { BaseMessage, ConnectionStateUpdated } from '@2060.io/service-agent-model'
 
 /**
  * The EventHandler interface defines the blueprint for handling events

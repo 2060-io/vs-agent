@@ -1,4 +1,4 @@
-import { EventType, MessageReceived, MessageStateUpdated } from '@2060.io/model'
+import { EventType, MessageReceived, MessageStateUpdated } from '@2060.io/service-agent-model'
 import { HttpUtils } from '@2060.io/service-agent-client'
 import { Body, Controller, Logger, Post } from '@nestjs/common'
 

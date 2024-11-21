@@ -23,7 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@2060.io/model": "file:../../packages/model/build",
+    "@2060.io/service-agent-model": "file:../../packages/model/build",
     "@2060.io/nestjs-client": "file:../../packages/nestjs-client/build",
     "@2060.io/service-agent-client": "file:../../packages/client/build",
     "@credo-ts/core": "^0.5.11",

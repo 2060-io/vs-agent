@@ -1,4 +1,4 @@
-import { MessageReceived, MessageStateUpdated, ReceiptsMessage } from '@2060.io/model'
+import { MessageReceived, MessageStateUpdated, ReceiptsMessage } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'

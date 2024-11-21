@@ -9,7 +9,7 @@ import {
   MrzDataSubmitMessage,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/model'
+} from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'

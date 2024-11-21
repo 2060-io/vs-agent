@@ -19,7 +19,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/model": "*",
+    "@2060.io/service-agent-model": "*",
     "@2060.io/service-agent-client": "*",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
