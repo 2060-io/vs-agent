@@ -2,7 +2,7 @@
   "name": "@2060.io/service-agent-model",
   "main": "build/index",
   "types": "build/index",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.1",
   "files": [
     "build"
   ],
