@@ -1,5 +1,5 @@
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
-import { didcommMessageState, ServiceAgentMessageReceipt } from '@2060.io/model'
+import { didcommMessageState, ServiceAgentMessageReceipt } from '@2060.io/service-agent-model'
 import { isUri } from '@credo-ts/core/build/utils'
 import { MessageReceipt } from 'credo-ts-receipts'
 

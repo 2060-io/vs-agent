@@ -1,4 +1,4 @@
-import type { AgentInfo } from '@2060.io/model'
+import type { AgentInfo } from '@2060.io/service-agent-model'
 
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
