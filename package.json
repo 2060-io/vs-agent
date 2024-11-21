@@ -5,6 +5,8 @@
   "description": "Your gateway to 2060 ecosystem",
   "homepage": "https://2060.io",
   "workspaces": [
+    "packages/model",
+    "packages/client",
     "packages/*"
   ],
   "repository": {
@@ -16,7 +18,7 @@
     "build": "yarn workspaces run build",
     "start": "yarn workspace main run start",
     "check-types": "yarn check-types:build",
-    "check-types:build": "yarn prebuild && yarn workspaces run tsc --noEmit -p tsconfig.build.json",
+    "check-types:build": "yarn workspaces run tsc --noEmit -p tsconfig.build.json",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
     "test": "yarn workspaces run test",

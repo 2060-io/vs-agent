@@ -10,7 +10,8 @@ export const ExtendedDidExchangeState = {
   Terminated: 'terminated',
 } as const
 
-type ExtendedDidExchangeState = (typeof ExtendedDidExchangeState)[keyof typeof ExtendedDidExchangeState]
+export type ExtendedDidExchangeState =
+  (typeof ExtendedDidExchangeState)[keyof typeof ExtendedDidExchangeState]
 
 export interface ConnectionStateUpdatedOptions {
   connectionId: string
