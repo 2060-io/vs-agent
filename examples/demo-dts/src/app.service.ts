@@ -11,7 +11,7 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { EventHandler } from '@2060.io/nestjs-client'
+import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { CredentialState, JsonTransformer } from '@credo-ts/core'

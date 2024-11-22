@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@2060.io/service-agent-model": "file:../../packages/model/build",
-    "@2060.io/nestjs-client": "file:../../packages/nestjs-client/build",
+    "@2060.io/service-agent-nestjs-client": "file:../../packages/nestjs-client/build",
     "@2060.io/service-agent-client": "file:../../packages/client/build",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/axios": "^3.1.1",

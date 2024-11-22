@@ -6,7 +6,11 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from './config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
-import { ConnectionEntity, ConnectionsEventModule, MessageEventModule } from '@2060.io/nestjs-client'
+import {
+  ConnectionEntity,
+  ConnectionsEventModule,
+  MessageEventModule,
+} from '@2060.io/service-agent-nestjs-client'
 import { ApiVersion } from '@2060.io/service-agent-client'
 
 const defaultOptions = {
