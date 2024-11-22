@@ -16,7 +16,7 @@
   "scripts": {
     "prebuild": "yarn workspace @2060.io/service-agent-model run build",
     "build": "yarn workspaces run build",
-    "start": "yarn workspace main run start",
+    "start": "yarn workspace @2060.io/service-agent-main run start",
     "check-types": "yarn check-types:build",
     "check-types:build": "yarn workspaces run tsc --noEmit -p tsconfig.build.json",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",
