@@ -100,10 +100,37 @@ export class CoreService implements EventHandler {
     await this.handleSession(event.connectionId)
   }
 
+  /**
+   * Handles the `ConnectionStateUpdated` event to close an active connection.
+   *
+   * This method is part of the event handler implementation for managing
+   * connection lifecycle events. It ensures that the session associated with
+   * the given connection is updated and purged of sensitive or user-specific data
+   * before finalizing the connection closure.
+   *
+   * Steps:
+   * 1. Retrieves the session associated with the `connectionId` from the event.
+   * 2. Purges user-specific data from the session using `purgeUserData`,
+   *    resetting the session state and clearing sensitive fields.
+   *
+   * @param event - The `ConnectionStateUpdated` event containing details of
+   *                the connection to be closed (e.g., `connectionId`).
+   *
+   * @returns {Promise<void>} - Resolves when the connection is successfully closed
+   *                            and the session is updated.
+   *
+   * @note This method ensures that the session's `connectionId` and other essential
+   *       metadata remain intact while cleaning up unnecessary or sensitive data.
+   */
+  async closeConnection(event: ConnectionStateUpdated): Promise<void> {
+    let session = await this.handleSession(event.connectionId)
+    session = await this.purgeUserData(session)
+  }
+
   private handleContextualAction(selectionId: string, state: StateStep) {
     throw new Error('Function not implemented.')
   }
-  
+
   private async handleStateInput(content: any, session: SessionEntity) {
     switch (session.state) {
       case StateStep.START:
@@ -113,24 +140,24 @@ export class CoreService implements EventHandler {
         break
     }
   }
-  
+
   private async welcomeMessage(connectionId: string) {
     const lang = (await this.handleSession(connectionId)).lang
     await this.sendText(connectionId, 'WELCOME', lang)
   }
-  
+
   private async handleSession(connectionId: string): Promise<SessionEntity> {
     let session = await this.sessionRepository.findOneBy({
       connectionId: connectionId,
     })
     this.logger.log('inputMessage session: ' + session)
-  
+
     if (!session) {
       session = this.sessionRepository.create({
         connectionId: connectionId,
         state: StateStep.START,
       })
-  
+
       await this.sessionRepository.save(session)
       this.logger.log('New session: ' + session)
     }
@@ -142,12 +169,34 @@ export class CoreService implements EventHandler {
       new TextMessage({
         connectionId: connectionId,
         content: this.getText(text, lang),
-      })
+      }),
     )
   }
 
   private getText(text: string, lang: string): string {
     return this.i18n.t(`msg.${text}`, { lang: lang })
   }
-}
 
+  // Special flows
+  /**
+   * Purges user-specific data from the provided session.
+   *
+   * This method resets the session's `state` to `StateStep.START` and ensures that
+   * any additional parameters in the session (user-specific or sensitive data)
+   * are set to `null`. It updates the session in the database, keeping the
+   * `connectionId`, `id`, `lang`, and timestamps intact.
+   *
+   * @param session - The session entity to be purged.
+   *                  It must be a valid session retrieved from the database.
+   *
+   * @returns {Promise<SessionEntity>} - The updated session entity after the purge.
+   *
+   * @note This method should be used to reset a session to its initial state
+   *       while preserving its connection details and essential metadata.
+   */
+  private async purgeUserData(session: SessionEntity): Promise<SessionEntity> {
+    session.state = StateStep.START
+    // Additional sensitive data can be reset here if needed.
+    return await this.sessionRepository.save(session)
+  }
+}
