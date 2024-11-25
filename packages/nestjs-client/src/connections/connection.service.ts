@@ -32,6 +32,10 @@ export class ConnectionsEventService {
         break
       case ExtendedDidExchangeState.Terminated:
         await this.repository.updateStatus(event.connectionId, event.state)
+
+        if (this.eventHandler) {
+          await this.eventHandler.closeConnection(event)
+        }
         break
       default:
         break

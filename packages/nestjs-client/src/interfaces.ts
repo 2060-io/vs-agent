@@ -17,6 +17,15 @@ export interface EventHandler {
   newConnection(event: ConnectionStateUpdated): Promise<void> | void
 
   /**
+   * Handles a terminated connection event, typically triggered when the connection
+   * state changes. This method can execute synchronously or asynchronously.
+   *
+   * @param event - An instance of ConnectionStateUpdated representing
+   *                the updated connection state.
+   */
+  closeConnection(event: ConnectionStateUpdated): Promise<void> | void
+
+  /**
    * Processes an incoming message. This method allows for both synchronous
    * and asynchronous handling of messages of type BaseMessage.
    *
