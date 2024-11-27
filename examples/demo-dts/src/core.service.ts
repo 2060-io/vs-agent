@@ -32,7 +32,7 @@ export class CoreService implements EventHandler {
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
   ) {
-    const baseUrl = configService.get<string>('appConfig.serviceAgentAdmin')
+    const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
   }
 
