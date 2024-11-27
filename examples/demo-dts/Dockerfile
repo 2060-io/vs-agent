@@ -1,4 +1,4 @@
-FROM node:22 as base
+FROM node:22-alpine as base
 
 COPY package.json yarn.lock tsconfig.json tsconfig.build.json ./
 COPY packages/model/package.json packages/model/package.json
