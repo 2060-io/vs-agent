@@ -8,7 +8,7 @@ import { ApiVersion } from '../types/enums'
 const logger = new Logger({
   name: 'MessageService',
   type: 'pretty',
-  prettyLogTemplate: '{{logLevelName}} [{{name}}]: '
+  prettyLogTemplate: '{{logLevelName}} [{{name}}]: ',
 })
 
 /**
