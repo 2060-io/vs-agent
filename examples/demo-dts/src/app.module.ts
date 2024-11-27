@@ -30,8 +30,8 @@ import { CoreModule } from '@/core.module'
     MessageEventModule.forRoot({
       eventHandler: CoreService,
       imports: [],
-      url: process.env.SERVICE_AGENT_ADMIN_BASE_URL,
-      version: process.env.API_VERSION as ApiVersion,
+      url: process.env.SERVICE_AGENT_ADMIN_URL,
+      version: ApiVersion.V1,
     }),
     ConnectionsEventModule.forRoot({
       eventHandler: CoreService,

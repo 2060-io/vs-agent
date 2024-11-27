@@ -33,8 +33,7 @@ export class CoreService implements EventHandler {
     private readonly configService: ConfigService,
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdmin')
-    const apiVersion = configService.get<ApiVersion>('appConfig.apiVersion')
-    this.apiClient = new ApiClient(baseUrl, apiVersion)
+    this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
   }
 
   /**

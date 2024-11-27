@@ -37,22 +37,15 @@ export default registerAs('appConfig', () => ({
 
   /**
    * Base URL for the Service Agent Admin.
-   * Defaults to 'http://localhost:3000' if SERVICE_AGENT_ADMIN_BASE_URL is not set in the environment variables.
+   * Defaults to 'http://localhost:3000' if SERVICE_AGENT_ADMIN_URL is not set in the environment variables.
    * @type {string}
    */
-  serviceAgentAdmin: process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000',
-
-  /**
-   * API version for the application.
-   * Defaults to '1.0' if API_VERSION is not set in the environment variables.
-   * @type {ApiVersion}
-   */
-  apiVersion: (process.env.API_VERSION as ApiVersion) || ApiVersion.V1,
+  serviceAgentAdminUrl: process.env.SERVICE_AGENT_ADMIN_URL || 'http://localhost:3000',
 
   /**
    * Base URL for the application.
    * Defaults to 'http://localhost:2902' if PUBLIC_BASE_URL is not set.
    * @type {string}
    */
-  baseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:2902',
+  publicBaseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:2902',
 }))
