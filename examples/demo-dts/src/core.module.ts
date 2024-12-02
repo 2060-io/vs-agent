@@ -17,7 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
         port: 5432,
         username: configService.get<string>('appConfig.postgresUser'),
         password: configService.get<string>('appConfig.postgresPassword'),
-        database: configService.get<string>('appConfig.postgresUser'),
+        database: configService.get<string>('appConfig.postgresDbName'),
         entities: [ConnectionEntity, SessionEntity],
         synchronize: true,
         ssl: false,

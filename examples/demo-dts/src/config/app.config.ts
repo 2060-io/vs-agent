@@ -26,14 +26,21 @@ export default registerAs('appConfig', () => ({
    * Defaults 'unicid' string if POSTGRES_USER is not set in the environment variables.
    * @type {string}
    */
-  postgresUser: process.env.POSTGRES_USER || 'unicid',
+  postgresUser: process.env.POSTGRES_USER || 'demo',
+
+  /**
+   * Name for the PostgreSQL database.
+   * Defaults 'unicid' string if POSTGRES_DB_NAME is not set in the environment variables.
+   * @type {string}
+   */
+  postgresDbName: process.env.POSTGRES_DB_NAME || 'demo',
 
   /**
    * Password for the PostgreSQL database.
    * Defaults 'demo' string if POSTGRES_PASSWORD is not set in the environment variables.
    * @type {string}
    */
-  postgresPassword: process.env.POSTGRES_PASSWORD || 'demo',
+  postgresPassword: process.env.POSTGRES_PASSWORD || '2060demo',
 
   /**
    * Base URL for the Service Agent Admin.

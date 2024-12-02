@@ -44,6 +44,7 @@ services:
       - SERVICE_AGENT_ADMIN_URL=https://p2800.ovpndev.2060.io
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
+      - POSTGRES_DB_NAME=gaia
       - POSTGRES_PASSWORD=2060demo
       - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
 
