@@ -138,7 +138,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     }
 
     if (message.type === CallOfferMessage.type.messageTypeUri) {
-      const callOffer = (message as CallOfferMessage)
+      const callOffer = message as CallOfferMessage
       const msg = new CallOfferRequestMessage({
         id: message.id,
         connectionId: connection.id,
