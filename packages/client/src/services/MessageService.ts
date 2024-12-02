@@ -5,7 +5,11 @@ import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'
 
-const logger = new Logger()
+const logger = new Logger({
+  name: 'MessageService',
+  type: 'pretty',
+  prettyLogTemplate: '{{logLevelName}} [{{name}}]: ',
+})
 
 /**
  * `MessageService` class for handling message-related endpoints in the Agent Service.

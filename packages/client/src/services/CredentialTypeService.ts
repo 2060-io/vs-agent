@@ -5,7 +5,11 @@ import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'
 
-const logger = new Logger()
+const logger = new Logger({
+  name: 'CredentialTypeService',
+  type: 'pretty',
+  prettyLogTemplate: '{{logLevelName}} [{{name}}]: ',
+})
 
 /**
  * `CredentialTypeService` class for managing credential types and interacting with
