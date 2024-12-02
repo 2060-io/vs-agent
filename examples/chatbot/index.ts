@@ -381,6 +381,7 @@ expressHandler.messageReceived(async (req, res) => {
         ongoingCalls.push({ wsUrl, roomId, connectionId: obj.connectionId })
         const body = new CallOfferRequestMessage({
           connectionId: obj.connectionId,
+          description: 'Start call',
           parameters: { wsUrl, roomId, peerId },
         })
         await apiClient.messages.send(body)
