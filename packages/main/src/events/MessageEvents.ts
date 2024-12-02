@@ -40,6 +40,7 @@ import {
   VerifiableCredentialSubmittedProofItem,
   MessageStateUpdated,
   MessageReceived,
+  MrtdSubmitState,
 } from '@2060.io/service-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
@@ -61,7 +62,6 @@ import {
   MediaSharingStateChangedEvent,
 } from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
-import { MrtdSubmitState } from 'packages/model/build/messages/mrtd/MrtdSubmitState'
 
 import { ServiceAgent } from '../utils/ServiceAgent'
 import { createDataUrl } from '../utils/parsers'
