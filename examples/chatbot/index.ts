@@ -361,13 +361,10 @@ expressHandler.messageReceived(async (req, res) => {
       try {
         if (!wsUrl || !roomId) {
           // Create a room if not given as argument
-          const result = await fetch(`${WEBRTC_SERVER_BASE_URL}/rooms`, {
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
+          const result = await fetch(`${WEBRTC_SERVER_BASE_URL}/rooms/${randomUUID()}`, {
             method: 'POST',
-            body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ maxPeerCount: 50, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }),
           })
 
           const response = await result.json()
