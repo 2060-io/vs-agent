@@ -31,12 +31,10 @@ export class CallOfferRequestMessage extends BaseMessage {
   public readonly type = CallOfferRequestMessage.type
   public static readonly type = MessageType.CallOfferRequestMessage
 
-  @Expose()
   @IsOptional()
   @Transform(({ value }) => DateParser(value))
   public offerExpirationTime?: Date
 
-  @Expose()
   @IsOptional()
   @Transform(({ value }) => DateParser(value))
   public offerStartTime?: Date

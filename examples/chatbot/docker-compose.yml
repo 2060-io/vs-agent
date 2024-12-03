@@ -18,7 +18,6 @@ services:
       - AGENT_LABEL=Chatbot Agent
       - USE_CORS=true
       - EVENTS_BASE_URL=http://chatbot-backend:5000
-      - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
     volumes:
