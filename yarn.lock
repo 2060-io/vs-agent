@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@2060.io/credo-ts-didcomm-calls@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.8.tgz#8b3368d8399cd43925747fd58f118492f279e00d"
-  integrity sha512-cGiO9xcVCE1pOPDrC7H9fl0vVDC3aQ2B/9v0KewS/mYWj91k/quRskjwtODqzq8YxcSTQXnfIXqYez2DuX3FAQ==
+"@2060.io/credo-ts-didcomm-calls@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.10.tgz#0c4953a08ff3c694fe93a81dd62f3918738d53d0"
+  integrity sha512-urgP0S6I2aJbOwlmELNnpPzGU7s0MYEGN43pMaiP3HC1r+cLTB+vCJZaSQ1SjRP7uN7CrvyP+SD6e98U83mcsQ==
   dependencies:
     class-transformer "0.5.1"
     class-validator "0.14.1"
@@ -416,7 +416,7 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@credo-ts/action-menu@^0.5.11":
+"@credo-ts/action-menu@0.5.11", "@credo-ts/action-menu@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/action-menu/-/action-menu-0.5.11.tgz#ccd5da4ffc4ee7d1cf67a4ad1fd867c9c14566ce"
   integrity sha512-J8rnsk5av3ja2P8yxOP9hEgHRaxCfsSxWUQAzQME82uXI4at6MGENmu7LYO/TXqRzrAirgDNi0wduxYQso9+hA==
@@ -426,7 +426,7 @@
     class-validator "0.14.1"
     rxjs "^7.8.0"
 
-"@credo-ts/anoncreds@^0.5.11":
+"@credo-ts/anoncreds@0.5.11", "@credo-ts/anoncreds@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/anoncreds/-/anoncreds-0.5.11.tgz#1ecbb04268957e674d6bcacc671ca05eb7768236"
   integrity sha512-CEB1QxQQP/J++Y3t4hTyZq7KVo94hQPM2wZ0MIOq+TsM8Wp0/0CMogDsWPtBJDi+jk7JZRbb7qPiOzBHo2hDtg==
@@ -440,7 +440,7 @@
     class-validator "0.14.1"
     reflect-metadata "^0.1.13"
 
-"@credo-ts/askar@^0.5.11":
+"@credo-ts/askar@0.5.11", "@credo-ts/askar@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/askar/-/askar-0.5.11.tgz#bb8fd7ab59219501be8cb194fb29d801065848cb"
   integrity sha512-KIBNOhEqF8mOWuFYEolPo/qU8hrHR+X4othq3WrzRWJoApJKe7OQk9mI6H9yjQ4H3eD2By7oHWEqgZCB4IDcwg==
@@ -498,7 +498,7 @@
     web-did-resolver "^2.0.21"
     webcrypto-core "^1.8.0"
 
-"@credo-ts/node@^0.5.11":
+"@credo-ts/node@0.5.11", "@credo-ts/node@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/node/-/node-0.5.11.tgz#18fc04cba3e91b81737f1ad83298d74326a8f227"
   integrity sha512-zrm+IujCAkSzSPj3Je5iZCsPkwUC8IDfStuSLJ0wiYjDaXzjYtUGn320bDE13VMJ56i/AdW1rv49/PWSGpebVA==
@@ -510,7 +510,7 @@
     express "^4.17.1"
     ws "^8.13.0"
 
-"@credo-ts/question-answer@^0.5.11":
+"@credo-ts/question-answer@0.5.11", "@credo-ts/question-answer@^0.5.11":
   version "0.5.11"
   resolved "https://registry.yarnpkg.com/@credo-ts/question-answer/-/question-answer-0.5.11.tgz#5184495261d8b1c9914f018195fe3bfb1ffcfc89"
   integrity sha512-ls/NFaWCh+iHR4U88BcJZ8l2hhZ1dUI+cZu6irBnWhKMz4www4x+azhX9BZ9Ejq3BM7CcTvGYaTvUJjskhnN5Q==
@@ -875,7 +875,7 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@hyperledger/anoncreds-nodejs@^0.2.4":
+"@hyperledger/anoncreds-nodejs@0.2.4", "@hyperledger/anoncreds-nodejs@^0.2.4":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@hyperledger/anoncreds-nodejs/-/anoncreds-nodejs-0.2.4.tgz#79c4eea016409fe08bc5fd4014d36a0d29fbdd49"
   integrity sha512-CaWYwV8DOTfgXS8n15TIAzdCkAyI+g+r/hgUMq7qMGesy0wfOokDDUC+7WPgNuG4am6jscETUgGbicWr95WInA==
@@ -892,7 +892,7 @@
   resolved "https://registry.yarnpkg.com/@hyperledger/anoncreds-shared/-/anoncreds-shared-0.2.4.tgz#14577c3290a17aa5c5fbd3721de59774ff928704"
   integrity sha512-OKw8/KXU5bAVA2fhm8pI3BLyJOIzOrEWz6sqX8QQSILNgx2hrEcN1OCSYTudcLAfID3fGRvr1X3vLzlRo19IVg==
 
-"@hyperledger/aries-askar-nodejs@^0.2.3":
+"@hyperledger/aries-askar-nodejs@0.2.3", "@hyperledger/aries-askar-nodejs@^0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@hyperledger/aries-askar-nodejs/-/aries-askar-nodejs-0.2.3.tgz#f939c19047c78b9903b422f992b4f5406ac3aae3"
   integrity sha512-2BnGqK08Y96DEB8tDuXy2x+soetChyMGB0+L1yqdHx1Xv5FvRerYrTXdTjJXTW6ANb48k2Np8WlJ4YNePSo6ww==
@@ -1986,7 +1986,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@20.11.19", "@types/node@^20.11.19":
+"@types/node@*", "@types/node@^20.11.19":
   version "20.11.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.19.tgz#b466de054e9cb5b3831bee38938de64ac7f81195"
   integrity sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==

@@ -1,6 +1,6 @@
 import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Transform } from 'class-transformer'
-import { IsString } from 'class-validator'
+import { IsOptional, IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
@@ -23,7 +23,7 @@ export class CallOfferRequestMessage extends BaseMessage {
       this.connectionId = options.connectionId
       this.offerExpirationTime = options.offerExpirationTime
       this.offerStartTime = options.offerStartTime
-      this.description = options.description ?? 'Call Offer'
+      this.description = options.description
       this.parameters = options.parameters
     }
   }
@@ -32,16 +32,19 @@ export class CallOfferRequestMessage extends BaseMessage {
   public static readonly type = MessageType.CallOfferRequestMessage
 
   @Expose()
-  @Transform(({ value }) => (value !== undefined ? DateParser(value) : undefined))
+  @IsOptional()
+  @Transform(({ value }) => DateParser(value))
   public offerExpirationTime?: Date
 
   @Expose()
-  @Transform(({ value }) => (value !== undefined ? DateParser(value) : undefined))
+  @IsOptional()
+  @Transform(({ value }) => DateParser(value))
   public offerStartTime?: Date
 
   @Expose()
   @IsString()
-  public description!: string
+  @IsOptional()
+  public description?: string
 
   @Expose()
   public parameters!: Record<string, unknown>
