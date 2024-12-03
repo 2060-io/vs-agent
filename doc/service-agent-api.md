@@ -36,6 +36,10 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Call Accept](#call-accept)
       - [Call Reject](#call-reject)
       - [Call End](#call-end)
+      - [MRZ Data Request](#mrz-data-request)
+      - [MRZ Data Submit](#mrz-data-submit)
+      - [eMRTD Data Request](#emrtd-data-request)
+      - [eMRTD Data Submit](#emrtd-data-submit)
     - [Identity Proof Item types](#identity-proof-item-types)
       - [Verifiable Credential](#verifiable-credential)
         - [Request value](#request-value)
@@ -513,10 +517,13 @@ Request the other party to provide the Machine Readable Zone string from a valid
 
 Submit Machine Readable Zone data. This message may be sent either individually or as a response to a MRZ Data Request.
 
+The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending on how the flow went. The latter is used for unspecified errors (e.g. User Agent not capable of handling the request).
+
 ```json
 {
    ...
    "type": "mrz-data-submit",
+   "state": MrtdSubmitState,
    "mrzData": MrzData
 }
 ```
@@ -538,6 +545,43 @@ Submit Machine Readable Zone data. This message may be sent either individually 
 ```
 
 More info about the meaning of each field (and validity) can be found in [MRZ](https://github.com/cheminfo/mrz), the underlying library we are using for MRZ parsing.
+
+#### eMRTD Data Request
+
+
+Request the other party to read and provide eMRTD (Electronic Machine Readable Travel Document) data from a compatible electronic document.
+
+```json
+{
+   ...
+   "type": "emrtd-data-request",
+}
+```
+
+> TODO: Add parameters once supported by @2060.io/credo-ts-didcomm-mrtd module
+
+#### eMRTD Data Submit
+
+Submit data retrieved from an electronic Machine Readable Travel Document. This message may be sent either individually or as a response to an eMRTD Data Request.
+
+
+The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending on how the flow went. The latter is used for unspecified errors (e.g. User Agent not capable of handling the request).
+
+```json
+{
+   ...
+   "type": "emrtd-data-submit",
+   "state": MrtdSubmitState,
+   "dataGroups": EMrtdData
+}
+```
+
+`dataGroups` is a JSON object with two basic fields:
+
+- raw: object containing all data groups read from the chip in base64 format
+- parsed: object containing all interpreted fields and a global 'valid' flag to indicate if the document structure and integrity has been properly validated
+
+> TODO: Document better the interpreted fields or refer to the libraries to check the format.
 
 ### Identity Proof Item types
 
