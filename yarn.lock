@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@2060.io/credo-ts-didcomm-calls@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.3.tgz#d47a5700248b0063e90b298876100ce862a0033f"
-  integrity sha512-dmmdGuo76/7xponJv1wUst5i5sSLEDZ3R/GyfYLjU6O3xa2MLLmxI/9cvp2PBbqnVEHcsBsAjMH6mtllIEzp7Q==
+"@2060.io/credo-ts-didcomm-calls@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-calls/-/credo-ts-didcomm-calls-0.0.10.tgz#0c4953a08ff3c694fe93a81dd62f3918738d53d0"
+  integrity sha512-urgP0S6I2aJbOwlmELNnpPzGU7s0MYEGN43pMaiP3HC1r+cLTB+vCJZaSQ1SjRP7uN7CrvyP+SD6e98U83mcsQ==
   dependencies:
     class-transformer "0.5.1"
     class-validator "0.14.1"
@@ -1986,7 +1986,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@20.11.19", "@types/node@^20.11.19":
+"@types/node@*", "@types/node@^20.11.19":
   version "20.11.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.11.19.tgz#b466de054e9cb5b3831bee38938de64ac7f81195"
   integrity sha512-7xMnVEcZFu0DikYjWOlRq7NTPETrm7teqUT2WkQjrTIkEgUyyGdWsj/Zg8bEJt5TNklzbPD1X3fqfsHw3SpapQ==

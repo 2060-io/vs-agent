@@ -41,6 +41,7 @@ import {
   MessageStateUpdated,
   MessageReceived,
   MrtdSubmitState,
+  CallAcceptRequestMessage,
 } from '@2060.io/service-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
@@ -144,11 +145,14 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     }
 
     if (message.type === CallOfferMessage.type.messageTypeUri) {
-      const parameters = (message as CallOfferMessage).parameters
+      const callOffer = message as CallOfferMessage
       const msg = new CallOfferRequestMessage({
         id: message.id,
         connectionId: connection.id,
-        parameters: parameters,
+        offerExpirationTime: callOffer.offerExpirationTime ?? undefined,
+        offerStartTime: callOffer.offerStartTime ?? undefined,
+        description: callOffer.description,
+        parameters: callOffer.parameters,
         threadId: message.thread?.threadId,
         timestamp: new Date(),
       })
@@ -170,7 +174,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
     if (message.type === CallAcceptMessage.type.messageTypeUri) {
       const parameters = (message as CallAcceptMessage).parameters
-      const msg = new CallOfferRequestMessage({
+      const msg = new CallAcceptRequestMessage({
         id: message.id,
         connectionId: connection.id,
         parameters: parameters,

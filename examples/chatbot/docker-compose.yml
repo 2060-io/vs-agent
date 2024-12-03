@@ -15,9 +15,11 @@ services:
       - AGENT_PUBLIC_DID=did:web:10.82.14.12%3A3000
       - AGENT_ENDPOINT=ws://10.82.14.12:3001
       - AGENT_INVITATION_IMAGE_URL=http://10.82.14.12:3001/avatar.png
-      - AGENT_NAME=Chatbot Agent
+      - AGENT_LABEL=Chatbot Agent
       - USE_CORS=true
       - EVENTS_BASE_URL=http://chatbot-backend:5000
+      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
+      - REDIS_HOST=redis
     volumes:
       - ./afj:/root/.afj
 

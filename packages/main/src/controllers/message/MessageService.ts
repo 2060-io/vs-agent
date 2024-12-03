@@ -313,6 +313,9 @@ export class MessageService {
 
         const callOffer = await agent.modules.calls.offer({
           connectionId: connection.id,
+          offerExpirationTime: msg.offerExpirationTime,
+          offerStartTime: msg.offerStartTime,
+          description: msg.description,
           callType: 'service',
           parameters: msg.parameters,
         })
