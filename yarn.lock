@@ -11,18 +11,6 @@
     class-validator "0.14.1"
     tsyringe "^4.8.0"
 
-"@2060.io/credo-ts-didcomm-mrtd@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.8.tgz#faf0d24a651957138437f30ff0ff15695256eece"
-  integrity sha512-l6jDnDOu9yDIobQprCmaJCesUpmd/8AspKKI9KTlNlOFfmms++UcBEcBdQttVbb7KYJawsttoAWbLHJvWBUtfQ==
-  dependencies:
-    "@li0ard/tsemrtd" "^0.2.0"
-    class-transformer "0.5.1"
-    class-validator "0.14.1"
-    esbuild "^0.24.0"
-    mrz "^4.2.0"
-    tsyringe "^4.8.0"
-
 "@2060.io/credo-ts-didcomm-mrtd@^0.0.9":
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.9.tgz#fb0780c16f4a391ee902c026811a97dcf48013e3"
