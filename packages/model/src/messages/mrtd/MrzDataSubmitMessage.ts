@@ -1,11 +1,13 @@
 import { MrzData } from '@2060.io/credo-ts-didcomm-mrtd'
-import { Expose } from 'class-transformer'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
 
+import { MrtdSubmitState } from './MrtdSubmitState'
+
 export interface MrzDataSubmitMessageOptions extends BaseMessageOptions {
-  mrzData: MrzData
+  state: MrtdSubmitState
+  mrzData?: MrzData
 }
 
 export class MrzDataSubmitMessage extends BaseMessage {
@@ -24,6 +26,7 @@ export class MrzDataSubmitMessage extends BaseMessage {
   public readonly type = MrzDataSubmitMessage.type
   public static readonly type = MessageType.MrzDataSubmitMessage
 
-  @Expose()
-  public mrzData!: MrzData
+  public mrzData?: MrzData
+
+  public state!: MrtdSubmitState
 }

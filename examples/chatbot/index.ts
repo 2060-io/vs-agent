@@ -1,3 +1,4 @@
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
 import {
   CallOfferRequestMessage,
   ContextualMenuSelectMessage,
@@ -30,7 +31,6 @@ import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
 import phoneCredDefData from './phone-cred-def-dev.json'
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
 
 const logger = new Logger()
 

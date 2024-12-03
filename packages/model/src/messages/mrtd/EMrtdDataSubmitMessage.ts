@@ -1,9 +1,10 @@
 import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
-import { Expose } from 'class-transformer'
 import * as Mrz from 'mrz'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
+
+import { MrtdSubmitState } from './MrtdSubmitState'
 
 export type EMrtdRawData = {
   raw: Record<string, string>
@@ -33,7 +34,8 @@ export type EMrtdRawData = {
 }
 
 export interface EMrtdDataSubmitMessageOptions extends BaseMessageOptions {
-  dataGroups: EMrtdData
+  state: MrtdSubmitState
+  dataGroups?: EMrtdData
 }
 
 export class EMrtdDataSubmitMessage extends BaseMessage {
@@ -45,17 +47,20 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.dataGroups = this.parseDataGroups(options.dataGroups)
+      if (options.dataGroups) {
+        this.dataGroups = this.parseDataGroups(options.dataGroups)
+      }
     }
   }
 
   public readonly type = EMrtdDataSubmitMessage.type
   public static readonly type = MessageType.EMrtdDataSubmitMessage
 
-  @Expose()
-  public dataGroups!: EMrtdRawData
+  public state!: MrtdSubmitState
 
-  public parseDataGroups({ raw, parsed }: EMrtdData): EMrtdRawData {
+  public dataGroups?: EMrtdRawData
+
+  public parseDataGroups({ raw, parsed }: EMrtdData) {
     if (!parsed || !parsed.fields) return this.dataGroups
 
     const dataUrls = parsed.fields.images.map(image => {
