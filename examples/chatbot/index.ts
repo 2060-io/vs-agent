@@ -367,7 +367,7 @@ expressHandler.messageReceived(async (req, res) => {
               'Content-Type': 'application/json',
             },
             method: 'POST',
-            body: JSON.stringify({ maxPeerCount: 50, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }),
+            body: JSON.stringify({ maxPeerCount: 2, eventNotificationUri: `${PUBLIC_BASE_URL}/call-events` }),
           })
 
           const response = await result.json()
