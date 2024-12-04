@@ -20,6 +20,7 @@ export class MrzDataSubmitMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.mrzData = options.mrzData
+      this.state = options.state
     }
   }
 
