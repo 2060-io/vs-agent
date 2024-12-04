@@ -50,6 +50,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       if (options.dataGroups) {
         this.dataGroups = this.parseDataGroups(options.dataGroups)
       }
+      this.state = options.state
     }
   }
 
