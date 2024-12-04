@@ -304,7 +304,6 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           threadId,
           state: stateMap[description.code as MrtdProblemReportReason],
         })
-        config.logger.debug(`TEST TEST TEST received: ${JSON.stringify(msg)}`)
         await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } else if (
         [MrtdProblemReportReason.MrzRefused, MrtdProblemReportReason.MrzTimeout].includes(
@@ -316,7 +315,6 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           threadId,
           state: stateMap[description.code as MrtdProblemReportReason],
         })
-        config.logger.debug(`TEST TEST TEST received: ${JSON.stringify(msg)}`)
         await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       }
     }
