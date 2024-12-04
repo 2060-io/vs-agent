@@ -474,7 +474,7 @@ expressHandler.messageReceived(async (req, res) => {
     } else {
       await sendTextMessage({
         connectionId: obj.connectionId,
-        content: `Problem with: mrz ${obj.state}`,
+        content: `Problem: mrz ${obj.state}`,
       })
     }
   } else if (obj.type === EMrtdDataSubmitMessage.type) {
@@ -483,7 +483,7 @@ expressHandler.messageReceived(async (req, res) => {
     if (obj.state !== MrtdSubmitState.Submitted) {
       await sendTextMessage({
         connectionId: obj.connectionId,
-        content: `Problem with: emrtd ${obj.state}`,
+        content: `Problem: emrtd ${obj.state}`,
       })
     }
   }

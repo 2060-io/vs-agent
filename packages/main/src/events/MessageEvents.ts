@@ -11,7 +11,7 @@ import {
 import {
   EMrtdDataReceivedEvent,
   MrtdEventTypes,
-  MrtdProblemReportMessage,
+  MrtdProblemReportEvent,
   MrtdProblemReportReason,
   MrzDataReceivedEvent,
 } from '@2060.io/credo-ts-didcomm-mrtd'
@@ -282,44 +282,6 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         config.logger.error(`Error processing presentaion message: ${error}`)
       }
     }
-
-    // MRTD problem reports
-    if (message.type === MrtdProblemReportMessage.type.messageTypeUri) {
-      const { description, threadId } = message as MrtdProblemReportMessage
-
-      const stateMap: Record<MrtdProblemReportReason, MrtdSubmitState> = {
-        'e.p.emrtd-refused': MrtdSubmitState.Declined,
-        'e.p.emrtd-timeout': MrtdSubmitState.Timeout,
-        'e.p.mrz-refused': MrtdSubmitState.Declined,
-        'e.p.mrz-timeout': MrtdSubmitState.Timeout,
-      }
-
-      if (
-        [MrtdProblemReportReason.EmrtdRefused, MrtdProblemReportReason.EmrtdTimeout].includes(
-          description.code as MrtdProblemReportReason,
-        )
-      ) {
-        const msg = new EMrtdDataSubmitMessage({
-          connectionId: connection.id,
-          threadId,
-          state: stateMap[description.code as MrtdProblemReportReason],
-        })
-        await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
-      } else if (
-        [MrtdProblemReportReason.MrzRefused, MrtdProblemReportReason.MrzTimeout].includes(
-          description.code as MrtdProblemReportReason,
-        )
-      ) {
-        const msg = new MrzDataSubmitMessage({
-          connectionId: connection.id,
-          threadId,
-          state: stateMap[description.code as MrtdProblemReportReason],
-        })
-        await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
-      }
-    }
-
-    // At the moment we only support refusal/timeouts. Other errors are TBD
   })
 
   // Credential events
@@ -481,6 +443,44 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
     await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
   })
+  
+  // MRTD problem reports
+  agent.events.on(MrtdEventTypes.MrtdProblemReport, async ({ payload }: MrtdProblemReportEvent) => {
+    const { connection, description, threadId } = payload
+
+    const stateMap: Record<MrtdProblemReportReason, MrtdSubmitState> = {
+      'e.p.emrtd-refused': MrtdSubmitState.Declined,
+      'e.p.emrtd-timeout': MrtdSubmitState.Timeout,
+      'e.p.mrz-refused': MrtdSubmitState.Declined,
+      'e.p.mrz-timeout': MrtdSubmitState.Timeout,
+    }
+
+    if (
+      [MrtdProblemReportReason.EmrtdRefused, MrtdProblemReportReason.EmrtdTimeout].includes(
+        description.code as MrtdProblemReportReason,
+      )
+    ) {
+      const msg = new EMrtdDataSubmitMessage({
+        connectionId: connection.id,
+        threadId,
+        state: stateMap[description.code as MrtdProblemReportReason],
+      })
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    } else if (
+      [MrtdProblemReportReason.MrzRefused, MrtdProblemReportReason.MrzTimeout].includes(
+        description.code as MrtdProblemReportReason,
+      )
+    ) {
+      const msg = new MrzDataSubmitMessage({
+        connectionId: connection.id,
+        threadId,
+        state: stateMap[description.code as MrtdProblemReportReason],
+      })
+      await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+    }
+  })
+
+  // At the moment we only support refusal/timeouts. Other errors are TBD  
 }
 
 const sendMessageReceivedEvent = async (
