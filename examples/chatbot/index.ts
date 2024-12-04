@@ -21,6 +21,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   VerifiableCredentialSubmittedProofItem,
   MediaMessage,
+  MrtdSubmitState,
 } from '@2060.io/service-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
@@ -464,14 +465,27 @@ expressHandler.messageReceived(async (req, res) => {
     await submitMessageReceipt(obj, 'viewed')
 
     // Request eEMRTD data to continue the flow
-    const body = new EMrtdDataRequestMessage({
-      connectionId: obj.connectionId,
-      threadId: obj.threadId,
-    })
-    await apiClient.messages.send(body)
+    if (obj.state === MrtdSubmitState.Submitted) {
+      const body = new EMrtdDataRequestMessage({
+        connectionId: obj.connectionId,
+        threadId: obj.threadId,
+      })
+      await apiClient.messages.send(body)
+    } else {
+      await sendTextMessage({
+        connectionId: obj.connectionId,
+        content: `Problem with mrz: Reason ${obj.state}`,
+      })
+    }
   } else if (obj.type === EMrtdDataSubmitMessage.type) {
     logger.info(`eMRTD Data submit: ${JSON.stringify(obj.dataGroups)}`)
     await submitMessageReceipt(obj, 'viewed')
+    if (obj.state !== MrtdSubmitState.Submitted) {
+      await sendTextMessage({
+        connectionId: obj.connectionId,
+        content: `Problem with emrtd: Reason ${obj.state}`,
+      })
+    }
   }
 })
 
