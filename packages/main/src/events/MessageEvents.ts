@@ -443,7 +443,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
     await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
   })
-  
+
   // MRTD problem reports
   agent.events.on(MrtdEventTypes.MrtdProblemReport, async ({ payload }: MrtdProblemReportEvent) => {
     const { connection, description, threadId } = payload
@@ -480,7 +480,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     }
   })
 
-  // At the moment we only support refusal/timeouts. Other errors are TBD  
+  // At the moment we only support refusal/timeouts. Other errors are TBD
 }
 
 const sendMessageReceivedEvent = async (
