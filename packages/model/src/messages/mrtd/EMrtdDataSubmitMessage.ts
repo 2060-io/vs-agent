@@ -1,6 +1,7 @@
 import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
 import * as Mrz from 'mrz'
 
+import { convertShortDate } from '../../utils'
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
 
@@ -87,7 +88,12 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       }
     })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
+    const rawSex = parsedMrz.fields.sex ?? undefined
     const birthDateFromAdditionalPersonalData = parsed.fields.additionalPersonalData?.fullDateOfBirth
+    const dateOfBirth =
+      !birthDateFromAdditionalPersonalData || birthDateFromAdditionalPersonalData.toString().length < 6
+        ? parsedMrz.fields.birthDate
+        : birthDateFromAdditionalPersonalData?.toString()
 
     const newEmrtdData: EMrtdRawData = {
       raw: raw,
@@ -95,8 +101,8 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
         documentType: parsedMrz.format,
         documentNumber: parsedMrz.documentNumber ?? undefined,
         issuingState: parsedMrz.fields.issuingState ?? undefined,
-        dateOfExpiry: parsedMrz.fields.expirationDate ?? undefined, // TODO: Check and specify date format
-        sex: parsedMrz.fields.sex ?? undefined,
+        dateOfExpiry: convertShortDate(parsedMrz.fields.expirationDate, true),
+        sex: rawSex ? rawSex.charAt(0).toUpperCase() : undefined,
         nationality: parsedMrz.fields.nationality ?? undefined,
         lastName: parsedMrz.fields.lastName ?? undefined,
         firstName: parsedMrz.fields.firstName ?? undefined,
@@ -105,10 +111,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
         nameOfHolder:
           parsed.fields.additionalPersonalData?.nameOfHolder ??
           `${parsedMrz.fields.lastName} ${parsedMrz.fields.firstName}`,
-        dateOfBirth:
-          birthDateFromAdditionalPersonalData && birthDateFromAdditionalPersonalData !== 0
-            ? birthDateFromAdditionalPersonalData.toString().slice(2)
-            : (parsedMrz.fields.birthDate ?? undefined), // TODO: Check and specify date format
+        dateOfBirth: convertShortDate(dateOfBirth, false),
         otherNames: parsed.fields.additionalPersonalData?.otherNames,
         personalNumber: parsed.fields.additionalPersonalData?.personalNumber,
         placeOfBirth: parsed.fields.additionalPersonalData?.placeOfBirth,
