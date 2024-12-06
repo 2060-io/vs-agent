@@ -88,6 +88,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       }
     })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
+    const rawSex = parsedMrz.fields.sex ?? undefined
     const birthDateFromAdditionalPersonalData = parsed.fields.additionalPersonalData?.fullDateOfBirth
     const dateOfBirth =
       !birthDateFromAdditionalPersonalData || birthDateFromAdditionalPersonalData.toString().length < 6
@@ -101,7 +102,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
         documentNumber: parsedMrz.documentNumber ?? undefined,
         issuingState: parsedMrz.fields.issuingState ?? undefined,
         dateOfExpiry: convertShortDate(parsedMrz.fields.expirationDate, true),
-        sex: parsedMrz.fields.sex ?? undefined,
+        sex: rawSex ? rawSex.charAt(0).toUpperCase() : undefined,
         nationality: parsedMrz.fields.nationality ?? undefined,
         lastName: parsedMrz.fields.lastName ?? undefined,
         firstName: parsedMrz.fields.firstName ?? undefined,

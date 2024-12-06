@@ -52,7 +52,7 @@ describe('EMrtdDataSubmitMessage', () => {
     expect(message.dataGroups?.processed.firstName).toBe('JOHN')
     expect(message.dataGroups?.processed.dateOfBirth).toBe('19900101')
     expect(message.dataGroups?.processed.dateOfExpiry).toBe('20300510')
-    expect(message.dataGroups?.processed.sex).toBe('male')
+    expect(message.dataGroups?.processed.sex).toBe('M')
     expect(message.dataGroups?.processed.nationality).toBe('COL')
     expect(message.dataGroups?.processed.nameOfHolder).toBe('John Doe')
     expect(message.dataGroups?.processed.faceImages[0]).toContain('data:image/jp2;base64,')
