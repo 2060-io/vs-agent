@@ -1,4 +1,5 @@
 import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
+import { whereAlpha3 } from 'iso-3166-1'
 import * as Mrz from 'mrz'
 
 import { convertShortDate } from '../../utils'
@@ -88,22 +89,28 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
       }
     })(mrzString.length)
     const parsedMrz = Mrz.parse(formattedMrz)
-    const rawSex = parsedMrz.fields.sex ?? undefined
+    const rawSex = parsedMrz.fields.sex ?? 'X'
     const birthDateFromAdditionalPersonalData = parsed.fields.additionalPersonalData?.fullDateOfBirth
     const dateOfBirth =
       !birthDateFromAdditionalPersonalData || birthDateFromAdditionalPersonalData.toString().length < 6
         ? parsedMrz.fields.birthDate
         : birthDateFromAdditionalPersonalData?.toString()
+    const nationality = parsedMrz.fields.nationality
+      ? whereAlpha3(parsedMrz.fields.nationality)?.alpha2
+      : undefined
+    const issuingState = parsedMrz.fields.issuingState
+      ? whereAlpha3(parsedMrz.fields.issuingState)?.alpha2
+      : undefined
 
     const newEmrtdData: EMrtdRawData = {
       raw: raw,
       processed: {
         documentType: parsedMrz.format,
         documentNumber: parsedMrz.documentNumber ?? undefined,
-        issuingState: parsedMrz.fields.issuingState ?? undefined,
+        issuingState,
         dateOfExpiry: convertShortDate(parsedMrz.fields.expirationDate, true),
-        sex: rawSex ? rawSex.charAt(0).toUpperCase() : undefined,
-        nationality: parsedMrz.fields.nationality ?? undefined,
+        sex: ['male', 'female'].includes(rawSex) ? rawSex.charAt(0).toUpperCase() : 'X',
+        nationality,
         lastName: parsedMrz.fields.lastName ?? undefined,
         firstName: parsedMrz.fields.firstName ?? undefined,
         mrzOptionalData: parsedMrz.fields.optional1 ?? undefined,
