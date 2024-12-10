@@ -131,7 +131,7 @@ export class CredentialTypesController {
 
       const registrationResult = await agent.modules.anoncreds.registerCredentialDefinition({
         credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
-        options: { supportRevocation: false },
+        options: { supportRevocation: true },
       })
 
       const credentialDefinitionId = registrationResult.credentialDefinitionState.credentialDefinitionId

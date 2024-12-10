@@ -223,6 +223,8 @@ export class MessageService {
                     return { name: item.name, mimeType: item.mimeType, value: item.value }
                   }),
                   credentialDefinitionId: msg.credentialDefinitionId,
+                  revocationRegistryDefinitionId: msg.revocationDefinitionId,
+                  revocationRegistryIndex: msg.revocationRegistryIndex,
                 },
               },
               protocolVersion: 'v2',
