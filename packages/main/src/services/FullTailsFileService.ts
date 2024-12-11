@@ -3,7 +3,7 @@ import type { AgentContext } from '@credo-ts/core'
 
 import { BasicTailsFileService } from '@credo-ts/anoncreds'
 import { utils } from '@credo-ts/core'
-import FormData from 'form-data'
+import { FormData } from 'undici'
 import fs from 'fs'
 
 export class FullTailsFileService extends BasicTailsFileService {
@@ -30,6 +30,7 @@ export class FullTailsFileService extends BasicTailsFileService {
       `${this.tailsServerBaseUrl}/${encodeURIComponent(tailsFileId)}`,
       {
         method: 'PUT',
+        headers: {},
         body: data,
       },
     )
