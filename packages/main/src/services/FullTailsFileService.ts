@@ -3,7 +3,8 @@ import type { AgentContext } from '@credo-ts/core'
 
 import { BasicTailsFileService } from '@credo-ts/anoncreds'
 import { utils } from '@credo-ts/core'
-import { FormData } from 'undici'
+import axios from 'axios'
+import FormData from 'form-data'
 import fs from 'fs'
 
 export class FullTailsFileService extends BasicTailsFileService {
@@ -26,14 +27,11 @@ export class FullTailsFileService extends BasicTailsFileService {
     const data = new FormData()
     const readStream = fs.createReadStream(localTailsFilePath)
     data.append('file', readStream)
-    const response = await agentContext.config.agentDependencies.fetch(
-      `${this.tailsServerBaseUrl}/${encodeURIComponent(tailsFileId)}`,
-      {
-        method: 'PUT',
-        headers: {},
-        body: data,
+    const response = await axios.put(`${this.tailsServerBaseUrl}/${encodeURIComponent(tailsFileId)}`, data, {
+      headers: {
+        ...data.getHeaders(),
       },
-    )
+    })
     if (response.status !== 200) {
       throw new Error('Cannot upload tails file')
     }
