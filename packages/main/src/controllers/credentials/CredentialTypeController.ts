@@ -144,7 +144,38 @@ export class CredentialTypesController {
           `Cannot create credential definition: ${JSON.stringify(registrationResult.registrationMetadata)}`,
         )
       }
+
+      const revocationResult = await agent.modules.anoncreds.registerRevocationRegistryDefinition({
+        revocationRegistryDefinition: {
+          credentialDefinitionId,
+          tag: 'default',
+          maximumCredentialNumber: 10,
+          issuerId,
+        },
+        options: {},
+      })
+      const revocationDefinitionId =
+        revocationResult.revocationRegistryDefinitionState.revocationRegistryDefinitionId
+      this.logger.debug!(
+        `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
+      )
+
+      if (!revocationDefinitionId) {
+        throw new Error(
+          `Cannot create credential revocations: ${JSON.stringify(registrationResult.registrationMetadata)}`,
+        )
+      }
+
+      await agent.modules.anoncreds.registerRevocationStatusList({
+        revocationStatusList: {
+          issuerId,
+          revocationRegistryDefinitionId: revocationDefinitionId,
+        },
+        options: {},
+      })
+
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
+      this.logger.log(`Revocation Definition Id: ${revocationDefinitionId}`)
 
       // Apply name and version as tags
       const credentialDefinitionRepository = agent.dependencyManager.resolve(
@@ -164,6 +195,7 @@ export class CredentialTypesController {
         name: options.name,
         version: options.version,
         schemaId,
+        revocationId: revocationDefinitionId,
       }
     } catch (error) {
       throw new HttpException(
