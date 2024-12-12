@@ -58,6 +58,8 @@ app.set('json spaces', 2)
 const expressHandler = new ExpressEventHandler(app)
 
 let phoneNumberCredentialDefinitionId: string | undefined
+let phoneNumberRevocationDefinitionId: string | undefined
+let phoneNumberRevocationCount: number = 0
 
 type OngoingCall = {
   wsUrl: string
@@ -83,9 +85,19 @@ const server = app.listen(PORT, async () => {
   )
 
   try {
+    const credentialDefinition = (await apiClient.credentialTypes.create({
+        id: randomUUID(),
+        name: "phoneNumber",
+        version: '1.0',
+        attributes: ['phoneNumber']
+      }))
+    // const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
     phoneNumberCredentialDefinitionId =
-      phoneNumberCredentialType?.id ?? (await apiClient.credentialTypes.import(phoneCredDefData)).id
+      phoneNumberCredentialType?.id ?? credentialDefinition.id
+    phoneNumberRevocationDefinitionId =
+      phoneNumberCredentialType?.revocationId ?? credentialDefinition.revocationId
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
+    logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberRevocationDefinitionId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
   }
@@ -154,7 +166,8 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
 
   // Issue credential
   if (selectedItem === 'issue' || selectedItem === 'Issue credential') {
-    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '') {
+    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
+      !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
       await sendTextMessage({
         connectionId,
         content: 'Service not available',
@@ -170,6 +183,33 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
             value: '+5712345678',
           },
         ],
+        revocationDefinitionId: phoneNumberRevocationDefinitionId,
+        revocationRegistryIndex: phoneNumberRevocationCount += 1,
+      })
+      await apiClient.messages.send(body)
+    }
+  }
+
+  if (selectedItem === 'revoke' || selectedItem === 'Revoke credential') {
+    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
+      !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
+      await sendTextMessage({
+        connectionId,
+        content: 'Service not available',
+      })
+    } else {
+      const body = new CredentialIssuanceMessage({
+        connectionId,
+        credentialDefinitionId: phoneNumberCredentialDefinitionId,
+        claims: [
+          {
+            name: 'phoneNumber',
+            mimeType: 'text/plain',
+            value: '+5712345678',
+          },
+        ],
+        revocationDefinitionId: phoneNumberRevocationDefinitionId,
+        revocationRegistryIndex: phoneNumberRevocationCount,
       })
       await apiClient.messages.send(body)
     }
@@ -383,6 +423,9 @@ expressHandler.messageReceived(async (req, res) => {
         const body = new CallOfferRequestMessage({
           connectionId: obj.connectionId,
           description: 'Start call',
+          offerExpirationTime: new Date(
+            Date.now() + 60 * 1000,
+          ),  
           parameters: { wsUrl, roomId, peerId },
         })
         await apiClient.messages.send(body)
