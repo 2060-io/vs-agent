@@ -168,7 +168,7 @@ export class CredentialTypesController {
         )
       }
 
-      await agent.modules.anoncreds.registerRevocationStatusList({
+      const revStatusListResult = await agent.modules.anoncreds.registerRevocationStatusList({
         revocationStatusList: {
           issuerId,
           revocationRegistryDefinitionId: revocationDefinitionId,
