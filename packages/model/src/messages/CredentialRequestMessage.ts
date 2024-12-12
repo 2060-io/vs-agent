@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
+import { IsOptional, IsString, IsArray, IsInstance, ValidateNested, IsNumber } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { Claim, ClaimOptions } from './CredentialIssuanceMessage'
@@ -7,6 +7,8 @@ import { MessageType } from './MessageType'
 
 export interface CredentialRequestMessageOptions extends BaseMessageOptions {
   credentialDefinitionId: string
+  revocationDefinitionId?: string
+  revocationRegistryIndex?: number
   claims: ClaimOptions[]
 }
 
@@ -20,6 +22,8 @@ export class CredentialRequestMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.credentialDefinitionId = options.credentialDefinitionId
+      this.revocationDefinitionId = options.revocationDefinitionId
+      this.revocationRegistryIndex = options.revocationRegistryIndex
       this.claims = options.claims.map(item => new Claim(item))
     }
   }
@@ -30,6 +34,16 @@ export class CredentialRequestMessage extends BaseMessage {
   @Expose()
   @IsString()
   public credentialDefinitionId!: string
+  
+  @Expose()
+  @IsString()
+  @IsOptional()
+  public revocationDefinitionId?: string
+
+  @Expose()
+  @IsNumber()
+  @IsOptional()
+  public revocationRegistryIndex?: number
 
   @Expose()
   @Type(() => Claim)
