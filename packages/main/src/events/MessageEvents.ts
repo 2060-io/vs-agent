@@ -67,6 +67,7 @@ import { ReceiptsEventTypes } from 'credo-ts-receipts'
 import { ServiceAgent } from '../utils/ServiceAgent'
 import { createDataUrl } from '../utils/parsers'
 
+import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
@@ -206,12 +207,14 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       config.logger.info('Presentation problem report received')
       try {
         const record = await agent.proofs.getByThreadAndConnectionId(message.threadId, connection.id)
+        const errorCode =
+          (message as V2PresentationProblemReportMessage).description.en ??
+          (message as V2PresentationProblemReportMessage).description.code
+
         const msg = new IdentityProofSubmitMessage({
           submittedProofItems: [
             new VerifiableCredentialSubmittedProofItem({
-              errorCode:
-                (message as V2PresentationProblemReportMessage).description.en ??
-                (message as V2PresentationProblemReportMessage).description.code,
+              errorCode,
               id: record.threadId, // TODO: store id as a tag
               proofExchangeId: record.id,
             }),
@@ -221,6 +224,25 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           threadId: record.threadId,
           timestamp: record.updatedAt,
         })
+
+        // Call callbackUrl if existant. Depending on the received error code, set status
+        const callbackParameters = record.metadata.get('_2060/callbackParameters') as
+          | { ref?: string; callbackUrl?: string }
+          | undefined
+
+        if (callbackParameters && callbackParameters.callbackUrl) {
+          const errorMap: Record<string, PresentationStatus> = {
+            'Request declined': PresentationStatus.REFUSED,
+            'e.msg.no-compatible-credentials': PresentationStatus.NO_COMPATIBLE_CREDENTIALS,
+          }
+
+          await sendPresentationCallbackEvent({
+            callbackUrl: callbackParameters.callbackUrl,
+            status: errorMap[errorCode] ?? PresentationStatus.UNSPECIFIED_ERROR,
+            logger: config.logger,
+            ref: callbackParameters.ref,
+          })
+        }
 
         await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } catch (error) {
@@ -262,6 +284,21 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
             }
           }
         }
+
+        // Call callbackUrl if existant. Depending on the received error code, set status
+        const callbackParameters = record.metadata.get('_2060/callbackParameters') as
+          | { ref?: string; callbackUrl?: string }
+          | undefined
+
+        if (callbackParameters && callbackParameters.callbackUrl) {
+          await sendPresentationCallbackEvent({
+            callbackUrl: callbackParameters.callbackUrl,
+            status: record.isVerified ? PresentationStatus.OK : PresentationStatus.VERIFICATION_ERROR,
+            logger: config.logger,
+            ref: callbackParameters.ref,
+          })
+        }
+
         const msg = new IdentityProofSubmitMessage({
           submittedProofItems: [
             new VerifiableCredentialSubmittedProofItem({
@@ -279,7 +316,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
         await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } catch (error) {
-        config.logger.error(`Error processing presentaion message: ${error}`)
+        config.logger.error(`Error processing presentation message: ${error}`)
       }
     }
   })

@@ -32,6 +32,8 @@ export class InvitationController {
       example: {
         summary: 'Phone Number',
         value: {
+          ref: '1234-5678',
+          callbackUrl: 'https://myhost/mycallbackurl',
           requestedCredentials: [
             {
               credentialDefinitionId:
@@ -48,7 +50,7 @@ export class InvitationController {
   ): Promise<CreatePresentationRequestResult> {
     const agent = await this.agentService.getAgent()
 
-    const { requestedCredentials } = options
+    const { requestedCredentials, ref, callbackUrl } = options
 
     if (!requestedCredentials?.length) {
       throw Error('You must specify a least a requested credential')
@@ -104,6 +106,7 @@ export class InvitationController {
     })
 
     request.proofRecord.metadata.set('_2060/requestedCredentials', requestedCredentials)
+    request.proofRecord.metadata.set('_2060/callbackParameters', { ref, callbackUrl })
     await agent.proofs.update(request.proofRecord)
 
     const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])

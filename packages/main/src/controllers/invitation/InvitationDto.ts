@@ -12,6 +12,10 @@ export class CreatePresentationRequestDto implements CreatePresentationRequestOp
     description: 'Requested credentials',
     example: '[{ credentialDefinitionId: "myCredentialDefinition", attributes: ["name","age"] }]',
   })
+  ref?: string
+
+  callbackUrl?: string
+
   @IsNotEmpty()
   requestedCredentials!: RequestedCredential[]
 }
