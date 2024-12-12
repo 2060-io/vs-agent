@@ -34,7 +34,7 @@ export class CredentialRequestMessage extends BaseMessage {
   @Expose()
   @IsString()
   public credentialDefinitionId!: string
-  
+
   @Expose()
   @IsString()
   @IsOptional()
