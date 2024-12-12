@@ -186,10 +186,19 @@ export class CredentialTypesController {
         agent.context,
         credentialDefinitionId,
       )
+      const revocationDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
+      const revocationDefinitionRecord = await revocationDefinitionRepository.getByRevocationRegistryDefinitionId(
+        agent.context,
+        revocationDefinitionId,
+      )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
       credentialDefinitionRecord.setTag('revocationDefinitionId', revocationDefinitionId)
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
+      revocationDefinitionRecord.metadata.add('revStatusList', revStatusListResult.revocationStatusListState.revocationStatusList!)
+      await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
       return {
         id: credentialDefinitionId,
