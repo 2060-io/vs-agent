@@ -7,6 +7,7 @@ import {
   AnonCredsCredentialDefinitionRepository,
   AnonCredsKeyCorrectnessProofRecord,
   AnonCredsKeyCorrectnessProofRepository,
+  AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchema,
   AnonCredsSchemaRecord,
   AnonCredsSchemaRepository,
