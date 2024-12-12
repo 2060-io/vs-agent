@@ -57,21 +57,12 @@ export class CredentialTypesController {
 
         const schema = schemaResult.schema
 
-        const revocationDefinitionRepository = agent.dependencyManager.resolve(
-          AnonCredsRevocationRegistryDefinitionRepository,
-        )
-
-        const revocationDefinition = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
-          agent.context,
-          record.credentialDefinitionId,
-        )
-
         return {
           id: record.credentialDefinitionId,
           name: (record.getTag('name') as string) ?? schema?.name,
-          version: (record.getTag('version') as string) ?? schema?.version,
+          version: (record.getTag('revocationDefinitionId') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
-          revocationId: revocationDefinition[0].revocationRegistryDefinitionId,
+          revocationId: record.getTag('revocationDefinitionId') as string,
         }
       }),
     )
@@ -159,7 +150,7 @@ export class CredentialTypesController {
         revocationRegistryDefinition: {
           credentialDefinitionId,
           tag: 'default',
-          maximumCredentialNumber: 1000,
+          maximumCredentialNumber: 10,
           issuerId,
         },
         options: {},
@@ -197,6 +188,7 @@ export class CredentialTypesController {
       )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
+      credentialDefinitionRecord.setTag('revocationDefinitionId', revocationDefinitionId)
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 
       return {

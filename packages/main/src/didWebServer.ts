@@ -2,7 +2,11 @@ import 'reflect-metadata'
 
 import type { DidWebServerConfig } from './utils/ServerConfig'
 
-import { AnonCredsCredentialDefinitionRepository, AnonCredsSchemaRepository } from '@credo-ts/anoncreds'
+import {
+  AnonCredsCredentialDefinitionRepository,
+  AnonCredsRevocationRegistryDefinitionRepository,
+  AnonCredsSchemaRepository,
+} from '@credo-ts/anoncreds'
 import cors from 'cors'
 import { createHash } from 'crypto'
 import express from 'express'
@@ -122,6 +126,28 @@ export const addDidWebRoutes = async (
 
       if (credentialDefinitionRecord) {
         res.send({ resource: credentialDefinitionRecord.credentialDefinition, resourceMetadata: {} })
+        return
+      }
+
+      res.send(404)
+    })
+
+    app.get('/anoncreds/v1/revRegDef/:revocationDefinitionId', async (req, res) => {
+      const revocationDefinitionId = req.params.revocationDefinitionId
+
+      agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
+      const revocationDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
+
+      const revocationDefinitionRecord =
+        await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
+          agent.context,
+          `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        )
+
+      if (revocationDefinitionRecord) {
+        res.send({ resource: revocationDefinitionRecord.revocationRegistryDefinition, resourceMetadata: {} })
         return
       }
 
