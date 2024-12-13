@@ -149,16 +149,21 @@ By sending this message, a Verifiable Credential is effectively issued and sent 
 This message could be sent as a response to a Credential Request. In such case, `threadId` is used to identify credential details. But it can also start a new Credential Issuance flow, and specify
 
 Parameters:
-
 - (optional) Credential Definition ID
+- (optional) Revocation Definition ID
+- (optional) Revocation Index
 - (optional) Claims
+
+> **Note:** When using revocation parameters (`revocationDefinitionId` and `revocationRegistryIndex`), it is essential to ensure the `id` was preserved from the time it was generated with the credential. The `revocationRegistryIndex` serves as a reference to the specific credential in the revocation registry.  
 
 ```json
 {
   ...
   "type": "credential-issuance",
   "credentialDefinitionId": "id",
- "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
+  "revocationDefinitionId": "id",
+  "revocationRegistryIndex": 1,
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
 }
 ```
 
