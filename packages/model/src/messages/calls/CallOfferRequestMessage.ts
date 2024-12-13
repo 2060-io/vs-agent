@@ -1,4 +1,5 @@
-import { Expose } from 'class-transformer'
+import { DateParser } from '@credo-ts/core/build/utils/transformers'
+import { Expose, Transform } from 'class-transformer'
 import { IsOptional, IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
@@ -31,9 +32,11 @@ export class CallOfferRequestMessage extends BaseMessage {
   public static readonly type = MessageType.CallOfferRequestMessage
 
   @IsOptional()
+  @Transform(({ value }) => DateParser(value))
   public offerExpirationTime?: Date
 
   @IsOptional()
+  @Transform(({ value }) => DateParser(value))
   public offerStartTime?: Date
 
   @Expose()
