@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsOptional, IsString, IsArray, IsInstance, ValidateNested, IsNumber } from 'class-validator'
+import { IsOptional, IsString, IsArray, IsInstance, ValidateNested } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { Claim, ClaimOptions } from './CredentialIssuanceMessage'
