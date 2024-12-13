@@ -17,6 +17,7 @@ import {
   EMrtdDataRequestMessage,
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
+  CredentialRevocationMessage,
 } from '@2060.io/service-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
@@ -236,6 +237,22 @@ export class MessageService {
               'Claims and credentialDefinitionId attributes must be present if a credential without related thread is to be issued',
             )
           }
+        }
+      } else if (messageType === CredentialRevocationMessage.type) {
+        const msg = JsonTransformer.fromJSON(message, CredentialRevocationMessage)
+
+        this.logger.debug!(`CredentialRevocationMessage: ${JSON.stringify(message)}`)
+        const credential = (await agent.credentials.getAll()).find(item => item.threadId === message.threadId)
+        if (credential) {
+          await agent.credentials.sendRevocationNotification({
+            credentialRecordId: credential.id,
+            revocationFormat: 'anoncreds',
+            revocationId: `${msg.revocationDefinitionId}::${msg.revocationRegistryIndex}`,
+          })
+        } else {
+          throw new Error(
+            `No credentials were found for revocation associated with the provided credentialDefinitionId: ${msg.credentialDefinitionId}.`,
+          )
         }
       } else if (messageType === InvitationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)
