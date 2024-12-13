@@ -176,6 +176,7 @@ export class CredentialTypesController {
         options: {},
       })
 
+      this.logger.log(`revStatusListResult: ${JSON.stringify(revStatusListResult)}`)
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
       this.logger.log(`Revocation Definition Id: ${revocationDefinitionId}`)
 
@@ -190,15 +191,20 @@ export class CredentialTypesController {
       const revocationDefinitionRepository = agent.dependencyManager.resolve(
         AnonCredsRevocationRegistryDefinitionRepository,
       )
-      const revocationDefinitionRecord = await revocationDefinitionRepository.getByRevocationRegistryDefinitionId(
-        agent.context,
-        revocationDefinitionId,
-      )
+      const revocationDefinitionRecord =
+        await revocationDefinitionRepository.getByRevocationRegistryDefinitionId(
+          agent.context,
+          revocationDefinitionId,
+        )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
       credentialDefinitionRecord.setTag('revocationDefinitionId', revocationDefinitionId)
+
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
-      revocationDefinitionRecord.metadata.add('revStatusList', revStatusListResult.revocationStatusListState.revocationStatusList!)
+      revocationDefinitionRecord.metadata.set(
+        'revStatusList',
+        revStatusListResult.revocationStatusListState.revocationStatusList!,
+      )
       await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
       return {

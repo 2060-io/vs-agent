@@ -147,11 +147,11 @@ export const addDidWebRoutes = async (
         )
 
       if (revocationDefinitionRecord) {
-        res.send({ 
-          resource: revocationDefinitionRecord.revocationRegistryDefinition, 
+        res.send({
+          resource: revocationDefinitionRecord.revocationRegistryDefinition,
           resourceMetadata: {
-            revocationStatusListEndpoint: `${anoncredsBaseUrl}/anoncreds/v1/revStatus/${revocationDefinitionId}`
-          } 
+            statusListEndpoint: `${anoncredsBaseUrl}/anoncreds/v1/revStatus/${revocationDefinitionId}`,
+          },
         })
         return
       }
@@ -159,7 +159,7 @@ export const addDidWebRoutes = async (
       res.send(404)
     })
 
-    app.get('/anoncreds/v1/revStatus/:revocationDefinitionId', async (req, res) => {
+    app.get('/anoncreds/v1/revStatus/:revocationDefinitionId/:timestamp?', async (req, res) => {
       const revocationDefinitionId = req.params.revocationDefinitionId
 
       agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
@@ -175,12 +175,12 @@ export const addDidWebRoutes = async (
 
       if (revocationDefinitionRecord) {
         const revStatusList = revocationDefinitionRecord.metadata.get('revStatusList')
-        res.send({ 
-          resource: revStatusList, 
+        res.send({
+          resource: revStatusList,
           resourceMetadata: {
-            previousVersionId: "",
-            nextVersionId: "",
-          }
+            previousVersionId: '',
+            nextVersionId: '',
+          },
         })
         return
       }
