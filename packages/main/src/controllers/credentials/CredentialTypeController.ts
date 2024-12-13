@@ -61,7 +61,7 @@ export class CredentialTypesController {
         return {
           id: record.credentialDefinitionId,
           name: (record.getTag('name') as string) ?? schema?.name,
-          version: (record.getTag('revocationDefinitionId') as string) ?? schema?.version,
+          version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
           revocationId: record.getTag('revocationDefinitionId') as string,
         }
@@ -176,7 +176,6 @@ export class CredentialTypesController {
         options: {},
       })
 
-      this.logger.log(`revStatusListResult: ${JSON.stringify(revStatusListResult)}`)
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
       this.logger.log(`Revocation Definition Id: ${revocationDefinitionId}`)
 
