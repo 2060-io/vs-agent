@@ -166,6 +166,19 @@ Parameters:
   "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
 }
 ```
+#### Credential Revocation
+
+By sending this message, a Verifiable Credential is effectively revocated and sent to the destination connection.
+
+This message could be sent as a response to a Credential issuance. In such case, `connectionId` and `revocationDefinitionId` is used to identify credential details.
+
+```json
+{
+  ...
+  "type": "credential-revocation",
+  "revocationDefinitionId": "id",
+}
+```
 
 #### Credential Reception
 
