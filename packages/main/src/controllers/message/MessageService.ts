@@ -241,18 +241,19 @@ export class MessageService {
       } else if (messageType === CredentialRevocationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialRevocationMessage)
 
-        this.logger.debug!(`CredentialRevocationMessage: ${JSON.stringify(message)}`)
-        const credential = (await agent.credentials.getAll()).find(item => item.threadId === message.threadId)
+        const credential = (await agent.credentials.getAll()).find(
+          item =>
+            item.getTag('anonCredsRevocationRegistryId') === msg.revocationDefinitionId &&
+            item.connectionId === msg.connectionId,
+        )
         if (credential) {
           await agent.credentials.sendRevocationNotification({
             credentialRecordId: credential.id,
             revocationFormat: 'anoncreds',
-            revocationId: `${msg.revocationDefinitionId}::${msg.revocationRegistryIndex}`,
+            revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
           })
         } else {
-          throw new Error(
-            `No credentials were found for revocation associated with the provided credentialDefinitionId: ${msg.credentialDefinitionId}.`,
-          )
+          throw new Error(`No credentials were found for connection: ${msg.connectionId}.`)
         }
       } else if (messageType === InvitationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)

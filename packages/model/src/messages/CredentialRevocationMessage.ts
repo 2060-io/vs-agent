@@ -1,13 +1,11 @@
 import { Expose } from 'class-transformer'
-import { IsString, IsNumber } from 'class-validator'
+import { IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { MessageType } from './MessageType'
 
 export interface CredentialRevocationMessageOptions extends BaseMessageOptions {
-  credentialDefinitionId: string
   revocationDefinitionId: string
-  revocationRegistryIndex: number
 }
 
 export class CredentialRevocationMessage extends BaseMessage {
@@ -19,9 +17,7 @@ export class CredentialRevocationMessage extends BaseMessage {
       this.threadId = options.threadId
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
-      this.credentialDefinitionId = options.credentialDefinitionId
       this.revocationDefinitionId = options.revocationDefinitionId
-      this.revocationRegistryIndex = options.revocationRegistryIndex
     }
   }
 
@@ -30,13 +26,5 @@ export class CredentialRevocationMessage extends BaseMessage {
 
   @Expose()
   @IsString()
-  public credentialDefinitionId!: string
-
-  @Expose()
-  @IsString()
   public revocationDefinitionId!: string
-
-  @Expose()
-  @IsNumber()
-  public revocationRegistryIndex!: number
 }
