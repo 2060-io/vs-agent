@@ -86,13 +86,7 @@ const server = app.listen(PORT, async () => {
   )
 
   try {
-    const credentialDefinition = (await apiClient.credentialTypes.create({
-        id: randomUUID(),
-        name: "phoneNumber",
-        version: '1.0',
-        attributes: ['phoneNumber']
-      }))
-    // const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
+    const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
     phoneNumberCredentialDefinitionId =
       phoneNumberCredentialType?.id ?? credentialDefinition.id
     phoneNumberRevocationDefinitionId =
@@ -167,8 +161,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
 
   // Issue credential
   if (selectedItem === 'issue' || selectedItem === 'Issue credential') {
-    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
-      !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
+    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '') {
       await sendTextMessage({
         connectionId,
         content: 'Service not available',

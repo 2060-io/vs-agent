@@ -151,7 +151,7 @@ export class CredentialTypesController {
         revocationRegistryDefinition: {
           credentialDefinitionId,
           tag: 'default',
-          maximumCredentialNumber: 10,
+          maximumCredentialNumber: 1000,
           issuerId,
         },
         options: {},
