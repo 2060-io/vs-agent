@@ -132,6 +132,7 @@ export const addDidWebRoutes = async (
       res.send(404)
     })
 
+    // Endpoint to retrieve a revocation registry definition by its ID
     app.get('/anoncreds/v1/revRegDef/:revocationDefinitionId', async (req, res) => {
       const revocationDefinitionId = req.params.revocationDefinitionId
 
@@ -159,6 +160,8 @@ export const addDidWebRoutes = async (
       res.send(404)
     })
 
+    // Endpoint to retrieve the revocation status list for a specific revocation definition ID
+    // Optional: Accepts a timestamp parameter (not currently used in the logic)
     app.get('/anoncreds/v1/revStatus/:revocationDefinitionId/:timestamp?', async (req, res) => {
       const revocationDefinitionId = req.params.revocationDefinitionId
 
@@ -225,6 +228,7 @@ export const addDidWebRoutes = async (
       }
     })
 
+    // Endpoint to upload a tails file for a specific tailsFileId
     app.put('/:tailsFileId', multer({ storage: fileStorage }).single('file'), async (req, res) => {
       agent.config.logger.info(`tails file upload: ${req.params.tailsFileId}`)
 
