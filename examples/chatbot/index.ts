@@ -86,7 +86,16 @@ const server = app.listen(PORT, async () => {
   )
 
   try {
-    const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
+    /**
+     * Note: To test credential revocation locally, use the following configuration:
+     * const credentialDefinition = (await apiClient.credentialTypes.create({
+     *     id: randomUUID(),
+     *     name: "phoneNumber",
+     *     version: '1.0',
+     *     attributes: ['phoneNumber']
+     * }))
+     */
+   const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
     phoneNumberCredentialDefinitionId =
       phoneNumberCredentialType?.id ?? credentialDefinition.id
     phoneNumberRevocationDefinitionId =
