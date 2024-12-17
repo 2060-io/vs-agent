@@ -10,15 +10,18 @@ import {
 
 import { ConnectionEntity } from '../connections'
 
-@Entity('revocations')
-export class RevocationEntity {
-  @PrimaryGeneratedColumn('increment')
+@Entity('credentials')
+export class CredentialEntity {
+  @PrimaryGeneratedColumn('uuid')
   id!: string
-
+  
   @Column({ type: 'varchar', nullable: false })
+  credentialDefinitionId?: string
+
+  @Column({ type: 'varchar', nullable: true })
   revocationDefinitionId?: string
 
-  @Column({ type: 'integer', generated: 'increment', nullable: false })
+  @Column({ type: 'integer', generated: 'increment', nullable: true })
   revocationRegistryIndex?: number
 
   @OneToOne(() => ConnectionEntity, { nullable: false })
