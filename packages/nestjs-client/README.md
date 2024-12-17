@@ -4,9 +4,9 @@
 ```node 
 @Module({
   imports: [
-    ConnectionsEventModule.register({
+    ConnectionsEventModule.forRoot({
       messageHandler: CustomMessageHandler, // Class with input method
-      imports: [TypeOrmConfig]
+      imports: []
     })
   ]
 })
@@ -18,9 +18,9 @@ export class AppModule {}
 ```node
 @Module({
   imports: [
-    MessageEventModule.register({
+    MessageEventModule.forRoot({
       messageHandler: CustomMessageHandler, // Class with input method
-      imports: [TypeOrmConfig]
+      imports: []
       url: 'http://sa-url.com',
       version: ApiVersion.V1,
     }),
