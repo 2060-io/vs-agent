@@ -13,7 +13,7 @@ import { ConnectionEntity } from '../connections'
 @Entity('revocations')
 export class RevocationEntity {
   @PrimaryGeneratedColumn('increment')
-  id?: string
+  id!: string
 
   @Column({ type: 'varchar', nullable: false })
   revocationDefinitionId?: string
@@ -23,7 +23,7 @@ export class RevocationEntity {
 
   @OneToOne(() => ConnectionEntity, { nullable: false })
   @JoinColumn({ name: 'connection_id', referencedColumnName: 'id' })
-  connection?: ConnectionEntity
+  connectionId?: ConnectionEntity
 
   @Column({ type: 'blob', nullable: true })
   hash?: Buffer
