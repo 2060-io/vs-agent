@@ -168,7 +168,7 @@ Parameters:
 ```
 #### Credential Revocation
 
-By sending this message, a Verifiable Credential is effectively revocated and sent to the destination connection.
+By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
 
 This message could be sent as a response to a Credential issuance. In such case, `connectionId` and `revocationDefinitionId` is used to identify credential details.
 
