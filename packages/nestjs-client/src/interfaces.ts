@@ -32,4 +32,21 @@ export interface EventHandler {
    * @param message - An instance of BaseMessage containing the input message details.
    */
   inputMessage(message: BaseMessage): Promise<void> | void
+
+  /**
+   * Processes the creation of a unique hash for a credential.
+   * This method should ensure proper handling of credential generation
+   * by identifying the session associated with the provided connection ID.
+   *
+   * The implementation of this method must:
+   * 1. Identify the session or context using the given connectionId.
+   * 2. Generate a unique hash string based on the connection session
+   *    and any other required data for the credential.
+   *
+   * @param connectionId - The unique identifier of the connection used
+   *                       to determine the session context.
+   * @returns A Promise that resolves to a unique hash Uint8Array representing
+   *          the generated credential.
+   */
+  credentialHash(connectionId: string): Promise<Uint8Array>
 }

@@ -25,6 +25,9 @@ export class RevocationEntity {
   @JoinColumn({ name: 'connection_id', referencedColumnName: 'id' })
   connection?: ConnectionEntity
 
+  @Column({ type: 'blob', nullable: true })
+  hash?: Buffer
+
   @CreateDateColumn()
   createdTs?: Date
 

@@ -53,25 +53,26 @@ export class MessageEventService {
 
     await this.apiClient.messages.send(body)
 
-    if (event.message instanceof CredentialReceptionMessage) {
-      try {
-        const credential = (await this.apiClient.credentialTypes.getAll())[0]
-
-        const connectionId = await this.connectionRepository.findById(event.message.connectionId)
-
-        if (connectionId && event.message.state === CredentialState.Done) {
-          const credentialRev = this.revocationRepository.create({
-            connection: connectionId,
-            revocationDefinitionId: credential.revocationId,
-          })
-          await this.revocationRepository.save(credentialRev)
-        }
-      } catch (error) {
-        this.logger.error(`Cannot create the registry: ${error}`)
-      }
-    }
-
     if (this.eventHandler) {
+      if (event.message instanceof CredentialReceptionMessage) {
+        try {
+          const credential = (await this.apiClient.credentialTypes.getAll())[0]
+
+          const connectionId = await this.connectionRepository.findById(event.message.connectionId)
+
+          if (connectionId && event.message.state === CredentialState.Done) {
+            const credentialRev = this.revocationRepository.create({
+              connection: connectionId,
+              hash: Buffer.from(await this.eventHandler.credentialHash(event.message.connectionId)),
+              revocationDefinitionId: credential.revocationId,
+            })
+            await this.revocationRepository.save(credentialRev)
+          }
+        } catch (error) {
+          this.logger.error(`Cannot create the registry: ${error}`)
+        }
+      }
+
       await this.eventHandler.inputMessage(event.message)
     }
   }
