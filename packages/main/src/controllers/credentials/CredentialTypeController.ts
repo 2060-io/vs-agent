@@ -177,7 +177,7 @@ export class CredentialTypesController {
       })
 
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
-      this.logger.log(`Revocation Definition Id: ${revocationDefinitionId}`)
+      this.logger.log(`Revocation Registry Definition Id: ${revocationDefinitionId}`)
 
       // Apply name and version as tags
       const credentialDefinitionRepository = agent.dependencyManager.resolve(
