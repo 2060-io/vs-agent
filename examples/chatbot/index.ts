@@ -23,6 +23,7 @@ import {
   VerifiableCredentialSubmittedProofItem,
   MediaMessage,
   MrtdSubmitState,
+  CredentialReceptionMessage,
 } from '@2060.io/service-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
@@ -99,9 +100,9 @@ const server = app.listen(PORT, async () => {
     phoneNumberCredentialDefinitionId =
       phoneNumberCredentialType?.id ?? credentialDefinition.id
     phoneNumberRevocationDefinitionId =
-      phoneNumberCredentialType?.revocationId ?? credentialDefinition.revocationId
+      phoneNumberCredentialType?.revocationId ? phoneNumberCredentialType?.revocationId?.[0] : credentialDefinition.revocationId?.[0]
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
-    logger.info(`phoneNumberRevocationDefinitionId: ${phoneNumberRevocationDefinitionId}`)
+    logger.info(`phoneNumberRevocationDefinitionId: ${credentialDefinition.revocationId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
   }
@@ -186,24 +187,8 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
             value: '+5712345678',
           },
         ],
-        revocationDefinitionId: phoneNumberRevocationDefinitionId,
+        revocationRegistryDefinitionId: phoneNumberRevocationDefinitionId,
         revocationRegistryIndex: phoneNumberRevocationCount += 1,
-      })
-      await apiClient.messages.send(body)
-    }
-  }
-
-  if (selectedItem === 'revoke' || selectedItem === 'Revoke credential') {
-    if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
-      !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
-      await sendTextMessage({
-        connectionId,
-        content: 'Service not available',
-      })
-    } else {
-      const body = new CredentialRevocationMessage({
-        connectionId,
-        revocationDefinitionId: phoneNumberRevocationDefinitionId,
       })
       await apiClient.messages.send(body)
     }
@@ -437,6 +422,22 @@ expressHandler.messageReceived(async (req, res) => {
         connectionId,
       })
       await apiClient.messages.send(body)
+    } else if (content.startsWith('/revoke')) {
+      const parsedContents = content.split(' ')
+      let threadId = parsedContents[1]
+      if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
+        !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
+        await sendTextMessage({
+          connectionId,
+          content: 'Service not available',
+        })
+      } else {
+        const body = new CredentialRevocationMessage({
+          connectionId,
+          threadId,
+        })
+        await apiClient.messages.send(body)
+      }
     } else if (content.startsWith('/proof')) {
       const body = new IdentityProofRequestMessage({
         connectionId,
@@ -520,6 +521,12 @@ expressHandler.messageReceived(async (req, res) => {
         content: `Problem: emrtd ${obj.state}`,
       })
     }
+  } else if (obj.type === CredentialReceptionMessage.type) {
+    await submitMessageReceipt(obj, 'viewed')
+    obj.state === 'done' && await sendTextMessage({
+      connectionId: obj.connectionId,
+      content: `For revocation, please provide the thread ID: ${obj.threadId}`,
+    })
   }
 })
 

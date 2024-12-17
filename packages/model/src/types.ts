@@ -27,7 +27,7 @@ export interface CreateCredentialTypeOptions {
   version: string
   attributes: string[]
   schemaId?: string
-  revocationId?: string
+  revocationId?: string[]
 }
 
 type JsonObject = {
