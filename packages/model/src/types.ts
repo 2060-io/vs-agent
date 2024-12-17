@@ -5,6 +5,8 @@ import type {
   ProofState,
 } from '@credo-ts/core'
 
+export { CredentialState } from '@credo-ts/core'
+
 import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
 
 export interface AgentInfo {

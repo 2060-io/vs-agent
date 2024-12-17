@@ -22,6 +22,7 @@ export class ConnectionsEventModule {
           useClass: options.eventHandler,
         },
       ],
+      exports: [ConnectionsRepository],
     }
   }
 }
