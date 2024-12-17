@@ -24,10 +24,6 @@ export const rootContextMenu = {
       id: 'issue',
     },
     {
-      title: 'Revoke credential',
-      id: 'revoke',
-    },
-    {
       title: 'Request proof',
       id: 'proof',
     },
@@ -44,7 +40,6 @@ export const rootMenuAsQA = {
     { id: 'poll', text: '⚽ World Cup poll' },
     { id: 'rocky', text: '💪 Rocky quotes' },
     { id: 'issue', text: 'Issue credential' },
-    { id: 'revoke', text: 'Revoke credential' },
     { id: 'proof', text: 'Request proof' },
     { id: 'help', text: '🆘 Help' },
   ],

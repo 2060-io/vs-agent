@@ -154,14 +154,14 @@ Parameters:
 - (optional) Revocation Index
 - (optional) Claims
 
-> **Note:** When using revocation parameters (`revocationDefinitionId` and `revocationRegistryIndex`), it is essential to ensure the `id` was preserved from the time it was generated with the credential. The `revocationRegistryIndex` serves as a reference to the specific credential in the revocation registry.  
+> **Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is essential to ensure the `id` was preserved from the time it was generated with the credential. The `revocationRegistryIndex` serves as a reference to the specific credential in the revocation registry.  
 
 ```json
 {
   ...
   "type": "credential-issuance",
   "credentialDefinitionId": "id",
-  "revocationDefinitionId": "id",
+  "revocationRegistryDefinitionId": "id",
   "revocationRegistryIndex": 1,
   "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
 }
@@ -170,13 +170,12 @@ Parameters:
 
 By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
 
-This message could be sent as a response to a Credential issuance. In such case, `connectionId` and `revocationDefinitionId` is used to identify credential details.
+This message could be sent as a credential revocation notification. In such case, `threadId` is used to identify credential details.
 
 ```json
 {
   ...
   "type": "credential-revocation",
-  "revocationDefinitionId": "id",
 }
 ```
 
