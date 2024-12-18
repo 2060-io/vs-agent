@@ -34,7 +34,8 @@ export class CreateCredentialTypeDto {
   schemaId?: string
 
   @ApiProperty({
-    description: 'Indicates whether to enable credential revocation support. If enabled, it allows revocation of issued credentials.',
+    description:
+      'Indicates whether to enable credential revocation support. If enabled, it allows revocation of issued credentials.',
     example: true,
     default: false,
   })

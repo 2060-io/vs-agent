@@ -40,13 +40,13 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
-  public async create(credentialType: CredentialTypeInfo): Promise<any> {
+  public async create(credentialType: CredentialTypeInfo): Promise<CredentialTypeInfo> {
     const response = await fetch(`${this.url}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentialType),
     })
-    return response.json()
+    return ( await response.json()) as CredentialTypeInfo
   }
 
   public async getAll(): Promise<CredentialTypeInfo[]> {
@@ -62,5 +62,13 @@ export class CredentialTypeService {
     }
 
     return types.map(value => value as CredentialTypeInfo)
+  }
+
+  public async createRevocation(credentialDefinitionId: string): Promise<string> {
+    const response = await fetch(`${this.url}/revoke/${credentialDefinitionId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    return response.text()
   }
 }
