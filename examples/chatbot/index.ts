@@ -93,7 +93,8 @@ const server = app.listen(PORT, async () => {
      *     id: randomUUID(),
      *     name: "phoneNumber",
      *     version: '1.0',
-     *     attributes: ['phoneNumber']
+     *     attributes: ['phoneNumber'],
+     *     supportRevocation: true
      * }))
      */
    const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))

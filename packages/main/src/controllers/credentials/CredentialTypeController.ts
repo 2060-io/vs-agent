@@ -38,11 +38,8 @@ import { CreateCredentialTypeDto } from './CredentialTypeDto'
 })
 export class CredentialTypesController {
   private readonly logger = new Logger(CredentialTypesController.name)
-  private readonly supportRevocation: boolean
 
-  constructor(private readonly agentService: AgentService) {
-    this.supportRevocation = process.env.SUPPORTING_REVOCATION === 'true'
-  }
+  constructor(private readonly agentService: AgentService) {}
 
   /**
    * Get all created credential types
@@ -137,7 +134,7 @@ export class CredentialTypesController {
 
       const registrationResult = await agent.modules.anoncreds.registerCredentialDefinition({
         credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
-        options: { supportRevocation: this.supportRevocation },
+        options: { supportRevocation: options.supportRevocation },
       })
 
       const credentialDefinitionId = registrationResult.credentialDefinitionState.credentialDefinitionId
@@ -152,7 +149,7 @@ export class CredentialTypesController {
       }
 
       let revocationRegistryDefinitionId
-      if (this.supportRevocation) {
+      if (options.supportRevocation) {
         const revocationResult = await agent.modules.anoncreds.registerRevocationRegistryDefinition({
           revocationRegistryDefinition: {
             credentialDefinitionId,
