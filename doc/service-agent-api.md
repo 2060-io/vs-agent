@@ -154,7 +154,7 @@ Parameters:
 - (optional) Revocation Index
 - (optional) Claims
 
-> **Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is essential to ensure the `id` was preserved from the time it was generated with the credential. The `revocationRegistryIndex` serves as a reference to the specific credential in the revocation registry.  
+**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process. 
 
 ```json
 {
@@ -170,7 +170,7 @@ Parameters:
 
 By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
 
-This message could be sent as a credential revocation notification. In such case, `threadId` is used to identify credential details.
+In this context, `threadId` is used to identify the details of the credential
 
 ```json
 {

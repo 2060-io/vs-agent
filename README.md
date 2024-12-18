@@ -36,7 +36,6 @@ but likely needed for production and test deployments.
 | POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
 | REDIS_HOST       | Redis database host user. This system will only function if this variable is defined. (Recommended for production mode)                                                                                       | None                            |
 | REDIS_PASSWORD   | Redis database password                                                                                   | None                            |
-| SUPPORTING_REVOCATION | Enables support for revocation features (true/false)                     | false                           |
 
 
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
