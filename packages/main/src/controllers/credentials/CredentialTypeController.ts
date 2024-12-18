@@ -419,7 +419,7 @@ export class CredentialTypesController {
    * @param credentialDefinitionId
    * @returns RevocationTypeInfo
    */
-  @Post('/revocationDefinition')
+  @Post('/revocationRegistry')
   public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
@@ -436,7 +436,7 @@ export class CredentialTypesController {
         revocationRegistryDefinition: {
           credentialDefinitionId,
           tag: 'default',
-          maximumCredentialNumber: 1000,
+          maximumCredentialNumber: options.maximumCredentialNumber,
           issuerId: cred.credentialDefinition.issuerId,
         },
         options: {},
@@ -498,7 +498,7 @@ export class CredentialTypesController {
    *
    * @returns string[] with revocationRegistryDefinitionIds
    */
-  @Get('/revocationDefinition')
+  @Get('/revocationRegistry')
   public async getRevocationDefinitions(@Body() options: CreateRevocationRegistryDto): Promise<string[]> {
     const agent = await this.agentService.getAgent()
 

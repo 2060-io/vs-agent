@@ -47,6 +47,11 @@ export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
   id: string
 }
 
+export interface RevocationRegistry {
+  credentialDefinitionId: string
+  maximumCredentialNumber: number
+}
+
 export interface CreatePresentationRequestOptions {
   requestedCredentials: RequestedCredential[]
 }
