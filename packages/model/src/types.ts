@@ -25,7 +25,6 @@ export interface CreateCredentialTypeOptions {
   version: string
   attributes: string[]
   schemaId?: string
-  revocationIds?: string[]
   supportRevocation?: boolean
 }
 

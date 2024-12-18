@@ -59,23 +59,11 @@ export class CredentialTypesController {
 
         const schema = schemaResult.schema
 
-        const revocationDefinitionRepository = agent.dependencyManager.resolve(
-          AnonCredsRevocationRegistryDefinitionRepository,
-        )
-        const revocationRegistries = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
-          agent.context,
-          record.credentialDefinitionId,
-        )
-        const revocationRegistryDefinitionIds = revocationRegistries.map(
-          item => item.revocationRegistryDefinitionId,
-        )
-
         return {
           id: record.credentialDefinitionId,
           name: (record.getTag('name') as string) ?? schema?.name,
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
-          revocationIds: revocationRegistryDefinitionIds,
         }
       }),
     )
@@ -431,7 +419,7 @@ export class CredentialTypesController {
    * @param credentialDefinitionId
    * @returns RevocationTypeInfo
    */
-  @Post('/revoke')
+  @Post('/revocationDefinition')
   public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
@@ -455,15 +443,14 @@ export class CredentialTypesController {
       })
       const revocationRegistryDefinitionId =
         revocationResult.revocationRegistryDefinitionState.revocationRegistryDefinitionId
-      this.logger.debug!(
-        `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
-      )
-
       if (!revocationRegistryDefinitionId) {
         throw new Error(
           `Cannot create credential revocations: ${JSON.stringify(revocationResult.registrationMetadata)}`,
         )
       }
+      this.logger.debug!(
+        `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
+      )
 
       const revStatusListResult = await agent.modules.anoncreds.registerRevocationStatusList({
         revocationStatusList: {
@@ -472,6 +459,9 @@ export class CredentialTypesController {
         },
         options: {},
       })
+      if (!revStatusListResult.revocationStatusListState.revocationStatusList) {
+        throw new Error(`Failed to create revocation status list`)
+      }
       const revocationDefinitionRepository = agent.dependencyManager.resolve(
         AnonCredsRevocationRegistryDefinitionRepository,
       )
@@ -482,7 +472,7 @@ export class CredentialTypesController {
         )
       revocationDefinitionRecord.metadata.set(
         'revStatusList',
-        revStatusListResult.revocationStatusListState.revocationStatusList!,
+        revStatusListResult.revocationStatusListState.revocationStatusList,
       )
       await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
@@ -501,5 +491,28 @@ export class CredentialTypesController {
         },
       )
     }
+  }
+
+  /**
+   * Get all revocation definitions by credentialDefinitionId
+   *
+   * @returns string[] with revocationRegistryDefinitionIds
+   */
+  @Get('/revocationDefinition')
+  public async getRevocationDefinitions(@Body() options: CreateRevocationRegistryDto): Promise<string[]> {
+    const agent = await this.agentService.getAgent()
+
+    const revocationDefinitionRepository = agent.dependencyManager.resolve(
+      AnonCredsRevocationRegistryDefinitionRepository,
+    )
+    const revocationRegistries = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
+      agent.context,
+      options.credentialDefinitionId,
+    )
+    const revocationRegistryDefinitionIds = revocationRegistries.map(
+      item => item.revocationRegistryDefinitionId,
+    )
+
+  return revocationRegistryDefinitionIds
   }
 }
