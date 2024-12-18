@@ -12,9 +12,9 @@ import { Repository } from 'typeorm'
 
 import { ConnectionsRepository } from '../connections'
 import { EventHandler } from '../interfaces'
-import { RevocationEntity } from '../models'
 
 import { MESSAGE_EVENT, MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
+import { CredentialEntity } from '../credentials'
 
 @Injectable()
 export class MessageEventService {
@@ -25,8 +25,8 @@ export class MessageEventService {
 
   constructor(
     @Inject(MESSAGE_MODULE_OPTIONS) private options: MessageModuleOptions,
-    @InjectRepository(RevocationEntity)
-    private readonly revocationRepository: Repository<RevocationEntity>,
+    @InjectRepository(CredentialEntity)
+    private readonly credentialRepository: Repository<CredentialEntity>,
     private readonly connectionRepository: ConnectionsRepository,
     @Optional() @Inject(MESSAGE_EVENT) private eventHandler?: EventHandler,
   ) {
@@ -59,19 +59,19 @@ export class MessageEventService {
           const [credential] = await this.apiClient.credentialTypes.getAll()
           const connectionId = await this.connectionRepository.findById(event.message.connectionId)
           const hash = Buffer.from(await this.eventHandler.credentialHash(event.message.connectionId))
-          const currentCred = await this.revocationRepository.findOneBy({ hash })
+          const currentCred = await this.credentialRepository.findOneBy({ hash })
           const isCredentialDone = event.message.state === CredentialState.Done
 
           if (connectionId && isCredentialDone) {
             if (!currentCred) {
-              const credentialRev = this.revocationRepository.create({
+              const credentialRev = this.credentialRepository.create({
                 connectionId,
                 hash,
                 revocationDefinitionId: credential.revocationId,
               })
-              await this.revocationRepository.save(credentialRev)
+              await this.credentialRepository.save(credentialRev)
             } else {
-              this.revocationRepository.update(currentCred.id, { connectionId })
+              this.credentialRepository.update(currentCred.id, { connectionId })
             }
           }
         } catch (error) {
