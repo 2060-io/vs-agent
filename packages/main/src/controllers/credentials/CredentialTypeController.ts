@@ -513,6 +513,6 @@ export class CredentialTypesController {
       item => item.revocationRegistryDefinitionId,
     )
 
-  return revocationRegistryDefinitionIds
+    return revocationRegistryDefinitionIds
   }
 }
