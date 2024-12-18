@@ -29,6 +29,7 @@ import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { AgentService } from '../../services/AgentService'
 
+import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
 
 @ApiTags('credential-types')
@@ -430,12 +431,11 @@ export class CredentialTypesController {
    * @param credentialDefinitionId
    * @returns RevocationTypeInfo
    */
-  @Post('/revoke/:credentialDefinitionId')
-  public async createRevocationRegistry(
-    @Param('credentialDefinitionId') credentialDefinitionId: string,
-  ): Promise<string> {
+  @Post('/revoke')
+  public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
+      const credentialDefinitionId = options.credentialDefinitionId
 
       const cred = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
 
