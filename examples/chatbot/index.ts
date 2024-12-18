@@ -93,16 +93,19 @@ const server = app.listen(PORT, async () => {
      *     id: randomUUID(),
      *     name: "phoneNumber",
      *     version: '1.0',
-     *     attributes: ['phoneNumber']
+     *     attributes: ['phoneNumber'],
+     *     supportRevocation: true
      * }))
      */
    const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
     phoneNumberCredentialDefinitionId =
       phoneNumberCredentialType?.id ?? credentialDefinition.id
-    phoneNumberRevocationDefinitionId =
-      phoneNumberCredentialType?.revocationId ? phoneNumberCredentialType?.revocationId?.[0] : credentialDefinition.revocationId?.[0]
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
-    logger.info(`phoneNumberRevocationDefinitionId: ${credentialDefinition.revocationId}`)
+    phoneNumberRevocationDefinitionId =
+      phoneNumberCredentialType?.revocationIds ? 
+        phoneNumberCredentialType?.revocationIds?.[0] : 
+        await apiClient.credentialTypes.createRevocation(phoneNumberCredentialDefinitionId)
+    logger.info(`phoneNumberRevocationDefinitionId: ${phoneNumberRevocationDefinitionId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
   }
