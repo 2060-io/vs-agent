@@ -66,7 +66,7 @@ export class RevocationRegistryService {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch revocation definitions: ${response.statusText}`)
+      throw new Error(`Failed to fetch revocation registries: ${response.statusText}`)
     }
 
     return (await response.json()) as string[]
