@@ -28,18 +28,22 @@ export class RevocationRegistryService {
     this.url = `${this.baseURL.replace(/\/$/, '')}/${this.version}/credential-types`
   }
 
-  public async create(options: RevocationRegistryInfo): Promise<string> {
-    logger.info(`Creating revocation registry with credentialDefinitionId: ${JSON.stringify(options)}`)
+  public async create(options: RevocationRegistryInfo): Promise<string | undefined> {
     const response = await fetch(`${this.url}/revocationRegistry`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ options }),
+      body: JSON.stringify(options),
     })
-    return response.text()
+
+    if (!response.ok) {
+      logger.error(`Failed to create revocation registry`)
+      return undefined
+    }
+
+    return await response.text()
   }
 
   public async get(credentialDefinitionId: string): Promise<string[]> {
-    logger.info(`Searching revocation registry with credentialDefinitionId: ${credentialDefinitionId}`)
     const response = await fetch(
       `${this.url}/revocationRegistry?credentialDefinitionId=${encodeURIComponent(credentialDefinitionId)}`,
       {
@@ -56,7 +60,6 @@ export class RevocationRegistryService {
   }
 
   public async getAll(): Promise<string[]> {
-    logger.info(`Searching all revocation registry`)
     const response = await fetch(`${this.url}/revocationRegistry`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

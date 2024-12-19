@@ -510,9 +510,7 @@ export class CredentialTypesController {
     )
     let revocationRegistries
     if (!credentialDefinitionId) {
-      revocationRegistries = await revocationDefinitionRepository.getAll(
-        agent.context,
-      )
+      revocationRegistries = await revocationDefinitionRepository.getAll(agent.context)
     } else {
       revocationRegistries = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
         agent.context,
