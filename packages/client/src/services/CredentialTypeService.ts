@@ -63,13 +63,4 @@ export class CredentialTypeService {
 
     return types.map(value => value as CredentialTypeInfo)
   }
-
-  public async createRevocation(credentialDefinitionId: string): Promise<string> {
-    const response = await fetch(`${this.url}/revoke`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credentialDefinitionId }),
-    })
-    return response.text()
-  }
 }

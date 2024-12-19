@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator'
+import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator'
 
 export class CreateRevocationRegistryDto {
   @ApiProperty({
@@ -18,5 +18,6 @@ export class CreateRevocationRegistryDto {
   })
   @IsNumber()
   @IsNotEmpty()
+  @IsOptional()
   maximumCredentialNumber: number = 1000
 }

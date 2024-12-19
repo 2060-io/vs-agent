@@ -47,7 +47,7 @@ export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
   id: string
 }
 
-export interface RevocationRegistry {
+export interface RevocationRegistryInfo {
   credentialDefinitionId: string
   maximumCredentialNumber: number
 }
