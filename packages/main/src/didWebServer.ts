@@ -2,9 +2,16 @@ import 'reflect-metadata'
 
 import type { DidWebServerConfig } from './utils/ServerConfig'
 
-import { AnonCredsCredentialDefinitionRepository, AnonCredsSchemaRepository } from '@credo-ts/anoncreds'
+import {
+  AnonCredsCredentialDefinitionRepository,
+  AnonCredsRevocationRegistryDefinitionRepository,
+  AnonCredsSchemaRepository,
+} from '@credo-ts/anoncreds'
 import cors from 'cors'
+import { createHash } from 'crypto'
 import express from 'express'
+import fs from 'fs'
+import multer, { diskStorage } from 'multer'
 
 import { ServiceAgent } from './utils/ServiceAgent'
 
@@ -26,6 +33,41 @@ export const startDidWebServer = async (agent: ServiceAgent, config: DidWebServe
 
   return server
 }
+
+const baseFilePath = './tails'
+const indexFilePath = `./${baseFilePath}/index.json`
+
+if (!fs.existsSync(baseFilePath)) {
+  fs.mkdirSync(baseFilePath, { recursive: true })
+}
+const tailsIndex = (
+  fs.existsSync(indexFilePath) ? JSON.parse(fs.readFileSync(indexFilePath, { encoding: 'utf-8' })) : {}
+) as Record<string, string>
+
+function fileHash(filePath: string, algorithm = 'sha256') {
+  return new Promise<string>((resolve, reject) => {
+    const shasum = createHash(algorithm)
+    try {
+      const s = fs.createReadStream(filePath)
+      s.on('data', function (data) {
+        shasum.update(data)
+      })
+      // making digest
+      s.on('end', function () {
+        const hash = shasum.digest('hex')
+        return resolve(hash)
+      })
+    } catch (error) {
+      return reject('error in calculation')
+    }
+  })
+}
+
+const fileStorage = diskStorage({
+  filename: (req: any, file: { originalname: string }, cb: (arg0: null, arg1: string) => void) => {
+    cb(null, file.originalname + '-' + new Date().toISOString())
+  },
+})
 
 export const addDidWebRoutes = async (
   app: express.Express,
@@ -88,6 +130,145 @@ export const addDidWebRoutes = async (
       }
 
       res.send(404)
+    })
+
+    // Endpoint to retrieve a revocation registry definition by its ID
+    app.get('/anoncreds/v1/revRegDef/:revocationDefinitionId', async (req, res) => {
+      const revocationDefinitionId = req.params.revocationDefinitionId
+
+      agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
+      const revocationDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
+
+      const revocationDefinitionRecord =
+        await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
+          agent.context,
+          `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        )
+
+      if (revocationDefinitionRecord) {
+        res.send({
+          resource: revocationDefinitionRecord.revocationRegistryDefinition,
+          resourceMetadata: {
+            statusListEndpoint: `${anoncredsBaseUrl}/anoncreds/v1/revStatus/${revocationDefinitionId}`,
+          },
+        })
+        return
+      }
+
+      res.send(404)
+    })
+
+    // Endpoint to retrieve the revocation status list for a specific revocation definition ID
+    // Optional: Accepts a timestamp parameter (not currently used in the logic)
+    app.get('/anoncreds/v1/revStatus/:revocationDefinitionId/:timestamp?', async (req, res) => {
+      const revocationDefinitionId = req.params.revocationDefinitionId
+
+      agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
+      const revocationDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
+
+      const revocationDefinitionRecord =
+        await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
+          agent.context,
+          `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        )
+
+      if (revocationDefinitionRecord) {
+        const revStatusList = revocationDefinitionRecord.metadata.get('revStatusList')
+        res.send({
+          resource: revStatusList,
+          resourceMetadata: {
+            previousVersionId: '',
+            nextVersionId: '',
+          },
+        })
+        return
+      }
+
+      res.send(404)
+    })
+
+    // Allow to create invitation, no other way to ask for invitation yet
+    app.get('/:tailsFileId', async (req, res) => {
+      agent.config.logger.debug(`requested file`)
+
+      const tailsFileId = req.params.tailsFileId
+      if (!tailsFileId) {
+        res.status(409).end()
+        return
+      }
+
+      const fileName = tailsIndex[tailsFileId]
+
+      if (!fileName) {
+        agent.config.logger.debug(`no entry found for tailsFileId: ${tailsFileId}`)
+        res.status(404).end()
+        return
+      }
+
+      const path = `${baseFilePath}/${fileName}`
+      try {
+        agent.config.logger.debug(`reading file: ${path}`)
+
+        if (!fs.existsSync(path)) {
+          agent.config.logger.debug(`file not found: ${path}`)
+          res.status(404).end()
+          return
+        }
+
+        const file = fs.createReadStream(path)
+        res.setHeader('Content-Disposition', `attachment: filename="${fileName}"`)
+        file.pipe(res)
+      } catch (error) {
+        agent.config.logger.debug(`error reading file: ${path}`)
+        res.status(500).end()
+      }
+    })
+
+    // Endpoint to upload a tails file for a specific tailsFileId
+    app.put('/:tailsFileId', multer({ storage: fileStorage }).single('file'), async (req, res) => {
+      agent.config.logger.info(`tails file upload: ${req.params.tailsFileId}`)
+
+      const file = req.file
+
+      if (!file) {
+        agent.config.logger.info(`No file found: ${JSON.stringify(req.headers)}`)
+        return res.status(400).send('No files were uploaded.')
+      }
+
+      const tailsFileId = req.params.tailsFileId
+      if (!tailsFileId) {
+        // Clean up temporary file
+        fs.rmSync(file.path)
+        return res.status(409).send('Missing tailsFileId')
+      }
+
+      const item = tailsIndex[tailsFileId]
+
+      if (item) {
+        agent.config.logger.debug(`there is already an entry for: ${tailsFileId}`)
+        res.status(409).end()
+        return
+      }
+
+      const hash = await fileHash(file.path)
+      const destinationPath = `${baseFilePath}/${hash}`
+
+      if (fs.existsSync(destinationPath)) {
+        agent.config.logger.warn('tails file already exists')
+      } else {
+        fs.copyFileSync(file.path, destinationPath)
+        fs.rmSync(file.path)
+      }
+
+      // Store filename in index
+      tailsIndex[tailsFileId] = hash
+      fs.writeFileSync(indexFilePath, JSON.stringify(tailsIndex))
+
+      res.status(200).end()
     })
   }
 }

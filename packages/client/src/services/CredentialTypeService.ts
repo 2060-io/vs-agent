@@ -40,13 +40,13 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
-  public async create(credentialType: CredentialTypeInfo): Promise<any> {
+  public async create(credentialType: CredentialTypeInfo): Promise<CredentialTypeInfo> {
     const response = await fetch(`${this.url}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentialType),
     })
-    return response.json()
+    return (await response.json()) as CredentialTypeInfo
   }
 
   public async getAll(): Promise<CredentialTypeInfo[]> {

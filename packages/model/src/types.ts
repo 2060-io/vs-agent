@@ -25,6 +25,7 @@ export interface CreateCredentialTypeOptions {
   version: string
   attributes: string[]
   schemaId?: string
+  supportRevocation?: boolean
 }
 
 type JsonObject = {
@@ -44,6 +45,11 @@ export interface ImportCredentialTypeOptions {
 
 export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
   id: string
+}
+
+export interface RevocationRegistryInfo {
+  credentialDefinitionId: string
+  maximumCredentialNumber: number
 }
 
 export interface CreatePresentationRequestOptions {

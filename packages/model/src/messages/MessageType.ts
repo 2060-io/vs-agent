@@ -7,6 +7,7 @@ export enum MessageType {
   ContextualMenuSelectMessage = 'contextual-menu-select',
   ContextualMenuUpdateMessage = 'contextual-menu-update',
   CredentialIssuanceMessage = 'credential-issuance',
+  CredentialRevocationMessage = 'credential-revocation',
   CredentialReceptionMessage = 'credential-reception',
   CredentialRequestMessage = 'credential-request',
   EMrtdDataRequestMessage = 'emrtd-data-request',

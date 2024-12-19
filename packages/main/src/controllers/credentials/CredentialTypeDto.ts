@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator'
+import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator'
 
 export class CreateCredentialTypeDto {
   @ApiProperty({
@@ -32,4 +32,15 @@ export class CreateCredentialTypeDto {
   @IsOptional()
   @IsNotEmpty()
   schemaId?: string
+
+  @ApiProperty({
+    description:
+      'Indicates whether to enable credential revocation support. If enabled, it allows revocation of issued credentials.',
+    example: true,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  @IsNotEmpty()
+  supportRevocation: boolean = false
 }

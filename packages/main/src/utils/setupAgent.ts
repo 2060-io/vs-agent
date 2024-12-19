@@ -73,6 +73,7 @@ export const setupAgent = async ({
     },
     did: publicDid,
     dependencies: agentDependencies,
+    anoncredsServiceBaseUrl,
   })
 
   const app = express()
