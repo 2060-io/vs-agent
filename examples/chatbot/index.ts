@@ -101,10 +101,12 @@ const server = app.listen(PORT, async () => {
     phoneNumberCredentialDefinitionId =
       phoneNumberCredentialType?.id ?? credentialDefinition.id
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
-    phoneNumberRevocationDefinitionId =
-      phoneNumberCredentialType?.revocationIds ? 
-        phoneNumberCredentialType?.revocationIds?.[0] : 
-        await apiClient.credentialTypes.createRevocation(phoneNumberCredentialDefinitionId)
+    phoneNumberRevocationDefinitionId = 
+        (await apiClient.revocationRegistry.get(phoneNumberCredentialDefinitionId))[0]  ??
+        await apiClient.revocationRegistry.create({
+          credentialDefinitionId: phoneNumberCredentialDefinitionId,
+          maximumCredentialNumber: 1000
+        })
     logger.info(`phoneNumberRevocationDefinitionId: ${phoneNumberRevocationDefinitionId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)

@@ -244,27 +244,28 @@ export class MessageService {
         const credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
         if (credentials && credentials.length > 0) {
           for (const credential of credentials) {
-            const isRevoke = Boolean(
+            const isRevocable = Boolean(
               credential.getTag('anonCredsRevocationRegistryId') &&
                 credential.getTag('anonCredsCredentialRevocationId'),
             )
-            isRevoke &&
-              (await agent.modules.anoncreds.updateRevocationStatusList({
-                revocationStatusList: {
-                  revocationRegistryDefinitionId: credential.getTag(
-                    'anonCredsRevocationRegistryId',
-                  ) as string,
-                  revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
-                },
-                options: {},
-              }))
+            if (!isRevocable) throw new Error(`Credential for threadId ${msg.threadId} is not revocable)`)
 
-            isRevoke &&
-              (await agent.credentials.sendRevocationNotification({
-                credentialRecordId: credential.id,
-                revocationFormat: 'anoncreds',
-                revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
-              }))
+            const uptStatusListResult = await agent.modules.anoncreds.updateRevocationStatusList({
+              revocationStatusList: {
+                revocationRegistryDefinitionId: credential.getTag('anonCredsRevocationRegistryId') as string,
+                revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
+              },
+              options: {},
+            })
+            if (!uptStatusListResult.revocationStatusListState.revocationStatusList) {
+              throw new Error(`Failed to update revocation status list`)
+            }
+
+            await agent.credentials.sendRevocationNotification({
+              credentialRecordId: credential.id,
+              revocationFormat: 'anoncreds',
+              revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
+            })
           }
         } else {
           throw new Error(`No credentials were found for connection: ${msg.connectionId}.`)

@@ -1,5 +1,6 @@
 // src/ApiClient.ts
 
+import { RevocationRegistryService } from './services'
 import { CredentialTypeService } from './services/CredentialTypeService'
 import { MessageService } from './services/MessageService'
 import { ApiVersion } from './types/enums'
@@ -23,18 +24,20 @@ import { ApiVersion } from './types/enums'
  * const apiClient = new ApiClient('http://localhost', ApiVersion.V1)
  *
  * // Example to query available credentials
- * await apiClient.credentialType.getAllCredentialTypes()
+ * await apiClient.credentialType.getAll()
  *
  * // Example to send a message
- * apiClient.message.sendMessage(message: BaseMessage)
+ * apiClient.message.send(message: BaseMessage)
  *
  * The `ApiClient` class provides easy methods for interacting with:
  * - `message`: Send and manage messages.
  * - `credentialType`: Query and manage credential types.
+ * - `revocationRegistry`: Query and manage the revocation registry for credential definitions.
  */
 export class ApiClient {
   public readonly messages: MessageService
   public readonly credentialTypes: CredentialTypeService
+  public readonly revocationRegistry: RevocationRegistryService
 
   constructor(
     private baseURL: string,
@@ -42,5 +45,6 @@ export class ApiClient {
   ) {
     this.messages = new MessageService(baseURL, version)
     this.credentialTypes = new CredentialTypeService(baseURL, version)
+    this.revocationRegistry = new RevocationRegistryService(baseURL, version)
   }
 }

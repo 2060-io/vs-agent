@@ -27,7 +27,6 @@ export interface CreateCredentialTypeOptions {
   version: string
   attributes: string[]
   schemaId?: string
-  revocationIds?: string[]
   supportRevocation?: boolean
 }
 
@@ -48,6 +47,11 @@ export interface ImportCredentialTypeOptions {
 
 export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
   id: string
+}
+
+export interface RevocationRegistryInfo {
+  credentialDefinitionId: string
+  maximumCredentialNumber: number
 }
 
 export interface CreatePresentationRequestOptions {
