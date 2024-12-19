@@ -248,23 +248,21 @@ export class MessageService {
               credential.getTag('anonCredsRevocationRegistryId') &&
                 credential.getTag('anonCredsCredentialRevocationId'),
             )
-            isRevoke &&
-              (await agent.modules.anoncreds.updateRevocationStatusList({
-                revocationStatusList: {
-                  revocationRegistryDefinitionId: credential.getTag(
-                    'anonCredsRevocationRegistryId',
-                  ) as string,
-                  revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
-                },
-                options: {},
-              }))
+            if (!isRevocable) throw new Error(`Credential for threadId ${msg.threadId} is not revocable)`)
 
-            isRevoke &&
-              (await agent.credentials.sendRevocationNotification({
-                credentialRecordId: credential.id,
-                revocationFormat: 'anoncreds',
-                revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
-              }))
+            await agent.modules.anoncreds.updateRevocationStatusList({
+              revocationStatusList: {
+                revocationRegistryDefinitionId: credential.getTag('anonCredsRevocationRegistryId') as string,
+                revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
+              },
+              options: {},
+            })
+
+            await agent.credentials.sendRevocationNotification({
+              credentialRecordId: credential.id,
+              revocationFormat: 'anoncreds',
+              revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
+            })
           }
         } else {
           throw new Error(`No credentials were found for connection: ${msg.connectionId}.`)
