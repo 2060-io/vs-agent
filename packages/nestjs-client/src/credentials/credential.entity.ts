@@ -14,7 +14,7 @@ import { ConnectionEntity } from '../connections'
 export class CredentialEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string
-  
+
   @Column({ type: 'varchar', nullable: false })
   credentialDefinitionId?: string
 

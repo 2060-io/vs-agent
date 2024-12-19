@@ -1,4 +1,3 @@
-export * from './connection.config'
 export * from './connection.controller'
 export * from './connection.entity'
 export * from './connection.module'
