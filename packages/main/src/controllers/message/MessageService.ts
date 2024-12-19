@@ -244,7 +244,7 @@ export class MessageService {
         const credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
         if (credentials && credentials.length > 0) {
           for (const credential of credentials) {
-            const isRevoke = Boolean(
+            const isRevocable = Boolean(
               credential.getTag('anonCredsRevocationRegistryId') &&
                 credential.getTag('anonCredsCredentialRevocationId'),
             )
