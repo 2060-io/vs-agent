@@ -40,11 +40,13 @@ export class RevocationRegistryService {
 
   public async get(credentialDefinitionId: string): Promise<string[]> {
     logger.info(`Searching revocation registry with credentialDefinitionId: ${credentialDefinitionId}`)
-    const response = await fetch(`${this.url}/revocationRegistry`, {
-      method: 'GET',
-      headers: { accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credentialDefinitionId }),
-    })
+    const response = await fetch(
+      `${this.url}/revocationRegistry?credentialDefinitionId=${encodeURIComponent(credentialDefinitionId)}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
 
     if (!response.ok) {
       throw new Error(`Failed to fetch revocation definitions: ${response.statusText}`)
@@ -57,8 +59,7 @@ export class RevocationRegistryService {
     logger.info(`Searching all revocation registry`)
     const response = await fetch(`${this.url}/revocationRegistry`, {
       method: 'GET',
-      headers: { accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credentialDefinitionId: '' }),
+      headers: { 'Content-Type': 'application/json' },
     })
 
     if (!response.ok) {

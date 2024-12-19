@@ -24,6 +24,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
@@ -499,16 +500,25 @@ export class CredentialTypesController {
    * @returns string[] with revocationRegistryDefinitionIds
    */
   @Get('/revocationRegistry')
-  public async getRevocationDefinitions(@Body() options: CreateRevocationRegistryDto): Promise<string[]> {
+  public async getRevocationDefinitions(
+    @Query('credentialDefinitionId') credentialDefinitionId?: string,
+  ): Promise<string[]> {
     const agent = await this.agentService.getAgent()
 
     const revocationDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsRevocationRegistryDefinitionRepository,
     )
-    const revocationRegistries = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
-      agent.context,
-      options.credentialDefinitionId,
-    )
+    let revocationRegistries
+    if (!credentialDefinitionId) {
+      revocationRegistries = await revocationDefinitionRepository.getAll(
+        agent.context,
+      )
+    } else {
+      revocationRegistries = await revocationDefinitionRepository.findAllByCredentialDefinitionId(
+        agent.context,
+        credentialDefinitionId,
+      )
+    }
     const revocationRegistryDefinitionIds = revocationRegistries.map(
       item => item.revocationRegistryDefinitionId,
     )
