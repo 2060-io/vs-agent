@@ -250,13 +250,16 @@ export class MessageService {
             )
             if (!isRevocable) throw new Error(`Credential for threadId ${msg.threadId} is not revocable)`)
 
-            await agent.modules.anoncreds.updateRevocationStatusList({
+            const uptStatusListResult = await agent.modules.anoncreds.updateRevocationStatusList({
               revocationStatusList: {
                 revocationRegistryDefinitionId: credential.getTag('anonCredsRevocationRegistryId') as string,
                 revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
               },
               options: {},
             })
+            if (!uptStatusListResult.revocationStatusListState.revocationStatusList) {
+              throw new Error(`Failed to update revocation status list`)
+            }
 
             await agent.credentials.sendRevocationNotification({
               credentialRecordId: credential.id,
