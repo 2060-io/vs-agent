@@ -86,17 +86,9 @@ export class CredentialEventService implements OnModuleInit {
    */
   async issuance(connectionId: string, records: Record<string, any>, hash: string): Promise<void> {
     const [{ id: credentialDefinitionId }] = await this.apiClient.credentialTypes.getAll()
-    const claims: Claim[] = []
-    if (records) {
-      Object.entries(records).forEach(([key, value]) => {
-        claims.push(
-          new Claim({
-            name: key,
-            value: value ?? null,
-          }),
-        )
-      })
-    }
+    const claims = Object.entries(records).map(
+      ([key, value]) => new Claim({ name: key, value: value ?? null }),
+    )
 
     const { revocationDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
