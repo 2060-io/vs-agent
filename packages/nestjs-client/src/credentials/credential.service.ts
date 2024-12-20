@@ -1,58 +1,81 @@
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { Claim, CredentialIssuanceMessage, CredentialTypeInfo } from '@2060.io/service-agent-model'
-import { Injectable, Logger } from '@nestjs/common'
+import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/service-agent-model'
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { EntityManager, Repository } from 'typeorm'
+
+import { CredentialEventOptions } from '../types'
 
 import { CredentialEntity } from './credential.entity'
 
 @Injectable()
-export class CredentialEventService {
+export class CredentialEventService implements OnModuleInit {
   private readonly logger = new Logger(CredentialEventService.name)
-  // private readonly url: string
-  //   private readonly version: ApiVersion
-  //   private readonly apiClient: ApiClient
+
+  // Service agent client API
+  private readonly url: string
+  private readonly apiVersion: ApiVersion
+  private readonly apiClient: ApiClient
+  
+  //Credential type definitions
+  private readonly name: string
+  private readonly version: string
+  private readonly attributes: string[]
+  private readonly supportRevocation: boolean
+  private readonly maximumCredentialNumber: number
 
   constructor(
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
+    @Inject('EVENT_MODULE_OPTIONS') private options: CredentialEventOptions,
+    private readonly entityManager: EntityManager,
   ) {
-    // this.url = options.url
-    // this.version = options.version
-    // this.apiClient = new ApiClient(this.url, this.version)
+    if (!options.url) throw new Error(`For this module to be used the value url must be added`)
+    this.url = options.url
+    this.apiVersion = options.version ?? ApiVersion.V1
+
+    if (!options.creds?.attributes)
+      throw new Error(`For this module to be used, the parameter credential types must be added`)
+    this.name = options.creds?.name ?? 'Chatbot'
+    this.version = options.creds?.version ?? '1.0'
+    this.attributes = options.creds?.attributes
+    this.supportRevocation = options.creds?.supportRevocation ?? false
+    this.maximumCredentialNumber = options.creds?.maximumCredentialNumber ?? 1000
+
+    this.apiClient = new ApiClient(this.url, this.apiVersion)
+
+    this.logger.debug(`Initialized with url: ${this.url}, version: ${this.apiVersion}`)
   }
 
-  /**
-   * Creates a credential using the provided records.
-   * This method requires a `CredentialTypeInfo` object with necessary parameters
-   * such as the credential's name, version, and attributes.
-   *
-   * @param {CredentialTypeInfo} records - An object containing the attributes
-   * of the credential to be created.
-   *
-   * Example of constructing the `records` object:
-   * const records = {
-   *   name: "Chabot",
-   *   version: "1.0",
-   *   attributes: ["email"]
-   * };
-   *
-   * @returns {Promise<CredentialTypeInfo>} A promise that resolves when the credential is created successfully.
-   */
-  // async createCredential(records: CredentialTypeInfo): Promise<CredentialTypeInfo> {
-  // const [credential] = await this.apiClient.credentialTypes.getAll()
+  async onModuleInit() {
+    const [credential] = await this.apiClient.credentialTypes.getAll()
 
-  // if (!credential || credential.length === 0) {
-  //   const newCredential = await this.apiClient.credentialTypes.create({
-  //     id: records.id,
-  //     name: records.name,
-  //     version: records.version,
-  //     attributes: records.attributes,
-  //   })
-  //   credential.push(newCredential)
-  // }
-  // return credential
-  // }
+    if (!credential) {
+      const credential = await this.apiClient.credentialTypes.create({
+        id: '', // TODO: implement uuid
+        name: this.name,
+        version: this.version,
+        attributes: this.attributes,
+        supportRevocation: this.supportRevocation,
+      })
+
+      await this.createRevocationRegistry(credential.id)
+    }
+  }
+
+  async createRevocationRegistry(credentialDefinitionId: string) {
+    const revocationRegistry = await this.apiClient.revocationRegistry.create({
+      credentialDefinitionId,
+      maximumCredentialNumber: this.maximumCredentialNumber,
+    })
+    const credentialRev = this.credentialRepository.create({
+      credentialDefinitionId,
+      revocationDefinitionId: revocationRegistry,
+      revocationRegistryIndex: 0,
+      maximumCredentialNumber: this.maximumCredentialNumber,
+    })
+    await this.credentialRepository.save(credentialRev)
+  }
 
   /**
    * Sends a credential issuance to the specified connection using the provided claims.
@@ -74,28 +97,29 @@ export class CredentialEventService {
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
    * sent. If an error occurs during the process, the promise will be rejected.
    */
-  async sendCredentialIssuance(connectionId: string, records: Record<string, any>): Promise<void> {
-    // const claims: Claim[] = []
-    // if (records) {
-    //   Object.entries(records).forEach(([key, value]) => {
-    //     claims.push(
-    //       new Claim({
-    //         name: key,
-    //         value: value ?? null,
-    //       }),
-    //     )
-    //   })
-    // }
-    // let credentialId
-    // let credential = (await this.apiClient.credentialTypes.getAll())[0]
-    // if (!credential) credentialId = (await this.sendCredentialType())[0]?.id
-    // await this.apiClient.messages.send(
-    //   new CredentialIssuanceMessage({
-    //     connectionId: connectionId,
-    //     credentialDefinitionId: credentialId,
-    //     claims: claims,
-    //   }),
-    // )
-    // this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
+
+  async accept(connectionId: string, threadId: string): Promise<void> {
+    const cred = await this.credentialRepository.findOne({
+      where: { connectionId: connectionId },
+      order: { createdTs: 'DESC' },
+    })
+    if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
+    await this.credentialRepository.update(cred.id, { threadId })
+  }
+
+  async revoke(threadId: string): Promise<void> {
+    const cred = await this.credentialRepository.findOne({ where: { threadId } })
+    if (!cred || !cred.connectionId) {
+      throw new Error(`Credencial with threadId ${threadId} not found`)
+    }
+
+    await this.credentialRepository.update(cred.id, { revoked: true })
+    await this.apiClient.messages.send(
+      new CredentialRevocationMessage({
+        connectionId: cred.connectionId,
+        threadId,
+      }),
+    )
+    this.logger.log(`Revoke Credential: ${cred.id}`)
   }
 }
