@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
 import { CredentialEventOptions } from '../types'
+
 import { CredentialEventService } from './credential.service'
 
 @Module({})
@@ -17,7 +18,7 @@ export class CredentialEventModule {
           useValue: options,
         },
       ],
-      exports: [CredentialEventService]
+      exports: [CredentialEventService],
     }
   }
 }

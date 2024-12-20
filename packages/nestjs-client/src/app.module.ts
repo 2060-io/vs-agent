@@ -1,9 +1,9 @@
 import { Module, DynamicModule } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
+import { CredentialEventModule } from './credentials'
 import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
-import { CredentialEventModule } from './credentials'
 
 @Module({})
 export class EventsModule {
@@ -37,7 +37,7 @@ export class EventsModule {
           imports: moduleOptions.imports ?? [],
           url: moduleOptions.url,
           version: moduleOptions.version,
-          creds: moduleOptions.creds
+          creds: moduleOptions.creds,
         }),
       )
     }

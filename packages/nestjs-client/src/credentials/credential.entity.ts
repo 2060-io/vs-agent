@@ -1,14 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm'
-
-import { ConnectionEntity } from '../connections'
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('credentials')
 export class CredentialEntity {
@@ -16,20 +6,28 @@ export class CredentialEntity {
   id!: string
 
   @Column({ type: 'varchar', nullable: false })
-  credentialDefinitionId?: string
+  credentialDefinitionId!: string
 
   @Column({ type: 'varchar', nullable: true })
   revocationDefinitionId?: string
 
-  @Column({ type: 'integer', generated: 'increment', nullable: true })
+  @Column({ type: 'integer', nullable: true })
   revocationRegistryIndex?: number
 
-  @OneToOne(() => ConnectionEntity, { nullable: false })
-  @JoinColumn({ name: 'connection_id', referencedColumnName: 'id' })
-  connectionId?: ConnectionEntity
+  @Column({ type: 'integer', nullable: false })
+  maximumCredentialNumber!: number
+
+  @Column({ type: 'varchar', nullable: true })
+  connectionId?: string
+
+  @Column({ type: 'varchar', nullable: true })
+  threadId?: string
 
   @Column({ type: 'blob', nullable: true })
   hash?: Buffer
+
+  @Column({ nullable: true })
+  revoked?: boolean
 
   @CreateDateColumn()
   createdTs?: Date
