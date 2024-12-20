@@ -18,7 +18,7 @@ export class ConnectionsEventModule {
         ConnectionsRepository,
         {
           provide: 'CONNECTIONS_EVENT',
-          useClass: options.eventHandler,
+          useValue: options.eventHandler,
         },
       ],
       exports: [ConnectionsRepository],

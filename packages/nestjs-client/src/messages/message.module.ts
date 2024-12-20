@@ -15,12 +15,12 @@ export class MessageEventModule {
       providers: [
         MessageEventService,
         {
-          provide: 'MESSAGE_MODULE_OPTIONS',
+          provide: 'EVENT_MODULE_OPTIONS',
           useValue: options,
         },
         {
           provide: 'MESSAGE_EVENT',
-          useClass: options.eventHandler,
+          useValue: options.eventHandler,
         },
       ],
     }

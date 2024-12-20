@@ -3,6 +3,7 @@ import { Module, DynamicModule } from '@nestjs/common'
 import { ConnectionsEventModule } from './connections'
 import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
+import { CredentialEventModule } from './credentials'
 
 @Module({})
 export class EventsModule {
@@ -10,7 +11,7 @@ export class EventsModule {
     const imports = []
     const { modules, options: moduleOptions } = options
 
-    if (modules.messages && moduleOptions.eventHandler) {
+    if (modules.messages) {
       imports.push(
         MessageEventModule.forRoot({
           eventHandler: moduleOptions.eventHandler,
@@ -21,11 +22,22 @@ export class EventsModule {
       )
     }
 
-    if (modules.connections && moduleOptions.eventHandler) {
+    if (modules.connections) {
       imports.push(
         ConnectionsEventModule.forRoot({
           eventHandler: moduleOptions.eventHandler,
           imports: moduleOptions.imports ?? [],
+        }),
+      )
+    }
+
+    if (modules.credentials) {
+      imports.push(
+        CredentialEventModule.forRoot({
+          imports: moduleOptions.imports ?? [],
+          url: moduleOptions.url,
+          version: moduleOptions.version,
+          creds: moduleOptions.creds
         }),
       )
     }
