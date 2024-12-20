@@ -8,11 +8,11 @@ export class CredentialEntity {
   @Column({ type: 'varchar', nullable: false })
   credentialDefinitionId!: string
 
-  @Column({ type: 'varchar', nullable: true })
-  revocationDefinitionId?: string
+  @Column({ type: 'varchar', nullable: false })
+  revocationDefinitionId!: string
 
-  @Column({ type: 'integer', nullable: true })
-  revocationRegistryIndex?: number
+  @Column({ type: 'integer', nullable: false })
+  revocationRegistryIndex!: number
 
   @Column({ type: 'integer', nullable: false })
   maximumCredentialNumber!: number

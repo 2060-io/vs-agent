@@ -1,5 +1,6 @@
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/service-agent-model'
+import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
@@ -16,7 +17,7 @@ export class CredentialEventService implements OnModuleInit {
   private readonly url: string
   private readonly apiVersion: ApiVersion
   private readonly apiClient: ApiClient
-  
+
   //Credential type definitions
   private readonly name: string
   private readonly version: string
@@ -52,7 +53,7 @@ export class CredentialEventService implements OnModuleInit {
 
     if (!credential) {
       const credential = await this.apiClient.credentialTypes.create({
-        id: '', // TODO: implement uuid
+        id: utils.uuid(),
         name: this.name,
         version: this.version,
         attributes: this.attributes,
@@ -61,20 +62,6 @@ export class CredentialEventService implements OnModuleInit {
 
       await this.createRevocationRegistry(credential.id)
     }
-  }
-
-  async createRevocationRegistry(credentialDefinitionId: string) {
-    const revocationRegistry = await this.apiClient.revocationRegistry.create({
-      credentialDefinitionId,
-      maximumCredentialNumber: this.maximumCredentialNumber,
-    })
-    const credentialRev = this.credentialRepository.create({
-      credentialDefinitionId,
-      revocationDefinitionId: revocationRegistry,
-      revocationRegistryIndex: 0,
-      maximumCredentialNumber: this.maximumCredentialNumber,
-    })
-    await this.credentialRepository.save(credentialRev)
   }
 
   /**
@@ -97,7 +84,67 @@ export class CredentialEventService implements OnModuleInit {
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
    * sent. If an error occurs during the process, the promise will be rejected.
    */
+  async issuance(connectionId: string, records: Record<string, any>, hash: string): Promise<void> {
+    const [{ id: credentialDefinitionId }] = await this.apiClient.credentialTypes.getAll()
+    const claims: Claim[] = []
+    if (records) {
+      Object.entries(records).forEach(([key, value]) => {
+        claims.push(
+          new Claim({
+            name: key,
+            value: value ?? null,
+          }),
+        )
+      })
+    }
 
+    const { revocationDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
+      async transaction => {
+        const lastCred = await transaction.findOne(CredentialEntity, {
+          where: {
+            credentialDefinitionId,
+          },
+          order: { revocationRegistryIndex: 'DESC' },
+          lock: { mode: 'pessimistic_write' },
+        })
+        if (!lastCred)
+          throw new Error(
+            'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
+          )
+
+        const newCredential = await transaction.save(CredentialEntity, {
+          connectionId,
+          credentialDefinitionId,
+          revocationDefinitionId: lastCred.revocationDefinitionId,
+          revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
+          hash: Buffer.from(new Sha256().hash(hash)),
+          maximumCredentialNumber: lastCred.maximumCredentialNumber,
+        })
+        return {
+          revocationDefinitionId: newCredential.revocationDefinitionId,
+          revocationRegistryIndex: newCredential.revocationRegistryIndex,
+        }
+      },
+    )
+
+    await this.apiClient.messages.send(
+      new CredentialIssuanceMessage({
+        connectionId,
+        credentialDefinitionId,
+        revocationRegistryDefinitionId: revocationDefinitionId,
+        revocationRegistryIndex: revocationRegistryIndex,
+        claims: claims,
+      }),
+    )
+    this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
+  }
+
+  /**
+   * Accepts a credential by associating it with the provided thread ID.
+   * @param connectionId - The connection ID associated with the credential.
+   * @param threadId - The thread ID to link with the credential.
+   * @throws Error if no credential is found with the specified connection ID.
+   */
   async accept(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: { connectionId: connectionId },
@@ -107,6 +154,11 @@ export class CredentialEventService implements OnModuleInit {
     await this.credentialRepository.update(cred.id, { threadId })
   }
 
+  /**
+   * Revokes a credential associated with the provided thread ID.
+   * @param threadId - The thread ID linked to the credential to revoke.
+   * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
+   */
   async revoke(threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({ where: { threadId } })
     if (!cred || !cred.connectionId) {
@@ -121,5 +173,25 @@ export class CredentialEventService implements OnModuleInit {
       }),
     )
     this.logger.log(`Revoke Credential: ${cred.id}`)
+  }
+
+  // private methods
+  private async createRevocationRegistry(credentialDefinitionId: string) {
+    const revocationRegistry = await this.apiClient.revocationRegistry.create({
+      credentialDefinitionId,
+      maximumCredentialNumber: this.maximumCredentialNumber,
+    })
+    const credentialRev = this.credentialRepository.create({
+      credentialDefinitionId,
+      revocationDefinitionId: revocationRegistry,
+      revocationRegistryIndex: 0,
+      maximumCredentialNumber: this.maximumCredentialNumber,
+    })
+    await this.credentialRepository.save(credentialRev)
+  }
+
+  private async createRegistry(record: Partial<CredentialEntity>) {
+    const credentialRev = this.credentialRepository.create(record)
+    await this.credentialRepository.save(credentialRev)
   }
 }
