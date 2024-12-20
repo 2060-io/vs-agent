@@ -28,3 +28,25 @@ export class AppModule {}
 })
 
 ```
+
+
+## How to use for main module
+```node
+@Module({
+  imports: [
+    EventsModule.register({
+      modules: {
+      messages: true,
+      connections: false,
+      },
+      options: {
+      eventHandler: CoreService,
+      imports: [],
+      url: process.env.SERVICE_AGENT_ADMIN_URL,
+      version: ApiVersion.V1,
+      }
+    })
+  ],
+})
+
+```
