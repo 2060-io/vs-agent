@@ -30,6 +30,8 @@ import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 import { MediaSharingModule } from 'credo-ts-media-sharing'
 import { ReceiptsModule } from 'credo-ts-receipts'
 
+import { FullTailsFileService } from '../services/FullTailsFileService'
+
 import { CachedWebDidResolver } from './CachedWebDidResolver'
 
 type ServiceAgentModules = {
@@ -69,6 +71,7 @@ export interface ServiceAgentOptions {
   config: InitConfig
   did?: string
   dependencies: AgentDependencies
+  anoncredsServiceBaseUrl?: string
 }
 
 export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent => {
@@ -80,6 +83,9 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
         askar: new AskarModule({ ariesAskar }),
         anoncreds: new AnonCredsModule({
           anoncreds,
+          tailsFileService: new FullTailsFileService({
+            tailsServerBaseUrl: options.anoncredsServiceBaseUrl,
+          }),
           registries: [
             new DidWebAnonCredsRegistry({
               cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },

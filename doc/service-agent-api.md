@@ -155,16 +155,33 @@ By sending this message, a Verifiable Credential is effectively issued and sent 
 This message could be sent as a response to a Credential Request. In such case, `threadId` is used to identify credential details. But it can also start a new Credential Issuance flow, and specify
 
 Parameters:
-
 - (optional) Credential Definition ID
+- (optional) Revocation Definition ID
+- (optional) Revocation Index
 - (optional) Claims
+
+**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process. 
 
 ```json
 {
   ...
   "type": "credential-issuance",
   "credentialDefinitionId": "id",
- "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
+  "revocationRegistryDefinitionId": "id",
+  "revocationRegistryIndex": 1,
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
+}
+```
+#### Credential Revocation
+
+By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
+
+In this context, `threadId` is used to identify the details of the credential
+
+```json
+{
+  ...
+  "type": "credential-revocation",
 }
 ```
 

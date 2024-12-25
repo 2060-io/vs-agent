@@ -17,6 +17,7 @@ import {
   EMrtdDataRequestMessage,
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
+  CredentialRevocationMessage,
 } from '@2060.io/service-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
@@ -223,6 +224,8 @@ export class MessageService {
                     return { name: item.name, mimeType: item.mimeType, value: item.value }
                   }),
                   credentialDefinitionId: msg.credentialDefinitionId,
+                  revocationRegistryDefinitionId: msg.revocationRegistryDefinitionId,
+                  revocationRegistryIndex: msg.revocationRegistryIndex,
                 },
               },
               protocolVersion: 'v2',
@@ -234,6 +237,38 @@ export class MessageService {
               'Claims and credentialDefinitionId attributes must be present if a credential without related thread is to be issued',
             )
           }
+        }
+      } else if (messageType === CredentialRevocationMessage.type) {
+        const msg = JsonTransformer.fromJSON(message, CredentialRevocationMessage)
+
+        const credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
+        if (credentials && credentials.length > 0) {
+          for (const credential of credentials) {
+            const isRevocable = Boolean(
+              credential.getTag('anonCredsRevocationRegistryId') &&
+                credential.getTag('anonCredsCredentialRevocationId'),
+            )
+            if (!isRevocable) throw new Error(`Credential for threadId ${msg.threadId} is not revocable)`)
+
+            const uptStatusListResult = await agent.modules.anoncreds.updateRevocationStatusList({
+              revocationStatusList: {
+                revocationRegistryDefinitionId: credential.getTag('anonCredsRevocationRegistryId') as string,
+                revokedCredentialIndexes: [Number(credential.getTag('anonCredsCredentialRevocationId'))],
+              },
+              options: {},
+            })
+            if (!uptStatusListResult.revocationStatusListState.revocationStatusList) {
+              throw new Error(`Failed to update revocation status list`)
+            }
+
+            await agent.credentials.sendRevocationNotification({
+              credentialRecordId: credential.id,
+              revocationFormat: 'anoncreds',
+              revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
+            })
+          }
+        } else {
+          throw new Error(`No credentials were found for connection: ${msg.connectionId}.`)
         }
       } else if (messageType === InvitationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)
