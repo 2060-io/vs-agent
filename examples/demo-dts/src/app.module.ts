@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
-import { ConnectionsEventModule, MessageEventModule } from '@2060.io/service-agent-nestjs-client'
+import { EventsModule } from '@2060.io/service-agent-nestjs-client'
 import { ApiVersion } from '@2060.io/service-agent-client'
 import { CoreModule } from '@/core.module'
 
@@ -27,18 +27,26 @@ import { CoreModule } from '@/core.module'
       isGlobal: true,
       load: [appConfig],
     }),
-    MessageEventModule.forRoot({
-      eventHandler: CoreService,
-      imports: [],
-      url: process.env.SERVICE_AGENT_ADMIN_URL,
-      version: ApiVersion.V1,
-    }),
-    ConnectionsEventModule.forRoot({
-      eventHandler: CoreService,
-      imports: [],
+    EventsModule.register({
+      modules: {
+        messages: true,
+        connections: true,
+        credentials: true,
+      },
+      options: {
+        eventHandler: CoreService,
+        imports: [],
+        url: process.env.SERVICE_AGENT_ADMIN_URL,
+        version: ApiVersion.V1,
+        creds: {
+          name: 'demo dts',
+          version: '1.0',
+          attributes: ['fullName', 'issuanceDate'],
+          supportRevocation: true,
+          maximumCredentialNumber: 1000,
+        },
+      },
     }),
   ],
-  controllers: [],
-  providers: [CoreService],
 })
 export class AppModule {}

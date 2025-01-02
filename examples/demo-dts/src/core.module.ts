@@ -2,13 +2,13 @@ import { Global, Module } from '@nestjs/common'
 import { SessionEntity } from '@/models'
 import { CoreService } from '@/core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { ConnectionEntity } from '@2060.io/service-agent-nestjs-client'
+import { ConnectionEntity, CredentialEntity } from '@2060.io/service-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ConnectionEntity, SessionEntity]),
+    TypeOrmModule.forFeature([ConnectionEntity, CredentialEntity, SessionEntity]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
@@ -18,7 +18,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
         username: configService.get<string>('appConfig.postgresUser'),
         password: configService.get<string>('appConfig.postgresPassword'),
         database: configService.get<string>('appConfig.postgresDbName'),
-        entities: [ConnectionEntity, SessionEntity],
+        entities: [ConnectionEntity, CredentialEntity, SessionEntity],
         synchronize: true,
         ssl: false,
         logging: false,

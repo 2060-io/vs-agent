@@ -1,4 +1,9 @@
 {
   "WELCOME":"Welcome to our demo chatbot",
+  "ROOT_TITTLE": "Context Menu",
+  "CMD": {
+    "CREDENTIAL":"New credential",
+    "REVOKE":"Revoke credential"
+  },
   "HELP":"Check the contextual menu for available actions."
 }

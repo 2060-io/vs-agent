@@ -1,7 +1,9 @@
 import {
   BaseMessage,
   ConnectionStateUpdated,
+  ContextualMenuItem,
   ContextualMenuSelectMessage,
+  ContextualMenuUpdateMessage,
   CredentialReceptionMessage,
   EMrtdDataSubmitMessage,
   MediaMessage,
@@ -11,11 +13,11 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { CredentialEventService, EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'
-import { StateStep } from './common'
+import { Cmd, StateStep } from './common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
@@ -31,6 +33,7 @@ export class CoreService implements EventHandler {
     private readonly sessionRepository: Repository<SessionEntity>,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
+    private readonly credentialEvent: CredentialEventService,
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -102,7 +105,8 @@ export class CoreService implements EventHandler {
    * @param event - The event containing connection update details.
    */
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    await this.handleSession(event.connectionId)
+    const session = await this.handleSession(event.connectionId)
+    await this.sendContextualMenu(session)
   }
 
   /**
@@ -128,8 +132,8 @@ export class CoreService implements EventHandler {
    *       metadata remain intact while cleaning up unnecessary or sensitive data.
    */
   async closeConnection(event: ConnectionStateUpdated): Promise<void> {
-    let session = await this.handleSession(event.connectionId)
-    session = await this.purgeUserData(session)
+    const session = await this.handleSession(event.connectionId)
+    await this.purgeUserData(session)
   }
 
   private async welcomeMessage(connectionId: string) {
@@ -170,8 +174,24 @@ export class CoreService implements EventHandler {
    * @param selectionId - Identifier of the user's selection.
    * @param session - The current session associated with the message.
    */
-  private handleContextualAction(selectionId: string, session: SessionEntity): Promise<SessionEntity> {
-    throw new Error('Function not implemented.')
+  private async handleContextualAction(selectionId: string, session: SessionEntity): Promise<SessionEntity> {
+    switch (session.state) {
+      case StateStep.START:
+        if (selectionId === Cmd.CREDENTIAL) {
+          const values = {
+            fullName: 'example',
+            issuanceDate: new Date().toISOString().split('T')[0],
+          }
+          await this.credentialEvent.issuance(session.connectionId, values, values.fullName)
+        }
+        if (selectionId === Cmd.REVOKE) {
+          await this.credentialEvent.revoke(session.connectionId)
+        }
+        break
+      default:
+        break
+    }
+    return await this.sessionRepository.save(session)
   }
 
   /**
@@ -182,7 +202,11 @@ export class CoreService implements EventHandler {
    * @param session - The active session to update.
    */
   private async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
-    throw new Error('Function not implemented.')
+    try {
+    } catch (error) {
+      this.logger.error('handleStateInput: ' + error)
+    }
+    return await this.sendContextualMenu(session)
   }
 
   /**
@@ -244,6 +268,39 @@ export class CoreService implements EventHandler {
   private async purgeUserData(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.START
     // Additional sensitive data can be reset here if needed.
+    return await this.sessionRepository.save(session)
+  }
+
+  // send special flows
+  private async sendContextualMenu(session: SessionEntity): Promise<SessionEntity> {
+    const item: ContextualMenuItem[] = []
+    switch (session.state) {
+      case StateStep.START:
+        item.push(
+          new ContextualMenuItem({
+            id: Cmd.CREDENTIAL,
+            title: this.getText('CMD.CREDENTIAL', session.lang),
+          }),
+        )
+        item.push(
+          new ContextualMenuItem({
+            id: Cmd.REVOKE,
+            title: this.getText('CMD.REVOKE', session.lang),
+          }),
+        )
+        break
+      default:
+        break
+    }
+
+    await this.apiClient.messages.send(
+      new ContextualMenuUpdateMessage({
+        title: this.getText('ROOT_TITTLE', session.lang),
+        connectionId: session.connectionId,
+        options: item,
+        timestamp: new Date(),
+      }),
+    )
     return await this.sessionRepository.save(session)
   }
 }
