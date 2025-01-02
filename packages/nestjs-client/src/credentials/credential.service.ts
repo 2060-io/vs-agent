@@ -3,7 +3,7 @@ import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Repository } from 'typeorm'
+import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
 
 import { CredentialEventOptions } from '../types'
 
@@ -61,6 +61,7 @@ export class CredentialEventService implements OnModuleInit {
       })
 
       await this.createRevocationRegistry(credential.id)
+      await this.createRevocationRegistry(credential.id)
     }
   }
 
@@ -92,17 +93,43 @@ export class CredentialEventService implements OnModuleInit {
 
     const { revocationDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
-        const lastCred = await transaction.findOne(CredentialEntity, {
+        const invalidRegistries = await transaction.find(CredentialEntity, {
+          select: ['revocationDefinitionId'],
           where: {
             credentialDefinitionId,
+            revocationRegistryIndex: Equal(this.maximumCredentialNumber),
+          },
+        })
+        const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
+
+        let lastCred = await transaction.findOne(CredentialEntity, {
+          where: {
+            credentialDefinitionId,
+            revocationRegistryIndex: Not(Equal(0)),
+            ...(invalidRevocationIds.length > 0
+              ? {
+                  revocationDefinitionId: Not(In(invalidRevocationIds)),
+                }
+              : {}),
           },
           order: { revocationRegistryIndex: 'DESC' },
           lock: { mode: 'pessimistic_write' },
         })
-        if (!lastCred)
-          throw new Error(
-            'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
-          )
+        if (!lastCred) {
+          lastCred = await transaction.findOne(CredentialEntity, {
+            where: {
+              credentialDefinitionId,
+              revocationRegistryIndex: Equal(0),
+            },
+            order: { createdTs: 'DESC' },
+            lock: { mode: 'pessimistic_write' },
+          })
+
+          if (!lastCred)
+            throw new Error(
+              'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
+            )
+        }
 
         const newCredential = await transaction.save(CredentialEntity, {
           connectionId,
@@ -128,6 +155,10 @@ export class CredentialEventService implements OnModuleInit {
         claims: claims,
       }),
     )
+    if (revocationRegistryIndex === this.maximumCredentialNumber) {
+      const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
+      this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
+    }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
   }
 
@@ -140,7 +171,7 @@ export class CredentialEventService implements OnModuleInit {
   async accept(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: { connectionId: connectionId },
-      order: { createdTs: 'DESC' },
+      order: { createdTs: 'DESC' }, // TODO: improve the search method on differents revocation
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
     await this.credentialRepository.update(cred.id, { threadId })
@@ -168,11 +199,15 @@ export class CredentialEventService implements OnModuleInit {
   }
 
   // private methods
-  private async createRevocationRegistry(credentialDefinitionId: string) {
+  private async createRevocationRegistry(credentialDefinitionId: string): Promise<string> {
     const revocationRegistry = await this.apiClient.revocationRegistry.create({
       credentialDefinitionId,
       maximumCredentialNumber: this.maximumCredentialNumber,
     })
+    if (!revocationRegistry)
+      throw new Error(
+        `Unable to create a new revocation registry for CredentialDefinitionId: ${credentialDefinitionId}`,
+      )
     const credentialRev = this.credentialRepository.create({
       credentialDefinitionId,
       revocationDefinitionId: revocationRegistry,
@@ -180,10 +215,6 @@ export class CredentialEventService implements OnModuleInit {
       maximumCredentialNumber: this.maximumCredentialNumber,
     })
     await this.credentialRepository.save(credentialRev)
-  }
-
-  private async createRegistry(record: Partial<CredentialEntity>) {
-    const credentialRev = this.credentialRepository.create(record)
-    await this.credentialRepository.save(credentialRev)
+    return revocationRegistry
   }
 }
