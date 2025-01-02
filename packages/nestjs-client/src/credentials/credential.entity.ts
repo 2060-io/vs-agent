@@ -23,8 +23,8 @@ export class CredentialEntity {
   @Column({ type: 'varchar', nullable: true })
   threadId?: string
 
-  @Column({ type: 'blob', nullable: true })
-  hash?: Buffer
+  @Column({ type: 'varchar', nullable: true })
+  hash?: string
 
   @Column({ nullable: true })
   revoked?: boolean

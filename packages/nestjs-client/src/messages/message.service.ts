@@ -58,8 +58,9 @@ export class MessageEventService {
       if (message instanceof CredentialReceptionMessage) {
         try {
           const isCredentialDone = message.state === CredentialState.Done
-          if (this.credentialEvent && isCredentialDone && message.threadId) {
-            this.credentialEvent.accept(message.connectionId, message.threadId)
+          if (this.credentialEvent && message.threadId) {
+            if (isCredentialDone) this.credentialEvent.accept(message.connectionId, message.threadId)
+            else this.credentialEvent.reject(message.connectionId, message.threadId)
           }
         } catch (error) {
           this.logger.error(`Cannot create the registry: ${error}`)

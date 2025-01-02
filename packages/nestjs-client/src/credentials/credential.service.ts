@@ -90,6 +90,13 @@ export class CredentialEventService implements OnModuleInit {
     const claims = Object.entries(records).map(
       ([key, value]) => new Claim({ name: key, value: value ?? null }),
     )
+    const isRevoked = await this.credentialRepository.findOne({
+      where: {
+        hash: Equal(Buffer.from(new Sha256().hash(hash)).toString('hex')),
+        revoked: false,
+      },
+    })
+    if (isRevoked) throw new Error('Please revoke the credential with the same data first.')
 
     const { revocationDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
@@ -136,7 +143,7 @@ export class CredentialEventService implements OnModuleInit {
           credentialDefinitionId,
           revocationDefinitionId: lastCred.revocationDefinitionId,
           revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
-          hash: Buffer.from(new Sha256().hash(hash)),
+          hash: Buffer.from(new Sha256().hash(hash)).toString('hex'),
           maximumCredentialNumber: lastCred.maximumCredentialNumber,
         })
         return {
@@ -175,6 +182,21 @@ export class CredentialEventService implements OnModuleInit {
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
     await this.credentialRepository.update(cred.id, { threadId })
+  }
+
+  /**
+   * Rejected a credential by associating it with the provided thread ID.
+   * @param connectionId - The connection ID associated with the credential.
+   * @param threadId - The thread ID to link with the credential.
+   * @throws Error if no credential is found with the specified connection ID.
+   */
+  async reject(connectionId: string, threadId: string): Promise<void> {
+    const cred = await this.credentialRepository.findOne({
+      where: { connectionId: connectionId },
+      order: { createdTs: 'DESC' }, // TODO: improve the search method on differents revocation
+    })
+    if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
+    await this.credentialRepository.update(cred.id, { threadId, revoked: true })
   }
 
   /**

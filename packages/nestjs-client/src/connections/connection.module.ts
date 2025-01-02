@@ -9,6 +9,9 @@ import { ConnectionsEventService } from './connection.service'
 @Module({})
 export class ConnectionsEventModule {
   static forRoot(options: ConnectionEventOptions): DynamicModule {
+    if (!options.eventHandler) {
+      throw new Error('Event handler is required but not provided.')
+    }
     return {
       module: ConnectionsEventModule,
       imports: options.imports,
@@ -18,7 +21,7 @@ export class ConnectionsEventModule {
         ConnectionsRepository,
         {
           provide: 'CONNECTIONS_EVENT',
-          useValue: options.eventHandler,
+          useClass: options.eventHandler,
         },
       ],
       exports: [ConnectionsRepository],

@@ -8,6 +8,9 @@ import { MessageEventService } from './message.service'
 @Module({})
 export class MessageEventModule {
   static forRoot(options: MessageEventOptions): DynamicModule {
+    if (!options.eventHandler) {
+      throw new Error('Event handler is required but not provided.')
+    }
     return {
       module: MessageEventModule,
       imports: options.imports,
@@ -20,7 +23,7 @@ export class MessageEventModule {
         },
         {
           provide: 'MESSAGE_EVENT',
-          useValue: options.eventHandler,
+          useClass: options.eventHandler,
         },
       ],
     }

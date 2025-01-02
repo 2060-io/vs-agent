@@ -1,10 +1,11 @@
-import { Module, DynamicModule } from '@nestjs/common'
+import { Module, DynamicModule, Global } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
 import { CredentialEventModule } from './credentials'
 import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
 
+@Global()
 @Module({})
 export class EventsModule {
   static register(options: EventsModuleOptions): DynamicModule {
