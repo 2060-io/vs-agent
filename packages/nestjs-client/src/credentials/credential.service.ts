@@ -182,17 +182,17 @@ export class CredentialEventService implements OnModuleInit {
    * @param threadId - The thread ID linked to the credential to revoke.
    * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
    */
-  async revoke(threadId: string): Promise<void> {
-    const cred = await this.credentialRepository.findOne({ where: { threadId } })
+  async revoke(connectionId: string): Promise<void> {
+    const cred = await this.credentialRepository.findOne({ where: { connectionId } })
     if (!cred || !cred.connectionId) {
-      throw new Error(`Credencial with threadId ${threadId} not found`)
+      throw new Error(`Credencial with threadId ${cred?.threadId} not found`)
     }
 
     await this.credentialRepository.update(cred.id, { revoked: true })
     await this.apiClient.messages.send(
       new CredentialRevocationMessage({
         connectionId: cred.connectionId,
-        threadId,
+        threadId: cred?.threadId,
       }),
     )
     this.logger.log(`Revoke Credential: ${cred.id}`)
