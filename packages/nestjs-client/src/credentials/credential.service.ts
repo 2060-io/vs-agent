@@ -48,6 +48,10 @@ export class CredentialEventService implements OnModuleInit {
     this.logger.debug(`Initialized with url: ${this.url}, version: ${this.apiVersion}`)
   }
 
+  /**
+   * When the module is instantiated, two default lists of possible revocation registries will be created.
+   * This is to ensure seamless handling in case one of the registries runs out of revocation capacity.
+   */
   async onModuleInit() {
     const [credential] = await this.apiClient.credentialTypes.getAll()
 
@@ -96,7 +100,11 @@ export class CredentialEventService implements OnModuleInit {
         revoked: false,
       },
     })
-    if (isRevoked) throw new Error('Please revoke the credential with the same data first.')
+    if (isRevoked) {
+      isRevoked.connectionId = connectionId
+      await this.credentialRepository.save(isRevoked)
+      throw new Error('Please revoke the credential with the same data first.')
+    }
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
