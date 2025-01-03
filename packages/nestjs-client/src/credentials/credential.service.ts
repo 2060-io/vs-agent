@@ -103,7 +103,7 @@ export class CredentialEventService implements OnModuleInit {
     if (isRevoked) {
       isRevoked.connectionId = connectionId
       await this.credentialRepository.save(isRevoked)
-      throw new Error('Please revoke the credential with the same data first.')
+      await this.revoke(connectionId)
     }
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
