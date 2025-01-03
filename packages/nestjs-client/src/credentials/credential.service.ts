@@ -98,13 +98,13 @@ export class CredentialEventService implements OnModuleInit {
     })
     if (isRevoked) throw new Error('Please revoke the credential with the same data first.')
 
-    const { revocationDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
+    const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
         const invalidRegistries = await transaction.find(CredentialEntity, {
           select: ['revocationDefinitionId'],
           where: {
             credentialDefinitionId,
-            revocationRegistryIndex: Equal(this.maximumCredentialNumber),
+            revocationRegistryIndex: Equal(this.maximumCredentialNumber - 1),
           },
         })
         const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
@@ -112,7 +112,7 @@ export class CredentialEventService implements OnModuleInit {
         let lastCred = await transaction.findOne(CredentialEntity, {
           where: {
             credentialDefinitionId,
-            revocationRegistryIndex: Not(Equal(0)),
+            revocationRegistryIndex: Not(Equal(this.maximumCredentialNumber)),
             ...(invalidRevocationIds.length > 0
               ? {
                   revocationDefinitionId: Not(In(invalidRevocationIds)),
@@ -126,7 +126,7 @@ export class CredentialEventService implements OnModuleInit {
           lastCred = await transaction.findOne(CredentialEntity, {
             where: {
               credentialDefinitionId,
-              revocationRegistryIndex: Equal(0),
+              revocationRegistryIndex: Equal(this.maximumCredentialNumber),
             },
             order: { createdTs: 'DESC' },
             lock: { mode: 'pessimistic_write' },
@@ -136,6 +136,7 @@ export class CredentialEventService implements OnModuleInit {
             throw new Error(
               'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
             )
+          lastCred.revocationRegistryIndex = -1
         }
 
         const newCredential = await transaction.save(CredentialEntity, {
@@ -147,7 +148,7 @@ export class CredentialEventService implements OnModuleInit {
           maximumCredentialNumber: lastCred.maximumCredentialNumber,
         })
         return {
-          revocationDefinitionId: newCredential.revocationDefinitionId,
+          revocationRegistryDefinitionId: newCredential.revocationDefinitionId,
           revocationRegistryIndex: newCredential.revocationRegistryIndex,
         }
       },
@@ -157,12 +158,12 @@ export class CredentialEventService implements OnModuleInit {
       new CredentialIssuanceMessage({
         connectionId,
         credentialDefinitionId,
-        revocationRegistryDefinitionId: revocationDefinitionId,
-        revocationRegistryIndex: revocationRegistryIndex,
+        revocationRegistryDefinitionId,
+        revocationRegistryIndex,
         claims: claims,
       }),
     )
-    if (revocationRegistryIndex === this.maximumCredentialNumber) {
+    if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
       const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
@@ -177,11 +178,16 @@ export class CredentialEventService implements OnModuleInit {
    */
   async accept(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
-      where: { connectionId: connectionId },
+      where: {
+        connectionId,
+        revoked: false,
+      },
       order: { createdTs: 'DESC' }, // TODO: improve the search method on differents revocation
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
-    await this.credentialRepository.update(cred.id, { threadId })
+
+    cred.threadId = threadId
+    await this.credentialRepository.save(cred)
   }
 
   /**
@@ -192,11 +198,16 @@ export class CredentialEventService implements OnModuleInit {
    */
   async reject(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
-      where: { connectionId: connectionId },
-      order: { createdTs: 'DESC' }, // TODO: improve the search method on differents revocation
+      where: {
+        connectionId,
+        revoked: false,
+      },
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
-    await this.credentialRepository.update(cred.id, { threadId, revoked: true })
+
+    cred.threadId = threadId
+    cred.revoked = true
+    await this.credentialRepository.save(cred)
   }
 
   /**
@@ -205,12 +216,16 @@ export class CredentialEventService implements OnModuleInit {
    * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
    */
   async revoke(connectionId: string): Promise<void> {
-    const cred = await this.credentialRepository.findOne({ where: { connectionId } })
+    const cred = await this.credentialRepository.findOne({
+      where: { connectionId },
+      order: { createdTs: 'DESC' },
+    })
     if (!cred || !cred.connectionId) {
       throw new Error(`Credencial with threadId ${cred?.threadId} not found`)
     }
 
-    await this.credentialRepository.update(cred.id, { revoked: true })
+    cred.revoked = true
+    await this.credentialRepository.save(cred)
     await this.apiClient.messages.send(
       new CredentialRevocationMessage({
         connectionId: cred.connectionId,
@@ -233,7 +248,7 @@ export class CredentialEventService implements OnModuleInit {
     const credentialRev = this.credentialRepository.create({
       credentialDefinitionId,
       revocationDefinitionId: revocationRegistry,
-      revocationRegistryIndex: 0,
+      revocationRegistryIndex: this.maximumCredentialNumber,
       maximumCredentialNumber: this.maximumCredentialNumber,
     })
     await this.credentialRepository.save(credentialRev)

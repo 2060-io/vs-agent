@@ -5,6 +5,7 @@ import {
   MessageReceived,
   ReceiptsMessage,
 } from '@2060.io/service-agent-model'
+import { JsonTransformer } from '@credo-ts/core'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'
 
@@ -55,12 +56,14 @@ export class MessageEventService {
     await this.apiClient.messages.send(body)
 
     if (this.eventHandler) {
-      if (message instanceof CredentialReceptionMessage) {
+      if (message.type === CredentialReceptionMessage.type) {
         try {
-          const isCredentialDone = message.state === CredentialState.Done
-          if (this.credentialEvent && message.threadId) {
-            if (isCredentialDone) this.credentialEvent.accept(message.connectionId, message.threadId)
-            else this.credentialEvent.reject(message.connectionId, message.threadId)
+          const msg = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
+          const isCredentialDone = msg.state === CredentialState.Done
+          if (this.credentialEvent) {
+            if (!msg.threadId) throw new Error('threadId is required for credential')
+            if (isCredentialDone) await this.credentialEvent.accept(msg.connectionId, msg.threadId)
+            else await this.credentialEvent.reject(msg.connectionId, msg.threadId)
           }
         } catch (error) {
           this.logger.error(`Cannot create the registry: ${error}`)

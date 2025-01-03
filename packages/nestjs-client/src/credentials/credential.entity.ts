@@ -26,7 +26,7 @@ export class CredentialEntity {
   @Column({ type: 'varchar', nullable: true })
   hash?: string
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   revoked?: boolean
 
   @CreateDateColumn()
