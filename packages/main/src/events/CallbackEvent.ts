@@ -12,13 +12,14 @@ export enum PresentationStatus {
 }
 
 export const sendPresentationCallbackEvent = async (options: {
+  proofExchangeId: string
   callbackUrl: string
   status: PresentationStatus
   ref?: string
   claims?: Claim[]
   logger: TsLogger
 }) => {
-  const { callbackUrl, ref, claims, logger } = options
+  const { callbackUrl, ref, claims, logger, status, proofExchangeId } = options
   try {
     logger.debug(`sending presentation callback event to ${callbackUrl}: ${JSON.stringify(options)}`)
     await fetch(callbackUrl, {
@@ -26,6 +27,8 @@ export const sendPresentationCallbackEvent = async (options: {
       body: JSON.stringify({
         ref,
         claims,
+        status,
+        proofExchangeId,
       }),
       headers: { 'Content-Type': 'application/json' },
     })

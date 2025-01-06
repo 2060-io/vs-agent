@@ -17,6 +17,7 @@ In addition, it supports a notification mechanism to subscribe to any event the 
     - [Message types](#message-types)
       - [Credential Request](#credential-request)
       - [Credential Issuance](#credential-issuance)
+      - [Credential Revocation](#credential-revocation)
       - [Credential Reception](#credential-reception)
       - [Identity Proof Request](#identity-proof-request)
       - [Identity Proof Submit](#identity-proof-submit)
@@ -792,7 +793,7 @@ Response will include the invitation code in both short and long form URL format
 {
     "url": "string containing long form URL-encoded invitation",
     "shortUrl": "string containing a shortened URL for the invitation",
-    "presentationRequestId": "unique identifier for the flow",
+    "proofExchangeId": "unique identifier for the flow",
 }
 ```
 

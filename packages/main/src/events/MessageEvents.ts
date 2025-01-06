@@ -237,6 +237,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           }
 
           await sendPresentationCallbackEvent({
+            proofExchangeId: record.id,
             callbackUrl: callbackParameters.callbackUrl,
             status: errorMap[errorCode] ?? PresentationStatus.UNSPECIFIED_ERROR,
             logger: config.logger,
@@ -292,6 +293,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
         if (callbackParameters && callbackParameters.callbackUrl) {
           await sendPresentationCallbackEvent({
+            proofExchangeId: record.id,
             callbackUrl: callbackParameters.callbackUrl,
             status: record.isVerified ? PresentationStatus.OK : PresentationStatus.VERIFICATION_ERROR,
             logger: config.logger,
