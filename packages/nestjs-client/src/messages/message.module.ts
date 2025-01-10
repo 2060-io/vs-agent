@@ -18,7 +18,7 @@ export class MessageEventModule {
       providers: [
         MessageEventService,
         {
-          provide: 'EVENT_MODULE_OPTIONS',
+          provide: 'GLOBAL_MODULE_OPTIONS',
           useValue: options,
         },
         {

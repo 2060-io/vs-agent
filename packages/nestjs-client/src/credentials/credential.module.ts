@@ -1,24 +1,24 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import { CredentialEventOptions } from '../types'
+import { CredentialOptions } from '../types'
 
-import { CredentialEventService } from './credential.service'
+import { CredentialService } from './credential.service'
 
 @Module({})
-export class CredentialEventModule {
-  static forRoot(options: CredentialEventOptions): DynamicModule {
+export class CredentialModule {
+  static forRoot(options: CredentialOptions): DynamicModule {
     return {
-      module: CredentialEventModule,
+      module: CredentialModule,
       imports: options.imports,
       controllers: [],
       providers: [
-        CredentialEventService,
+        CredentialService,
         {
-          provide: 'EVENT_MODULE_OPTIONS',
+          provide: 'GLOBAL_MODULE_OPTIONS',
           useValue: options,
         },
       ],
-      exports: [CredentialEventService],
+      exports: [CredentialService],
     }
   }
 }

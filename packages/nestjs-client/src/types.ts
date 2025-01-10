@@ -15,7 +15,7 @@ export interface ConnectionEventOptions {
   imports?: DynamicModule[]
 }
 
-export interface CredentialEventOptions {
+export interface CredentialOptions {
   imports?: DynamicModule[]
   url?: string
   version?: ApiVersion

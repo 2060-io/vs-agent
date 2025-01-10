@@ -1,7 +1,7 @@
 import { Module, DynamicModule, Global } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
-import { CredentialEventModule } from './credentials'
+import { CredentialModule } from './credentials'
 import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
 
@@ -34,7 +34,7 @@ export class EventsModule {
 
     if (modules.credentials) {
       imports.push(
-        CredentialEventModule.forRoot({
+        CredentialModule.forRoot({
           imports: moduleOptions.imports ?? [],
           url: moduleOptions.url,
           version: moduleOptions.version,

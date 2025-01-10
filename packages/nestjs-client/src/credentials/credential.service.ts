@@ -5,13 +5,13 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
 
-import { CredentialEventOptions } from '../types'
+import { CredentialOptions } from '../types'
 
 import { CredentialEntity } from './credential.entity'
 
 @Injectable()
-export class CredentialEventService implements OnModuleInit {
-  private readonly logger = new Logger(CredentialEventService.name)
+export class CredentialService implements OnModuleInit {
+  private readonly logger = new Logger(CredentialService.name)
 
   // Service agent client API
   private readonly url: string
@@ -28,7 +28,7 @@ export class CredentialEventService implements OnModuleInit {
   constructor(
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
-    @Inject('EVENT_MODULE_OPTIONS') private options: CredentialEventOptions,
+    @Inject('GLOBAL_MODULE_OPTIONS') private options: CredentialOptions,
     private readonly entityManager: EntityManager,
   ) {
     if (!options.url) throw new Error(`For this module to be used the value url must be added`)
