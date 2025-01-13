@@ -176,7 +176,7 @@ export class CredentialService {
           order: { revocationRegistryIndex: 'DESC' },
           lock: { mode: 'pessimistic_write' },
         })
-        if (!lastCred || !lastCred.revocationRegistryIndex) {
+        if (!lastCred || lastCred.revocationRegistryIndex == null) {
           lastCred = await transaction.findOne(CredentialEntity, {
             where: {
               credentialDefinitionId,

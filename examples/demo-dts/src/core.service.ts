@@ -43,7 +43,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     await this.credentialService.create(['fullName', 'issuanceDate'], {
       name: 'demo dts',
       supportRevocation: true,
-      maximumCredentialNumber: 1000,
+      maximumCredentialNumber: 5,
+      autoRevocationEnabled: true,
     })
   }
 
