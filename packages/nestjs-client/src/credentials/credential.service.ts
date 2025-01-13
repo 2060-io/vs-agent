@@ -130,7 +130,7 @@ export class CredentialService implements OnModuleInit {
           order: { revocationRegistryIndex: 'DESC' },
           lock: { mode: 'pessimistic_write' },
         })
-        if (!lastCred) {
+        if (!lastCred || !lastCred.revocationRegistryIndex) {
           lastCred = await transaction.findOne(CredentialEntity, {
             where: {
               credentialDefinitionId,
@@ -153,7 +153,7 @@ export class CredentialService implements OnModuleInit {
           revocationDefinitionId: lastCred.revocationDefinitionId,
           revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
           hash: Buffer.from(new Sha256().hash(hash)).toString('hex'),
-          maximumCredentialNumber: lastCred.maximumCredentialNumber,
+          maximumCredentialNumber: this.maximumCredentialNumber,
         })
         return {
           revocationRegistryDefinitionId: newCredential.revocationDefinitionId,
@@ -257,7 +257,6 @@ export class CredentialService implements OnModuleInit {
       credentialDefinitionId,
       revocationDefinitionId: revocationRegistry,
       revocationRegistryIndex: this.maximumCredentialNumber,
-      maximumCredentialNumber: this.maximumCredentialNumber,
     })
     await this.credentialRepository.save(credentialRev)
     return revocationRegistry
