@@ -13,8 +13,8 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { CredentialEventService, EventHandler } from '@2060.io/service-agent-nestjs-client'
-import { Injectable, Logger } from '@nestjs/common'
+import { CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'
 import { Cmd, StateStep } from './common'
@@ -24,7 +24,7 @@ import { I18nService } from 'nestjs-i18n'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
-export class CoreService implements EventHandler {
+export class CoreService implements EventHandler, OnModuleInit {
   private readonly apiClient: ApiClient
   private readonly logger = new Logger(CoreService.name)
 
@@ -33,10 +33,18 @@ export class CoreService implements EventHandler {
     private readonly sessionRepository: Repository<SessionEntity>,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
-    private readonly credentialEvent: CredentialEventService,
+    private readonly credentialService: CredentialService,
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+  }
+
+  async onModuleInit() {
+    await this.credentialService.create(['fullName', 'issuanceDate'], {
+      name: 'demo dts',
+      supportRevocation: true,
+      maximumCredentialNumber: 1000,
+    })
   }
 
   /**
@@ -182,10 +190,10 @@ export class CoreService implements EventHandler {
             fullName: 'example',
             issuanceDate: new Date().toISOString().split('T')[0],
           }
-          await this.credentialEvent.issuance(session.connectionId, values, values.fullName)
+          await this.credentialService.issuance(session.connectionId, values, { identifier: values.fullName })
         }
         if (selectionId === Cmd.REVOKE) {
-          await this.credentialEvent.revoke(session.connectionId)
+          await this.credentialService.revoke(session.connectionId)
         }
         break
       default:

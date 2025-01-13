@@ -38,13 +38,6 @@ import { CoreModule } from '@/core.module'
         imports: [],
         url: process.env.SERVICE_AGENT_ADMIN_URL,
         version: ApiVersion.V1,
-        creds: {
-          name: 'demo dts',
-          version: '1.0',
-          attributes: ['fullName', 'issuanceDate'],
-          supportRevocation: true,
-          maximumCredentialNumber: 1000,
-        },
       },
     }),
   ],
