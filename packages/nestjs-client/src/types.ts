@@ -19,13 +19,6 @@ export interface CredentialOptions {
   imports?: DynamicModule[]
   url?: string
   version?: ApiVersion
-  creds?: {
-    name?: string
-    version?: string
-    attributes?: string[]
-    supportRevocation?: boolean
-    maximumCredentialNumber?: number
-  }
 }
 
 export interface ModulesConfig {
@@ -41,12 +34,5 @@ export interface EventsModuleOptions {
     imports?: DynamicModule[]
     url?: string
     version?: ApiVersion
-    creds?: {
-      name?: string
-      version?: string
-      attributes?: string[]
-      supportRevocation?: boolean
-      maximumCredentialNumber?: number
-    }
   }
 }

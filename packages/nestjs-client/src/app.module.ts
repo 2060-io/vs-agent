@@ -38,7 +38,6 @@ export class EventsModule {
           imports: moduleOptions.imports ?? [],
           url: moduleOptions.url,
           version: moduleOptions.version,
-          creds: moduleOptions.creds,
         }),
       )
     }

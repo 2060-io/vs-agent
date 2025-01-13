@@ -1,7 +1,7 @@
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/service-agent-model'
 import { Sha256, utils } from '@credo-ts/core'
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
 
@@ -10,7 +10,7 @@ import { CredentialOptions } from '../types'
 import { CredentialEntity } from './credential.entity'
 
 @Injectable()
-export class CredentialService implements OnModuleInit {
+export class CredentialService {
   private readonly logger = new Logger(CredentialService.name)
 
   // Service agent client API
@@ -19,11 +19,11 @@ export class CredentialService implements OnModuleInit {
   private readonly apiClient: ApiClient
 
   //Credential type definitions
-  private readonly name: string
-  private readonly version: string
-  private readonly attributes: string[]
-  private readonly supportRevocation: boolean
-  private readonly maximumCredentialNumber: number
+  private name: string = 'Chatbot'
+  private version: string = '1.0'
+  private supportRevocation: boolean = false
+  private maximumCredentialNumber: number = 1000
+  private autoRevocationEnabled: boolean = false
 
   constructor(
     @InjectRepository(CredentialEntity)
@@ -34,33 +34,55 @@ export class CredentialService implements OnModuleInit {
     if (!options.url) throw new Error(`For this module to be used the value url must be added`)
     this.url = options.url
     this.apiVersion = options.version ?? ApiVersion.V1
-
-    if (!options.creds?.attributes)
-      throw new Error(`For this module to be used, the parameter credential types must be added`)
-    this.name = options.creds?.name ?? 'Chatbot'
-    this.version = options.creds?.version ?? '1.0'
-    this.attributes = options.creds?.attributes
-    this.supportRevocation = options.creds?.supportRevocation ?? false
-    this.maximumCredentialNumber = options.creds?.maximumCredentialNumber ?? 1000
-
     this.apiClient = new ApiClient(this.url, this.apiVersion)
 
     this.logger.debug(`Initialized with url: ${this.url}, version: ${this.apiVersion}`)
   }
 
   /**
-   * When the module is instantiated, two default lists of possible revocation registries will be created.
-   * This is to ensure seamless handling in case one of the registries runs out of revocation capacity.
+   * Ensures the creation and initialization of a credential definition with support for revocation registries.
+   *
+   * When this method is called:
+   * - Two default lists of possible revocation registries will be created. (only with supportRevocation)
+   * - This guarantees seamless handling in case one of the registries runs out of revocation capacity. (only with supportRevocation)
+   *
+   * **Usage Recommendation:**
+   * It is recommended to call this method inside an `OnModuleInit` lifecycle hook to validate the existence
+   * of credentials as soon as the project is initialized.
+   *
+   * @param name - The name of the credential definition. Defaults to "Chatbot" if not provided.
+   * @param version - The version of the credential definition. Defaults to "1.0" if not provided.
+   * @param attributes - A list of attributes that the credential definition supports.
+   * @param supportRevocation - Whether revocation is supported. Defaults to `false` if not provided.
+   * @param maximumCredentialNumber - The maximum number of credentials. Defaults to `1000` if not provided.
+   *
+   * @returns A promise that resolves when the credential definition and revocation registries are created.
    */
-  async onModuleInit() {
+  async create(
+    attributes: string[],
+    options: {
+      name?: string
+      version?: string
+      supportRevocation?: boolean
+      maximumCredentialNumber?: number
+      autoRevocationEnabled?: boolean
+    } = {},
+  ) {
+    const { name, version, supportRevocation, maximumCredentialNumber, autoRevocationEnabled } = options
+
     const [credential] = await this.apiClient.credentialTypes.getAll()
+    if (name !== undefined) this.name = name
+    if (version !== undefined) this.version = version
+    if (supportRevocation !== undefined) this.supportRevocation = supportRevocation
+    if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
+    if (autoRevocationEnabled !== undefined) this.autoRevocationEnabled = autoRevocationEnabled
 
     if (!credential) {
       const credential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
         name: this.name,
         version: this.version,
-        attributes: this.attributes,
+        attributes,
         supportRevocation: this.supportRevocation,
       })
 
@@ -89,20 +111,33 @@ export class CredentialService implements OnModuleInit {
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
    * sent. If an error occurs during the process, the promise will be rejected.
    */
-  async issuance(connectionId: string, records: Record<string, any>, hashIdentifier: string): Promise<void> {
-    const [{ id: credentialDefinitionId }] = await this.apiClient.credentialTypes.getAll()
+  async issuance(
+    connectionId: string,
+    records: Record<string, any>,
+    options?: { identifier?: string },
+  ): Promise<void> {
+    const { identifier = null } = options || {}
+    const hashIdentifier = identifier ? this.hashIdentifier(identifier) : null
+    const credentials = await this.apiClient.credentialTypes.getAll()
+    if (!credentials || credentials.length === 0) {
+      throw new Error(
+        'No credential definitions found. Please configure a credential using the create method before proceeding.',
+      )
+    }
+    const [{ id: credentialDefinitionId }] = credentials
+
     const claims = Object.entries(records).map(
       ([key, value]) => new Claim({ name: key, value: value ?? null }),
     )
-    const isRevoked = await this.credentialRepository.findOne({
+    const cred = await this.credentialRepository.findOne({
       where: {
-        hashIdentifier: Equal(Buffer.from(new Sha256().hash(hashIdentifier)).toString('hex')),
         revoked: false,
+        ...(hashIdentifier ? { hashIdentifier } : {}),
       },
     })
-    if (isRevoked) {
-      isRevoked.connectionId = connectionId
-      await this.credentialRepository.save(isRevoked)
+    if (cred && this.autoRevocationEnabled) {
+      cred.connectionId = connectionId
+      await this.credentialRepository.save(cred)
       await this.revoke(connectionId)
     }
 
@@ -112,7 +147,7 @@ export class CredentialService implements OnModuleInit {
           await transaction.save(CredentialEntity, {
             connectionId,
             credentialDefinitionId,
-            hashIdentifier: Buffer.from(new Sha256().hash(hashIdentifier)).toString('hex'),
+            ...(hashIdentifier ? { hashIdentifier } : {}),
           })
           return {
             revocationRegistryDefinitionId: undefined,
@@ -163,7 +198,7 @@ export class CredentialService implements OnModuleInit {
           credentialDefinitionId,
           revocationDefinitionId: lastCred.revocationDefinitionId,
           revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
-          hashIdentifier: Buffer.from(new Sha256().hash(hashIdentifier)).toString('hex'),
+          ...(hashIdentifier ? { hashIdentifier } : {}),
           maximumCredentialNumber: this.maximumCredentialNumber,
         })
         return {
@@ -201,7 +236,7 @@ export class CredentialService implements OnModuleInit {
         connectionId,
         revoked: false,
       },
-      order: { createdTs: 'DESC' }, // TODO: improve the search method on differents revocation
+      order: { createdTs: 'DESC' },
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
 
@@ -275,5 +310,9 @@ export class CredentialService implements OnModuleInit {
       revocationRegistryIndex: this.maximumCredentialNumber,
     })
     return revocationRegistry
+  }
+
+  private hashIdentifier(identifier: string): string {
+    return Buffer.from(new Sha256().hash(identifier)).toString('hex')
   }
 }
