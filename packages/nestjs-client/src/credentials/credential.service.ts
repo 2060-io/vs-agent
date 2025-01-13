@@ -89,14 +89,14 @@ export class CredentialService implements OnModuleInit {
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
    * sent. If an error occurs during the process, the promise will be rejected.
    */
-  async issuance(connectionId: string, records: Record<string, any>, hash: string): Promise<void> {
+  async issuance(connectionId: string, records: Record<string, any>, hashIdentifier: string): Promise<void> {
     const [{ id: credentialDefinitionId }] = await this.apiClient.credentialTypes.getAll()
     const claims = Object.entries(records).map(
       ([key, value]) => new Claim({ name: key, value: value ?? null }),
     )
     const isRevoked = await this.credentialRepository.findOne({
       where: {
-        hash: Equal(Buffer.from(new Sha256().hash(hash)).toString('hex')),
+        hashIdentifier: Equal(Buffer.from(new Sha256().hash(hashIdentifier)).toString('hex')),
         revoked: false,
       },
     })
@@ -152,7 +152,7 @@ export class CredentialService implements OnModuleInit {
           credentialDefinitionId,
           revocationDefinitionId: lastCred.revocationDefinitionId,
           revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
-          hash: Buffer.from(new Sha256().hash(hash)).toString('hex'),
+          hashIdentifier: Buffer.from(new Sha256().hash(hashIdentifier)).toString('hex'),
           maximumCredentialNumber: this.maximumCredentialNumber,
         })
         return {
@@ -234,7 +234,7 @@ export class CredentialService implements OnModuleInit {
 
     cred.revoked = true
     await this.credentialRepository.save(cred)
-    await this.apiClient.messages.send(
+    this.supportRevocation && await this.apiClient.messages.send(
       new CredentialRevocationMessage({
         connectionId: cred.connectionId,
         threadId: cred?.threadId,
