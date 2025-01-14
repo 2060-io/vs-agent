@@ -304,7 +304,7 @@ export class CoreService implements EventHandler, OnModuleInit {
 
     await this.apiClient.messages.send(
       new ContextualMenuUpdateMessage({
-        title: this.getText('ROOT_TITTLE', session.lang),
+        title: this.getText('ROOT_TITLE', session.lang),
         connectionId: session.connectionId,
         options: item,
         timestamp: new Date(),
