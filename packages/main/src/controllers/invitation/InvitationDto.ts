@@ -9,14 +9,22 @@ import { IsNotEmpty } from 'class-validator'
 
 export class CreatePresentationRequestDto implements CreatePresentationRequestOptions {
   @ApiProperty({
-    description: 'Requested credentials',
-    example: '[{ credentialDefinitionId: "myCredentialDefinition", attributes: ["name","age"] }]',
+    description: 'Optional reference',
+    example: '1234-5678',
   })
   ref?: string
 
+  @ApiProperty({
+    description: 'URL to be called when flow ends',
+    example: 'https://myhost.com/mycallback',
+  })
   callbackUrl?: string
 
   @IsNotEmpty()
+  @ApiProperty({
+    description: 'Requested credentials',
+    example: '[{ credentialDefinitionId: "myCredentialDefinition", attributes: ["name","age"] }]',
+  })
   requestedCredentials!: RequestedCredential[]
 }
 

@@ -2,6 +2,7 @@
 
 import { RevocationRegistryService } from './services'
 import { CredentialTypeService } from './services/CredentialTypeService'
+import { InvitationService } from './services/InvitationService'
 import { MessageService } from './services/MessageService'
 import { ApiVersion } from './types/enums'
 
@@ -38,11 +39,13 @@ export class ApiClient {
   public readonly messages: MessageService
   public readonly credentialTypes: CredentialTypeService
   public readonly revocationRegistry: RevocationRegistryService
+  public readonly invitation: InvitationService
 
   constructor(
     private baseURL: string,
     private version: ApiVersion = ApiVersion.V1,
   ) {
+    this.invitation = new InvitationService(baseURL, version)
     this.messages = new MessageService(baseURL, version)
     this.credentialTypes = new CredentialTypeService(baseURL, version)
     this.revocationRegistry = new RevocationRegistryService(baseURL, version)

@@ -233,9 +233,8 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         if (callbackParameters && callbackParameters.callbackUrl) {
           const errorMap: Record<string, PresentationStatus> = {
             'Request declined': PresentationStatus.REFUSED,
-            'e.msg.no-compatible-credentials': PresentationStatus.NO_COMPATIBLE_CREDENTIALS,
+            'e.req.no-compatible-credentials': PresentationStatus.NO_COMPATIBLE_CREDENTIALS,
           }
-
           await sendPresentationCallbackEvent({
             proofExchangeId: record.id,
             callbackUrl: callbackParameters.callbackUrl,
@@ -247,7 +246,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
         await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
       } catch (error) {
-        config.logger.error(`Error processing presentaion problem report: ${error}`)
+        config.logger.error(`Error processing presentation problem report: ${error}`)
       }
     }
     // Proofs protocol messages
