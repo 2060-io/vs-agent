@@ -257,7 +257,7 @@ export class CredentialService {
         revoked: false,
       },
     })
-    if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
+    if (!cred) throw new Error(`Credencial with connectionId ${connectionId} not found.`)
 
     cred.threadId = threadId
     cred.revoked = true
@@ -275,7 +275,7 @@ export class CredentialService {
       order: { createdTs: 'DESC' },
     })
     if (!cred || !cred.connectionId) {
-      throw new Error(`Credencial with threadId ${cred?.threadId} not found`)
+      throw new Error(`Credencial with connectionId ${connectionId} not found.`)
     }
 
     cred.revoked = true
