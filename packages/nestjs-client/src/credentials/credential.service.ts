@@ -116,8 +116,7 @@ export class CredentialService {
     records: Record<string, any>,
     options?: { identifier?: string },
   ): Promise<void> {
-    const { identifier = null } = options || {}
-    const hashIdentifier = identifier ? this.hashIdentifier(identifier) : null
+    const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
     if (!credentials || credentials.length === 0) {
       throw new Error(
@@ -138,7 +137,7 @@ export class CredentialService {
     if (cred && this.autoRevocationEnabled) {
       cred.connectionId = connectionId
       await this.credentialRepository.save(cred)
-      await this.revoke(connectionId)
+      await this.revoke(connectionId, { identifier: options?.identifier ?? undefined })
     }
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
@@ -256,6 +255,7 @@ export class CredentialService {
         connectionId,
         revoked: false,
       },
+      order: { createdTs: 'DESC' },
     })
     if (!cred) throw new Error(`Credencial with connectionId ${connectionId} not found.`)
 
@@ -269,9 +269,10 @@ export class CredentialService {
    * @param threadId - The thread ID linked to the credential to revoke.
    * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
    */
-  async revoke(connectionId: string): Promise<void> {
+  async revoke(connectionId: string, options?: { identifier?: string }): Promise<void> {
+    const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
     const cred = await this.credentialRepository.findOne({
-      where: { connectionId },
+      where: { connectionId, revoked: false, ...(hashIdentifier ? { hashIdentifier } : {}) },
       order: { createdTs: 'DESC' },
     })
     if (!cred || !cred.connectionId) {
