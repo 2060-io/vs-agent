@@ -70,13 +70,14 @@ export class CredentialService {
   ) {
     const { name, version, supportRevocation, maximumCredentialNumber, autoRevocationEnabled } = options
 
-    const [credential] = await this.apiClient.credentialTypes.getAll()
+    const credentials = await this.apiClient.credentialTypes.getAll()
     if (name !== undefined) this.name = name
     if (version !== undefined) this.version = version
     if (supportRevocation !== undefined) this.supportRevocation = supportRevocation
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
     if (autoRevocationEnabled !== undefined) this.autoRevocationEnabled = autoRevocationEnabled
 
+    const credential = credentials.find(cred => cred.name === name && cred.version === version)
     if (!credential) {
       const credential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
