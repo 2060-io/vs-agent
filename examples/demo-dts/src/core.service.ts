@@ -191,7 +191,7 @@ export class CoreService implements EventHandler, OnModuleInit {
             fullName: 'example',
             issuanceDate: new Date().toISOString().split('T')[0],
           }
-          await this.credentialService.issuance(session.connectionId, values, { identifier: values.fullName })
+          await this.credentialService.issue(session.connectionId, values, { identifier: values.fullName })
         }
         if (selectionId === Cmd.REVOKE) {
           await this.credentialService.revoke(session.connectionId)
