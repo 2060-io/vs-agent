@@ -58,7 +58,7 @@ export class CredentialService {
    *
    * @returns A promise that resolves when the credential definition and revocation registries are created.
    */
-  async create(
+  async createType(
     attributes: string[],
     options: {
       name?: string
