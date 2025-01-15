@@ -111,7 +111,7 @@ export class CredentialService {
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
    * sent. If an error occurs during the process, the promise will be rejected.
    */
-  async issuance(
+  async issue(
     connectionId: string,
     records: Record<string, any>,
     options?: { identifier?: string },
