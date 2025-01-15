@@ -100,7 +100,7 @@ export class CredentialService {
    * ```
    *
    * @param {object} [options] - Additional options for credential issuance.
-   * 
+   *
    * ### Options
    * - `refId` (optional, `string`): A unique identifier for the credential. If provided:
    *   - Ensures the credential is unique and any existing credential with the same `refId` is revoked.
