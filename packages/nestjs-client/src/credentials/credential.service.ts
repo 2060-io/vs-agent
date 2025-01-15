@@ -114,7 +114,7 @@ export class CredentialService {
   async issue(
     connectionId: string,
     claims: Claim[],
-    options?: { identifier?: string },
+    options?: { refId?: string },
   ): Promise<void> {
     const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
