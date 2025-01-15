@@ -113,7 +113,7 @@ export class CredentialService {
    */
   async issue(
     connectionId: string,
-    records: Record<string, any>,
+    claims: Claim[],
     options?: { identifier?: string },
   ): Promise<void> {
     const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
@@ -125,9 +125,6 @@ export class CredentialService {
     }
     const [{ id: credentialDefinitionId }] = credentials
 
-    const claims = Object.entries(records).map(
-      ([key, value]) => new Claim({ name: key, value: value ?? null }),
-    )
     const cred = await this.credentialRepository.findOne({
       where: {
         revoked: false,

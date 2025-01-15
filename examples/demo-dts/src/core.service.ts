@@ -1,5 +1,6 @@
 import {
   BaseMessage,
+  Claim,
   ConnectionStateUpdated,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
@@ -187,11 +188,11 @@ export class CoreService implements EventHandler, OnModuleInit {
     switch (session.state) {
       case StateStep.START:
         if (selectionId === Cmd.CREDENTIAL) {
-          const values = {
-            fullName: 'example',
-            issuanceDate: new Date().toISOString().split('T')[0],
-          }
-          await this.credentialService.issue(session.connectionId, values, { identifier: values.fullName })
+          const claims = [
+            new Claim({ name: 'fullName', value: 'example' }),
+            new Claim({ name: 'issuanceDate', value: new Date().toISOString().split('T')[0] })
+          ]
+          await this.credentialService.issue(session.connectionId, claims, { identifier: claims[0].value })
         }
         if (selectionId === Cmd.REVOKE) {
           await this.credentialService.revoke(session.connectionId)
