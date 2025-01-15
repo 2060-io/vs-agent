@@ -94,23 +94,34 @@ export class CredentialService {
 
   /**
    * Sends a credential issuance to the specified connection using the provided claims.
-   * This method initiates the issuance process by sending claims as part of a credential to
-   * the recipient identified by the connection ID.
+   * This method initiates the issuance process by sending claims as part of a credential
+   * to the recipient identified by the connection ID.
    *
    * @param {string} connectionId - The unique identifier of the connection to which the credential
    * will be issued. This represents the recipient of the credential.
    *
-   * @param {Record<string, any>} records - A key value objects, where each key represents an attribute
-   * of the credential.
-   *
-   * Example of constructing the `records` array:
-   * const records = {
+   * @param {Claim[]} claims - An array of claims representing the data to be included in the credential.
+   * Each claim has a `name` (key) and a `value` (data). Example:
+   * ```javascript
+   * const claims = [
    *   { name: "email", value: "john.doe@example.com" },
-   *   { name: "name", value: "John Doe" },
-   * }
+   *   { name: "name", value: "John Doe" }
+   * ];
+   * ```
    *
-   * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully
-   * sent. If an error occurs during the process, the promise will be rejected.
+   * @param {object} [options] - Additional options for credential issuance.
+   * 
+   * ### Options
+   * - `refId` (optional, `string`): A unique identifier for the credential. If provided:
+   *   - Ensures the credential is unique and any existing credential with the same `refId` is revoked.
+   *   - Used for managing unique credentials like official documents.
+   *   - Encrypted in the database for security.
+   * - `credentialDefinitionId` (optional, `string`): Specifies the ID of the credential definition to use.
+   *   - If not provided, the first available credential definition is used.
+   *
+   * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully sent.
+   * If an error occurs during the process, the promise will be rejected with the relevant error message.
+   *
    */
   async issue(
     connectionId: string,
