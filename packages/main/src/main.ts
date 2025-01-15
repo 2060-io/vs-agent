@@ -45,6 +45,9 @@ export const startAdminServer = async (agent: ServiceAgent, serverConfig: Server
   // Dto
   app.useGlobalPipes(new ValidationPipe())
 
+  // Cors
+  app.enableCors()
+  
   // Port expose
   await app.listen(serverConfig.port)
 }
