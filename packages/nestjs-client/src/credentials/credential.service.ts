@@ -133,14 +133,13 @@ export class CredentialService {
   ): Promise<void> {
     const hashRefId = options?.refId ? this.hashRefId(options.refId) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
-    if (!credentials || credentials.length === 0) {
+    const credential = credentials.find(c => c.id === options?.credentialDefinitionId) ?? credentials[0]
+    if (!credential) {
       throw new Error(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
       )
     }
-    let credentialDefinitionId
-    if (options?.credentialDefinitionId) credentialDefinitionId = options.credentialDefinitionId
-    else [{ id: credentialDefinitionId }] = credentials
+    const { id: credentialDefinitionId, supportRevocation } = credential
 
     const cred = await this.credentialRepository.findOne({
       where: {
@@ -295,7 +294,10 @@ export class CredentialService {
 
     cred.revoked = true
     await this.credentialRepository.save(cred)
-    this.supportRevocation &&
+
+    const credentials = await this.apiClient.credentialTypes.getAll()
+    const credential = credentials.find(c => c.id === cred.credentialDefinitionId) ?? credentials[0]
+    credential.supportRevocation &&
       (await this.apiClient.messages.send(
         new CredentialRevocationMessage({
           connectionId: cred.connectionId,
