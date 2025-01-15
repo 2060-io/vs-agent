@@ -116,7 +116,7 @@ export class CredentialService {
     claims: Claim[],
     options?: { refId?: string },
   ): Promise<void> {
-    const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
+    const hashRefId = options?.refId ? this.hashRefId(options.refId) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
     if (!credentials || credentials.length === 0) {
       throw new Error(
@@ -128,13 +128,13 @@ export class CredentialService {
     const cred = await this.credentialRepository.findOne({
       where: {
         revoked: false,
-        ...(hashIdentifier ? { hashIdentifier } : {}),
+        ...(hashRefId ? { hashRefId } : {}),
       },
     })
     if (cred && this.autoRevocationEnabled) {
       cred.connectionId = connectionId
       await this.credentialRepository.save(cred)
-      await this.revoke(connectionId, { identifier: options?.identifier ?? undefined })
+      await this.revoke(connectionId, { refId: options?.refId ?? undefined })
     }
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
@@ -143,7 +143,7 @@ export class CredentialService {
           await transaction.save(CredentialEntity, {
             connectionId,
             credentialDefinitionId,
-            ...(hashIdentifier ? { hashIdentifier } : {}),
+            ...(hashRefId ? { hashRefId } : {}),
           })
           return {
             revocationRegistryDefinitionId: undefined,
@@ -194,7 +194,7 @@ export class CredentialService {
           credentialDefinitionId,
           revocationDefinitionId: lastCred.revocationDefinitionId,
           revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
-          ...(hashIdentifier ? { hashIdentifier } : {}),
+          ...(hashRefId ? { hashRefId } : {}),
           maximumCredentialNumber: this.maximumCredentialNumber,
         })
         return {
@@ -266,10 +266,10 @@ export class CredentialService {
    * @param threadId - The thread ID linked to the credential to revoke.
    * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
    */
-  async revoke(connectionId: string, options?: { identifier?: string }): Promise<void> {
-    const hashIdentifier = options?.identifier ? this.hashIdentifier(options.identifier) : null
+  async revoke(connectionId: string, options?: { refId?: string }): Promise<void> {
+    const hashRefId = options?.refId ? this.hashRefId(options.refId) : null
     const cred = await this.credentialRepository.findOne({
-      where: { connectionId, revoked: false, ...(hashIdentifier ? { hashIdentifier } : {}) },
+      where: { connectionId, revoked: false, ...(hashRefId ? { hashRefId } : {}) },
       order: { createdTs: 'DESC' },
     })
     if (!cred || !cred.connectionId) {
@@ -310,7 +310,7 @@ export class CredentialService {
     return revocationRegistry
   }
 
-  private hashIdentifier(identifier: string): string {
+  private hashRefId(identifier: string): string {
     return Buffer.from(new Sha256().hash(identifier)).toString('hex')
   }
 }
