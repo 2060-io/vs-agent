@@ -114,7 +114,10 @@ export class CredentialService {
   async issue(
     connectionId: string,
     claims: Claim[],
-    options?: { refId?: string },
+    options?: {
+      refId?: string
+      credentialDefinitionId?: string
+    },
   ): Promise<void> {
     const hashRefId = options?.refId ? this.hashRefId(options.refId) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
@@ -123,7 +126,9 @@ export class CredentialService {
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
       )
     }
-    const [{ id: credentialDefinitionId }] = credentials
+    let credentialDefinitionId
+    if (options?.credentialDefinitionId) credentialDefinitionId = options.credentialDefinitionId
+    else [{ id: credentialDefinitionId }] = credentials
 
     const cred = await this.credentialRepository.findOne({
       where: {
