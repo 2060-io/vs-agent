@@ -19,11 +19,7 @@ export class CredentialService {
   private readonly apiClient: ApiClient
 
   //Credential type definitions
-  private name: string = 'Chatbot'
-  private version: string = '1.0'
-  private supportRevocation: boolean = false
   private maximumCredentialNumber: number = 1000
-  private autoRevocationEnabled: boolean = false
 
   constructor(
     @InjectRepository(CredentialEntity)
@@ -40,23 +36,22 @@ export class CredentialService {
   }
 
   /**
-   * Ensures the creation and initialization of a credential definition with support for revocation registries.
+   * Creates and initializes a credential type (credential definition) with optional revocation registry support.
    *
-   * When this method is called:
-   * - Two default lists of possible revocation registries will be created. (only with supportRevocation)
-   * - This guarantees seamless handling in case one of the registries runs out of revocation capacity. (only with supportRevocation)
+   * This method specifically handles the creation of credential types/definitions, which serve as templates
+   * for issuing actual credentials.
    *
-   * **Usage Recommendation:**
-   * It is recommended to call this method inside an `OnModuleInit` lifecycle hook to validate the existence
-   * of credentials as soon as the project is initialized.
+   * When revocation support is enabled:
+   * - Two default revocation registries will be created
+   * - This ensures continuity if one registry reaches capacity
    *
-   * @param name - The name of the credential definition. Defaults to "Chatbot" if not provided.
-   * @param version - The version of the credential definition. Defaults to "1.0" if not provided.
-   * @param attributes - A list of attributes that the credential definition supports.
-   * @param supportRevocation - Whether revocation is supported. Defaults to `false` if not provided.
-   * @param maximumCredentialNumber - The maximum number of credentials. Defaults to `1000` if not provided.
+   * @param attributes - List of attributes that credentials of this type will support
+   * @param options.name - Name identifier for the credential type
+   * @param options.version - Version of the credential type
+   * @param options.supportRevocation - Whether credentials can be revoked
+   * @param options.maximumCredentialNumber - Maximum number of credentials that can be issued
    *
-   * @returns A promise that resolves when the credential definition and revocation registries are created.
+   * @returns Promise<void> - Resolves when the credential type and revocation registries are created
    */
   async createType(
     attributes: string[],
@@ -65,30 +60,25 @@ export class CredentialService {
       version?: string
       supportRevocation?: boolean
       maximumCredentialNumber?: number
-      autoRevocationEnabled?: boolean
     } = {},
   ) {
-    const { name, version, supportRevocation, maximumCredentialNumber, autoRevocationEnabled } = options
+    const { name = 'Chatbot', version = '1.0', supportRevocation, maximumCredentialNumber } = options
 
     const credentials = await this.apiClient.credentialTypes.getAll()
-    if (name !== undefined) this.name = name
-    if (version !== undefined) this.version = version
-    if (supportRevocation !== undefined) this.supportRevocation = supportRevocation
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
-    if (autoRevocationEnabled !== undefined) this.autoRevocationEnabled = autoRevocationEnabled
 
     const credential = credentials.find(cred => cred.name === name && cred.version === version)
     if (!credential) {
       const credential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
-        name: this.name,
-        version: this.version,
+        name,
+        version,
         attributes,
-        supportRevocation: this.supportRevocation,
+        supportRevocation,
       })
 
-      await this.createRevocationRegistry(credential.id)
-      await this.createRevocationRegistry(credential.id)
+      await this.saveCredential(credential.id, supportRevocation)
+      await this.saveCredential(credential.id, supportRevocation)
     }
   }
 
@@ -118,6 +108,7 @@ export class CredentialService {
    *   - Encrypted in the database for security.
    * - `credentialDefinitionId` (optional, `string`): Specifies the ID of the credential definition to use.
    *   - If not provided, the first available credential definition is used.
+   * - `autoRevocationEnabled` (optional, `boolean`): Whether automatic revocation is enabled (default false)
    *
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully sent.
    * If an error occurs during the process, the promise will be rejected with the relevant error message.
@@ -129,8 +120,10 @@ export class CredentialService {
     options?: {
       refId?: string
       credentialDefinitionId?: string
+      autoRevocationEnabled?: boolean
     },
   ): Promise<void> {
+    const { autoRevocationEnabled = false } = options ?? {}
     const hashRefId = options?.refId ? this.hashRefId(options.refId) : null
     const credentials = await this.apiClient.credentialTypes.getAll()
     const credential = credentials.find(c => c.id === options?.credentialDefinitionId) ?? credentials[0]
@@ -147,7 +140,7 @@ export class CredentialService {
         ...(hashRefId ? { hashRefId } : {}),
       },
     })
-    if (cred && this.autoRevocationEnabled) {
+    if (cred && autoRevocationEnabled) {
       cred.connectionId = connectionId
       await this.credentialRepository.save(cred)
       await this.revoke(connectionId, { refId: options?.refId ?? undefined })
@@ -155,7 +148,7 @@ export class CredentialService {
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
-        if (!this.supportRevocation) {
+        if (!supportRevocation) {
           await transaction.save(CredentialEntity, {
             connectionId,
             credentialDefinitionId,
@@ -230,7 +223,7 @@ export class CredentialService {
       }),
     )
     if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
+      const revRegistry = await this.saveCredential(credentialDefinitionId, supportRevocation)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
@@ -308,8 +301,11 @@ export class CredentialService {
   }
 
   // private methods
-  private async createRevocationRegistry(credentialDefinitionId: string): Promise<string | null> {
-    if (!this.supportRevocation) {
+  private async saveCredential(
+    credentialDefinitionId: string,
+    supportRevocation: boolean = false,
+  ): Promise<string | null> {
+    if (!supportRevocation) {
       await this.credentialRepository.save({ credentialDefinitionId })
       return null
     }
