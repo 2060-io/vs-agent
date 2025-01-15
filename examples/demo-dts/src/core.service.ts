@@ -189,9 +189,12 @@ export class CoreService implements EventHandler, OnModuleInit {
         if (selectionId === Cmd.CREDENTIAL) {
           const claims = [
             new Claim({ name: 'fullName', value: 'example' }),
-            new Claim({ name: 'issuanceDate', value: new Date().toISOString().split('T')[0] })
+            new Claim({ name: 'issuanceDate', value: new Date().toISOString().split('T')[0] }),
           ]
-          await this.credentialService.issue(session.connectionId, claims, { refId: claims[0].value, autoRevocationEnabled: true })
+          await this.credentialService.issue(session.connectionId, claims, {
+            refId: claims[0].value,
+            autoRevocationEnabled: true,
+          })
         }
         if (selectionId === Cmd.REVOKE) {
           await this.credentialService.revoke(session.connectionId)
