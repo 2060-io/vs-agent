@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  service-agent:
+    build: ../..
+    image: 2060-service-agent
+    container_name: verifier-service-agent
+    restart: always
+    networks:
+      - verifier
+    ports:
+      - 3000:3000
+      - 3001:3001
+    environment:
+      - AGENT_PUBLIC_DID=did:web:10.82.14.12%3A3000
+      - AGENT_ENDPOINT=ws://10.82.14.12:3001
+      - AGENT_INVITATION_IMAGE_URL=http://10.82.14.12:3001/avatar.png
+      - AGENT_LABEL=Verifier Agent
+      - USE_CORS=true
+      - EVENTS_BASE_URL=http://verifier-backend:5100
+      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
+      - REDIS_HOST=redis
+    volumes:
+      - ./afj:/root/.afj
+
+  verifier-backend:
+    build: 
+      context: ../../
+      dockerfile: ./examples/verifier/Dockerfile
+    image: 2060-service-agent-verifier
+    container_name: verifier-backend
+    restart: always
+    networks:
+      - verifier
+    ports:
+      - 5100:5100
+    environment:
+      - PORT=5100
+      - SERVICE_AGENT_ADMIN_BASE_URL=http://verifier-service-agent:3000
+      - PUBLIC_BASE_URL=http://10.82.14.12:5100
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - verifier
+    ports:
+      - 6379:6379
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+
+  postgres:
+    image: postgres:15.2
+    restart: always
+    networks:
+      - verifier
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=64270demo
+      - POSTGRES_USER=emailvs
+networks:
+  verifier:

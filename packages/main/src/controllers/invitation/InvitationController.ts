@@ -1,4 +1,8 @@
-import { CreateCredentialOfferResult, CreatePresentationRequestResult } from '@2060.io/service-agent-model'
+import {
+  CreateCredentialOfferResult,
+  CreatePresentationRequestResult,
+  CreateInvitationResult,
+} from '@2060.io/service-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
@@ -21,7 +25,7 @@ export class InvitationController {
   ) {}
 
   @Get('/')
-  public async getInvitation() {
+  public async getInvitation(): Promise<CreateInvitationResult> {
     return await createInvitation(await this.agentService.getAgent())
   }
 
@@ -30,8 +34,10 @@ export class InvitationController {
     type: CreatePresentationRequestDto,
     examples: {
       example: {
-        summary: 'Phone Number',
+        summary: 'Create Presentation Request',
         value: {
+          ref: '1234-5678',
+          callbackUrl: 'https://myhost/mycallbackurl',
           requestedCredentials: [
             {
               credentialDefinitionId:
@@ -48,7 +54,7 @@ export class InvitationController {
   ): Promise<CreatePresentationRequestResult> {
     const agent = await this.agentService.getAgent()
 
-    const { requestedCredentials } = options
+    const { requestedCredentials, ref, callbackUrl } = options
 
     if (!requestedCredentials?.length) {
       throw Error('You must specify a least a requested credential')
@@ -104,6 +110,7 @@ export class InvitationController {
     })
 
     request.proofRecord.metadata.set('_2060/requestedCredentials', requestedCredentials)
+    request.proofRecord.metadata.set('_2060/callbackParameters', { ref, callbackUrl })
     await agent.proofs.update(request.proofRecord)
 
     const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])

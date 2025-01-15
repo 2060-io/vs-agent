@@ -17,6 +17,7 @@ In addition, it supports a notification mechanism to subscribe to any event the 
     - [Message types](#message-types)
       - [Credential Request](#credential-request)
       - [Credential Issuance](#credential-issuance)
+      - [Credential Revocation](#credential-revocation)
       - [Credential Reception](#credential-reception)
       - [Identity Proof Request](#identity-proof-request)
       - [Identity Proof Submit](#identity-proof-submit)
@@ -51,6 +52,12 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Message State Updated](#message-state-updated)
       - [Message Received](#message-received)
     - [Subscribing to events](#subscribing-to-events)
+  - [Invitations](#invitations)
+    - [Connection Invitation](#connection-invitation)
+    - [Presentation Request](#presentation-request)
+      - [Presentation Callback API](#presentation-callback-api)
+    - [Credential Offer](#credential-offer)
+  - [Presentations](#presentations)
   - [Verifiable Data Registry Operations](#verifiable-data-registry-operations)
     - [Create Credential Type](#create-credential-type)
   - [Initial Service Agent API Use Cases](#initial-service-agent-api-use-cases)
@@ -637,7 +644,7 @@ When a Verifiable Credential Presentation is submitted, the following fields may
 - verified: boolean determining if the presentation is cryptographically valid
 - errorCode: if any, it indicated that an error has ocurred in the flow. Known error codes are the following:
   - 'Request declined': user has refused to present credential
-  - 'e.msg.no-compatble-credentials': user does not have a compatible credential to present
+  - 'e.msg.no-compatible-credentials': user does not have a compatible credential to present
 
 ##### Result value
 
@@ -757,12 +764,16 @@ Note that the following Service Agent configuration environment variables are us
 
 Presentation Request invitation codes are created by specifying details of the credentials required.
 
-This means that a single presentation request can ask for a number of attributes present in for two or more credentials. At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified, then Service Agent will ask for all attributes in the credential. 
+This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess. 
+At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified,
+then Service Agent will ask for all attributes in the credential.
 
 It's a POST to `/invitation/presentation-request` which receives a JSON object in the body
 
 ```json
 {
+  "callbackUrl": "https://myhost.com/presentation_callback ",
+  "ref": "1234-5678",
   "requestedCredentials": [
     { 
       "credentialDefinitionId": "full credential definition identifier",
@@ -772,13 +783,17 @@ It's a POST to `/invitation/presentation-request` which receives a JSON object i
 }
 ```
 
+`callbackUrl` is an URL that will be called by Service Agent when the flow completes. The request follows the [Presentation Callback API](#presentation-callback-api).
+
+`ref` is an optional, arbitrary string that will be included in the body of the request to the callback URL.
+
 Response will include the invitation code in both short and long form URL format.
 
 ```json
 {
     "url": "string containing long form URL-encoded invitation",
     "shortUrl": "string containing a shortened URL for the invitation",
-    "presentationRequestId": "unique identifier for the flow",
+    "proofExchangeId": "unique identifier for the flow",
 }
 ```
 
@@ -788,6 +803,27 @@ Note that the following Service Agent configuration environment variables are us
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 - PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+
+#### Presentation Callback API
+
+When the presentation flow is completed (either successfully or not), Service Agent calls its `callbackUrl` as an HTTP POST with the following body:
+
+```json
+{
+  "ref": "1234-5678",
+  "presentationRequestId": "unique identifier for the flow",
+  "status": PresentationStatus,
+  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+}
+```
+
+Possible values for PresentationStatus are:
+
+- 'ok'
+- 'refused'
+- 'no-compatible-credentials'
+- 'verification-error'
+- 'unspecified-error'
 
 
 ### Credential Offer
