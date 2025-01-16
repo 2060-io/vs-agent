@@ -54,15 +54,15 @@ export class CredentialService {
    * @returns Promise<void> - Resolves when the credential type and revocation registries are created
    */
   async createType(
+    name: string,
+    version: string,
     attributes: string[],
     options: {
-      name?: string
-      version?: string
       supportRevocation?: boolean
       maximumCredentialNumber?: number
     } = {},
   ) {
-    const { name = 'Chatbot', version = '1.0', supportRevocation, maximumCredentialNumber } = options
+    const { supportRevocation, maximumCredentialNumber } = options
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
