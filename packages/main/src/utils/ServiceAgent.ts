@@ -84,7 +84,7 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
         anoncreds: new AnonCredsModule({
           anoncreds,
           tailsFileService: new FullTailsFileService({
-            tailsServerBaseUrl: options.anoncredsServiceBaseUrl,
+            tailsServerBaseUrl: `${options.anoncredsServiceBaseUrl}/anoncreds/v1/tails`,
           }),
           registries: [
             new DidWebAnonCredsRegistry({
