@@ -128,7 +128,7 @@ export class CredentialService {
     },
   ): Promise<void> {
     const { revokeIfAlreadyIssued = false } = options ?? {}
-    const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
+    const refIdHash = options?.refId ? this.hash(options.refId) : null
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
       credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
@@ -281,7 +281,7 @@ export class CredentialService {
    * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
    */
   async revoke(connectionId: string, options?: { refId?: string }): Promise<void> {
-    const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
+    const refIdHash = options?.refId ? this.hash(options.refId) : null
     const cred = await this.credentialRepository.findOne({
       where: { connectionId, revoked: false, ...(refIdHash ? { refIdHash } : {}) },
       order: { createdTs: 'DESC' },
@@ -331,7 +331,7 @@ export class CredentialService {
     return revocationRegistry
   }
 
-  private refIdHash(refId: string): string {
-    return Buffer.from(new Sha256().hash(refId)).toString('hex')
+  private hash(value: string): string {
+    return Buffer.from(new Sha256().hash(value)).toString('hex')
   }
 }
