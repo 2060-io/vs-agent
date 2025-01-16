@@ -15,6 +15,20 @@ export interface ConnectionEventOptions {
   imports?: DynamicModule[]
 }
 
+export interface StatEventOptions {
+  imports?: DynamicModule[]
+  jmsOptions?: {
+    host?: string
+    port?: number
+    queue?: string
+    username?: string
+    password?: string
+    reconnectLimit?: number
+    threads?: number
+    delay?: number
+  }
+}
+
 export interface CredentialOptions {
   imports?: DynamicModule[]
   url?: string
@@ -25,6 +39,7 @@ export interface ModulesConfig {
   messages?: boolean
   connections?: boolean
   credentials?: boolean
+  stats?: boolean
 }
 
 export interface EventsModuleOptions {
@@ -34,5 +49,15 @@ export interface EventsModuleOptions {
     imports?: DynamicModule[]
     url?: string
     version?: ApiVersion
+    jmsOptions?: {
+      host?: string
+      port?: number
+      queue?: string
+      username?: string
+      password?: string
+      reconnectLimit?: number
+      threads?: number
+      delay?: number
+    }
   }
 }
