@@ -21,7 +21,7 @@ export class CredentialEntity {
   threadId?: string
 
   @Column({ type: 'varchar', nullable: true })
-  hashIdentifier?: string
+  refIdHash?: string
 
   @Column({ nullable: true, default: false })
   revoked?: boolean
