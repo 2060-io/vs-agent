@@ -67,7 +67,9 @@ export class CredentialService {
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
 
-    const credentialType = credentialTypes.find(credType => credType.name === name && credType.version === version)
+    const credentialType = credentialTypes.find(
+      credType => credType.name === name && credType.version === version,
+    )
     if (!credentialType) {
       const credentialType = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
@@ -103,7 +105,7 @@ export class CredentialService {
    *
    * ### Options
    * - `refId` (optional, `string`): A unique identifier for the credential. If provided:
-   *   - When `revokeIfAlreadyIssued` is set to `true`, any existing credential with the same `refId` 
+   *   - When `revokeIfAlreadyIssued` is set to `true`, any existing credential with the same `refId`
    *     will be revoked, ensuring the credential is unique.
    *   - If `revokeIfAlreadyIssued` is set to `false` (default), multiple credentials with the same `refId` can exist
    *   - Used for managing unique credentials like official documents.
@@ -128,7 +130,8 @@ export class CredentialService {
     const { revokeIfAlreadyIssued = false } = options ?? {}
     const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
-    const credentialType = credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
+    const credentialType =
+      credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
     if (!credentialType) {
       throw new Error(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
@@ -291,7 +294,8 @@ export class CredentialService {
     await this.credentialRepository.save(cred)
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
-    const credentialType = credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
+    const credentialType =
+      credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
     credentialType.supportRevocation &&
       (await this.apiClient.messages.send(
         new CredentialRevocationMessage({
