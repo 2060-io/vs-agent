@@ -228,46 +228,50 @@ export const addDidWebRoutes = async (
     })
 
     // Endpoint to upload a tails file for a specific tailsFileId
-    app.put('/:tailsFileId', multer({ storage: fileStorage }).single('file'), async (req, res) => {
-      agent.config.logger.info(`tails file upload: ${req.params.tailsFileId}`)
+    app.put(
+      '/anoncreds/v1/tails/:tailsFileId',
+      multer({ storage: fileStorage }).single('file'),
+      async (req, res) => {
+        agent.config.logger.info(`tails file upload: ${req.params.tailsFileId}`)
 
-      const file = req.file
+        const file = req.file
 
-      if (!file) {
-        agent.config.logger.info(`No file found: ${JSON.stringify(req.headers)}`)
-        return res.status(400).send('No files were uploaded.')
-      }
+        if (!file) {
+          agent.config.logger.info(`No file found: ${JSON.stringify(req.headers)}`)
+          return res.status(400).send('No files were uploaded.')
+        }
 
-      const tailsFileId = req.params.tailsFileId
-      if (!tailsFileId) {
-        // Clean up temporary file
-        fs.rmSync(file.path)
-        return res.status(409).send('Missing tailsFileId')
-      }
+        const tailsFileId = req.params.tailsFileId
+        if (!tailsFileId) {
+          // Clean up temporary file
+          fs.rmSync(file.path)
+          return res.status(409).send('Missing tailsFileId')
+        }
 
-      const item = tailsIndex[tailsFileId]
+        const item = tailsIndex[tailsFileId]
 
-      if (item) {
-        agent.config.logger.debug(`there is already an entry for: ${tailsFileId}`)
-        res.status(409).end()
-        return
-      }
+        if (item) {
+          agent.config.logger.debug(`there is already an entry for: ${tailsFileId}`)
+          res.status(409).end()
+          return
+        }
 
-      const hash = await fileHash(file.path)
-      const destinationPath = `${baseFilePath}/${hash}`
+        const hash = await fileHash(file.path)
+        const destinationPath = `${baseFilePath}/${hash}`
 
-      if (fs.existsSync(destinationPath)) {
-        agent.config.logger.warn('tails file already exists')
-      } else {
-        fs.copyFileSync(file.path, destinationPath)
-        fs.rmSync(file.path)
-      }
+        if (fs.existsSync(destinationPath)) {
+          agent.config.logger.warn('tails file already exists')
+        } else {
+          fs.copyFileSync(file.path, destinationPath)
+          fs.rmSync(file.path)
+        }
 
-      // Store filename in index
-      tailsIndex[tailsFileId] = hash
-      fs.writeFileSync(indexFilePath, JSON.stringify(tailsIndex))
+        // Store filename in index
+        tailsIndex[tailsFileId] = hash
+        fs.writeFileSync(indexFilePath, JSON.stringify(tailsIndex))
 
-      res.status(200).end()
-    })
+        res.status(200).end()
+      },
+    )
   }
 }
