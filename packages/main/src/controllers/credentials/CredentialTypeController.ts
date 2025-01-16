@@ -66,7 +66,7 @@ export class CredentialTypesController {
           name: (record.getTag('name') as string) ?? schema?.name,
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
-          supportRevocation,
+          revocationSupported,
         }
       }),
     )
