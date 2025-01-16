@@ -294,6 +294,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           await sendPresentationCallbackEvent({
             proofExchangeId: record.id,
             callbackUrl: callbackParameters.callbackUrl,
+            claims,
             status: record.isVerified ? PresentationStatus.OK : PresentationStatus.VERIFICATION_ERROR,
             logger: config.logger,
             ref: callbackParameters.ref,
