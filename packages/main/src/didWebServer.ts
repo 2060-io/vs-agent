@@ -191,8 +191,7 @@ export const addDidWebRoutes = async (
       res.send(404)
     })
 
-    // Allow to create invitation, no other way to ask for invitation yet
-    app.get('/:tailsFileId', async (req, res) => {
+    app.get('/anoncreds/v1/tails/:tailsFileId', async (req, res) => {
       agent.config.logger.debug(`requested file`)
 
       const tailsFileId = req.params.tailsFileId
