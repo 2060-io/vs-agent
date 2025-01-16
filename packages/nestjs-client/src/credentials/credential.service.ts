@@ -105,7 +105,7 @@ export class CredentialService {
    * - `refId` (optional, `string`): A unique identifier for the credential. If provided:
    *   - Ensures the credential is unique and any existing credential with the same `refId` is revoked.
    *   - Used for managing unique credentials like official documents.
-   *   - Encrypted in the database for security.
+   *   - Hashed in the database for security.
    * - `credentialDefinitionId` (optional, `string`): Specifies the ID of the credential definition to use.
    *   - If not provided, the first available credential definition is used.
    * - `autoRevocationEnabled` (optional, `boolean`): Whether automatic revocation is enabled (default false)
