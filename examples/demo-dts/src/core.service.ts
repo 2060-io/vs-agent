@@ -193,7 +193,7 @@ export class CoreService implements EventHandler, OnModuleInit {
           ]
           await this.credentialService.issue(session.connectionId, claims, {
             refId: claims[0].value,
-            autoRevocationEnabled: true,
+            revokeIfAlreadyIssued: true,
           })
         }
         if (selectionId === Cmd.REVOKE) {

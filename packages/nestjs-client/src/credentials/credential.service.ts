@@ -108,7 +108,7 @@ export class CredentialService {
    *   - Hashed in the database for security.
    * - `credentialDefinitionId` (optional, `string`): Specifies the ID of the credential definition to use.
    *   - If not provided, the first available credential definition is used.
-   * - `autoRevocationEnabled` (optional, `boolean`): Whether automatic revocation is enabled (default false)
+   * - `revokeIfAlreadyIssued` (optional, `boolean`): Whether automatic revocation is enabled (default false)
    *
    * @returns {Promise<void>} A promise that resolves when the credential issuance is successfully sent.
    * If an error occurs during the process, the promise will be rejected with the relevant error message.
@@ -120,10 +120,10 @@ export class CredentialService {
     options?: {
       refId?: string
       credentialDefinitionId?: string
-      autoRevocationEnabled?: boolean
+      revokeIfAlreadyIssued?: boolean
     },
   ): Promise<void> {
-    const { autoRevocationEnabled = false } = options ?? {}
+    const { revokeIfAlreadyIssued = false } = options ?? {}
     const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType = credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
@@ -140,7 +140,7 @@ export class CredentialService {
         ...(refIdHash ? { refIdHash } : {}),
       },
     })
-    if (cred && autoRevocationEnabled) {
+    if (cred && revokeIfAlreadyIssued) {
       cred.connectionId = connectionId
       await this.credentialRepository.save(cred)
       await this.revoke(connectionId, { refId: options?.refId ?? undefined })
