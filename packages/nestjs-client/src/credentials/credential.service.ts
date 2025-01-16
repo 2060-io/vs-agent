@@ -67,7 +67,7 @@ export class CredentialService {
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
 
-    const credential = credentials.find(cred => cred.name === name && cred.version === version)
+    const credentialType = credentialTypes.find(credType => credType.name === name && credType.version === version)
     if (!credential) {
       const credential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
