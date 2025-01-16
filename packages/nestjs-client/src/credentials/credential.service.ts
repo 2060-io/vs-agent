@@ -137,7 +137,7 @@ export class CredentialService {
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
       )
     }
-    const { id: credentialDefinitionId, supportRevocation } = credentialType
+    const { id: credentialDefinitionId, revocationSupported } = credentialType
 
     const cred = await this.credentialRepository.findOne({
       where: {
@@ -153,7 +153,7 @@ export class CredentialService {
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
       async transaction => {
-        if (!supportRevocation) {
+        if (!revocationSupported) {
           await transaction.save(CredentialEntity, {
             connectionId,
             credentialDefinitionId,
@@ -228,7 +228,7 @@ export class CredentialService {
       }),
     )
     if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.saveCredentialType(credentialDefinitionId, supportRevocation)
+      const revRegistry = await this.saveCredentialType(credentialDefinitionId, revocationSupported)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
@@ -296,7 +296,7 @@ export class CredentialService {
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
       credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
-    credentialType.supportRevocation &&
+    credentialType.revocationSupported &&
       (await this.apiClient.messages.send(
         new CredentialRevocationMessage({
           connectionId: cred.connectionId,

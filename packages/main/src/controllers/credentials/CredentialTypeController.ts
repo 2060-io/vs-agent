@@ -1,4 +1,8 @@
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/service-agent-model'
+import {
+  CredentialTypeInfo,
+  CredentialTypeResult,
+  ImportCredentialTypeOptions,
+} from '@2060.io/service-agent-model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
@@ -49,7 +53,7 @@ export class CredentialTypesController {
    * @returns
    */
   @Get('/')
-  public async getAllCredentialTypes(): Promise<CredentialTypeInfo[]> {
+  public async getAllCredentialTypes(): Promise<CredentialTypeResult[]> {
     const agent = await this.agentService.getAgent()
 
     const credentialDefinitions = await agent.modules.anoncreds.getCreatedCredentialDefinitions({})
