@@ -68,8 +68,8 @@ export class CredentialService {
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
 
     const credentialType = credentialTypes.find(credType => credType.name === name && credType.version === version)
-    if (!credential) {
-      const credential = await this.apiClient.credentialTypes.create({
+    if (!credentialType) {
+      const credentialType = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
         name,
         version,
@@ -77,8 +77,8 @@ export class CredentialService {
         supportRevocation,
       })
 
-      await this.saveCredential(credential.id, supportRevocation)
-      await this.saveCredential(credential.id, supportRevocation)
+      await this.saveCredentialType(credentialType.id, supportRevocation)
+      await this.saveCredentialType(credentialType.id, supportRevocation)
     }
   }
 
@@ -125,14 +125,14 @@ export class CredentialService {
   ): Promise<void> {
     const { autoRevocationEnabled = false } = options ?? {}
     const hashIdentifier = options?.refId ? this.hashIdentifier(options.refId) : null
-    const credentials = await this.apiClient.credentialTypes.getAll()
-    const credential = credentials.find(c => c.id === options?.credentialDefinitionId) ?? credentials[0]
-    if (!credential) {
+    const credentialTypes = await this.apiClient.credentialTypes.getAll()
+    const credentialType = credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
+    if (!credentialType) {
       throw new Error(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
       )
     }
-    const { id: credentialDefinitionId, supportRevocation } = credential
+    const { id: credentialDefinitionId, supportRevocation } = credentialType
 
     const cred = await this.credentialRepository.findOne({
       where: {
@@ -223,7 +223,7 @@ export class CredentialService {
       }),
     )
     if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.saveCredential(credentialDefinitionId, supportRevocation)
+      const revRegistry = await this.saveCredentialType(credentialDefinitionId, supportRevocation)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
@@ -288,9 +288,9 @@ export class CredentialService {
     cred.revoked = true
     await this.credentialRepository.save(cred)
 
-    const credentials = await this.apiClient.credentialTypes.getAll()
-    const credential = credentials.find(c => c.id === cred.credentialDefinitionId) ?? credentials[0]
-    credential.supportRevocation &&
+    const credentialTypes = await this.apiClient.credentialTypes.getAll()
+    const credentialType = credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
+    credentialType.supportRevocation &&
       (await this.apiClient.messages.send(
         new CredentialRevocationMessage({
           connectionId: cred.connectionId,
@@ -301,7 +301,7 @@ export class CredentialService {
   }
 
   // private methods
-  private async saveCredential(
+  private async saveCredentialType(
     credentialDefinitionId: string,
     supportRevocation: boolean = false,
   ): Promise<string | null> {
