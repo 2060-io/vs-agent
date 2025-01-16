@@ -64,7 +64,7 @@ export class CredentialService {
   ) {
     const { name = 'Chatbot', version = '1.0', supportRevocation, maximumCredentialNumber } = options
 
-    const credentials = await this.apiClient.credentialTypes.getAll()
+    const credentialTypes = await this.apiClient.credentialTypes.getAll()
     if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
 
     const credential = credentials.find(cred => cred.name === name && cred.version === version)
