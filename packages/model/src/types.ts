@@ -53,6 +53,8 @@ export interface RevocationRegistryInfo {
 }
 
 export interface CreatePresentationRequestOptions {
+  ref?: string
+  callbackUrl?: string
   requestedCredentials: RequestedCredential[]
 }
 
@@ -65,6 +67,10 @@ export interface CreatePresentationRequestResult {
   proofExchangeId: string
   url: string
   shortUrl: string
+}
+
+export interface CreateInvitationResult {
+  url: string
 }
 
 export interface PresentationData {

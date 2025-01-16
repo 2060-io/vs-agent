@@ -97,16 +97,19 @@ const server = app.listen(PORT, async () => {
      *     supportRevocation: true
      * }))
      */
-   const credentialDefinition = (await apiClient.credentialTypes.import(phoneCredDefData))
-    phoneNumberCredentialDefinitionId =
-      phoneNumberCredentialType?.id ?? credentialDefinition.id
+    phoneNumberCredentialDefinitionId = phoneNumberCredentialType?.id
+    if (!phoneNumberCredentialDefinitionId) {
+      const credentialDefinition = await apiClient.credentialTypes.import(phoneCredDefData)
+      phoneNumberCredentialDefinitionId = credentialDefinition.id
+    }
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
-    phoneNumberRevocationDefinitionId = 
-        (await apiClient.revocationRegistry.get(phoneNumberCredentialDefinitionId))[0]  ??
-        await apiClient.revocationRegistry.create({
-          credentialDefinitionId: phoneNumberCredentialDefinitionId,
-          maximumCredentialNumber: 1000
-        })
+
+    phoneNumberRevocationDefinitionId =
+      (await apiClient.revocationRegistry.get(phoneNumberCredentialDefinitionId))[0] ??
+      (await apiClient.revocationRegistry.create({
+        credentialDefinitionId: phoneNumberCredentialDefinitionId,
+        maximumCredentialNumber: 1000,
+      }))
     logger.info(`phoneNumberRevocationDefinitionId: ${phoneNumberRevocationDefinitionId}`)
   } catch (error) {
     logger.error(`Could not create or retrieve phone number credential type: ${error}`)
@@ -193,7 +196,7 @@ const handleMenuSelection = async (options: { connectionId: string; item: string
           },
         ],
         revocationRegistryDefinitionId: phoneNumberRevocationDefinitionId,
-        revocationRegistryIndex: phoneNumberRevocationCount += 1,
+        revocationRegistryIndex: (phoneNumberRevocationCount += 1),
       })
       await apiClient.messages.send(body)
     }
@@ -429,9 +432,13 @@ expressHandler.messageReceived(async (req, res) => {
       await apiClient.messages.send(body)
     } else if (content.startsWith('/revoke')) {
       const parsedContents = content.split(' ')
-      let threadId = parsedContents[1]
-      if (!phoneNumberCredentialDefinitionId || phoneNumberCredentialDefinitionId === '' || 
-        !phoneNumberRevocationDefinitionId || phoneNumberRevocationDefinitionId === '') {
+      const threadId = parsedContents[1]
+      if (
+        !phoneNumberCredentialDefinitionId ||
+        phoneNumberCredentialDefinitionId === '' ||
+        !phoneNumberRevocationDefinitionId ||
+        phoneNumberRevocationDefinitionId === ''
+      ) {
         await sendTextMessage({
           connectionId,
           content: 'Service not available',
@@ -528,10 +535,11 @@ expressHandler.messageReceived(async (req, res) => {
     }
   } else if (obj.type === CredentialReceptionMessage.type) {
     await submitMessageReceipt(obj, 'viewed')
-    obj.state === 'done' && await sendTextMessage({
-      connectionId: obj.connectionId,
-      content: `For revocation, please provide the thread ID: ${obj.threadId}`,
-    })
+    obj.state === 'done' &&
+      (await sendTextMessage({
+        connectionId: obj.connectionId,
+        content: `For revocation, please provide the thread ID: ${obj.threadId}`,
+      }))
   }
 })
 
