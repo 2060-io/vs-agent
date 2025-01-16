@@ -59,7 +59,7 @@ export class CredentialTypesController {
         const schemaResult = await agent.modules.anoncreds.getSchema(record.credentialDefinition.schemaId)
 
         const schema = schemaResult.schema
-        const supportRevocation = record.credentialDefinition?.value?.revocation !== undefined
+        const revocationSupported = record.credentialDefinition?.value?.revocation !== undefined
 
         return {
           id: record.credentialDefinitionId,
