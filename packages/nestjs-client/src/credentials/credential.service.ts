@@ -247,7 +247,7 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async accept(connectionId: string, threadId: string): Promise<void> {
+  async handleAcceptance(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
         connectionId,
@@ -267,7 +267,7 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async reject(connectionId: string, threadId: string): Promise<void> {
+  async handleRejection(connectionId: string, threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
         connectionId,
