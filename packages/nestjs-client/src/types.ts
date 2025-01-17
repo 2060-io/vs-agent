@@ -36,3 +36,10 @@ export interface EventsModuleOptions {
     version?: ApiVersion
   }
 }
+
+export enum CredentialStatus {
+  OFFERED = 'offered',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+  REVOKED = 'revoked',
+}

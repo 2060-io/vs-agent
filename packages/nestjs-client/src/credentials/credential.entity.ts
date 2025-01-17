@@ -1,5 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
+import { CredentialStatus } from '../types'
+
 @Entity('credentials')
 export class CredentialEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -23,8 +25,8 @@ export class CredentialEntity {
   @Column({ type: 'varchar', nullable: true })
   refIdHash?: string
 
-  @Column({ nullable: true, default: false })
-  revoked?: boolean
+  @Column({ nullable: true })
+  status?: CredentialStatus
 
   @CreateDateColumn()
   createdTs?: Date

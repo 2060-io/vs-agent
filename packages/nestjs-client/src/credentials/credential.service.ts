@@ -5,7 +5,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
 
-import { CredentialOptions } from '../types'
+import { CredentialOptions, CredentialStatus } from '../types'
 
 import { CredentialEntity } from './credential.entity'
 
@@ -146,7 +146,7 @@ export class CredentialService {
 
     const creds = await this.credentialRepository.find({
       where: {
-        revoked: false,
+        status: CredentialStatus.ACCEPTED,
         ...(refIdHash ? { refIdHash } : {}),
       },
     })
@@ -225,6 +225,7 @@ export class CredentialService {
       }),
     )
     cred.threadId = thread.id
+    cred.status = CredentialStatus.OFFERED
     await this.credentialRepository.save(cred)
     if (cred.revocationRegistryIndex === this.maximumCredentialNumber - 1) {
       const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
@@ -243,13 +244,14 @@ export class CredentialService {
     const cred = await this.credentialRepository.findOne({
       where: {
         threadId,
-        revoked: false,
+        status: CredentialStatus.OFFERED,
       },
       order: { createdTs: 'DESC' },
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${threadId}`)
 
     cred.threadId = threadId
+    cred.status = CredentialStatus.ACCEPTED
     await this.credentialRepository.save(cred)
   }
 
@@ -263,14 +265,14 @@ export class CredentialService {
     const cred = await this.credentialRepository.findOne({
       where: {
         threadId,
-        revoked: false,
+        status: CredentialStatus.OFFERED,
       },
       order: { createdTs: 'DESC' },
     })
     if (!cred) throw new Error(`Credential with connectionId ${threadId} not found.`)
 
     cred.threadId = threadId
-    cred.revoked = true
+    cred.status = CredentialStatus.REJECTED
     await this.credentialRepository.save(cred)
   }
 
@@ -282,14 +284,14 @@ export class CredentialService {
   async revoke(connectionId: string, options?: { refId?: string }): Promise<void> {
     const refIdHash = options?.refId ? this.hash(options.refId) : null
     const cred = await this.credentialRepository.findOne({
-      where: { connectionId, revoked: false, ...(refIdHash ? { refIdHash } : {}) },
+      where: { connectionId, status: CredentialStatus.ACCEPTED, ...(refIdHash ? { refIdHash } : {}) },
       order: { createdTs: 'DESC' },
     })
     if (!cred || !cred.connectionId) {
       throw new Error(`Credencial with connectionId ${connectionId} not found.`)
     }
 
-    cred.revoked = true
+    cred.status = CredentialStatus.REVOKED
     await this.credentialRepository.save(cred)
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
