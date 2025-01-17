@@ -139,16 +139,18 @@ export class CredentialService {
     }
     const { id: credentialDefinitionId, revocationSupported } = credentialType
 
-    const cred = await this.credentialRepository.findOne({
+    const creds = await this.credentialRepository.find({
       where: {
         revoked: false,
         ...(refIdHash ? { refIdHash } : {}),
       },
     })
-    if (cred && revokeIfAlreadyIssued) {
-      cred.connectionId = connectionId
-      await this.credentialRepository.save(cred)
-      await this.revoke(connectionId, { refId: options?.refId ?? undefined })
+    if (creds && revokeIfAlreadyIssued) {
+      for (const cred of creds) {
+        cred.connectionId = connectionId
+        await this.credentialRepository.save(cred)
+        await this.revoke(connectionId, { refId: options?.refId ?? undefined })
+      }
     }
 
     const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
