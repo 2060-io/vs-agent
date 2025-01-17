@@ -158,83 +158,75 @@ export class CredentialService {
       }
     }
 
-    const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
-      async transaction => {
-        if (!revocationSupported) {
-          await transaction.save(CredentialEntity, {
-            connectionId,
-            credentialDefinitionId,
-            ...(refIdHash ? { refIdHash } : {}),
-          })
-          return {
-            revocationRegistryDefinitionId: undefined,
-            revocationRegistryIndex: undefined,
-          }
-        }
-        const invalidRegistries = await transaction.find(CredentialEntity, {
-          select: ['revocationDefinitionId'],
-          where: {
-            credentialDefinitionId,
-            revocationRegistryIndex: Equal(this.maximumCredentialNumber - 1),
-          },
-        })
-        const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
-
-        let lastCred = await transaction.findOne(CredentialEntity, {
-          where: {
-            credentialDefinitionId,
-            revocationRegistryIndex: Not(Equal(this.maximumCredentialNumber)),
-            ...(invalidRevocationIds.length > 0
-              ? {
-                  revocationDefinitionId: Not(In(invalidRevocationIds)),
-                }
-              : {}),
-          },
-          order: { revocationRegistryIndex: 'DESC' },
-          lock: { mode: 'pessimistic_write' },
-        })
-        if (!lastCred || lastCred.revocationRegistryIndex == null) {
-          lastCred = await transaction.findOne(CredentialEntity, {
-            where: {
-              credentialDefinitionId,
-              revocationRegistryIndex: Equal(this.maximumCredentialNumber),
-            },
-            order: { createdTs: 'DESC' },
-            lock: { mode: 'pessimistic_write' },
-          })
-
-          if (!lastCred)
-            throw new Error(
-              'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
-            )
-          lastCred.revocationRegistryIndex = -1
-        }
-
-        const newCredential = await transaction.save(CredentialEntity, {
+    const cred: CredentialEntity = await this.entityManager.transaction(async transaction => {
+      if (!revocationSupported) {
+        return await transaction.save(CredentialEntity, {
           connectionId,
           credentialDefinitionId,
-          revocationDefinitionId: lastCred.revocationDefinitionId,
-          revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
           ...(refIdHash ? { refIdHash } : {}),
-          maximumCredentialNumber: this.maximumCredentialNumber,
         })
-        return {
-          revocationRegistryDefinitionId: newCredential.revocationDefinitionId,
-          revocationRegistryIndex: newCredential.revocationRegistryIndex,
-        }
-      },
-    )
+      }
+      const invalidRegistries = await transaction.find(CredentialEntity, {
+        select: ['revocationDefinitionId'],
+        where: {
+          credentialDefinitionId,
+          revocationRegistryIndex: Equal(this.maximumCredentialNumber - 1),
+        },
+      })
+      const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
 
-    await this.apiClient.messages.send(
+      let lastCred = await transaction.findOne(CredentialEntity, {
+        where: {
+          credentialDefinitionId,
+          revocationRegistryIndex: Not(Equal(this.maximumCredentialNumber)),
+          ...(invalidRevocationIds.length > 0
+            ? {
+                revocationDefinitionId: Not(In(invalidRevocationIds)),
+              }
+            : {}),
+        },
+        order: { revocationRegistryIndex: 'DESC' },
+        lock: { mode: 'pessimistic_write' },
+      })
+      if (!lastCred || lastCred.revocationRegistryIndex == null) {
+        lastCred = await transaction.findOne(CredentialEntity, {
+          where: {
+            credentialDefinitionId,
+            revocationRegistryIndex: Equal(this.maximumCredentialNumber),
+          },
+          order: { createdTs: 'DESC' },
+          lock: { mode: 'pessimistic_write' },
+        })
+
+        if (!lastCred)
+          throw new Error(
+            'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
+          )
+        lastCred.revocationRegistryIndex = -1
+      }
+
+      return await transaction.save(CredentialEntity, {
+        connectionId,
+        credentialDefinitionId,
+        revocationDefinitionId: lastCred.revocationDefinitionId,
+        revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
+        ...(refIdHash ? { refIdHash } : {}),
+        maximumCredentialNumber: this.maximumCredentialNumber,
+      })
+    })
+
+    const thread = await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
         connectionId,
         credentialDefinitionId,
-        revocationRegistryDefinitionId,
-        revocationRegistryIndex,
+        revocationRegistryDefinitionId: cred.revocationDefinitionId,
+        revocationRegistryIndex: cred.revocationRegistryIndex,
         claims: claims,
       }),
     )
-    if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
+    cred.threadId = thread.id
+    await this.credentialRepository.save(cred)
+    if (cred.revocationRegistryIndex === this.maximumCredentialNumber - 1) {
       const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
@@ -247,15 +239,15 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async handleAcceptance(connectionId: string, threadId: string): Promise<void> {
+  async handleAcceptance(threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
-        connectionId,
+        threadId,
         revoked: false,
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
+    if (!cred) throw new Error(`Credential not found with connectionId: ${threadId}`)
 
     cred.threadId = threadId
     await this.credentialRepository.save(cred)
@@ -267,15 +259,15 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async handleRejection(connectionId: string, threadId: string): Promise<void> {
+  async handleRejection(threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
-        connectionId,
+        threadId,
         revoked: false,
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credential with connectionId ${connectionId} not found.`)
+    if (!cred) throw new Error(`Credential with connectionId ${threadId} not found.`)
 
     cred.threadId = threadId
     cred.revoked = true
