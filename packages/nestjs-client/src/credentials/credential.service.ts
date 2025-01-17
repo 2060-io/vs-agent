@@ -152,7 +152,6 @@ export class CredentialService {
     })
     if (creds && revokeIfAlreadyIssued) {
       for (const cred of creds) {
-        cred.connectionId = connectionId
         await this.credentialRepository.save(cred)
         await this.revoke(connectionId, { refId: options?.refId ?? undefined })
       }
@@ -248,7 +247,7 @@ export class CredentialService {
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credential not found with connectionId: ${threadId}`)
+    if (!cred) throw new Error(`Credential not found with threadId: ${threadId}`)
 
     cred.status = CredentialStatus.ACCEPTED
     await this.credentialRepository.save(cred)
@@ -268,7 +267,7 @@ export class CredentialService {
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credential with connectionId ${threadId} not found.`)
+    if (!cred) throw new Error(`Credential with threadId ${threadId} not found.`)
 
     cred.status = CredentialStatus.REJECTED
     await this.credentialRepository.save(cred)
