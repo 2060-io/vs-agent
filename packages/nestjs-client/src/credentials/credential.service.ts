@@ -250,7 +250,6 @@ export class CredentialService {
     })
     if (!cred) throw new Error(`Credential not found with connectionId: ${threadId}`)
 
-    cred.threadId = threadId
     cred.status = CredentialStatus.ACCEPTED
     await this.credentialRepository.save(cred)
   }
@@ -271,7 +270,6 @@ export class CredentialService {
     })
     if (!cred) throw new Error(`Credential with connectionId ${threadId} not found.`)
 
-    cred.threadId = threadId
     cred.status = CredentialStatus.REJECTED
     await this.credentialRepository.save(cred)
   }
