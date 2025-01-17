@@ -79,8 +79,13 @@ export class CredentialService {
         supportRevocation,
       })
 
-      await this.saveCredentialType(credentialType.id, supportRevocation)
-      await this.saveCredentialType(credentialType.id, supportRevocation)
+      if (supportRevocation) {
+        await this.credentialRepository.save({ credentialDefinitionId: credentialType.id })
+      } else {
+        // Both records are created to handle multiple credentials
+        await this.createRevocationRegistry(credentialType.id)
+        await this.createRevocationRegistry(credentialType.id)
+      }
     }
   }
 
@@ -230,7 +235,7 @@ export class CredentialService {
       }),
     )
     if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.saveCredentialType(credentialDefinitionId, revocationSupported)
+      const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
       this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
@@ -309,14 +314,7 @@ export class CredentialService {
   }
 
   // private methods
-  private async saveCredentialType(
-    credentialDefinitionId: string,
-    supportRevocation: boolean = false,
-  ): Promise<string | null> {
-    if (!supportRevocation) {
-      await this.credentialRepository.save({ credentialDefinitionId })
-      return null
-    }
+  private async createRevocationRegistry(credentialDefinitionId: string): Promise<string> {
     const revocationRegistry = await this.apiClient.revocationRegistry.create({
       credentialDefinitionId,
       maximumCredentialNumber: this.maximumCredentialNumber,
