@@ -3,7 +3,7 @@ import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, FindOneOptions, Repository } from 'typeorm'
+import { EntityManager, FindOneOptions, IsNull, Not, Repository } from 'typeorm'
 
 import { CredentialOptions, CredentialStatus } from '../types'
 
@@ -254,10 +254,13 @@ export class CredentialService {
   async revoke(connectionId: string, threadId?: string): Promise<void> {
     const options: FindOneOptions<CredentialEntity> = threadId
       ? { where: { threadId, status: CredentialStatus.ACCEPTED } }
-      : { where: { connectionId, status: CredentialStatus.ACCEPTED }, order: { createdTs: 'DESC' } }
+      : {
+          where: { connectionId, status: CredentialStatus.ACCEPTED, threadId: Not(IsNull()) },
+          order: { createdTs: 'DESC' },
+        }
     const cred = await this.credentialRepository.findOne(options)
 
-    if (!cred) 
+    if (!cred)
       throw new Error(`Credential not found with threadId "${threadId}" or connectionId "${connectionId}".`)
 
     cred.status = CredentialStatus.REVOKED
