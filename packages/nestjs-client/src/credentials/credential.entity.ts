@@ -1,6 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm'
 
 import { CredentialStatus } from '../types'
+
+import { RevocationRegistryEntity } from './revocation-registry.entity'
 
 @Entity('credentials')
 export class CredentialEntity {
@@ -9,12 +19,6 @@ export class CredentialEntity {
 
   @Column({ type: 'varchar', nullable: false })
   credentialDefinitionId!: string
-
-  @Column({ type: 'varchar', nullable: true })
-  revocationDefinitionId?: string
-
-  @Column({ type: 'integer', nullable: true })
-  revocationRegistryIndex?: number
 
   @Column({ type: 'varchar', nullable: true })
   connectionId?: string
@@ -27,6 +31,10 @@ export class CredentialEntity {
 
   @Column({ nullable: true })
   status?: CredentialStatus
+
+  @ManyToOne(() => RevocationRegistryEntity, { nullable: true })
+  @JoinColumn({ name: 'revocationRegistryId' })
+  revocationRegistry?: RevocationRegistryEntity
 
   @CreateDateColumn()
   createdTs?: Date

@@ -3,11 +3,12 @@ import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
+import { EntityManager, FindOneOptions, Repository } from 'typeorm'
 
 import { CredentialOptions, CredentialStatus } from '../types'
 
 import { CredentialEntity } from './credential.entity'
+import { RevocationRegistryEntity } from './revocation-registry.entity'
 
 @Injectable()
 export class CredentialService {
@@ -18,12 +19,11 @@ export class CredentialService {
   private readonly apiVersion: ApiVersion
   private readonly apiClient: ApiClient
 
-  //Credential type definitions
-  private maximumCredentialNumber: number = 1000
-
   constructor(
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
+    @InjectRepository(RevocationRegistryEntity)
+    private readonly revocationRepository: Repository<RevocationRegistryEntity>,
     @Inject('GLOBAL_MODULE_OPTIONS') private options: CredentialOptions,
     private readonly entityManager: EntityManager,
   ) {
@@ -65,8 +65,6 @@ export class CredentialService {
     const { supportRevocation, maximumCredentialNumber } = options
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
-    if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
-
     const credentialType = credentialTypes.find(
       credType => credType.name === name && credType.version === version,
     )
@@ -80,11 +78,9 @@ export class CredentialService {
       })
 
       if (supportRevocation) {
-        await this.credentialRepository.save({ credentialDefinitionId: credentialType.id })
-      } else {
         // Both records are created to handle multiple credentials
-        await this.createRevocationRegistry(credentialType.id)
-        await this.createRevocationRegistry(credentialType.id)
+        await this.createRevocationRegistry(credentialType.id, maximumCredentialNumber)
+        await this.createRevocationRegistry(credentialType.id, maximumCredentialNumber)
       }
     }
   }
@@ -152,8 +148,7 @@ export class CredentialService {
     })
     if (creds && revokeIfAlreadyIssued) {
       for (const cred of creds) {
-        await this.credentialRepository.save(cred)
-        await this.revoke(connectionId, { refId: options?.refId ?? undefined })
+        await this.revoke(connectionId, cred.threadId)
       }
     }
 
@@ -165,52 +160,20 @@ export class CredentialService {
           ...(refIdHash ? { refIdHash } : {}),
         })
       }
-      const invalidRegistries = await transaction.find(CredentialEntity, {
-        select: ['revocationDefinitionId'],
-        where: {
-          credentialDefinitionId,
-          revocationRegistryIndex: Equal(this.maximumCredentialNumber - 1),
-        },
-      })
-      const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
+      let lastCred = await transaction
+        .createQueryBuilder(RevocationRegistryEntity, 'registry')
+        .where('registry.revocationRegistryIndex != registry.maximumCredentialNumber')
+        .orderBy('registry.revocationRegistryIndex', 'DESC')
+        .setLock('pessimistic_write')
+        .getOne()
+      if (!lastCred) lastCred = await this.createRevocationRegistry(credentialDefinitionId)
 
-      let lastCred = await transaction.findOne(CredentialEntity, {
-        where: {
-          credentialDefinitionId,
-          revocationRegistryIndex: Not(Equal(this.maximumCredentialNumber)),
-          ...(invalidRevocationIds.length > 0
-            ? {
-                revocationDefinitionId: Not(In(invalidRevocationIds)),
-              }
-            : {}),
-        },
-        order: { revocationRegistryIndex: 'DESC' },
-        lock: { mode: 'pessimistic_write' },
-      })
-      if (!lastCred || lastCred.revocationRegistryIndex == null) {
-        lastCred = await transaction.findOne(CredentialEntity, {
-          where: {
-            credentialDefinitionId,
-            revocationRegistryIndex: Equal(this.maximumCredentialNumber),
-          },
-          order: { createdTs: 'DESC' },
-          lock: { mode: 'pessimistic_write' },
-        })
-
-        if (!lastCred)
-          throw new Error(
-            'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
-          )
-        lastCred.revocationRegistryIndex = -1
-      }
-
+      await transaction.save(RevocationRegistryEntity, lastCred)
       return await transaction.save(CredentialEntity, {
         connectionId,
         credentialDefinitionId,
-        revocationDefinitionId: lastCred.revocationDefinitionId,
-        revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
+        revocationRegistry: lastCred,
         ...(refIdHash ? { refIdHash } : {}),
-        maximumCredentialNumber: this.maximumCredentialNumber,
       })
     })
 
@@ -218,17 +181,26 @@ export class CredentialService {
       new CredentialIssuanceMessage({
         connectionId,
         credentialDefinitionId,
-        revocationRegistryDefinitionId: cred.revocationDefinitionId,
-        revocationRegistryIndex: cred.revocationRegistryIndex,
+        revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
+        revocationRegistryIndex: cred.revocationRegistry?.revocationRegistryIndex,
         claims: claims,
       }),
     )
     cred.threadId = thread.id
     cred.status = CredentialStatus.OFFERED
     await this.credentialRepository.save(cred)
-    if (cred.revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.createRevocationRegistry(credentialDefinitionId)
-      this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
+    if (cred.revocationRegistry) {
+      cred.revocationRegistry.revocationRegistryIndex += 1
+      this.revocationRepository.save(cred.revocationRegistry)
+      if (
+        cred.revocationRegistry?.revocationRegistryIndex === cred.revocationRegistry?.maximumCredentialNumber
+      ) {
+        const revRegistry = await this.createRevocationRegistry(
+          credentialDefinitionId,
+          cred.revocationRegistry?.maximumCredentialNumber,
+        )
+        this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
+      }
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
   }
@@ -275,18 +247,18 @@ export class CredentialService {
 
   /**
    * Revokes a credential associated with the provided thread ID.
-   * @param threadId - The thread ID linked to the credential to revoke.
-   * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
+   * @param connectionId - The connection ID to send the revoke.
+   * @param threadId - (Optional) The thread ID linked to the credential to revoke.
+   * @throws Error if no credential is found with the specified thread ID or connection ID, or if the credential has no connection ID.
    */
-  async revoke(connectionId: string, options?: { refId?: string }): Promise<void> {
-    const refIdHash = options?.refId ? this.hash(options.refId) : null
-    const cred = await this.credentialRepository.findOne({
-      where: { connectionId, status: CredentialStatus.ACCEPTED, ...(refIdHash ? { refIdHash } : {}) },
-      order: { createdTs: 'DESC' },
-    })
-    if (!cred || !cred.connectionId) {
-      throw new Error(`Credencial with connectionId ${connectionId} not found.`)
-    }
+  async revoke(connectionId: string, threadId?: string): Promise<void> {
+    const options: FindOneOptions<CredentialEntity> = threadId
+      ? { where: { threadId, status: CredentialStatus.ACCEPTED } }
+      : { where: { connectionId, status: CredentialStatus.ACCEPTED }, order: { createdTs: 'DESC' } }
+    const cred = await this.credentialRepository.findOne(options)
+
+    if (!cred) 
+      throw new Error(`Credential not found with threadId "${threadId}" or connectionId "${connectionId}".`)
 
     cred.status = CredentialStatus.REVOKED
     await this.credentialRepository.save(cred)
@@ -294,30 +266,38 @@ export class CredentialService {
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
       credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
-    credentialType.revocationSupported &&
-      (await this.apiClient.messages.send(
-        new CredentialRevocationMessage({
-          connectionId: cred.connectionId,
-          threadId: cred?.threadId,
-        }),
-      ))
-    this.logger.log(`Revoke Credential: ${cred.id}`)
+    if (!credentialType.revocationSupported) {
+      this.logger.warn(`Credential definition ${cred.credentialDefinitionId} does not support revocation.`)
+      return
+    }
+
+    await this.apiClient.messages.send(
+      new CredentialRevocationMessage({
+        connectionId,
+        threadId: cred?.threadId,
+      }),
+    )
+
+    this.logger.log(`Credential revoked: ${cred.id}`)
   }
 
   // private methods
-  private async createRevocationRegistry(credentialDefinitionId: string): Promise<string> {
-    const revocationRegistry = await this.apiClient.revocationRegistry.create({
+  private async createRevocationRegistry(
+    credentialDefinitionId: string,
+    maximumCredentialNumber: number = 1000,
+  ): Promise<RevocationRegistryEntity> {
+    const revocationDefinitionId = await this.apiClient.revocationRegistry.create({
       credentialDefinitionId,
-      maximumCredentialNumber: this.maximumCredentialNumber,
+      maximumCredentialNumber,
     })
-    if (!revocationRegistry)
+    if (!revocationDefinitionId)
       throw new Error(
         `Unable to create a new revocation registry for CredentialDefinitionId: ${credentialDefinitionId}`,
       )
-    await this.credentialRepository.save({
-      credentialDefinitionId,
-      revocationDefinitionId: revocationRegistry,
-      revocationRegistryIndex: this.maximumCredentialNumber,
+    const revocationRegistry = await this.revocationRepository.save({
+      revocationDefinitionId,
+      revocationRegistryIndex: 0,
+      maximumCredentialNumber,
     })
     return revocationRegistry
   }

@@ -330,6 +330,8 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       config.logger.debug(`CredentialStateChangedEvent received. Record id: 
       ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
       const record = payload.credentialRecord
+      const messageRecord = await agent.genericRecords.findById(record.threadId)
+      record.threadId = (messageRecord?.getTag('messageId') as string) ?? record.threadId
 
       if (record.state === CredentialState.ProposalReceived) {
         const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
