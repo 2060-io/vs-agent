@@ -13,6 +13,7 @@ import {
 import { ServiceAgent } from '../utils/ServiceAgent'
 
 import { sendWebhookEvent } from './WebhookEvent'
+import { queries } from '../utils/discovery.config'
 
 export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig) => {
   agent.events.on(
