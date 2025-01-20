@@ -18,7 +18,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.10",
+    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.11",
     "@credo-ts/core": "^0.5.11",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
