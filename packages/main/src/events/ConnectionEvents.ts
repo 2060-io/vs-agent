@@ -1,6 +1,7 @@
 import type { ServerConfig } from '../utils/ServerConfig'
 import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
 
+import { Capability } from '@2060.io/credo-ts-didcomm-mrtd/build/models/Capability'
 import { ConnectionStateUpdated } from '@2060.io/service-agent-model'
 import {
   AgentEventTypes,
@@ -11,9 +12,9 @@ import {
 } from '@credo-ts/core'
 
 import { ServiceAgent } from '../utils/ServiceAgent'
+import { queries } from '../utils/discovery.config'
 
 import { sendWebhookEvent } from './WebhookEvent'
-import { queries } from '../utils/discovery.config'
 
 export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig) => {
   agent.events.on(
@@ -32,13 +33,29 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
         }
       }
 
-      if (record.state === DidExchangeState.Completed)
-        await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
+      let metadata
+      if (record.state === DidExchangeState.Completed) {
+        await agent.modules.userProfile.requestUserProfile({ connectionId: record.id }) // TODO: maybe it shouldn't be necessary
+        const capability = await agent.discovery.queryFeatures({
+          connectionId: record.id,
+          protocolVersion: 'v2',
+          queries,
+          awaitDisclosures: true,
+        })
+        metadata = capability.features?.reduce(
+          (acc, feature) => {
+            if (feature.type === Capability.type) acc[feature.id] = String((feature as Capability).value)
+            return acc
+          },
+          {} as Record<string, string>,
+        )
+      }
 
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
         invitationId: record.outOfBandId,
         state: record.state,
+        metadata,
       })
 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)

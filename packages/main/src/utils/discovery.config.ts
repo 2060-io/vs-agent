@@ -1,3 +1,1 @@
-export const queries = [
-  { featureType: 'capability', match: 'mrtd.*' }
-]
+export const queries = [{ featureType: 'capability', match: 'mrtd.*' }]
