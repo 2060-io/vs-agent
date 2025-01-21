@@ -163,6 +163,7 @@ export class CredentialService {
       let lastCred = await transaction
         .createQueryBuilder(RevocationRegistryEntity, 'registry')
         .where('registry.revocationRegistryIndex != registry.maximumCredentialNumber')
+        .andWhere('registry.credentialDefinitionId = :credentialDefinitionId', { credentialDefinitionId })
         .orderBy('registry.revocationRegistryIndex', 'DESC')
         .setLock('pessimistic_write')
         .getOne()
