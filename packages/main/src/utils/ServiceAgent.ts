@@ -51,7 +51,6 @@ type ServiceAgentModules = {
   questionAnswer: QuestionAnswerModule
   receipts: ReceiptsModule
   userProfile: UserProfileModule
-  discovery: DiscoverFeaturesModule
 }
 
 interface AgentOptions<ServiceAgentModules> {
@@ -122,7 +121,6 @@ export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent =
         questionAnswer: new QuestionAnswerModule(),
         receipts: new ReceiptsModule(),
         userProfile: new UserProfileModule(),
-        discovery: new DiscoverFeaturesModule(),
       },
     },
     options.did,
