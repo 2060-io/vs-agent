@@ -35,7 +35,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
 
       let metadata
       if (record.state === DidExchangeState.Completed) {
-        await agent.modules.userProfile.requestUserProfile({ connectionId: record.id }) // TODO: maybe it shouldn't be necessary
+        await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
         const capability = await agent.discovery.queryFeatures({
           connectionId: record.id,
           protocolVersion: 'v2',
