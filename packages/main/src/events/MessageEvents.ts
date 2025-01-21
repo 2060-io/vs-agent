@@ -331,14 +331,13 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
       const record = payload.credentialRecord
       const messageRecord = await agent.genericRecords.findById(record.threadId)
-      record.threadId = (messageRecord?.getTag('messageId') as string) ?? record.threadId
 
       if (record.state === CredentialState.ProposalReceived) {
         const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
         const message = new CredentialRequestMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: credentialProposalMessage?.threadId,
+          threadId: (messageRecord?.getTag('messageId') as string) ?? record.threadId,
           claims:
             credentialProposalMessage?.credentialPreview?.attributes.map(
               p => new Claim({ name: p.name, value: p.value, mimeType: p.mimeType }),
