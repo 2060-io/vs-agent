@@ -40,7 +40,6 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
           connectionId: record.id,
           protocolVersion: 'v2',
           queries,
-          awaitDisclosures: true,
         })
         metadata = capability.features?.reduce(
           (acc, feature) => {
