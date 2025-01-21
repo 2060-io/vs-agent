@@ -25,6 +25,20 @@
     rxjs "^7.2.0"
     tsyringe "^4.8.0"
 
+"@2060.io/credo-ts-didcomm-mrtd@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.12.tgz#f0388e2ae1a3652e7b42322bc953ab8e73d8ffce"
+  integrity sha512-VGFG9hfKnS8LhKa1ofCMZs80tUaZVwk9feHLClhk/JqbRuJZanbAnlKpP6hk8GQYJX2b0ryW2rL3UKNTRGAMTg==
+  dependencies:
+    "@li0ard/tsemrtd" "^0.2.0"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    esbuild "^0.24.0"
+    mrz "^4.2.0"
+    reflect-metadata "^0.1.13"
+    rxjs "^7.2.0"
+    tsyringe "^4.8.0"
+
 "@2060.io/credo-ts-didcomm-user-profile@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-user-profile/-/credo-ts-didcomm-user-profile-0.0.6.tgz#6cacd3e3146022589b7d22451953b598352b5c16"

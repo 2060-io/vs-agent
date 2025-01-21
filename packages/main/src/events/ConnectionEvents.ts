@@ -1,13 +1,17 @@
 import type { ServerConfig } from '../utils/ServerConfig'
-import type { AgentMessageProcessedEvent, ConnectionStateChangedEvent } from '@credo-ts/core'
+import type {
+  AgentMessageProcessedEvent,
+  ConnectionStateChangedEvent,
+  DiscoverFeaturesDisclosureReceivedEvent,
+} from '@credo-ts/core'
 
-import { Capability } from '@2060.io/credo-ts-didcomm-mrtd/build/models/Capability'
 import { ConnectionStateUpdated } from '@2060.io/service-agent-model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,
   ConnectionRepository,
   DidExchangeState,
+  DiscoverFeaturesEventTypes,
   HangupMessage,
 } from '@credo-ts/core'
 
@@ -33,28 +37,15 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
         }
       }
 
-      let metadata
       if (record.state === DidExchangeState.Completed) {
         await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
-        const capability = await agent.discovery.queryFeatures({
-          connectionId: record.id,
-          protocolVersion: 'v2',
-          queries,
-        })
-        metadata = capability.features?.reduce(
-          (acc, feature) => {
-            if (feature.type === Capability.type) acc[feature.id] = String((feature as Capability).value)
-            return acc
-          },
-          {} as Record<string, string>,
-        )
+        await agent.discovery.queryFeatures({ connectionId: record.id, protocolVersion: 'v2', queries })
       }
 
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
         invitationId: record.outOfBandId,
         state: record.state,
-        metadata,
       })
 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
@@ -76,4 +67,34 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     }
   })
+
+  agent.events.on(
+    DiscoverFeaturesEventTypes.DisclosureReceived,
+    async ({ payload }: DiscoverFeaturesDisclosureReceivedEvent) => {
+      const record = payload.connection
+      payload.disclosures.forEach(item =>
+        record.metadata.add(`features-${item.type}`, { [item.id]: item.toJSON() }),
+      )
+      await agent.context.dependencyManager
+        .resolve(ConnectionRepository)
+        .update(agent.context, payload.connection)
+
+      const metadata = payload.disclosures?.reduce(
+        (acc, item) => {
+          acc[item.id] = JSON.stringify(item.toJSON())
+          return acc
+        },
+        {} as Record<string, string>,
+      )
+
+      const body = new ConnectionStateUpdated({
+        connectionId: record.id,
+        invitationId: record.outOfBandId,
+        state: record.state,
+        metadata,
+      })
+
+      await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
+    },
+  )
 }
