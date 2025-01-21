@@ -17,9 +17,6 @@ export class CredentialEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column({ type: 'varchar', nullable: false })
-  credentialDefinitionId!: string
-
   @Column({ type: 'varchar', nullable: true })
   connectionId?: string
 
@@ -31,6 +28,9 @@ export class CredentialEntity {
 
   @Column({ nullable: true })
   status?: CredentialStatus
+
+  @Column({ type: 'integer', nullable: true })
+  revocationIndex?: number
 
   @ManyToOne(() => RevocationRegistryEntity, { nullable: true })
   @JoinColumn({ name: 'revocationRegistryId' })

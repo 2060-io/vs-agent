@@ -268,9 +268,12 @@ export class CredentialService {
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
-      credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
+      credentialTypes.find(credType => credType.id === cred.revocationRegistry?.credentialDefinitionId) ??
+      credentialTypes[0]
     if (!credentialType.revocationSupported) {
-      this.logger.warn(`Credential definition ${cred.credentialDefinitionId} does not support revocation.`)
+      this.logger.warn(
+        `Credential definition ${cred.revocationRegistry?.credentialDefinitionId} does not support revocation.`,
+      )
       return
     }
 

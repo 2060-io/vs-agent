@@ -6,6 +6,9 @@ export class RevocationRegistryEntity {
   id!: string
 
   @Column({ type: 'varchar', nullable: false })
+  credentialDefinitionId!: string
+
+  @Column({ type: 'varchar', nullable: false })
   revocationDefinitionId!: string
 
   @Column({ type: 'integer', nullable: false, default: 0 })
