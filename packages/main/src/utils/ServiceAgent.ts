@@ -18,7 +18,6 @@ import {
   ConnectionsModule,
   CredentialsModule,
   DidsModule,
-  DiscoverFeaturesModule,
   InitConfig,
   ProofsModule,
   V2CredentialProtocol,
