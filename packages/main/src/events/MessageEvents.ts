@@ -337,7 +337,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         const message = new CredentialRequestMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: (flowRecord?.getTag('messageId') as string) ?? record.threadId,
+          threadId: credentialProposalMessage?.threadId,
           claims:
             credentialProposalMessage?.credentialPreview?.attributes.map(
               p => new Claim({ name: p.name, value: p.value, mimeType: p.mimeType }),
@@ -355,7 +355,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         const message = new CredentialReceptionMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: record.threadId,
+          threadId: (flowRecord?.getTag('messageId') as string) ?? record.threadId,
           state:
             record.errorMessage === 'issuance-abandoned: e.msg.refused'
               ? CredentialState.Declined
