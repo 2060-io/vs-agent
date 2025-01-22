@@ -130,6 +130,8 @@ export class CredentialService {
   ): Promise<void> {
     const { revokeIfAlreadyIssued = false } = options ?? {}
     const refIdHash = options?.refId ? this.hash(options.refId) : null
+
+    // Find a specific credential type based on provided definition ID or default to first available
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
       credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
@@ -140,6 +142,7 @@ export class CredentialService {
     }
     const { id: credentialDefinitionId, revocationSupported } = credentialType
 
+    // If existing credentials are found and revocation is requested, revoke all of them
     const creds = await this.credentialRepository.find({
       where: {
         status: CredentialStatus.ACCEPTED,
@@ -152,6 +155,7 @@ export class CredentialService {
       }
     }
 
+    // Begin a transaction to save new credentials and handle revocation logic if supported
     const cred: CredentialEntity = await this.entityManager.transaction(async transaction => {
       if (!revocationSupported) {
         return await transaction.save(CredentialEntity, {
@@ -159,13 +163,17 @@ export class CredentialService {
           ...(refIdHash ? { refIdHash } : {}),
         })
       }
+
+      // Find last issued credential in revocation registry or create a new registry if none exists
       let lastCred = await transaction
         .createQueryBuilder(RevocationRegistryEntity, 'registry')
         .where('registry.currentIndex != registry.maximumCredentialNumber')
         .andWhere('registry.credentialDefinitionId = :credentialDefinitionId', { credentialDefinitionId })
         .orderBy('registry.currentIndex', 'DESC')
-        .setLock('pessimistic_write')
+        .setLock('pessimistic_write') // Lock row for safe concurrent access
         .getOne()
+
+      // Create new registry if none found
       if (!lastCred) lastCred = await this.createRevocationRegistry(credentialDefinitionId)
 
       await transaction.save(RevocationRegistryEntity, lastCred)
@@ -177,6 +185,7 @@ export class CredentialService {
       })
     })
 
+    // Send a message containing the newly issued credential details via API client
     const thread = await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
         connectionId,
@@ -192,6 +201,8 @@ export class CredentialService {
     if (cred.revocationRegistry) {
       cred.revocationRegistry.currentIndex += 1
       this.revocationRepository.save(cred.revocationRegistry)
+
+      // Check if maximum capacity has been reached and create a new revocation registry if necessary
       if (cred.revocationRegistry?.currentIndex === cred.revocationRegistry?.maximumCredentialNumber) {
         const revRegistry = await this.createRevocationRegistry(
           credentialDefinitionId,
@@ -245,11 +256,12 @@ export class CredentialService {
 
   /**
    * Revokes a credential associated with the provided thread ID.
-   * @param connectionId - The connection ID to send the revoke.
+   * @param connectionId - The connection ID to send the revoke. (Search by connection ID if no thread ID)
    * @param threadId - (Optional) The thread ID linked to the credential to revoke.
    * @throws Error if no credential is found with the specified thread ID or connection ID, or if the credential has no connection ID.
    */
   async revoke(connectionId: string, threadId?: string): Promise<void> {
+    // Define search options based on whether a thread ID is provided
     const options: FindOneOptions<CredentialEntity> = threadId
       ? { where: { threadId, status: CredentialStatus.ACCEPTED } }
       : {
@@ -261,6 +273,7 @@ export class CredentialService {
     if (!cred)
       throw new Error(`Credential not found with threadId "${threadId}" or connectionId "${connectionId}".`)
 
+    // Save the updated credential back to the repository with the new status 'revoked'
     cred.status = CredentialStatus.REVOKED
     await this.credentialRepository.save(cred)
 
@@ -268,6 +281,8 @@ export class CredentialService {
     const credentialType =
       credentialTypes.find(credType => credType.id === cred.revocationRegistry?.credentialDefinitionId) ??
       credentialTypes[0]
+
+    // If revocation is not supported for this credential type, return
     if (!credentialType.revocationSupported) {
       this.logger.warn(
         `Credential definition ${cred.revocationRegistry?.credentialDefinitionId} does not support revocation.`,
@@ -275,6 +290,7 @@ export class CredentialService {
       return
     }
 
+    // Send a revocation message using the API client
     await this.apiClient.messages.send(
       new CredentialRevocationMessage({
         connectionId,
@@ -286,6 +302,7 @@ export class CredentialService {
   }
 
   // private methods
+  // Method to create a revocation registry for a given credential definition
   private async createRevocationRegistry(
     credentialDefinitionId: string,
     maximumCredentialNumber: number = 1000,
@@ -294,11 +311,14 @@ export class CredentialService {
       credentialDefinitionId,
       maximumCredentialNumber,
     })
+
+    // Check if the revocation definition ID was successfully created
     if (!revocationDefinitionId)
       throw new Error(
         `Unable to create a new revocation registry for CredentialDefinitionId: ${credentialDefinitionId}`,
       )
     const revocationRegistry = await this.revocationRepository.save({
+      credentialDefinitionId,
       revocationDefinitionId,
       currentIndex: 0,
       maximumCredentialNumber,
