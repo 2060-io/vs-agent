@@ -12,7 +12,7 @@ export class RevocationRegistryEntity {
   revocationDefinitionId!: string
 
   @Column({ type: 'integer', nullable: false, default: 0 })
-  revocationRegistryIndex!: number
+  currentIndex!: number
 
   @Column({ type: 'integer', nullable: false, default: 1000 })
   maximumCredentialNumber!: number

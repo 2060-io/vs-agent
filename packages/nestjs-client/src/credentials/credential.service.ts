@@ -183,7 +183,7 @@ export class CredentialService {
         connectionId,
         credentialDefinitionId,
         revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
-        revocationRegistryIndex: cred.revocationRegistry?.revocationRegistryIndex,
+        revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
         claims: claims,
       }),
     )
@@ -191,10 +191,10 @@ export class CredentialService {
     cred.status = CredentialStatus.OFFERED
     await this.credentialRepository.save(cred)
     if (cred.revocationRegistry) {
-      cred.revocationRegistry.revocationRegistryIndex += 1
+      cred.revocationRegistry.currentIndex += 1
       this.revocationRepository.save(cred.revocationRegistry)
       if (
-        cred.revocationRegistry?.revocationRegistryIndex === cred.revocationRegistry?.maximumCredentialNumber
+        cred.revocationRegistry?.currentIndex === cred.revocationRegistry?.maximumCredentialNumber
       ) {
         const revRegistry = await this.createRevocationRegistry(
           credentialDefinitionId,
