@@ -36,7 +36,7 @@ export class StatEvent {
   ts: Date
 
   @IsNumber()
-  increment: number = 0
+  increment: number = 1
 
   constructor(
     entityId: string,
