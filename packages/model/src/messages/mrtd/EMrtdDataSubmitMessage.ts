@@ -31,7 +31,7 @@ export type EMrtdRawData = {
     title?: string
     personalSummary?: string
     custodyInformation?: string
-    mrzData?: string
+    mrzString?: string
   }
 }
 
@@ -122,7 +122,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
         title: parsed.fields.additionalPersonalData?.title,
         personalSummary: parsed.fields.additionalPersonalData?.personalSummary,
         custodyInformation: parsed.fields.additionalPersonalData?.custodyInformation,
-        mrzData: parsed.fields.mrzData,
+        mrzString: parsed.fields.mrzData,
       },
     }
     return newEmrtdData
