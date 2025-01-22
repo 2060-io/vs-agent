@@ -41,8 +41,10 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.credentialService.createType(['fullName', 'issuanceDate'], {
-      name: 'demo dts',
+    await this.credentialService.createType(
+      'demo dts',
+      '1.0',
+      ['fullName', 'issuanceDate'], {
       supportRevocation: true,
       maximumCredentialNumber: 5,
     })

@@ -3,11 +3,12 @@ import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Equal, In, Not, Repository } from 'typeorm'
+import { EntityManager, FindOneOptions, IsNull, Not, Repository } from 'typeorm'
 
-import { CredentialOptions } from '../types'
+import { CredentialOptions, CredentialStatus } from '../types'
 
 import { CredentialEntity } from './credential.entity'
+import { RevocationRegistryEntity } from './revocation-registry.entity'
 
 @Injectable()
 export class CredentialService {
@@ -18,12 +19,11 @@ export class CredentialService {
   private readonly apiVersion: ApiVersion
   private readonly apiClient: ApiClient
 
-  //Credential type definitions
-  private maximumCredentialNumber: number = 1000
-
   constructor(
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
+    @InjectRepository(RevocationRegistryEntity)
+    private readonly revocationRepository: Repository<RevocationRegistryEntity>,
     @Inject('GLOBAL_MODULE_OPTIONS') private options: CredentialOptions,
     private readonly entityManager: EntityManager,
   ) {
@@ -54,19 +54,17 @@ export class CredentialService {
    * @returns Promise<void> - Resolves when the credential type and revocation registries are created
    */
   async createType(
+    name: string,
+    version: string,
     attributes: string[],
     options: {
-      name?: string
-      version?: string
       supportRevocation?: boolean
       maximumCredentialNumber?: number
     } = {},
   ) {
-    const { name = 'Chatbot', version = '1.0', supportRevocation, maximumCredentialNumber } = options
+    const { supportRevocation, maximumCredentialNumber } = options
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
-    if (maximumCredentialNumber !== undefined) this.maximumCredentialNumber = maximumCredentialNumber
-
     const credentialType = credentialTypes.find(
       credType => credType.name === name && credType.version === version,
     )
@@ -79,8 +77,11 @@ export class CredentialService {
         supportRevocation,
       })
 
-      await this.saveCredentialType(credentialType.id, supportRevocation)
-      await this.saveCredentialType(credentialType.id, supportRevocation)
+      if (supportRevocation) {
+        // Both records are created to handle multiple credentials
+        await this.createRevocationRegistry(credentialType.id, maximumCredentialNumber)
+        await this.createRevocationRegistry(credentialType.id, maximumCredentialNumber)
+      }
     }
   }
 
@@ -128,7 +129,9 @@ export class CredentialService {
     },
   ): Promise<void> {
     const { revokeIfAlreadyIssued = false } = options ?? {}
-    const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
+    const refIdHash = options?.refId ? this.hash(options.refId) : null
+
+    // Find a specific credential type based on provided definition ID or default to first available
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
       credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
@@ -139,97 +142,74 @@ export class CredentialService {
     }
     const { id: credentialDefinitionId, revocationSupported } = credentialType
 
-    const cred = await this.credentialRepository.findOne({
+    // If existing credentials are found and revocation is requested, revoke all of them
+    const creds = await this.credentialRepository.find({
       where: {
-        revoked: false,
+        status: CredentialStatus.ACCEPTED,
         ...(refIdHash ? { refIdHash } : {}),
       },
     })
-    if (cred && revokeIfAlreadyIssued) {
-      cred.connectionId = connectionId
-      await this.credentialRepository.save(cred)
-      await this.revoke(connectionId, { refId: options?.refId ?? undefined })
+    if (creds && revokeIfAlreadyIssued) {
+      for (const cred of creds) {
+        await this.revoke(connectionId, cred.threadId)
+      }
     }
 
-    const { revocationRegistryDefinitionId, revocationRegistryIndex } = await this.entityManager.transaction(
-      async transaction => {
-        if (!revocationSupported) {
-          await transaction.save(CredentialEntity, {
-            connectionId,
-            credentialDefinitionId,
-            ...(refIdHash ? { refIdHash } : {}),
-          })
-          return {
-            revocationRegistryDefinitionId: undefined,
-            revocationRegistryIndex: undefined,
-          }
-        }
-        const invalidRegistries = await transaction.find(CredentialEntity, {
-          select: ['revocationDefinitionId'],
-          where: {
-            credentialDefinitionId,
-            revocationRegistryIndex: Equal(this.maximumCredentialNumber - 1),
-          },
-        })
-        const invalidRevocationIds = invalidRegistries.map(reg => reg.revocationDefinitionId)
-
-        let lastCred = await transaction.findOne(CredentialEntity, {
-          where: {
-            credentialDefinitionId,
-            revocationRegistryIndex: Not(Equal(this.maximumCredentialNumber)),
-            ...(invalidRevocationIds.length > 0
-              ? {
-                  revocationDefinitionId: Not(In(invalidRevocationIds)),
-                }
-              : {}),
-          },
-          order: { revocationRegistryIndex: 'DESC' },
-          lock: { mode: 'pessimistic_write' },
-        })
-        if (!lastCred || lastCred.revocationRegistryIndex == null) {
-          lastCred = await transaction.findOne(CredentialEntity, {
-            where: {
-              credentialDefinitionId,
-              revocationRegistryIndex: Equal(this.maximumCredentialNumber),
-            },
-            order: { createdTs: 'DESC' },
-            lock: { mode: 'pessimistic_write' },
-          })
-
-          if (!lastCred)
-            throw new Error(
-              'No valid registry definition found. Please restart the service and ensure the module is imported correctly',
-            )
-          lastCred.revocationRegistryIndex = -1
-        }
-
-        const newCredential = await transaction.save(CredentialEntity, {
+    // Begin a transaction to save new credentials and handle revocation logic if supported
+    const cred: CredentialEntity = await this.entityManager.transaction(async transaction => {
+      if (!revocationSupported) {
+        return await transaction.save(CredentialEntity, {
           connectionId,
-          credentialDefinitionId,
-          revocationDefinitionId: lastCred.revocationDefinitionId,
-          revocationRegistryIndex: lastCred.revocationRegistryIndex + 1,
           ...(refIdHash ? { refIdHash } : {}),
-          maximumCredentialNumber: this.maximumCredentialNumber,
         })
-        return {
-          revocationRegistryDefinitionId: newCredential.revocationDefinitionId,
-          revocationRegistryIndex: newCredential.revocationRegistryIndex,
-        }
-      },
-    )
+      }
 
-    await this.apiClient.messages.send(
+      // Find last issued credential in revocation registry or create a new registry if none exists
+      let lastCred = await transaction
+        .createQueryBuilder(RevocationRegistryEntity, 'registry')
+        .where('registry.currentIndex != registry.maximumCredentialNumber')
+        .andWhere('registry.credentialDefinitionId = :credentialDefinitionId', { credentialDefinitionId })
+        .orderBy('registry.currentIndex', 'DESC')
+        .setLock('pessimistic_write') // Lock row for safe concurrent access
+        .getOne()
+
+      // Create new registry if none found
+      if (!lastCred) lastCred = await this.createRevocationRegistry(credentialDefinitionId)
+
+      await transaction.save(RevocationRegistryEntity, lastCred)
+      return await transaction.save(CredentialEntity, {
+        connectionId,
+        revocationRegistryIndex: lastCred.currentIndex,
+        revocationRegistry: lastCred,
+        ...(refIdHash ? { refIdHash } : {}),
+      })
+    })
+
+    // Send a message containing the newly issued credential details via API client
+    const thread = await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
         connectionId,
         credentialDefinitionId,
-        revocationRegistryDefinitionId,
-        revocationRegistryIndex,
+        revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
+        revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
         claims: claims,
       }),
     )
-    if (revocationRegistryIndex === this.maximumCredentialNumber - 1) {
-      const revRegistry = await this.saveCredentialType(credentialDefinitionId, revocationSupported)
-      this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
+    cred.threadId = thread.id
+    cred.status = CredentialStatus.OFFERED
+    await this.credentialRepository.save(cred)
+    if (cred.revocationRegistry) {
+      cred.revocationRegistry.currentIndex += 1
+      this.revocationRepository.save(cred.revocationRegistry)
+
+      // Check if maximum capacity has been reached and create a new revocation registry if necessary
+      if (cred.revocationRegistry?.currentIndex === cred.revocationRegistry?.maximumCredentialNumber) {
+        const revRegistry = await this.createRevocationRegistry(
+          credentialDefinitionId,
+          cred.revocationRegistry?.maximumCredentialNumber,
+        )
+        this.logger.log(`Revocation registry successfully created with ID ${revRegistry}`)
+      }
     }
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
   }
@@ -240,17 +220,17 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async accept(connectionId: string, threadId: string): Promise<void> {
+  async handleAcceptance(threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
-        connectionId,
-        revoked: false,
+        threadId,
+        status: CredentialStatus.OFFERED,
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credential not found with connectionId: ${connectionId}`)
+    if (!cred) throw new Error(`Credential not found with threadId: ${threadId}`)
 
-    cred.threadId = threadId
+    cred.status = CredentialStatus.ACCEPTED
     await this.credentialRepository.save(cred)
   }
 
@@ -260,78 +240,93 @@ export class CredentialService {
    * @param threadId - The thread ID to link with the credential.
    * @throws Error if no credential is found with the specified connection ID.
    */
-  async reject(connectionId: string, threadId: string): Promise<void> {
+  async handleRejection(threadId: string): Promise<void> {
     const cred = await this.credentialRepository.findOne({
       where: {
-        connectionId,
-        revoked: false,
+        threadId,
+        status: CredentialStatus.OFFERED,
       },
       order: { createdTs: 'DESC' },
     })
-    if (!cred) throw new Error(`Credencial with connectionId ${connectionId} not found.`)
+    if (!cred) throw new Error(`Credential with threadId ${threadId} not found.`)
 
-    cred.threadId = threadId
-    cred.revoked = true
+    cred.status = CredentialStatus.REJECTED
     await this.credentialRepository.save(cred)
   }
 
   /**
    * Revokes a credential associated with the provided thread ID.
-   * @param threadId - The thread ID linked to the credential to revoke.
-   * @throws Error if no credential is found with the specified thread ID or if the credential has no connection ID.
+   * @param connectionId - The connection ID to send the revoke. (Search by connection ID if no thread ID)
+   * @param threadId - (Optional) The thread ID linked to the credential to revoke.
+   * @throws Error if no credential is found with the specified thread ID or connection ID, or if the credential has no connection ID.
    */
-  async revoke(connectionId: string, options?: { refId?: string }): Promise<void> {
-    const refIdHash = options?.refId ? this.refIdHash(options.refId) : null
-    const cred = await this.credentialRepository.findOne({
-      where: { connectionId, revoked: false, ...(refIdHash ? { refIdHash } : {}) },
-      order: { createdTs: 'DESC' },
-    })
-    if (!cred || !cred.connectionId) {
-      throw new Error(`Credencial with connectionId ${connectionId} not found.`)
-    }
+  async revoke(connectionId: string, threadId?: string): Promise<void> {
+    // Define search options based on whether a thread ID is provided
+    const options: FindOneOptions<CredentialEntity> = threadId
+      ? { where: { threadId, status: CredentialStatus.ACCEPTED } }
+      : {
+          where: { connectionId, status: CredentialStatus.ACCEPTED, threadId: Not(IsNull()) },
+          order: { createdTs: 'DESC' },
+        }
+    const cred = await this.credentialRepository.findOne(options)
 
-    cred.revoked = true
+    if (!cred)
+      throw new Error(`Credential not found with threadId "${threadId}" or connectionId "${connectionId}".`)
+
+    // Save the updated credential back to the repository with the new status 'revoked'
+    cred.status = CredentialStatus.REVOKED
     await this.credentialRepository.save(cred)
 
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
-      credentialTypes.find(credType => credType.id === cred.credentialDefinitionId) ?? credentialTypes[0]
-    credentialType.revocationSupported &&
-      (await this.apiClient.messages.send(
-        new CredentialRevocationMessage({
-          connectionId: cred.connectionId,
-          threadId: cred?.threadId,
-        }),
-      ))
-    this.logger.log(`Revoke Credential: ${cred.id}`)
+      credentialTypes.find(credType => credType.id === cred.revocationRegistry?.credentialDefinitionId) ??
+      credentialTypes[0]
+
+    // If revocation is not supported for this credential type, return
+    if (!credentialType.revocationSupported) {
+      this.logger.warn(
+        `Credential definition ${cred.revocationRegistry?.credentialDefinitionId} does not support revocation.`,
+      )
+      return
+    }
+
+    // Send a revocation message using the API client
+    await this.apiClient.messages.send(
+      new CredentialRevocationMessage({
+        connectionId,
+        threadId: cred?.threadId,
+      }),
+    )
+
+    this.logger.log(`Credential revoked: ${cred.id}`)
   }
 
   // private methods
-  private async saveCredentialType(
+  // Method to create a revocation registry for a given credential definition
+  private async createRevocationRegistry(
     credentialDefinitionId: string,
-    supportRevocation: boolean = false,
-  ): Promise<string | null> {
-    if (!supportRevocation) {
-      await this.credentialRepository.save({ credentialDefinitionId })
-      return null
-    }
-    const revocationRegistry = await this.apiClient.revocationRegistry.create({
+    maximumCredentialNumber: number = 1000,
+  ): Promise<RevocationRegistryEntity> {
+    const revocationDefinitionId = await this.apiClient.revocationRegistry.create({
       credentialDefinitionId,
-      maximumCredentialNumber: this.maximumCredentialNumber,
+      maximumCredentialNumber,
     })
-    if (!revocationRegistry)
+
+    // Check if the revocation definition ID was successfully created
+    if (!revocationDefinitionId)
       throw new Error(
         `Unable to create a new revocation registry for CredentialDefinitionId: ${credentialDefinitionId}`,
       )
-    await this.credentialRepository.save({
+    const revocationRegistry = await this.revocationRepository.save({
       credentialDefinitionId,
-      revocationDefinitionId: revocationRegistry,
-      revocationRegistryIndex: this.maximumCredentialNumber,
+      revocationDefinitionId,
+      currentIndex: 0,
+      maximumCredentialNumber,
     })
     return revocationRegistry
   }
 
-  private refIdHash(refId: string): string {
-    return Buffer.from(new Sha256().hash(refId)).toString('hex')
+  private hash(value: string): string {
+    return Buffer.from(new Sha256().hash(value)).toString('hex')
   }
 }
