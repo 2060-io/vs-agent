@@ -23,8 +23,8 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
     delay: number
   }
 
-  // The constructor initializes the service with default settings suitable for 
-  // a local development environment. By default, it points to the localhost of 
+  // The constructor initializes the service with default settings suitable for
+  // a local development environment. By default, it points to the localhost of
   // the 2060 project (`https://github.com/mobiera/stats`).
   constructor(@Inject('GLOBAL_MODULE_OPTIONS') private options: StatEventOptions) {
     this.container = create_container()
@@ -96,7 +96,7 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
   /**
    * Sends a message of type `JMSTextMessage` as defined by the IBM MQ documentation:
    * https://www.ibm.com/docs/en/ibm-mq/9.4?topic=messaging-jmstextmessage.
-   * 
+   *
    * The method spools statistical events to a messaging system. If the sender
    * is not initialized, it attempts to reconnect. Each message contains the event
    * details serialized as a JSON string and is sent to the configured messaging queue.
