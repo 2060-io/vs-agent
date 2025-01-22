@@ -1,6 +1,10 @@
 // src/services/CredentialTypeService.ts
 
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/service-agent-model'
+import {
+  CredentialTypeInfo,
+  CredentialTypeResult,
+  ImportCredentialTypeOptions,
+} from '@2060.io/service-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'
@@ -49,7 +53,7 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
-  public async getAll(): Promise<CredentialTypeInfo[]> {
+  public async getAll(): Promise<CredentialTypeResult[]> {
     const response = await fetch(this.url, {
       method: 'GET',
       headers: { accept: 'application/json', 'Content-Type': 'application/json' },
@@ -61,6 +65,6 @@ export class CredentialTypeService {
       throw new Error('Invalid response from Service Agent')
     }
 
-    return types.map(value => value as CredentialTypeInfo)
+    return types.map(value => value as CredentialTypeResult)
   }
 }

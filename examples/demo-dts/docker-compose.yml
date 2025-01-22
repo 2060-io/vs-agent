@@ -25,6 +25,8 @@ services:
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
+    volumes:
+      - ./afj:/root/.afj
 
   chatbot-dts:
     build: 
