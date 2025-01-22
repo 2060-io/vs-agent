@@ -7,9 +7,6 @@ import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
 
 @Global()
-import { EventsModuleOptions } from './types'
-
-@Global()
 @Module({})
 export class EventsModule {
   static register(options: EventsModuleOptions): DynamicModule {
