@@ -156,15 +156,14 @@ export class CredentialService {
       if (!revocationSupported) {
         return await transaction.save(CredentialEntity, {
           connectionId,
-          credentialDefinitionId,
           ...(refIdHash ? { refIdHash } : {}),
         })
       }
       let lastCred = await transaction
         .createQueryBuilder(RevocationRegistryEntity, 'registry')
-        .where('registry.revocationRegistryIndex != registry.maximumCredentialNumber')
+        .where('registry.currentIndex != registry.maximumCredentialNumber')
         .andWhere('registry.credentialDefinitionId = :credentialDefinitionId', { credentialDefinitionId })
-        .orderBy('registry.revocationRegistryIndex', 'DESC')
+        .orderBy('registry.currentIndex', 'DESC')
         .setLock('pessimistic_write')
         .getOne()
       if (!lastCred) lastCred = await this.createRevocationRegistry(credentialDefinitionId)
@@ -172,7 +171,7 @@ export class CredentialService {
       await transaction.save(RevocationRegistryEntity, lastCred)
       return await transaction.save(CredentialEntity, {
         connectionId,
-        credentialDefinitionId,
+        revocationRegistryIndex: lastCred.currentIndex,
         revocationRegistry: lastCred,
         ...(refIdHash ? { refIdHash } : {}),
       })
@@ -193,9 +192,7 @@ export class CredentialService {
     if (cred.revocationRegistry) {
       cred.revocationRegistry.currentIndex += 1
       this.revocationRepository.save(cred.revocationRegistry)
-      if (
-        cred.revocationRegistry?.currentIndex === cred.revocationRegistry?.maximumCredentialNumber
-      ) {
+      if (cred.revocationRegistry?.currentIndex === cred.revocationRegistry?.maximumCredentialNumber) {
         const revRegistry = await this.createRevocationRegistry(
           credentialDefinitionId,
           cred.revocationRegistry?.maximumCredentialNumber,
@@ -303,7 +300,7 @@ export class CredentialService {
       )
     const revocationRegistry = await this.revocationRepository.save({
       revocationDefinitionId,
-      revocationRegistryIndex: 0,
+      currentIndex: 0,
       maximumCredentialNumber,
     })
     return revocationRegistry

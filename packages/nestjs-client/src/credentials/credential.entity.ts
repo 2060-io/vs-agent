@@ -30,7 +30,7 @@ export class CredentialEntity {
   status?: CredentialStatus
 
   @Column({ type: 'integer', nullable: true })
-  revocationIndex?: number
+  revocationRegistryIndex?: number
 
   @ManyToOne(() => RevocationRegistryEntity, { nullable: true })
   @JoinColumn({ name: 'revocationRegistryId' })
