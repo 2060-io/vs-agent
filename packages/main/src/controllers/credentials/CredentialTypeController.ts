@@ -1,4 +1,8 @@
-import { CredentialTypeInfo, ImportCredentialTypeOptions } from '@2060.io/service-agent-model'
+import {
+  CredentialTypeInfo,
+  CredentialTypeResult,
+  ImportCredentialTypeOptions,
+} from '@2060.io/service-agent-model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
@@ -49,7 +53,7 @@ export class CredentialTypesController {
    * @returns
    */
   @Get('/')
-  public async getAllCredentialTypes(): Promise<CredentialTypeInfo[]> {
+  public async getAllCredentialTypes(): Promise<CredentialTypeResult[]> {
     const agent = await this.agentService.getAgent()
 
     const credentialDefinitions = await agent.modules.anoncreds.getCreatedCredentialDefinitions({})
@@ -59,12 +63,14 @@ export class CredentialTypesController {
         const schemaResult = await agent.modules.anoncreds.getSchema(record.credentialDefinition.schemaId)
 
         const schema = schemaResult.schema
+        const revocationSupported = record.credentialDefinition?.value?.revocation !== undefined
 
         return {
           id: record.credentialDefinitionId,
           name: (record.getTag('name') as string) ?? schema?.name,
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
+          revocationSupported,
         }
       }),
     )

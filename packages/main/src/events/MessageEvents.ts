@@ -330,6 +330,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       config.logger.debug(`CredentialStateChangedEvent received. Record id: 
       ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
       const record = payload.credentialRecord
+      const flowRecord = await agent.genericRecords.findById(record.threadId)
 
       if (record.state === CredentialState.ProposalReceived) {
         const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
@@ -354,7 +355,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         const message = new CredentialReceptionMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: record.threadId,
+          threadId: (flowRecord?.getTag('messageId') as string) ?? record.threadId,
           state:
             record.errorMessage === 'issuance-abandoned: e.msg.refused'
               ? CredentialState.Declined

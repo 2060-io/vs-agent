@@ -241,7 +241,12 @@ export class MessageService {
       } else if (messageType === CredentialRevocationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialRevocationMessage)
 
-        const credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
+        let credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
+        if (!credentials?.length && msg.threadId) {
+          const record = await agent.genericRecords.findById(msg.threadId)
+          const threadId = record?.getTag('messageId') as string
+          credentials = await agent.credentials.findAllByQuery({ threadId })
+        }
         if (credentials && credentials.length > 0) {
           for (const credential of credentials) {
             const isRevocable = Boolean(

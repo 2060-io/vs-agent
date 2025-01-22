@@ -1,25 +1,45 @@
-import { Module, DynamicModule } from '@nestjs/common'
+import { Module, DynamicModule, Global } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
+import { CredentialModule } from './credentials'
 import { MessageEventModule } from './messages'
+import { EventsModuleOptions } from './types'
 
-export interface EventsModuleOptions {
-  prefix?: string
-  enableMessages?: boolean
-  enableConnections?: boolean
-}
-
+@Global()
 @Module({})
 export class EventsModule {
-  static register(options: EventsModuleOptions = {}): DynamicModule {
+  static register(options: EventsModuleOptions): DynamicModule {
     const imports = []
+    const { modules, options: moduleOptions } = options
 
-    if (options.enableMessages !== false) {
-      imports.push(MessageEventModule)
+    if (modules.messages) {
+      imports.push(
+        MessageEventModule.forRoot({
+          eventHandler: moduleOptions.eventHandler,
+          imports: moduleOptions.imports ?? [],
+          url: moduleOptions.url,
+          version: moduleOptions.version,
+        }),
+      )
     }
 
-    if (options.enableConnections !== false) {
-      imports.push(ConnectionsEventModule)
+    if (modules.connections) {
+      imports.push(
+        ConnectionsEventModule.forRoot({
+          eventHandler: moduleOptions.eventHandler,
+          imports: moduleOptions.imports ?? [],
+        }),
+      )
+    }
+
+    if (modules.credentials) {
+      imports.push(
+        CredentialModule.forRoot({
+          imports: moduleOptions.imports ?? [],
+          url: moduleOptions.url,
+          version: moduleOptions.version,
+        }),
+      )
     }
 
     return {

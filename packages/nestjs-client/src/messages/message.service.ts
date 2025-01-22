@@ -1,11 +1,12 @@
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { MessageReceived, ReceiptsMessage } from '@2060.io/service-agent-model'
+import { CredentialReceptionMessage, MessageReceived, ReceiptsMessage } from '@2060.io/service-agent-model'
+import { CredentialState, JsonTransformer } from '@credo-ts/core'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'
 
+import { CredentialService } from '../credentials'
 import { EventHandler } from '../interfaces'
-
-import { MESSAGE_EVENT, MESSAGE_MODULE_OPTIONS, MessageModuleOptions } from './message.config'
+import { MessageEventOptions } from '../types'
 
 @Injectable()
 export class MessageEventService {
@@ -15,11 +16,18 @@ export class MessageEventService {
   private readonly apiClient: ApiClient
 
   constructor(
-    @Inject(MESSAGE_MODULE_OPTIONS) private options: MessageModuleOptions,
-    @Optional() @Inject(MESSAGE_EVENT) private eventHandler?: EventHandler,
+    @Inject('GLOBAL_MODULE_OPTIONS') private options: MessageEventOptions,
+    @Optional() @Inject('MESSAGE_EVENT') private eventHandler?: EventHandler,
+    @Optional() @Inject() private credentialService?: CredentialService,
   ) {
+    if (!options.url) throw new Error(`For this module to be used the value url must be added`)
     this.url = options.url
-    this.version = options.version
+    this.version = options.version ?? ApiVersion.V1
+
+    if (!credentialService)
+      this.logger.warn(
+        `To handle credential events and their revocation, make sure to initialize the CredentialService.`,
+      )
 
     this.apiClient = new ApiClient(this.url, this.version)
 
@@ -27,11 +35,12 @@ export class MessageEventService {
   }
 
   async received(event: MessageReceived): Promise<void> {
+    const message = event.message
     const body = new ReceiptsMessage({
-      connectionId: event.message.connectionId,
+      connectionId: message.connectionId,
       receipts: [
         {
-          messageId: event.message.id,
+          messageId: message.id,
           state: MessageState.Viewed,
           timestamp: new Date(),
         },
@@ -42,7 +51,21 @@ export class MessageEventService {
     await this.apiClient.messages.send(body)
 
     if (this.eventHandler) {
-      await this.eventHandler.inputMessage(event.message)
+      if (message.type === CredentialReceptionMessage.type) {
+        try {
+          const msg = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
+          const isCredentialDone = msg.state === CredentialState.Done
+          if (this.credentialService) {
+            if (!msg.threadId) throw new Error('threadId is required for credential')
+            if (isCredentialDone) await this.credentialService.handleAcceptance(msg.threadId)
+            else await this.credentialService.handleRejection(msg.threadId)
+          }
+        } catch (error) {
+          this.logger.error(`Cannot create the registry: ${error}`)
+        }
+      }
+
+      await this.eventHandler.inputMessage(message)
     }
   }
 
