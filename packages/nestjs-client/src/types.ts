@@ -61,3 +61,10 @@ export interface EventsModuleOptions {
     }
   }
 }
+
+export enum CredentialStatus {	
+  OFFERED = 'offered',	
+  ACCEPTED = 'accepted',	
+  REJECTED = 'rejected',	
+  REVOKED = 'revoked',	
+}
