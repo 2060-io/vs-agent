@@ -3,7 +3,6 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { EventHandler } from '../interfaces'
 
-import { CONNECTIONS_EVENT } from './connection.config'
 import { ConnectionEntity } from './connection.entity'
 import { ConnectionsRepository } from './connection.repository'
 
@@ -14,7 +13,7 @@ export class ConnectionsEventService {
   constructor(
     @Inject()
     private readonly repository: ConnectionsRepository,
-    @Optional() @Inject(CONNECTIONS_EVENT) private eventHandler?: EventHandler,
+    @Optional() @Inject('CONNECTIONS_EVENT') private eventHandler?: EventHandler,
   ) {}
 
   async update(event: ConnectionStateUpdated): Promise<any> {

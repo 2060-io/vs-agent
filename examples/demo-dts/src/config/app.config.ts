@@ -1,4 +1,3 @@
-import { ApiVersion } from '@2060.io/service-agent-client'
 import { registerAs } from '@nestjs/config'
 
 /**
