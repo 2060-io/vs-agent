@@ -42,8 +42,7 @@ but likely needed for production and test deployments.
 >
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 >
-> The Service Agent fetches capabilities from the `discovery.json` file to determine available features. This file can be replaced to use different capabilities, providing flexibility for customization.
-
+> The Service Agent fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
 
 Possible log levels:
 
