@@ -16,7 +16,6 @@ import {
 } from '@credo-ts/core'
 
 import { ServiceAgent } from '../utils/ServiceAgent'
-import { queries } from '../utils/discovery.config'
 
 import { sendWebhookEvent } from './WebhookEvent'
 
@@ -39,7 +38,12 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
 
       if (record.state === DidExchangeState.Completed) {
         await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
-        await agent.discovery.queryFeatures({ connectionId: record.id, protocolVersion: 'v2', queries })
+        config.discoveryOptions &&
+          (await agent.discovery.queryFeatures({
+            connectionId: record.id,
+            protocolVersion: 'v2',
+            queries: config.discoveryOptions,
+          }))
       }
 
       const body = new ConnectionStateUpdated({
