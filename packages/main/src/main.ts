@@ -6,6 +6,8 @@ import { KeyDerivationMethod, LogLevel } from '@credo-ts/core'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import packageJson from '../package.json'
 
@@ -86,11 +88,20 @@ const run = async () => {
     'Server',
   )
 
+  const discoveryOptions = (() => {
+    try {
+      return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'discovery.json'), 'utf-8'))
+    } catch (error) {
+      console.warn('Error reading discovery.json file:', error.message)
+      return undefined
+    }
+  })()
   const conf: ServerConfig = {
     port: Number(process.env.ADMIN_PORT || 3000),
     cors: Boolean(process.env.USE_CORS || false),
     logger: serverLogger,
     webhookUrl: process.env.EVENTS_BASE_URL || 'http://localhost:5000',
+    discoveryOptions,
   }
 
   await startAdminServer(agent, conf)

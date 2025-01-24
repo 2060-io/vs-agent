@@ -23,6 +23,7 @@ export class ConnectionsEventService {
         newConnection.id = event.connectionId
         newConnection.createdTs = event.timestamp
         newConnection.status = event.state
+        newConnection.metadata = event.metadata
         await this.repository.create(newConnection)
 
         if (this.eventHandler) {
