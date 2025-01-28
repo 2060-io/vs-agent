@@ -21,10 +21,11 @@ export class ConnectionsEventService {
     switch (event.state) {
       case ExtendedDidExchangeState.Updated:
         if (event.metadata?.[MessageType.ProfileMessage])
-          this.repository.updateLanguage(event.connectionId, event.metadata?.[MessageType.ProfileMessage])
+          await this.repository.updateLanguage(event.connectionId, event.metadata?.[MessageType.ProfileMessage])
         if (event.metadata?.[MrtdCapabilities.EMrtdReadSupport])
-          this.repository.updateMetadata(event.connectionId, event.metadata)
+          await this.repository.updateMetadata(event.connectionId, event.metadata)
         if (this.eventHandler && (await this.repository.isUpdated(event.connectionId))) {
+          this.logger.log(`A new connection has been started with connection id: ${event.connectionId}`)
           await this.eventHandler.newConnection(event)
         }
         break
