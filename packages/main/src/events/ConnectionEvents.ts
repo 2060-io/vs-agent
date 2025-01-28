@@ -94,6 +94,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
 
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
+        invitationId: record.outOfBandId,
         state: ExtendedDidExchangeState.Updated,
         metadata,
       })

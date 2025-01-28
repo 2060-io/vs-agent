@@ -460,6 +460,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 
       const body = new ConnectionStateUpdated({
         connectionId: connection.id,
+        invitationId: connection.outOfBandId,
         state: ExtendedDidExchangeState.Updated,
         metadata: { [MessageType.ProfileMessage]: preferredLanguage ?? 'en' },
       })
