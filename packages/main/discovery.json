@@ -1,0 +1,6 @@
+[
+  {
+    "featureType": "capability",
+    "match": "mrtd.*"
+  }
+]

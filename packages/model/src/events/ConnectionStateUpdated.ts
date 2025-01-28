@@ -1,6 +1,6 @@
 import { DidExchangeState } from '@credo-ts/core'
 import { Expose } from 'class-transformer'
-import { IsString } from 'class-validator'
+import { IsObject, IsOptional, IsString } from 'class-validator'
 
 import { Event } from './Event'
 import { EventType } from './EventType'
@@ -18,6 +18,7 @@ export interface ConnectionStateUpdatedOptions {
   state: ExtendedDidExchangeState
   timestamp?: Date
   invitationId?: string
+  metadata?: Record<string, string>
 }
 
 export class ConnectionStateUpdated extends Event {
@@ -29,6 +30,7 @@ export class ConnectionStateUpdated extends Event {
       this.state = options.state
       this.timestamp = options.timestamp ?? new Date()
       this.invitationId = options.invitationId
+      this.metadata = options.metadata
     }
   }
 
@@ -46,4 +48,9 @@ export class ConnectionStateUpdated extends Event {
   @Expose()
   @IsString()
   public state!: ExtendedDidExchangeState
+
+  @Expose()
+  @IsOptional()
+  @IsObject()
+  public metadata?: Record<string, string>
 }

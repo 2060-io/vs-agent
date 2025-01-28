@@ -41,6 +41,8 @@ but likely needed for production and test deployments.
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
 >
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
+>
+> The Service Agent fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
 
 Possible log levels:
 
