@@ -21,7 +21,10 @@ export class ConnectionsEventService {
     switch (event.state) {
       case ExtendedDidExchangeState.Updated:
         if (event.metadata?.[MessageType.ProfileMessage])
-          await this.repository.updateLanguage(event.connectionId, event.metadata?.[MessageType.ProfileMessage])
+          await this.repository.updateLanguage(
+            event.connectionId,
+            event.metadata?.[MessageType.ProfileMessage],
+          )
         if (event.metadata?.[MrtdCapabilities.EMrtdReadSupport])
           await this.repository.updateMetadata(event.connectionId, event.metadata)
         if (this.eventHandler && (await this.repository.isUpdated(event.connectionId))) {

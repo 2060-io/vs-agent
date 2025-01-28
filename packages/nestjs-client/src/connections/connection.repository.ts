@@ -45,9 +45,9 @@ export class ConnectionsRepository {
    * Validates if the connection was updated within the last minute
    * This method ensures that either the `lang` or `metadata` properties
    * have been updated recently, based on the `createdTs` timestamp.
-   * Its purpose is to trigger a new connection only once when the 
+   * Its purpose is to trigger a new connection only once when the
    * conditions are met.
-   * @param id The unique identifier of the connection to validate 
+   * @param id The unique identifier of the connection to validate
    * @returns A promise that resolves to `true` if:
    *   - `lang` is a valid non-null string.
    *   - `metadata` is either `undefined` or a non-empty object.
