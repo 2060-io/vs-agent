@@ -14,7 +14,7 @@ export class ConnectionEntity {
   status?: ExtendedDidExchangeState
 
   @Column({ type: 'varchar', nullable: true })
-  language?: string
+  lang?: string
 
   @CreateDateColumn()
   createdTs?: Date

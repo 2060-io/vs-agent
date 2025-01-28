@@ -5,7 +5,7 @@ import type {
   DiscoverFeaturesDisclosureReceivedEvent,
 } from '@credo-ts/core'
 
-import { ConnectionStateUpdated } from '@2060.io/service-agent-model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,
@@ -38,18 +38,19 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
 
       if (record.state === DidExchangeState.Completed) {
         await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
-        config.discoveryOptions &&
-          (await agent.discovery.queryFeatures({
+        if (config.discoveryOptions)
+          await agent.discovery.queryFeatures({
             connectionId: record.id,
             protocolVersion: 'v2',
             queries: config.discoveryOptions,
-          }))
+          })
       }
 
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
         invitationId: record.outOfBandId,
         state: record.state,
+        metadata: config.discoveryOptions ? {} : undefined,
       })
 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
@@ -93,8 +94,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
 
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
-        invitationId: record.outOfBandId,
-        state: record.state,
+        state: ExtendedDidExchangeState.Updated,
         metadata,
       })
 

@@ -42,6 +42,9 @@ import {
   MessageReceived,
   MrtdSubmitState,
   CallAcceptRequestMessage,
+  ConnectionStateUpdated,
+  ExtendedDidExchangeState,
+  MessageType,
 } from '@2060.io/service-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
@@ -454,6 +457,13 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       })
 
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
+
+      const body = new ConnectionStateUpdated({
+        connectionId: connection.id,
+        state: ExtendedDidExchangeState.Updated,
+        metadata: { [MessageType.ProfileMessage]: preferredLanguage ?? 'en' },
+      })
+      await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     },
   )
 

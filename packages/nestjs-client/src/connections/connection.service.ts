@@ -1,4 +1,5 @@
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
+import { ConnectionStateUpdated, ExtendedDidExchangeState, MessageType } from '@2060.io/service-agent-model'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { EventHandler } from '../interfaces'
@@ -18,6 +19,15 @@ export class ConnectionsEventService {
 
   async update(event: ConnectionStateUpdated): Promise<any> {
     switch (event.state) {
+      case ExtendedDidExchangeState.Updated:
+        if (event.metadata?.[MessageType.ProfileMessage])
+          this.repository.updateLanguage(event.connectionId, event.metadata?.[MessageType.ProfileMessage])
+        if (event.metadata?.[MrtdCapabilities.EMrtdReadSupport])
+          this.repository.updateMetadata(event.connectionId, event.metadata)
+        if (this.eventHandler && (await this.repository.isUpdated(event.connectionId))) {
+          await this.eventHandler.newConnection(event)
+        }
+        break
       case ExtendedDidExchangeState.Completed:
         const newConnection = new ConnectionEntity()
         newConnection.id = event.connectionId
@@ -25,10 +35,6 @@ export class ConnectionsEventService {
         newConnection.status = event.state
         newConnection.metadata = event.metadata
         await this.repository.create(newConnection)
-
-        if (this.eventHandler) {
-          await this.eventHandler.newConnection(event)
-        }
         break
       case ExtendedDidExchangeState.Terminated:
         await this.repository.updateStatus(event.connectionId, event.state)
