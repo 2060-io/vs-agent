@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
-      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
+      - REDIRECT_DEFAULT_URL_TO_INVITATION_URL=true
       - REDIS_HOST=redis
     volumes:
       - ./afj:/root/.afj

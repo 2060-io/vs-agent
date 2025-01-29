@@ -89,7 +89,7 @@ export class VCAuthNController {
         invitation: invitation.outOfBandInvitation.toJSON(),
         invi_msg_id: invitation.outOfBandInvitation.id,
         invitation_url: invitation.outOfBandInvitation.toUrl({
-          domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://2060.io/i',
+          domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/',
         }),
         oob_id: invitation.id,
         state: invitation.state,

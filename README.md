@@ -12,7 +12,7 @@ but likely needed for production and test deployments.
 | AGENT_ENDPOINT             | Public endpoint where agent DIDComm endpoints will be accessible (including protocol and port)                    | ws://localhost:3001   |
 | AGENT_ENDPOINTS            | List of endpoints where agent DIDComm endpoints will be accessible (including protocol and port), comma separated | ws://localhost:3001   |
 | AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
-| AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://2060.io/i     |
+| AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
 | AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)                                                                            | none                  |
 | AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
 | AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
