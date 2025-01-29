@@ -25,7 +25,7 @@ The `nestjs-client` allows dynamic configuration through various module options 
 Configures message event handling. The following properties are available:
 - `eventHandler` (optional).
 - `imports` (optional).
-- `url` (optional).
+- `url` (mandatory).
 - `version` (optional).
 #### `ConnectionEventOptions`
 Configures connection event handling. The following properties are available:
@@ -35,7 +35,7 @@ Configures connection event handling. The following properties are available:
 #### `CredentialOptions`
 Configures credential management. The following properties are available:
 - `imports` (optional).
-- `url` (optional).
+- `url` (mandatory).
 - `version` (optional).
 
 #### `ModulesConfig`
