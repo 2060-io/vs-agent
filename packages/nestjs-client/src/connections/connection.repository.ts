@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
+import { UserProfile } from '../types'
+
 import { ConnectionEntity } from './connection.entity'
 
 // TypeORM
@@ -31,8 +33,8 @@ export class ConnectionsRepository {
     return (await this.repository.findOne({ where: { id } })) ?? undefined
   }
 
-  async updateLanguage(id: string, lang: string): Promise<ConnectionEntity | undefined> {
-    await this.repository.update(id, { lang })
+  async updateLanguage(id: string, userProfile: UserProfile): Promise<ConnectionEntity | undefined> {
+    await this.repository.update(id, { userProfile })
     return (await this.repository.findOne({ where: { id } })) ?? undefined
   }
 
@@ -42,27 +44,30 @@ export class ConnectionsRepository {
   }
 
   /**
-   * Validates if the connection was updated within the last minute
-   * This method ensures that either the `lang` or `metadata` properties
-   * have been updated recently, based on the `createdTs` timestamp.
-   * Its purpose is to trigger a new connection only once when the
-   * conditions are met.
+   * Checks if a connection has been completed.
+   *
+   * This method verifies whether the connection's `lang` (if required)
+   * and `metadata` meet the completion criteria.
    * @param id The unique identifier of the connection to validate
+   * @param requireLang If `true`, ensures that `lang` is not `null`
    * @returns A promise that resolves to `true` if:
-   *   - `lang` is a valid non-null string.
    *   - `metadata` is either `undefined` or a non-empty object.
-   *   - The `createdTs` timestamp is within the last 60 seconds.
+   *   - If `requireLang` is `true`, `lang` must not be `null`.
    * @throws Error if the connection is not found or if `createdTs` is missing.
    */
-  async isUpdated(id: string): Promise<boolean> {
-    const conn = await this.repository.findOneBy({ id })
-    if (!conn?.createdTs) {
+  async isCompleted(id: string, requireLang: boolean): Promise<boolean> {
+    const conn = await this.findById(id)
+    if (!conn?.id) {
       throw new Error(`No connection found with id: ${id}. The connection may not have been created properly`)
     }
-    const { lang, metadata, createdTs } = conn
-    const isLangValid = typeof lang === 'string' && lang !== null
-    const isMetadataValid = metadata === undefined || Object.keys(metadata).length > 0
-    const isRecent = Date.now() - new Date(createdTs).getTime() <= 60000
-    return isLangValid && isMetadataValid && isRecent
+    if (conn.status === ExtendedDidExchangeState.Completed) return false
+
+    const isMetadataValid = !conn.metadata || Object.keys(conn.metadata).length > 0
+    const isLangValid = !requireLang || conn.userProfile?.preferredLanguage != null
+    if (isLangValid && isMetadataValid) {
+      this.updateStatus(conn.id, ExtendedDidExchangeState.Completed)
+      return true
+    }
+    return false
   }
 }

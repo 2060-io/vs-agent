@@ -28,6 +28,7 @@ export class EventsModule {
         ConnectionsEventModule.forRoot({
           eventHandler: moduleOptions.eventHandler,
           imports: moduleOptions.imports ?? [],
+          useMessages: modules.messages,
         }),
       )
     }

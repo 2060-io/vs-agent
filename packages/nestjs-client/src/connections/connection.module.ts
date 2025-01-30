@@ -20,11 +20,15 @@ export class ConnectionsEventModule {
         ConnectionsEventService,
         ConnectionsRepository,
         {
+          provide: 'GLOBAL_MODULE_OPTIONS',
+          useValue: options,
+        },
+        {
           provide: 'CONNECTIONS_EVENT',
           useClass: options.eventHandler,
         },
       ],
-      exports: [ConnectionsRepository],
+      exports: [ConnectionsRepository, ConnectionsEventService],
     }
   }
 }
