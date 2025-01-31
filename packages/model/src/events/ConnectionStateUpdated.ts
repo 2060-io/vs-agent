@@ -8,6 +8,7 @@ import { EventType } from './EventType'
 export const ExtendedDidExchangeState = {
   ...DidExchangeState,
   Terminated: 'terminated',
+  Updated: 'updated',
 } as const
 
 export type ExtendedDidExchangeState =
