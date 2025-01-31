@@ -21,6 +21,8 @@ export async function createInvitation(agent: ServiceAgent, messages?: AgentMess
     })
   ).outOfBandInvitation
   return {
-    url: outOfBandInvitation.toUrl({ domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://2060.io/i' }),
+    url: outOfBandInvitation.toUrl({
+      domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/',
+    }),
   }
 }
