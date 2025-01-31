@@ -50,7 +50,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "postinstall": "patch-package"
   },
   "dependencies": {
