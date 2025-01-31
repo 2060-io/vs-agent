@@ -1,4 +1,4 @@
-import { BaseMessage, ConnectionStateUpdated } from '@2060.io/service-agent-model'
+import { BaseMessage } from '@2060.io/service-agent-model'
 
 /**
  * The EventHandler interface defines the blueprint for handling events
@@ -14,7 +14,7 @@ export interface EventHandler {
    * @param event - An instance of ConnectionStateUpdated representing
    *                the updated connection state.
    */
-  newConnection(event: ConnectionStateUpdated): Promise<void> | void
+  newConnection(connectionId: string): Promise<void> | void
 
   /**
    * Handles a terminated connection event, typically triggered when the connection
@@ -23,7 +23,7 @@ export interface EventHandler {
    * @param event - An instance of ConnectionStateUpdated representing
    *                the updated connection state.
    */
-  closeConnection(event: ConnectionStateUpdated): Promise<void> | void
+  closeConnection(connectionId: string): Promise<void> | void
 
   /**
    * Processes an incoming message. This method allows for both synchronous
