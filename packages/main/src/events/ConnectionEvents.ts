@@ -46,6 +46,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
           })
       }
 
+      // If discovery is enabled, send an empty 'completed' state so that the recipient knows to expect async features.
       const body = new ConnectionStateUpdated({
         connectionId: record.id,
         invitationId: record.outOfBandId,
