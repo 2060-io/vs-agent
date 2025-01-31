@@ -33,7 +33,7 @@ export class ConnectionsRepository {
     return (await this.repository.findOne({ where: { id } })) ?? undefined
   }
 
-  async updateLanguage(id: string, userProfile: UserProfile): Promise<ConnectionEntity | undefined> {
+  async updateUserProfile(id: string, userProfile: UserProfile): Promise<ConnectionEntity | undefined> {
     await this.repository.update(id, { userProfile })
     return (await this.repository.findOne({ where: { id } })) ?? undefined
   }

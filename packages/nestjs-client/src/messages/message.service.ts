@@ -25,8 +25,8 @@ export class MessageEventService {
     @Inject('GLOBAL_MODULE_OPTIONS') private options: MessageEventOptions,
     @Optional() @Inject('MESSAGE_EVENT') private eventHandler?: EventHandler,
     @Optional() @Inject() private credentialService?: CredentialService,
-    @Optional() @Inject() private connRepository?: ConnectionsRepository,
-    @Optional() @Inject() private connEvent?: ConnectionsEventService,
+    @Optional() @Inject() private connectionRepository?: ConnectionsRepository,
+    @Optional() @Inject() private connectionsEventService?: ConnectionsEventService,
   ) {
     if (!options.url) throw new Error(`For this module to be used the value url must be added`)
     this.url = options.url
@@ -71,10 +71,14 @@ export class MessageEventService {
         } catch (error) {
           this.logger.error(`Cannot create the registry: ${error}`)
         }
-      } else if (this.connRepository && this.connEvent && message.type === ProfileMessage.type) {
+      } else if (
+        this.connectionRepository &&
+        this.connectionsEventService &&
+        message.type === ProfileMessage.type
+      ) {
         const msg = JsonTransformer.fromJSON(message, ProfileMessage)
-        await this.connRepository.updateLanguage(msg.connectionId, { ...msg })
-        await this.connEvent?.handleNewConnection(msg.connectionId)
+        await this.connectionRepository.updateUserProfile(msg.connectionId, { ...msg })
+        await this.connectionsEventService?.handleNewConnection(msg.connectionId)
       }
 
       await this.eventHandler.inputMessage(message)
