@@ -1,7 +1,7 @@
 `@2060.io/service-agent-model`
 # Service Agent Model
 
-This package provides the data models used by the **Service Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
+This package provides the data models used by **Service Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
 
 ## Packages Using This Library
 
