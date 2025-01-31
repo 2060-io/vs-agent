@@ -19,7 +19,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/credo-ts-didcomm-mrtd@^0.0.12": "^0.0.12",
+    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.12",
     "@2060.io/service-agent-model": "*",
     "@2060.io/service-agent-client": "*",
     "@credo-ts/core": "^0.5.11",
