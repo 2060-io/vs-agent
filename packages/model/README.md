@@ -16,6 +16,56 @@ The models in this package are used by the following services and libraries:
 
 This package defines essential models that support structured communication and event handling within the Service Agent ecosystem. It is designed to be used by chatbot services and other integrations that rely on a standardized message format.
 
+## How to work
+```plantuml
+@startuml
+
+package "2060 Ecosystem" {
+    package "Service Agent (SA)" {
+        class ServiceAgent {
+            + Handles DIDComm communication
+            + Manages agent wallet and credentials
+            + Exposes API for client interactions
+        }
+    }
+    
+    package "Libraries" {
+        class NestJSClient {
+            + Plug-and-play integration
+            + Selectable modules for various services
+            + Modules:
+              -- MessageEventOptions: Configures message event handling
+              -- ConnectionEventOptions: Configures connection event handling
+              -- CredentialOptions: Configures credential management
+        }
+        class Client {
+            + Directly manages requests to SA
+            + Facilitates reception of requests from modules
+            + Provides an abstraction for service communication
+            + Interfaces:
+              -- messages
+              -- credentialTypes
+              -- revocationRegistries
+              -- invitations
+      
+        }
+        class ModelLibrary ##red {
+            + Defines required data models
+            + Ensures type safety across services
+        }
+    }
+}
+
+NestJSClient --> ServiceAgent : Uses
+Client --> ServiceAgent : Sends requests
+Client --> ServiceAgent : Receives requests
+Client --> ModelLibrary : Uses models
+ModelLibrary --> ServiceAgent : Provides data models
+NestJSClient --> ModelLibrary : Uses models
+
+@enduml
+```
+
 ### Installation
 
 ```sh

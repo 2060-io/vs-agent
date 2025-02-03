@@ -12,6 +12,56 @@ The `nestjs-client` library simplifies the integration of 2060 Service Agent com
 3. Connection Management:
     - Manages events related to connection state changes.
 
+## How to work
+```plantuml
+@startuml
+
+package "2060 Ecosystem" {
+    package "Service Agent (SA)" {
+        class ServiceAgent {
+            + Handles DIDComm communication
+            + Manages agent wallet and credentials
+            + Exposes API for client interactions
+        }
+    }
+    
+    package "Libraries" {
+        class NestJSClient ##red {
+            + Plug-and-play integration
+            + Selectable modules for various services
+            + Modules:
+              -- MessageEventOptions: Configures message event handling
+              -- ConnectionEventOptions: Configures connection event handling
+              -- CredentialOptions: Configures credential management
+        }
+        class Client {
+            + Directly manages requests to SA
+            + Facilitates reception of requests from modules
+            + Provides an abstraction for service communication
+            + Interfaces:
+              -- messages
+              -- credentialTypes
+              -- revocationRegistries
+              -- invitations
+      
+        }
+        class ModelLibrary {
+            + Defines required data models
+            + Ensures type safety across services
+        }
+    }
+}
+
+NestJSClient --> ServiceAgent : Uses
+Client --> ServiceAgent : Sends requests
+Client --> ServiceAgent : Receives requests
+Client --> ModelLibrary : Uses models
+ModelLibrary --> ServiceAgent : Provides data models
+NestJSClient --> ModelLibrary : Uses models
+
+@enduml
+```
+
 ## Configuration
 ### Dynamic Module Setup
 The `nestjs-client` allows dynamic configuration through various module options defined in `types.ts`. You can configure individual modules or the `EventsModule` for handling multiple events at once
