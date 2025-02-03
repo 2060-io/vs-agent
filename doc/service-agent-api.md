@@ -756,7 +756,7 @@ Response from Service Agent is a JSON object containing an URL-encoded invitatio
 
 Note that the following Service Agent configuration environment variables are used when creating invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 
@@ -799,7 +799,7 @@ Response will include the invitation code in both short and long form URL format
 
 Note that the following Service Agent configuration environment variables are used when creating presentation request invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 - PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
@@ -851,7 +851,7 @@ Response will include the invitation code in both short and long form URL format
 
 Note that the following Service Agent configuration environment variables are used when creating credential offer invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://2060.io/i)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 - PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)

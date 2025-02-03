@@ -39,7 +39,8 @@ export const addInvitationRoutes = async (app: express.Express, agent: ServiceAg
   // Generate a regular invitation
   app.get('/invitation', async (req, res) => {
     const { url: invitationUrl } = await createInvitation(agent)
-    res.send(invitationUrl)
+    if (process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL === 'true') res.redirect(invitationUrl)
+    else res.send(invitationUrl)
   })
 
   // Generate a regular invitation and render it to a QR code
