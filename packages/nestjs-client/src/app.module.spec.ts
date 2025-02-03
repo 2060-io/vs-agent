@@ -1,9 +1,6 @@
 import { ApiVersion } from '@2060.io/service-agent-client'
-import {
-  ConnectionsEventModule,
-  EventsModule,
-  MessageEventModule,
-} from '../src'
+
+import { ConnectionsEventModule, EventsModule, MessageEventModule } from '../src'
 
 describe('EventsModule', () => {
   it('should register in EventModule some modules', () => {
