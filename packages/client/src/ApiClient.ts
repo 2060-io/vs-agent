@@ -25,29 +25,29 @@ import { ApiVersion } from './types/enums'
  * const apiClient = new ApiClient('http://localhost', ApiVersion.V1)
  *
  * // Example to query available credentials
- * await apiClient.credentialType.getAll()
+ * await apiClient.credentialTypes.getAll()
  *
  * // Example to send a message
- * apiClient.message.send(message: BaseMessage)
+ * apiClient.messages.send(message: BaseMessage)
  *
  * The `ApiClient` class provides easy methods for interacting with:
- * - `message`: Send and manage messages.
- * - `credentialType`: Query and manage credential types.
- * - `revocationRegistry`: Query and manage the revocation registry for credential definitions.
+ * - `messages`: Send and manage messages.
+ * - `credentialTypes`: Query and manage credential types.
+ * - `revocationRegistries`: Query and manage the revocation registry for credential definitions.
  */
 export class ApiClient {
   public readonly messages: MessageService
   public readonly credentialTypes: CredentialTypeService
-  public readonly revocationRegistry: RevocationRegistryService
-  public readonly invitation: InvitationService
+  public readonly revocationRegistries: RevocationRegistryService
+  public readonly invitations: InvitationService
 
   constructor(
     private baseURL: string,
     private version: ApiVersion = ApiVersion.V1,
   ) {
-    this.invitation = new InvitationService(baseURL, version)
+    this.invitations = new InvitationService(baseURL, version)
     this.messages = new MessageService(baseURL, version)
     this.credentialTypes = new CredentialTypeService(baseURL, version)
-    this.revocationRegistry = new RevocationRegistryService(baseURL, version)
+    this.revocationRegistries = new RevocationRegistryService(baseURL, version)
   }
 }
