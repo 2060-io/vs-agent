@@ -27,8 +27,7 @@ yarn add @2060.io/service-agent-client
 
 ### Example Usage
 ```ts
-import { ApiClient } from '@2060.io/service-agent-client'
-import { ApiVersion } from '@2060.io/service-agent-client/types/enums'
+import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 
 const apiClient = new ApiClient('http://localhost:3000', ApiVersion.V1)
 
@@ -46,8 +45,8 @@ console.log(`Message sent with ID: ${messageId}`)
 ### Services
 - `messages:` Handles message sending and receiving.
 - `credentialTypes:` Manages credential types.
-- `revocationRegistry:` Manages revocation registries.
-- `invitation:` Handles connection invitations.
+- `revocationRegistries:` Manages revocation registries.
+- `invitations:` Handles connection invitations.
 
 ## `ExpressEventHandler.ts`
 The `ExpressEventHandler` simplifies event handling for Express applications, mapping API endpoints to event handlers.
