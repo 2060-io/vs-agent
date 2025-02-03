@@ -1,7 +1,7 @@
 `@2060.io/service-agent-client`
 
 # Service Agent Client
-The **Service Agent Client** is a TypeScript library designed to simplify the interaction with the **Service Agent** (`@2060.io/service-agent-main`). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
+**Service Agent Client** is a TypeScript library designed to simplify the interaction with **Service Agent** (`@2060.io/service-agent-main`). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
 
 This package ensures that the client stays updated with the latest API versioning of the **Service Agent** to maintain compatibility with evolving endpoints.
 
