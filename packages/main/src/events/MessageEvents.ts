@@ -330,7 +330,6 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       config.logger.debug(`CredentialStateChangedEvent received. Record id: 
       ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
       const record = payload.credentialRecord
-      const flowRecord = await agent.genericRecords.findById(record.threadId)
 
       if (record.state === CredentialState.ProposalReceived) {
         const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
@@ -355,7 +354,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         const message = new CredentialReceptionMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: (flowRecord?.getTag('messageId') as string) ?? record.threadId,
+          threadId: record.threadId,
           state:
             record.errorMessage === 'issuance-abandoned: e.msg.refused'
               ? CredentialState.Declined
@@ -529,8 +528,10 @@ const sendMessageReceivedEvent = async (
   timestamp: Date,
   config: ServerConfig,
 ) => {
-  const recordId = await agent.genericRecords.findById(message.id)
-  if (recordId?.getTag('messageId') as string) message.id = recordId?.getTag('messageId') as string
+  if (message.threadId) {
+    const recordId = await agent.genericRecords.findById(message.threadId)
+    message.threadId = (recordId?.getTag('messageId') as string) ?? message.threadId
+  }
   const body = new MessageReceived({
     timestamp,
     message: message,
