@@ -307,7 +307,7 @@ export class CredentialService {
     credentialDefinitionId: string,
     maximumCredentialNumber: number = 1000,
   ): Promise<RevocationRegistryEntity> {
-    const revocationDefinitionId = await this.apiClient.revocationRegistry.create({
+    const revocationDefinitionId = await this.apiClient.revocationRegistries.create({
       credentialDefinitionId,
       maximumCredentialNumber,
     })

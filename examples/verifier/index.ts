@@ -55,7 +55,7 @@ expressHandler.messageReceived(async (req, res) => {
 app.get('/invitation/:ref', async (req, res) => {
   logger.info(`Generate invitation`)
 
-  const presReq = await apiClient.invitation.createPresentationRequest({
+  const presReq = await apiClient.invitations.createPresentationRequest({
     ref: req.params.ref,
     callbackUrl: `${PUBLIC_BASE_URL}/presentation`,
     requestedCredentials: [
