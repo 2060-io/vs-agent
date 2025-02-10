@@ -820,6 +820,7 @@ When the presentation flow is completed (either successfully or not), Service Ag
 Possible values for PresentationStatus are:
 
 - 'ok'
+- 'connected'
 - 'refused'
 - 'no-compatible-credentials'
 - 'verification-error'
