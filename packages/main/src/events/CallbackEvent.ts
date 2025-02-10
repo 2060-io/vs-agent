@@ -5,7 +5,7 @@ import { TsLogger } from '../utils/logger'
 
 export enum PresentationStatus {
   OK = 'ok',
-  WAITING = 'waiting',
+  CONNECTED = 'connected',
   REFUSED = 'refused',
   NO_COMPATIBLE_CREDENTIALS = 'no-compatible-credentials',
   VERIFICATION_ERROR = 'verification-error',
