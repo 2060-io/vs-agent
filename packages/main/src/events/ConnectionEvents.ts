@@ -66,7 +66,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
             await sendPresentationCallbackEvent({
               proofExchangeId: proofRecord.id,
               callbackUrl: callbackParameters.callbackUrl,
-              status: PresentationStatus.WAITING,
+              status: PresentationStatus.CONNECTED,
               logger: config.logger,
               ref: callbackParameters.ref,
             })
