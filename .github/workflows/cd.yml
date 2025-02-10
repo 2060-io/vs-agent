@@ -121,4 +121,3 @@ jobs:
           yarn workspace @2060.io/service-agent-nestjs-client version --no-git-tag-version --new-version $RELEASE_VERSION
           yarn workspace @2060.io/service-agent-nestjs-client publish --non-interactive
           
-

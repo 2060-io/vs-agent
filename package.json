@@ -24,9 +24,7 @@
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
     "test": "yarn workspaces run test --passWithNoTests",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
-    "validate": "yarn lint && yarn check-types && yarn check-format",
-    "release": "yarn build && yarn changeset publish --no-git-tag",
-    "changeset-version": "yarn changeset version && yarn format"
+    "validate": "yarn lint && yarn check-types && yarn check-format"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.12",
