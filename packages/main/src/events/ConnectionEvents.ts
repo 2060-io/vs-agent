@@ -17,6 +17,7 @@ import {
 
 import { ServiceAgent } from '../utils/ServiceAgent'
 
+import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
 
 export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig) => {
@@ -44,6 +45,33 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
             protocolVersion: 'v2',
             queries: config.discoveryOptions,
           })
+      }
+
+      // If an out-of-band ID exists, use the invitation to find the thread IDs
+      // and identify the invitation that created the connection to update its state.
+      if (record.outOfBandId) {
+        const invitationRecord = await agent.oob.findById(record.outOfBandId)
+        const threadIds = invitationRecord?.getTag('invitationRequestsThreadIds') as string[] | undefined
+        threadIds?.map(async threadId => {
+          const proofRecord = await agent.proofs.getByThreadAndConnectionId(threadId)
+          const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
+            | { ref?: string; callbackUrl?: string }
+            | undefined
+
+          if (
+            callbackParameters &&
+            callbackParameters.callbackUrl &&
+            record.state === DidExchangeState.RequestReceived
+          ) {
+            await sendPresentationCallbackEvent({
+              proofExchangeId: proofRecord.id,
+              callbackUrl: callbackParameters.callbackUrl,
+              status: PresentationStatus.CONNECTED,
+              logger: config.logger,
+              ref: callbackParameters.ref,
+            })
+          }
+        })
       }
 
       // If discovery is enabled, send an empty 'completed' state so that the recipient knows to expect async features.
