@@ -104,16 +104,21 @@ jobs:
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Publish NPM packages
-        id: changesets
         if: steps.semantic.outputs.new-release-published == 'true'
-        uses: changesets/action@v1
-        with:
-          title: 'chore(release): new version'
-          commit: 'chore(release): new version'
-          publish: yarn release
-          version: yarn changeset-version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
+        run: |
+          # Publish Model
+          yarn workspace @2060.io/service-agent-model version --no-git-tag-version --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-model publish --non-interactive
+          # Publish Client
+          yarn workspace @2060.io/service-agent-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-client version --no-git-tag-version --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-client publish --non-interactive
+          # Publish Nestjs-client
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client version --no-git-tag-version --new-version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client publish --non-interactive
+          
 
