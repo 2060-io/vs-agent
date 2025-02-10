@@ -24,14 +24,17 @@
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
     "test": "yarn workspaces run test --passWithNoTests",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
-    "validate": "yarn lint && yarn check-types && yarn check-format"
+    "validate": "yarn lint && yarn check-types && yarn check-format",
+    "release": "yarn build && yarn changeset publish --no-git-tag",
+    "changeset-version": "yarn changeset version && yarn format"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.12",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.11.19",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@types/supertest": "^2.0.12",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-import-resolver-typescript": "^3.6.1",
