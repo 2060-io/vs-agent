@@ -51,5 +51,6 @@
   },
   "resolutions": {
     "@types/node": "20.11.19"
-  }
+  },
+  "version": "3.6.1"
 }
