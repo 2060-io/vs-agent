@@ -17,10 +17,10 @@
     "start": "yarn workspace @2060.io/service-agent-main run start",
     "start:dev": "yarn workspace @2060.io/service-agent-main run start:dev",
     "check-types": "yarn check-types:build",
-    "check-types:build": "yarn workspaces run tsc --noEmit -p tsconfig.build.json",
+    "check-types:build": "yarn workspaces foreach run tsc --noEmit -p tsconfig.build.json",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
-    "test": "yarn workspaces run test --passWithNoTests",
+    "test": "yarn workspaces foreach run test --passWithNoTests",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
     "validate": "yarn lint && yarn check-types && yarn check-format"
   },
