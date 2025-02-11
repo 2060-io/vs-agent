@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-mrtd": "^0.0.12",
-    "@2060.io/service-agent-model": "*",
     "@2060.io/service-agent-client": "*",
+    "@2060.io/service-agent-model": "*",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
@@ -34,8 +34,8 @@
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
-    "@nestjs/testing": "^10.0.0",
     "@nestjs/swagger": "^8.0.7",
+    "@nestjs/testing": "^10.0.0",
     "@types/express": "^4.17.13",
     "credo-ts-receipts": "^0.0.1-alpha.5",
     "source-map-support": "^0.5.21",

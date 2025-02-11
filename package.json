@@ -27,7 +27,6 @@
     "validate": "yarn lint && yarn check-types && yarn check-format"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.12",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.11.19",
     "@types/supertest": "^2.0.12",
