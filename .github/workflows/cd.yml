@@ -108,7 +108,10 @@ jobs:
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
         run: |
-          yarn workspaces foreach version --new-version $RELEASE_VERSION --no-git-tag-version
+          yarn workspaces foreach --topological --exclude "@2060.io/service-agent-main" version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-client@$RELEASE_VERSION
           yarn workspaces foreach --exclude @2060.io/service-agent-main -pt run publish --non-interactive
           
 
