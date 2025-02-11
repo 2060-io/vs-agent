@@ -5,3 +5,7 @@ build
 *.txn
 logs.txt
 examples/**/afj
+
+# Yarn
+.yarn/cache
+.yarn/install-state.gz

@@ -5,8 +5,6 @@
   "description": "Your gateway to 2060 ecosystem",
   "homepage": "https://2060.io",
   "workspaces": [
-    "packages/model",
-    "packages/client",
     "packages/*"
   ],
   "repository": {
@@ -15,7 +13,7 @@
   },
   "scripts": {
     "prebuild": "yarn workspace @2060.io/service-agent-model run build",
-    "build": "yarn workspaces run build",
+    "build": "yarn workspaces foreach run build",
     "start": "yarn workspace @2060.io/service-agent-main run start",
     "start:dev": "yarn workspace @2060.io/service-agent-main run start:dev",
     "check-types": "yarn check-types:build",
@@ -39,6 +37,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
     "prettier": "^3.2.5",
+    "rimraf": "^6.0.1",
     "supertest": "^6.2.3",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.2",
@@ -51,5 +50,5 @@
   "resolutions": {
     "@types/node": "20.11.19"
   },
-  "version": "3.6.1"
+  "packageManager": "yarn@3.6.4"
 }
