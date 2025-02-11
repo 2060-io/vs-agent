@@ -20,7 +20,7 @@
     "check-types:build": "yarn workspaces foreach run tsc --noEmit -p tsconfig.build.json",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
-    "test": "yarn workspaces foreach run test --passWithNoTests",
+    "test": "yarn workspaces foreach run test",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
     "validate": "yarn lint && yarn check-types && yarn check-format"
   },
