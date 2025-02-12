@@ -106,20 +106,14 @@ jobs:
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}        
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Publish Model
-          yarn workspace @2060.io/service-agent-model version --no-git-tag-version --new-version $RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-model publish --non-interactive
-          # Publish Client
-          yarn workspace @2060.io/service-agent-client add @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-client version --no-git-tag-version --new-version $RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-client publish --non-interactive
-          # Publish Nestjs-client
-          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-client@$RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-nestjs-client version --no-git-tag-version --new-version $RELEASE_VERSION
-          yarn workspace @2060.io/service-agent-nestjs-client publish --non-interactive
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+          yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
+          yarn workspaces foreach --topological version $RELEASE_VERSION
+          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
           
 
 
