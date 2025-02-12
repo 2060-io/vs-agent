@@ -36,3 +36,13 @@ jobs:
       - name: Check Types
         run: |
           yarn check-types
+
+      - name: Publish NPM packages
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_VERSION: 0.0.0-beta.${{ github.run_number }}
+        run: |
+          yarn workspaces foreach --topological version $RELEASE_VERSION
+          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
