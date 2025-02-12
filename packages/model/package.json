@@ -15,7 +15,6 @@
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "yarn run build",
-    "publish": "npm publish",
     "test": "jest"
   },
   "dependencies": {
