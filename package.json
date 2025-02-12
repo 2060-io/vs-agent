@@ -21,7 +21,7 @@
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
     "test": "yarn workspaces foreach run test",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
-    "publish": "yarn workspaces foreach --topological run publish",
+    "publish": "yarn workspaces foreach --no-private --exclude @2060.io/service-agent-main --topological npm publish",
     "validate": "yarn lint && yarn check-types && yarn check-format"
   },
   "devDependencies": {
