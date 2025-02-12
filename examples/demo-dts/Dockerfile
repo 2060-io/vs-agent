@@ -30,9 +30,9 @@ COPY examples/demo-dts/yarn.lock examples/demo-dts/yarn.lock
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching
-COPY --from=base packages/model/build /www/packages/model/build
-COPY --from=base packages/client/build /www/packages/client/build
-COPY --from=base packages/nestjs-client/build /www/packages/nestjs-client/build
+COPY --from=base packages/model /www/packages/model
+COPY --from=base packages/client /www/packages/client
+COPY --from=base packages/nestjs-client /www/packages/nestjs-client
 RUN yarn --cwd examples/demo-dts install
 
 
