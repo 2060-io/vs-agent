@@ -1,6 +1,17 @@
 FROM node:18 as base
 
-COPY package.json yarn.lock tsconfig.json tsconfig.build.json ./
+# Setup yarn version
+RUN corepack enable
+RUN yarn set version 3.6.4
+RUN corepack prepare yarn@3.6.4 --activate
+
+# AFJ specifc setup
+WORKDIR /www
+ENV RUN_MODE="docker"
+
+COPY package.json yarn.lock tsconfig.json tsconfig.build.json .yarnrc.yml ./
+COPY .yarn/releases/ .yarn/releases/
+COPY .yarn/plugins/ .yarn/plugins/
 COPY packages/model/package.json packages/model/package.json
 COPY packages/client/package.json packages/client/package.json
 
@@ -21,22 +32,15 @@ FROM base as final
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY examples/chatbot/package.json examples/chatbot/package.json
-COPY examples/chatbot/yarn.lock examples/chatbot/yarn.lock
+COPY examples/chatbot/ examples/chatbot/
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching
-COPY --from=base packages/model /www/packages/model
-COPY --from=base packages/client /www/packages/client
-RUN yarn --cwd examples/chatbot install
+COPY --from=base /www/packages ./packages
+WORKDIR /www/examples/chatbot
+RUN yarn install
+RUN yarn build
 
-
-# Copy other depdencies
-COPY examples/chatbot/index.ts examples/chatbot/index.ts
-COPY examples/chatbot/data.ts examples/chatbot/data.ts
-COPY examples/chatbot/phone-cred-def-dev.json examples/chatbot/phone-cred-def-dev.json
-COPY examples/chatbot/tsconfig.json examples/chatbot/tsconfig.json
-
-RUN yarn --cwd examples/chatbot build
 COPY examples/chatbot/public examples/chatbot/build/public
-CMD yarn --cwd examples/chatbot start
+WORKDIR /www/examples/chatbot
+CMD yarn start

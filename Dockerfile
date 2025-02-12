@@ -1,10 +1,17 @@
 FROM node:20 as base
 
+# Setup yarn version
+RUN corepack enable
+RUN yarn set version 3.6.4
+RUN corepack prepare yarn@3.6.4 --activate
+
 # AFJ specifc setup
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/releases/ .yarn/releases/
+COPY .yarn/plugins/ .yarn/plugins/
 
 COPY packages/model/package.json packages/model/package.json
 COPY packages/main/package.json packages/main/package.json
