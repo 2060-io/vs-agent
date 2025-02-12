@@ -42,6 +42,7 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_VERSION: 0.0.0-beta.${{ github.run_number }}
         run: |
+          yarn set version 3.6.4
           yarn workspaces foreach --topological version $RELEASE_VERSION
           yarn up @2060.io/service-agent-model@$RELEASE_VERSION
           yarn up @2060.io/service-agent-client@$RELEASE_VERSION
