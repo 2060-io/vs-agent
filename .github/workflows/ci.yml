@@ -44,6 +44,8 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_VERSION: 0.0.0-beta.${{ github.run_number }}
         run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+          yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
           yarn workspaces foreach --topological version $RELEASE_VERSION
           yarn up @2060.io/service-agent-model@$RELEASE_VERSION
           yarn up @2060.io/service-agent-client@$RELEASE_VERSION
