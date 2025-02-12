@@ -12,8 +12,7 @@
     "url": "https://github.com/2060-io/2060-service-agent"
   },
   "scripts": {
-    "prebuild": "yarn workspace @2060.io/service-agent-model run build",
-    "build": "yarn workspaces foreach run build",
+    "build": "yarn workspaces foreach --topological run build",
     "start": "yarn workspace @2060.io/service-agent-main run start",
     "start:dev": "yarn workspace @2060.io/service-agent-main run start:dev",
     "check-types": "yarn check-types:build",
