@@ -1,6 +1,17 @@
 FROM node:22-alpine as base
 
-COPY package.json yarn.lock tsconfig.json tsconfig.build.json ./
+# Setup yarn version
+RUN corepack enable
+RUN yarn set version 3.6.4
+RUN corepack prepare yarn@3.6.4 --activate
+
+# AFJ specifc setup
+WORKDIR /www
+ENV RUN_MODE="docker"
+
+COPY package.json yarn.lock tsconfig.json tsconfig.build.json .yarnrc.yml ./
+COPY .yarn/releases/ .yarn/releases/
+COPY .yarn/plugins/ .yarn/plugins/
 COPY packages/model/package.json packages/model/package.json
 COPY packages/client/package.json packages/client/package.json
 COPY packages/nestjs-client/package.json packages/nestjs-client/package.json
@@ -25,22 +36,14 @@ FROM base as final
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY examples/demo-dts/package.json examples/demo-dts/package.json
-COPY examples/demo-dts/yarn.lock examples/demo-dts/yarn.lock
+COPY examples/demo-dts/ examples/demo-dts/
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching
-COPY --from=base packages/model /www/packages/model
-COPY --from=base packages/client /www/packages/client
-COPY --from=base packages/nestjs-client /www/packages/nestjs-client
-RUN yarn --cwd examples/demo-dts install
-
-
-# Copy other depdencies
-COPY examples/demo-dts/tsconfig.build.json examples/demo-dts/tsconfig.build.json
-COPY examples/demo-dts/tsconfig.json examples/demo-dts/tsconfig.json
-COPY examples/demo-dts/src examples/demo-dts/src
-RUN yarn --cwd examples/demo-dts build
+COPY --from=base /www/packages ./packages
+WORKDIR /www/examples/chatbot
+RUN yarn install
+RUN yarn build
 
 WORKDIR /www/examples/demo-dts/build
 CMD ["node", "main.js"]
