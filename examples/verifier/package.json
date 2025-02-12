@@ -23,8 +23,8 @@
     "typescript": "4.7.4"
   },
   "dependencies": {
-    "@2060.io/service-agent-model": "file:../../packages/model/build",
-    "@2060.io/service-agent-client": "file:../../packages/client/build",
+    "@2060.io/service-agent-client": "link:../../packages/client",
+    "@2060.io/service-agent-model": "link:../../packages/model",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^4.18.1",
