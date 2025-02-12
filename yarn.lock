@@ -104,11 +104,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@2060.io/service-agent-client@*, @2060.io/service-agent-client@workspace:packages/client":
+"@2060.io/service-agent-client@workspace:*, @2060.io/service-agent-client@workspace:packages/client":
   version: 0.0.0-use.local
   resolution: "@2060.io/service-agent-client@workspace:packages/client"
   dependencies:
-    "@2060.io/service-agent-model": "*"
+    "@2060.io/service-agent-model": "workspace:*"
     "@nestjs/common": ^10.0.0
     "@types/express": ^4.17.13
     class-transformer: 0.5.1
@@ -128,7 +128,7 @@ __metadata:
     "@2060.io/credo-ts-didcomm-calls": ^0.0.10
     "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
     "@2060.io/credo-ts-didcomm-user-profile": 0.0.6
-    "@2060.io/service-agent-model": "*"
+    "@2060.io/service-agent-model": "workspace:*"
     "@credo-ts/action-menu": ^0.5.11
     "@credo-ts/anoncreds": ^0.5.11
     "@credo-ts/askar": ^0.5.11
@@ -173,7 +173,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@2060.io/service-agent-model@*, @2060.io/service-agent-model@workspace:packages/model":
+"@2060.io/service-agent-model@workspace:*, @2060.io/service-agent-model@workspace:packages/model":
   version: 0.0.0-use.local
   resolution: "@2060.io/service-agent-model@workspace:packages/model"
   dependencies:
@@ -195,8 +195,8 @@ __metadata:
   resolution: "@2060.io/service-agent-nestjs-client@workspace:packages/nestjs-client"
   dependencies:
     "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
-    "@2060.io/service-agent-client": "*"
-    "@2060.io/service-agent-model": "*"
+    "@2060.io/service-agent-client": "workspace:*"
+    "@2060.io/service-agent-model": "workspace:*"
     "@credo-ts/core": ^0.5.11
     "@nestjs/cli": ^10.0.0
     "@nestjs/common": ^10.0.0
