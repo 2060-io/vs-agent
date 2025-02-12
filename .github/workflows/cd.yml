@@ -112,6 +112,10 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" >> ~/.npmrc
 
           yarn workspaces foreach --topological version $RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-main add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-model@$RELEASE_VERSION
+          yarn workspace @2060.io/service-agent-nestjs-client add @2060.io/service-agent-client@$RELEASE_VERSION
           yarn install
           yarn publish
           
