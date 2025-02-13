@@ -94,6 +94,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         timestamp: new Date(), // It can take also 'sentTime' to be related to the origin
       })
 
+      if (msg.threadId) msg.threadId = await getRecordId(agent, msg.threadId)
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
 
@@ -148,7 +149,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (message.type === CallOfferMessage.type.messageTypeUri) {
       const callOffer = message as CallOfferMessage
       const msg = new CallOfferRequestMessage({
-        id: message.id,
+        id: await getRecordId(agent, message.id),
         connectionId: connection.id,
         offerExpirationTime: callOffer.offerExpirationTime ?? undefined,
         offerStartTime: callOffer.offerStartTime ?? undefined,
@@ -164,7 +165,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (message.type === CallEndMessage.type.messageTypeUri) {
       const thread = (message as CallEndMessage).thread
       const msg = new CallEndRequestMessage({
-        id: message.id,
+        id: await getRecordId(agent, message.id),
         connectionId: connection.id,
         threadId: thread?.threadId,
         timestamp: new Date(),
@@ -176,7 +177,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (message.type === CallAcceptMessage.type.messageTypeUri) {
       const parameters = (message as CallAcceptMessage).parameters
       const msg = new CallAcceptRequestMessage({
-        id: message.id,
+        id: await getRecordId(agent, message.id),
         connectionId: connection.id,
         parameters: parameters,
         threadId: message.thread?.threadId,
@@ -189,7 +190,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
     if (message.type === CallRejectMessage.type.messageTypeUri) {
       const thread = (message as CallEndMessage).thread
       const msg = new CallRejectRequestMessage({
-        id: message.id,
+        id: await getRecordId(agent, message.id),
         connectionId: connection.id,
         threadId: thread?.threadId,
         timestamp: new Date(),
@@ -221,7 +222,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           ],
           connectionId: record.connectionId!,
           id: message.id,
-          threadId: record.threadId,
+          threadId: await getRecordId(agent, record.threadId),
           timestamp: record.updatedAt,
         })
 
@@ -312,7 +313,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           ],
           connectionId: record.connectionId!,
           id: message.id,
-          threadId: record.threadId,
+          threadId: await getRecordId(agent, record.threadId),
           timestamp: record.updatedAt,
         })
 
@@ -347,6 +348,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           timestamp: record.createdAt,
         })
 
+        if (message.threadId) message.threadId = await getRecordId(agent, message.threadId)
         await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       } else if (
         [CredentialState.Declined, CredentialState.Done, CredentialState.Abandoned].includes(record.state)
@@ -354,7 +356,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         const message = new CredentialReceptionMessage({
           connectionId: record.connectionId!,
           id: record.id,
-          threadId: record.threadId,
+          threadId: await getRecordId(agent, record.threadId),
           state:
             record.errorMessage === 'issuance-abandoned: e.msg.refused'
               ? CredentialState.Declined
@@ -399,6 +401,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
           })),
         })
 
+        if (message.threadId) message.threadId = await getRecordId(agent, message.threadId)
         await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       }
     }
@@ -467,6 +470,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       mrzData,
     })
 
+    msg.id = await getRecordId(agent, msg.id)
     await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
   })
 
@@ -480,6 +484,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
       dataGroups,
     })
 
+    msg.id = await getRecordId(agent, msg.id)
     await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
   })
 
@@ -504,6 +509,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         threadId,
         state: stateMap[description.code as MrtdProblemReportReason],
       })
+      msg.id = await getRecordId(agent, msg.id)
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     } else if (
       [MrtdProblemReportReason.MrzRefused, MrtdProblemReportReason.MrzTimeout].includes(
@@ -515,6 +521,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
         threadId,
         state: stateMap[description.code as MrtdProblemReportReason],
       })
+      msg.id = await getRecordId(agent, msg.id)
       await sendMessageReceivedEvent(agent, msg, msg.timestamp, config)
     }
   })
@@ -528,10 +535,6 @@ const sendMessageReceivedEvent = async (
   timestamp: Date,
   config: ServerConfig,
 ) => {
-  if (message.threadId) {
-    const recordId = await agent.genericRecords.findById(message.threadId)
-    message.threadId = (recordId?.getTag('messageId') as string) ?? message.threadId
-  }
   const body = new MessageReceived({
     timestamp,
     message: message,
@@ -558,4 +561,9 @@ const sendMessageStateUpdatedEvent = async (options: {
     connectionId,
   })
   await sendWebhookEvent(config.webhookUrl + '/message-state-updated', body, config.logger)
+}
+
+const getRecordId = async (agent: ServiceAgent, id: string): Promise<string> => {
+  const record = await agent.genericRecords.findById(id)
+  return (record?.getTag('messageId') as string) ?? id
 }
