@@ -19,7 +19,9 @@
   },
   "exclude": [
     "node_modules",
+    "examples",
     "build",
+    "**/*.spec.ts",
     "**/*.test.ts",
     "**/__tests__/*.ts",
     "**/__mocks__/*.ts",

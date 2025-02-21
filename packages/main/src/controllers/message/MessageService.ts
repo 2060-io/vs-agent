@@ -396,7 +396,7 @@ export class MessageService {
           content: {},
           tags: { messageId: message.id, connectionId: message.connectionId },
         })
-      this.logger.debug!(`messageId: ${messageId}`)
+      this.logger.debug!(`messageId saved: ${messageId}`)
       return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)

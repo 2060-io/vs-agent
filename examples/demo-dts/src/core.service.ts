@@ -115,8 +115,8 @@ export class CoreService implements EventHandler, OnModuleInit {
    *
    * @param event - The event containing connection update details.
    */
-  async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    const session = await this.handleSession(event.connectionId)
+  async newConnection(connectionId: string): Promise<void> {
+    const session = await this.handleSession(connectionId)
     await this.sendContextualMenu(session)
   }
 
@@ -142,8 +142,8 @@ export class CoreService implements EventHandler, OnModuleInit {
    * @note This method ensures that the session's `connectionId` and other essential
    *       metadata remain intact while cleaning up unnecessary or sensitive data.
    */
-  async closeConnection(event: ConnectionStateUpdated): Promise<void> {
-    const session = await this.handleSession(event.connectionId)
+  async closeConnection(connectionId: string): Promise<void> {
+    const session = await this.handleSession(connectionId)
     await this.purgeUserData(session)
   }
 
