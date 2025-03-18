@@ -26,9 +26,9 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
   /**
    * Initializes the StatProducerService with default settings optimized for a local development environment.
    * By default, it connects to a JMS broker running on `localhost` with predefined credentials.
-   * 
+   *
    * If custom options are provided through `GLOBAL_MODULE_OPTIONS`, they will override the defaults.
-   * 
+   *
    * @param options - Configuration options for the JMS connection.
    */
   constructor(@Inject('GLOBAL_MODULE_OPTIONS') private options: StatEventOptions) {
