@@ -71,7 +71,7 @@ The `nestjs-client` allows dynamic configuration through various module options 
 - `imports`: An array of additional modules to import, such as service modules or other shared functionality.
 - `url`: The URL of the service agent for connecting to it.
 - `version`: Specifies the version of the service agent API to use.
-- `jmsOptions`: Configuration options for the **JMS (Java Message Service) broker**, including host, port, queue name, authentication, and reconnection settings. The default broker used is **Apache Artemis**. 
+- `jmsOptions`: Configuration options for the **JMS (Jakarta Message Service) broker**, including host, port, queue name, authentication, and reconnection settings. The default broker used is **Apache Artemis**. 
 
 ### `jmsOptions` Parameters  
 The `jmsOptions` object includes the following properties for configuring the message broker:  
