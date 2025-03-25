@@ -21,7 +21,7 @@ export interface ConnectionEventOptions {
 
 export interface StatEventOptions {
   imports?: DynamicModule[]
-  jmsOptions?: {
+  statOptions?: {
     host?: string
     port?: number
     queue?: string
@@ -53,7 +53,7 @@ export interface EventsModuleOptions {
     imports?: DynamicModule[]
     url?: string
     version?: ApiVersion
-    jmsOptions?: {
+    statOptions?: {
       host?: string
       port?: number
       queue?: string

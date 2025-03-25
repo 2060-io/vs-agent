@@ -48,7 +48,7 @@ export class EventsModule {
       imports.push(
         StatEventModule.forRoot({
           imports: moduleOptions.imports ?? [],
-          jmsOptions: moduleOptions.jmsOptions,
+          statOptions: moduleOptions.statOptions,
         }),
       )
     }

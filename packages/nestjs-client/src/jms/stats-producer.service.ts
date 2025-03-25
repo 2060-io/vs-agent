@@ -34,14 +34,14 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
   constructor(@Inject('GLOBAL_MODULE_OPTIONS') private options: StatEventOptions) {
     this.container = create_container()
     this.config = {
-      host: options.jmsOptions?.host || 'localhost',
-      port: options.jmsOptions?.port || 61616,
-      queue: options.jmsOptions?.queue || 'stats-queue',
-      username: options.jmsOptions?.username || 'quarkus',
-      password: options.jmsOptions?.password || 'quarkus',
-      reconnectLimit: options.jmsOptions?.reconnectLimit || 10,
-      threads: options.jmsOptions?.threads || 1,
-      delay: options.jmsOptions?.delay || 1000,
+      host: options.statOptions?.host || 'localhost',
+      port: options.statOptions?.port || 61616,
+      queue: options.statOptions?.queue || 'stats-queue',
+      username: options.statOptions?.username || 'quarkus',
+      password: options.statOptions?.password || 'quarkus',
+      reconnectLimit: options.statOptions?.reconnectLimit || 10,
+      threads: options.statOptions?.threads || 1,
+      delay: options.statOptions?.delay || 1000,
     }
 
     this.logger.log('StatProducerService instantiated')
