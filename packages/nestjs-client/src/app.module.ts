@@ -2,6 +2,7 @@ import { Module, DynamicModule, Global } from '@nestjs/common'
 
 import { ConnectionsEventModule } from './connections'
 import { CredentialModule } from './credentials'
+import { StatEventModule } from './jms'
 import { MessageEventModule } from './messages'
 import { EventsModuleOptions } from './types'
 
@@ -39,6 +40,15 @@ export class EventsModule {
           imports: moduleOptions.imports ?? [],
           url: moduleOptions.url,
           version: moduleOptions.version,
+        }),
+      )
+    }
+
+    if (modules.stats) {
+      imports.push(
+        StatEventModule.forRoot({
+          imports: moduleOptions.imports ?? [],
+          statOptions: moduleOptions.statOptions,
         }),
       )
     }

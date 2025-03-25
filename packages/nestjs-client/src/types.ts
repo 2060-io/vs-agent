@@ -19,6 +19,20 @@ export interface ConnectionEventOptions {
   useMessages?: boolean
 }
 
+export interface StatEventOptions {
+  imports?: DynamicModule[]
+  statOptions?: {
+    host?: string
+    port?: number
+    queue?: string
+    username?: string
+    password?: string
+    reconnectLimit?: number
+    threads?: number
+    delay?: number
+  }
+}
+
 export interface CredentialOptions {
   imports?: DynamicModule[]
   url?: string
@@ -29,6 +43,7 @@ export interface ModulesConfig {
   messages?: boolean
   connections?: boolean
   credentials?: boolean
+  stats?: boolean
 }
 
 export interface EventsModuleOptions {
@@ -38,6 +53,16 @@ export interface EventsModuleOptions {
     imports?: DynamicModule[]
     url?: string
     version?: ApiVersion
+    statOptions?: {
+      host?: string
+      port?: number
+      queue?: string
+      username?: string
+      password?: string
+      reconnectLimit?: number
+      threads?: number
+      delay?: number
+    }
   }
 }
 

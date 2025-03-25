@@ -30,9 +30,10 @@ package "2060 Ecosystem" {
             + Plug-and-play integration
             + Selectable modules for various services
             + Modules:
-              -- MessageEventOptions: Configures message event handling
-              -- ConnectionEventOptions: Configures connection event handling
-              -- CredentialOptions: Configures credential management
+              -- MessageEventOptions: Configures message event handling.
+              -- ConnectionEventOptions: Configures connection event handling.
+              -- CredentialOptions: Configures credential management.
+              -- StatEventOptions: Configures stats producer service for jms.
         }
         class Client {
             + Directly manages requests to SA
@@ -70,6 +71,21 @@ The `nestjs-client` allows dynamic configuration through various module options 
 - `imports`: An array of additional modules to import, such as service modules or other shared functionality.
 - `url`: The URL of the service agent for connecting to it.
 - `version`: Specifies the version of the service agent API to use.
+- `statOptions`: Configuration options for the **JMS (Jakarta Message Service) broker**, including host, port, queue name, authentication, and reconnection settings. The default broker used is **Apache Artemis**. 
+
+### `statOptions` Parameters  
+The `statOptions` object includes the following properties for configuring the message broker:  
+
+| Parameter       | Type      | Description |
+|---------------|---------|-------------|
+| `host`        | `string`  | The hostname or IP address of the JMS broker. |
+| `port`        | `number`  | The port used to connect to the JMS broker. |
+| `queue`       | `string`  | The name of the message queue to use. |
+| `username`    | `string`  | The username for authenticating with the broker (if required). |
+| `password`    | `string`  | The password for authentication (if required). |
+| `reconnectLimit` | `number` | The maximum number of reconnection attempts in case of a connection failure. |
+| `threads`     | `number`  | The number of worker threads for processing messages. |
+| `delay`       | `number`  | The delay (in milliseconds) before retrying a failed connection or message processing. |
 
 #### `MessageEventOptions`
 Configures message event handling. The following properties are available:
@@ -88,11 +104,17 @@ Configures credential management. The following properties are available:
 - `url` (mandatory).
 - `version` (optional).
 
+#### `StatsOptions`
+Configures stats management. The following properties are available:
+- `imports` (optional).
+- `statOptions` (optional).
+
 #### `ModulesConfig`
 This interface defines the configuration for enabling or disabling modules:
 - `messages` (optional): Whether to enable the message handling module. Defaults to false.
 - `connections` (optional): Whether to enable the connection management module. Defaults to false.
 - `credentials` (optional): Whether to enable the credential management module. Defaults to false.
+- `stats` (optional): Whether to enable the stats management module. Defaults to false.
 
 #### `EventsModuleOptions`
 This configuration interface is used to configure multiple modules at once via the EventsModule:
