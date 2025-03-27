@@ -209,6 +209,7 @@ __metadata:
     "@types/express": ^4.17.13
     credo-ts-receipts: ^0.0.1-alpha.5
     reflect-metadata: ^0.2.0
+    rhea: ^3.0.3
     rxjs: ^7.8.1
     source-map-support: ^0.5.21
     ts-loader: ^9.4.3
@@ -4836,6 +4837,18 @@ __metadata:
   dependencies:
     ms: ^2.1.1
   checksum: b3d8c5940799914d30314b7c3304a43305fd0715581a919dacb8b3176d024a782062368405b47491516d2091d6462d4d11f2f4974a405048094f8bfebfa3071c
+  languageName: node
+  linkType: hard
+
+"debug@npm:^4.3.3":
+  version: 4.4.0
+  resolution: "debug@npm:4.4.0"
+  dependencies:
+    ms: ^2.1.3
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: fb42df878dd0e22816fc56e1fdca9da73caa85212fbe40c868b1295a6878f9101ae684f4eeef516c13acfc700f5ea07f1136954f43d4cd2d477a811144136479
   languageName: node
   linkType: hard
 
@@ -9744,6 +9757,15 @@ __metadata:
   version: 1.0.4
   resolution: "reusify@npm:1.0.4"
   checksum: c3076ebcc22a6bc252cb0b9c77561795256c22b757f40c0d8110b1300723f15ec0fc8685e8d4ea6d7666f36c79ccc793b1939c748bf36f18f542744a4e379fcc
+  languageName: node
+  linkType: hard
+
+"rhea@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "rhea@npm:3.0.3"
+  dependencies:
+    debug: ^4.3.3
+  checksum: a4e05495ca1f2e50d5e1c1f65561d0de774f48551952fde905fb6b075fee50b7134e493426fd26cdcc5d4cee4771ddc7c8b2679ad3f543dbc425c7f2beff5f3d
   languageName: node
   linkType: hard
 
