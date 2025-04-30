@@ -29,11 +29,11 @@ import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'
 import fetch from 'node-fetch'
+import fs from 'fs'
 import path from 'path'
 import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
-import phoneCredDefData from './phone-cred-def-dev.json'
 
 const logger = new Logger()
 
@@ -43,6 +43,8 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
 const VISION_SERVICE_BASE_URL =
   process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
 const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
+const credDefFilePath = process.env.PHONE_CRED_DEF_PATH ?? './phone-cred-def-dev.json'
+const phoneCredDefData = JSON.parse(fs.readFileSync(path.resolve(credDefFilePath), 'utf-8'))
 const app = express()
 
 const [baseUrl, versionPath] = SERVICE_AGENT_BASE_URL.split('/v')
