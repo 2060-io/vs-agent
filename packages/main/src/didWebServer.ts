@@ -7,15 +7,15 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
+import { type AgentContext, Buffer, Key, KeyType } from '@credo-ts/core'
 import cors from 'cors'
 import { createHash } from 'crypto'
+import { AbstractCrypto, resolveDID, type SigningOutput } from 'didwebvh-ts'
 import express from 'express'
 import fs from 'fs'
 import multer, { diskStorage } from 'multer'
 
 import { ServiceAgent } from './utils/ServiceAgent'
-import { type AgentContext, Buffer, Key, KeyType } from '@credo-ts/core'
-import { AbstractCrypto, resolveDID, type SigningOutput } from 'didwebvh-ts'
 
 export const startDidWebServer = async (agent: ServiceAgent, config: DidWebServerConfig) => {
   const app = config.app ?? express()
@@ -96,7 +96,7 @@ export const addDidWebRoutes = async (
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
       const crypto = new DIDWebvhCrypto(agent.context)
-      const { doc: didDocument } = await resolveDID( agent.did, { verifier: crypto })
+      const { doc: didDocument } = await resolveDID(agent.did, { verifier: crypto })
       if (didDocument) {
         res.send(didDocument)
       } else {
