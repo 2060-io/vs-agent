@@ -8,9 +8,19 @@ import {
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
 import { type AgentContext, Buffer, Key, KeyType } from '@credo-ts/core'
+import * as crypto from '@stablelib/ed25519'
 import cors from 'cors'
 import { createHash } from 'crypto'
-import { AbstractCrypto, resolveDID, type SigningOutput } from 'didwebvh-ts'
+import {
+  AbstractCrypto,
+  multibaseEncode,
+  MultibaseEncoding,
+  prepareDataForSigning,
+  resolveDID,
+  SigningInput,
+  VerificationMethod,
+  type SigningOutput,
+} from 'didwebvh-ts'
 import express from 'express'
 import fs from 'fs'
 import multer, { diskStorage } from 'multer'
@@ -296,21 +306,52 @@ export const addDidWebRoutes = async (
 export class DIDWebvhCrypto extends AbstractCrypto {
   private agentContext: AgentContext
 
-  public constructor(agentContext: AgentContext) {
+  public constructor(agentContext: AgentContext, verificationMethod?: VerificationMethod) {
     super({
-      verificationMethod: {
-        id: 'did:webvh:123',
-        controller: 'did:webvh:123',
+      verificationMethod: verificationMethod ?? {
+        id: 'did:webvh:z6MktMfquhE3nUbEMNQey6BfjLTA16R61dMTNbpLXJ8zdxwh',
+        controller: 'did:webvh:z6MktMfquhE3nUbEMNQey6BfjLTA16R61dMTNbpLXJ8zdxwh',
         type: 'Ed25519VerificationKey2020',
-        publicKeyMultibase: '123',
-        secretKeyMultibase: '123',
+        publicKeyMultibase: 'z6MktMfquhE3nUbEMNQey6BfjLTA16R61dMTNbpLXJ8zdxwh',
+        secretKeyMultibase:
+          'zrv1v7LscnqobKumZEULSjiwFyeZPZSUBDqyDraQtmfsGkLwMVMCQc3PPh3wUkTBV1yqCx2DmyHzfq1p8yoTRzaPLhM',
       },
     })
     this.agentContext = agentContext
   }
 
-  public async sign(): Promise<SigningOutput> {
-    throw new Error('Not implemented')
+  public static async create(agentContext: AgentContext): Promise<DIDWebvhCrypto> {
+    const verificationMethod = await generateTestVerificationMethod()
+    return new DIDWebvhCrypto(agentContext, verificationMethod)
+  }
+
+  public getVerificationMethod(): VerificationMethod {
+    return this.verificationMethod
+  }
+
+  public async sign(input: SigningInput): Promise<SigningOutput> {
+    try {
+      if (!this.agentContext) {
+        throw new Error('Agent context is required')
+      }
+
+      const key = await this.agentContext.wallet.createKey({ keyType: KeyType.Ed25519 })
+      const data = await prepareDataForSigning(input.document, input.proof)
+      const signature = await this.agentContext.wallet.sign({
+        key,
+        data: Buffer.from(data),
+      })
+
+      return {
+        proofValue: multibaseEncode(signature, MultibaseEncoding.BASE58_BTC),
+      }
+    } catch (error) {
+      // Log error in a non-production environment
+      if (process.env.NODE_ENV !== 'production') {
+        this.agentContext.config.logger.error('Error sign signature:', error)
+      }
+      throw new Error(`Failed to sign message: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   public async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
@@ -320,7 +361,6 @@ export class DIDWebvhCrypto extends AbstractCrypto {
       }
 
       const key = new Key(publicKey, KeyType.Ed25519)
-
       return await this.agentContext.wallet.verify({
         key,
         data: Buffer.from(message),
@@ -333,5 +373,30 @@ export class DIDWebvhCrypto extends AbstractCrypto {
       }
       return false
     }
+  }
+}
+
+export async function generateTestVerificationMethod(
+  purpose:
+    | 'authentication'
+    | 'assertionMethod'
+    | 'keyAgreement'
+    | 'capabilityInvocation'
+    | 'capabilityDelegation' = 'authentication',
+): Promise<VerificationMethod> {
+  const keyPair = crypto.generateKeyPair()
+  const secretKey = multibaseEncode(
+    new Uint8Array([0x80, 0x26, ...keyPair.secretKey]),
+    MultibaseEncoding.BASE58_BTC,
+  )
+  const publicKey = multibaseEncode(
+    new Uint8Array([0xed, 0x01, ...keyPair.publicKey]),
+    MultibaseEncoding.BASE58_BTC,
+  )
+  return {
+    type: 'Multikey',
+    publicKeyMultibase: publicKey,
+    secretKeyMultibase: secretKey,
+    purpose,
   }
 }

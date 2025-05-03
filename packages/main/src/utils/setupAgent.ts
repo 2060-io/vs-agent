@@ -18,11 +18,12 @@ import {
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
+import { createDID } from 'didwebvh-ts'
 import express from 'express'
 import { Socket } from 'net'
 import WebSocket from 'ws'
 
-import { addDidWebRoutes } from '../didWebServer'
+import { addDidWebRoutes, DIDWebvhCrypto } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
@@ -129,6 +130,20 @@ export const setupAgent = async ({
       displayName: label,
       displayPicture,
     })
+  }
+
+  if (!publicDid) {
+    const crypto = await DIDWebvhCrypto.create(agent.context)
+    const authKey = crypto.getVerificationMethod()
+    const result = await createDID({
+      domain: endpoints[0].split('//')[1],
+      signer: crypto,
+      updateKeys: [authKey.publicKeyMultibase],
+      verificationMethods: [authKey],
+      verifier: crypto,
+    })
+    console.log(result.did)
+    console.log(result.doc)
   }
 
   if (publicDid) {
