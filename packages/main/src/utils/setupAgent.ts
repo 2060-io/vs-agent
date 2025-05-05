@@ -104,6 +104,19 @@ export const setupAgent = async ({
 
   const httpServer = httpInboundTransport ? httpInboundTransport.server : app.listen(port)
 
+  if (!publicDid) {
+    const crypto = await DIDWebvhCrypto.create(agent.context)
+    const authKey = crypto.getVerificationMethod()
+    const result = await createDID({
+      domain: endpoints[0].split('//')[1],
+      signer: crypto,
+      updateKeys: [authKey.publicKeyMultibase],
+      verificationMethods: [authKey],
+      verifier: crypto,
+    })
+    agent.did = result.did
+  }
+
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
 
@@ -132,20 +145,7 @@ export const setupAgent = async ({
     })
   }
 
-  if (!publicDid) {
-    const crypto = await DIDWebvhCrypto.create(agent.context)
-    const authKey = crypto.getVerificationMethod()
-    const result = await createDID({
-      domain: endpoints[0].split('//')[1],
-      signer: crypto,
-      updateKeys: [authKey.publicKeyMultibase],
-      verificationMethods: [authKey],
-      verifier: crypto,
-    })
-    console.log(result) // created did but not assigned
-  }
-
-  if (publicDid) {
+  if (agent.did) {
     // If a public did is specified, check if it's already stored in the wallet. If it's not the case,
     // create a new one and generate keys for DIDComm (if there are endpoints configured)
     // TODO: Make DIDComm version, keys, etc. configurable. Keys can also be imported
@@ -157,23 +157,23 @@ export const setupAgent = async ({
         logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
         const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
         if (
-          oob?.outOfBandInvitation.id === publicDid &&
+          oob?.outOfBandInvitation.id === agent.did &&
           data.payload.connectionRecord.state === DidExchangeState.RequestReceived
         ) {
-          logger.debug(`Incoming connection request for ${publicDid}`)
+          logger.debug(`Incoming connection request for ${agent.did}`)
           await agent.connections.acceptRequest(data.payload.connectionRecord.id)
-          logger.debug(`Accepted request for ${publicDid}`)
+          logger.debug(`Accepted request for ${agent.did}`)
         }
       },
     )
 
     const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-    const builder = new DidDocumentBuilder(publicDid)
+    const builder = new DidDocumentBuilder(agent.did)
 
     // Create a set of keys suitable for did communication
     if (endpoints && endpoints.length > 0) {
-      const verificationMethodId = `${publicDid}#verkey`
-      const keyAgreementId = `${publicDid}#key-agreement-1`
+      const verificationMethodId = `${agent.did}#verkey`
+      const keyAgreementId = `${agent.did}#key-agreement-1`
 
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
@@ -184,13 +184,13 @@ export const setupAgent = async ({
         .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
         .addContext('https://w3id.org/security/suites/x25519-2019/v1')
         .addVerificationMethod({
-          controller: publicDid,
+          controller: agent.did,
           id: verificationMethodId,
           publicKeyBase58: ed25519.publicKeyBase58,
           type: 'Ed25519VerificationKey2018',
         })
         .addVerificationMethod({
-          controller: publicDid,
+          controller: agent.did,
           id: keyAgreementId,
           publicKeyBase58: publicKeyX25519,
           type: 'X25519KeyAgreementKey2019',
@@ -202,7 +202,7 @@ export const setupAgent = async ({
       for (let i = 0; i < agent.config.endpoints.length; i++) {
         builder.addService(
           new DidCommV1Service({
-            id: `${publicDid}#did-communication`,
+            id: `${agent.did}#did-communication`,
             serviceEndpoint: agent.config.endpoints[i],
             priority: i,
             routingKeys: [], // TODO: Support mediation
@@ -215,7 +215,7 @@ export const setupAgent = async ({
       if (anoncredsServiceBaseUrl) {
         builder.addService(
           new DidDocumentService({
-            id: `${publicDid}#anoncreds`,
+            id: `${agent.did}#anoncreds`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
             type: 'AnonCredsRegistry',
           }),
@@ -223,7 +223,7 @@ export const setupAgent = async ({
       }
     }
 
-    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
+    const existingRecord = await didRepository.findCreatedDid(agent.context, agent.did)
     if (existingRecord) {
       logger?.debug('Public did record already stored. DidDocument updated')
       existingRecord.didDocument = builder.build()
@@ -232,7 +232,7 @@ export const setupAgent = async ({
       await didRepository.save(
         agent.context,
         new DidRecord({
-          did: publicDid,
+          did: agent.did,
           role: DidDocumentRole.Created,
           didDocument: builder.build(),
         }),
