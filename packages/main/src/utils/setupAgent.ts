@@ -142,8 +142,7 @@ export const setupAgent = async ({
       verificationMethods: [authKey],
       verifier: crypto,
     })
-    console.log(result.did)
-    console.log(result.doc)
+    console.log(result) // created did but not assigned
   }
 
   if (publicDid) {

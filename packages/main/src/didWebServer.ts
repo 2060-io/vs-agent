@@ -13,6 +13,7 @@ import cors from 'cors'
 import { createHash } from 'crypto'
 import {
   AbstractCrypto,
+  multibaseDecode,
   multibaseEncode,
   MultibaseEncoding,
   prepareDataForSigning,
@@ -334,8 +335,15 @@ export class DIDWebvhCrypto extends AbstractCrypto {
       if (!this.agentContext) {
         throw new Error('Agent context is required')
       }
+      if (!this.verificationMethod.secretKeyMultibase) {
+        throw new Error('secretKeyMultibase is required')
+      }
 
-      const key = await this.agentContext.wallet.createKey({ keyType: KeyType.Ed25519 })
+      const decoded = multibaseDecode(this.verificationMethod.secretKeyMultibase).bytes
+      const key = await this.agentContext.wallet.createKey({
+        privateKey: Buffer.from(decoded.slice(2).slice(0, 32)),
+        keyType: KeyType.Ed25519,
+      })
       const data = await prepareDataForSigning(input.document, input.proof)
       const signature = await this.agentContext.wallet.sign({
         key,
