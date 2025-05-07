@@ -33,7 +33,8 @@ import path from 'path'
 import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
-import phoneCredDefData from './phone-cred-def-dev.json'
+import { readFile, writeFile } from 'fs/promises'
+import { existsSync } from 'fs'
 
 const logger = new Logger()
 
@@ -99,8 +100,34 @@ const server = app.listen(PORT, async () => {
      */
     phoneNumberCredentialDefinitionId = phoneNumberCredentialType?.id
     if (!phoneNumberCredentialDefinitionId) {
-      const credentialDefinition = await apiClient.credentialTypes.import(phoneCredDefData)
-      phoneNumberCredentialDefinitionId = credentialDefinition.id
+      const filePath = path.resolve(__dirname, 'phone-cred-def-dev.json')
+    
+      try {
+        let cred
+        if (existsSync(filePath)) {
+          const data = await readFile(filePath, 'utf-8')
+          const phoneCredDefData = JSON.parse(data);
+          cred = await apiClient.credentialTypes.import(phoneCredDefData)
+          console.log(`Imported credential definition from file: ${filePath}`)
+        } else {
+          cred = await apiClient.credentialTypes.create({
+            id: randomUUID(),
+            name: "phoneNumber",
+            version: "1.0",
+            attributes: ["phoneNumber"],
+            supportRevocation: true,
+          })
+          console.log(`Created new credential definition with ID: ${cred.id}`)
+    
+          const exported = await apiClient.credentialTypes.export(cred.id)
+          await writeFile(filePath, JSON.stringify(exported, null, 2), 'utf-8')
+          console.log(`Exported credential definition to file: ${filePath}`)
+        }
+        phoneNumberCredentialDefinitionId = cred.id
+      } catch (err) {
+        console.error('Error managing credential definition:', err)
+        throw err
+      }
     }
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
 
