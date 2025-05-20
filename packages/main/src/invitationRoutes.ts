@@ -3,8 +3,10 @@ import 'reflect-metadata'
 import express from 'express'
 import QRCode from 'qrcode'
 
+import { PresentationStatus, sendPresentationCallbackEvent } from './events/CallbackEvent'
 import { ServiceAgent } from './utils/ServiceAgent'
 import { createInvitation } from './utils/agent'
+import { TsLogger } from './utils/logger'
 
 // Add invitation endpoints (TODO: remove as it should be part of an external API)
 export const addInvitationRoutes = async (app: express.Express, agent: ServiceAgent) => {
@@ -23,6 +25,25 @@ export const addInvitationRoutes = async (app: express.Express, agent: ServiceAg
       if (!id) {
         res.status(404).end()
         return
+      }
+
+      const connRecord = shortUrlRecord?.getTag('relatedFlowId') as string
+
+      // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
+      if (connRecord) {
+        const proofRecord = await agent.proofs.getById(connRecord)
+        const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
+          | { ref?: string; callbackUrl?: string }
+          | undefined
+        if (callbackParameters && callbackParameters.callbackUrl) {
+          await sendPresentationCallbackEvent({
+            proofExchangeId: proofRecord.id,
+            callbackUrl: callbackParameters.callbackUrl,
+            status: PresentationStatus.CONNECTED,
+            logger: (await agent.config.logger) as TsLogger,
+            ref: callbackParameters.ref,
+          })
+        }
       }
 
       if (req.accepts('json')) {
