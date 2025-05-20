@@ -101,27 +101,6 @@ The `app.module.ts` file is the entry point for the application and defines the 
 
 ---
 
-### **Recommendations**
-1. **Review Library Documentation**:
-   - Familiarize yourself with the APIs provided by `@2060.io` libraries.
-   - Explore advanced features like event handling and credential management.
-
-2. **Enhance Logging**:
-   - Add more detailed logs to track message processing and session updates.
-
-3. **Extend Features**:
-   - Add support for additional message types or actions in the contextual menu.
-
-4. **Testing**:
-   - Write unit tests for `CoreService` methods to ensure reliability.
-
-5. **Error Handling**:
-   - Improve error handling in methods like `inputMessage` and `handleStateInput`.
-
-By following these steps, you can ensure a robust and scalable chatbot application.
-
----
-
 ## Prerequisites
 
 Before running the chatbot, ensure you have the following installed:
@@ -221,3 +200,38 @@ To run the chatbot in a Docker container:
 
 - **Swagger Documentation Not Accessible**:
   Verify the application is running and navigate to `/api` in your browser.
+
+---
+
+## **Recommendations**
+
+1. **Focus on Core Components**:
+   - The `app.module.ts`, `core.service.ts`, and `core.module.ts` files are the main focus of this application. These files define the structure and behavior of the chatbot. If you plan to create a new chatbot, start by reviewing and adapting these files to meet your requirements.
+
+2. **Leverage Modular Design**:
+   - The library is designed to be modular, allowing you to extend or replace components as needed. Use the modular structure to add new features or customize existing ones without disrupting the core functionality.
+
+3. **Session Management**:
+   - Use the `models` directory to define and manage session entities. This ensures a consistent and reliable way to handle user sessions across the application.
+
+4. **Standardize Commands**:
+   - The `commands` file is essential for maintaining a standard across the development process. Define all chatbot commands here to ensure consistency and avoid duplication.
+
+5. **Review Library Documentation**:
+   - Familiarize yourself with the APIs provided by the `@2060.io` libraries. These libraries offer powerful tools for message handling, credential management, and API interactions.
+
+6. **Extend Features**:
+   - Add support for additional message types, commands, or contextual menu actions as needed. The modular design makes it easy to extend the chatbot's functionality.
+
+7. **Testing and Debugging**:
+   - Write unit tests for critical methods in `core.service.ts` to ensure reliability.
+   - Use detailed logging to track message processing, session updates, and API interactions.
+
+8. **Error Handling**:
+   - Implement robust error handling in methods like `inputMessage` and `handleStateInput` to ensure the chatbot can recover gracefully from unexpected issues.
+
+9. **Follow Best Practices**:
+   - Maintain a clean and organized codebase by adhering to best practices for modular development.
+   - Use consistent naming conventions and document your code to make it easier for others to understand and contribute.
+
+By following these recommendations, you can build a scalable, maintainable, and feature-rich chatbot application.
