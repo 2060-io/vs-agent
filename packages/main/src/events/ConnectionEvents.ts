@@ -43,7 +43,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
             connectionId: record.id,
             protocolVersion: 'v2',
             queries: config.discoveryOptions,
-        })
+          })
       }
 
       // If discovery is enabled, send an empty 'completed' state so that the recipient knows to expect async features.
