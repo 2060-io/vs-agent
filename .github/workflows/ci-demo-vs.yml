@@ -25,20 +25,20 @@ jobs:
           
       - name: Install dependencies
         run: |
-          cd examples/demo-vs
+          cd examples/demo-dts
           yarn install --immutable
 
       - name: Build
         run: |
-          cd examples/demo-vs
+          cd examples/demo-dts
           yarn build
 
       - name: Check Format
         run: |
-          cd examples/demo-vs
+          cd examples/demo-dts
           yarn check-format
 
       - name: Check Types
         run: |
-          cd examples/demo-vs
+          cd examples/demo-dts
           yarn check-types
