@@ -65,4 +65,5 @@ jobs:
           yarn workspaces foreach --topological version $RELEASE_VERSION
           yarn up @2060.io/service-agent-model@$RELEASE_VERSION
           yarn up @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn build
           yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
