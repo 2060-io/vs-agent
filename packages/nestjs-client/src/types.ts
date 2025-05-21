@@ -1,12 +1,12 @@
 import { ApiVersion } from '@2060.io/service-agent-client'
 import { ProfileMessageOptions } from '@2060.io/service-agent-model'
-import { DynamicModule, Type } from '@nestjs/common'
+import { DynamicModule, ForwardReference, Type } from '@nestjs/common'
 
 import { EventHandler } from './interfaces'
 
 export interface MessageEventOptions {
   eventHandler?: Type<EventHandler>
-  imports?: DynamicModule[]
+  imports?: (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[]
   url?: string
   version?: ApiVersion
 }
@@ -15,12 +15,12 @@ export type UserProfile = Omit<ProfileMessageOptions, 'id' | 'connectionId'>
 
 export interface ConnectionEventOptions {
   eventHandler?: Type<EventHandler>
-  imports?: DynamicModule[]
+  imports?: (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[]
   useMessages?: boolean
 }
 
 export interface StatEventOptions {
-  imports?: DynamicModule[]
+  imports?: (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[]
   statOptions?: {
     host?: string
     port?: number
@@ -34,7 +34,7 @@ export interface StatEventOptions {
 }
 
 export interface CredentialOptions {
-  imports?: DynamicModule[]
+  imports?: (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[]
   url?: string
   version?: ApiVersion
 }
@@ -50,7 +50,7 @@ export interface EventsModuleOptions {
   modules: ModulesConfig
   options: {
     eventHandler?: Type<EventHandler>
-    imports?: DynamicModule[]
+    imports?: (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[]
     url?: string
     version?: ApiVersion
     statOptions?: {
