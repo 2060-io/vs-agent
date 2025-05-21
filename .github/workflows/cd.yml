@@ -30,89 +30,88 @@ jobs:
         run: |
           yarn install
 
-      - uses: codfish/semantic-release-action@v3
-        id: semantic
-        with:
-          branches: |
-            [
-              'release',
-              { 
-                name: 'main',
-                prerelease: 'dev'
-              }
-            ]
-          plugins: |
-            [
-              [
-                "@semantic-release/commit-analyzer",
-                {
-                  "preset": "angular",
-                  "releaseRules": [
-                    {
-                      "type": "refactor",
-                      "release": "patch"
-                    }
-                  ]
-                }
-              ],
-              [
-                "@semantic-release/npm",
-                {
-                  "npmPublish": false
-                }
-              ],
-              "@semantic-release/release-notes-generator",
-            ]
+      # - uses: codfish/semantic-release-action@v3
+      #   id: semantic
+      #   with:
+      #     branches: |
+      #       [
+      #         'release',
+      #         { 
+      #           name: 'main',
+      #           prerelease: 'dev'
+      #         }
+      #       ]
+      #     plugins: |
+      #       [
+      #         [
+      #           "@semantic-release/commit-analyzer",
+      #           {
+      #             "preset": "angular",
+      #             "releaseRules": [
+      #               {
+      #                 "type": "refactor",
+      #                 "release": "patch"
+      #               }
+      #             ]
+      #           }
+      #         ],
+      #         [
+      #           "@semantic-release/npm",
+      #           {
+      #             "npmPublish": false
+      #           }
+      #         ],
+      #         "@semantic-release/release-notes-generator",
+      #       ]
 
-      - name: Log in to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
+      # - name: Log in to Docker Hub
+      #   if: steps.semantic.outputs.new-release-published == 'true'
+      #   run: |
+      #     echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
 
-      - name: Build Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+      # - name: Build Docker image
+      #   if: steps.semantic.outputs.new-release-published == 'true'
+      #   run: |
+      #     docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
  
-      - name: Add tags to Docker image and push to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
-            docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
+      # - name: Add tags to Docker image and push to Docker Hub
+      #   if: steps.semantic.outputs.new-release-published == 'true'
+      #   run: |
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}-$IMAGE_TAG
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}-$IMAGE_TAG
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-$IMAGE_TAG
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
+      #       docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR-$IMAGE_TAG
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR-$IMAGE_TAG
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}-$IMAGE_TAG
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
      
-      - name: Add tags to Docker image and push to Docker Hub (specific to releases)
-        if: github.ref == 'refs/heads/release' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}
+      # - name: Add tags to Docker image and push to Docker Hub (specific to releases)
+      #   if: github.ref == 'refs/heads/release' && steps.semantic.outputs.new-release-published == 'true'
+      #   run: |
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
+      #       docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
+      #       docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}
 
-      - name: Build and push Chatbot Demo Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
+      # - name: Build and push Chatbot Demo Docker image
+      #   if: steps.semantic.outputs.new-release-published == 'true'
+      #   run: |
+      #     docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
+      #     docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Publish NPM packages
-        if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
-          yarn workspaces foreach --topological version $RELEASE_VERSION
-          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn workspaces foreach --topological version 1.1.0-beta.55
+          yarn up @2060.io/service-agent-model@1.1.0-beta.55
+          yarn up @2060.io/service-agent-client@1.1.0-beta.551.1.0-beta.55
           yarn build
           yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
           
