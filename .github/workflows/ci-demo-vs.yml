@@ -1,0 +1,44 @@
+name: Continuous Integration for Demo vs
+# This workflow is triggered on pull requests to the main branch and on pushes to the main branch.
+# It runs a series of steps to validate the code, including checking out the code, setting up Node.js, installing dependencies, building the project, and checking formatting and types.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup node v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
+      - name: Install dependencies
+        run: |
+          cd examples/demo-vs
+          yarn install --immutable
+
+      - name: Build
+        run: |
+          cd examples/demo-vs
+          yarn build
+
+      - name: Check Format
+        run: |
+          cd examples/demo-vs
+          yarn check-format
+
+      - name: Check Types
+        run: |
+          cd examples/demo-vs
+          yarn check-types
