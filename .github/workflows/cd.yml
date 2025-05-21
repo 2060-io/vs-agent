@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**']
+    branches: [main, 'release/**', fix/add-the-correct-version-to-variable-service-libraries]
 
   workflow_dispatch:
 
