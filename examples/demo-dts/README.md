@@ -105,7 +105,7 @@ The `app.module.ts` file is the entry point for the application and defines the 
 
 Before running the chatbot, ensure you have the following installed:
 
-- Node.js (v16 or higher)
+- Node.js (v20 or higher)
 - Yarn package manager
 - Docker (optional, for containerized deployment)
 
