@@ -7,6 +7,7 @@ env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: '2060-service-agent'      
+  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 jobs:
   build-and-push:
     name: Build and push docker images
@@ -52,8 +53,8 @@ jobs:
       - name: Build and push Chatbot Demo Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
+          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}}
 
       - name: Publish NPM packages
         if: steps.get_version.outputs.is-semver == 'true'
@@ -62,8 +63,8 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
-          yarn workspaces foreach --topological version $RELEASE_VERSION
-          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
+          yarn workspaces foreach --topological version ${{steps.get_version.outputs.version}}
+          yarn up @2060.io/service-agent-model@${{steps.get_version.outputs.version}}
+          yarn up @2060.io/service-agent-client@${{steps.get_version.outputs.version}}
           yarn build
           yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
