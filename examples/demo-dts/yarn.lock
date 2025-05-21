@@ -5,23 +5,76 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@2060.io/service-agent-client@link:../../packages/client::locator=demo-dts%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@2060.io/service-agent-client@link:../../packages/client::locator=demo-dts%40workspace%3A."
+"@2060.io/credo-ts-didcomm-mrtd@npm:^0.0.12":
+  version: 0.0.12
+  resolution: "@2060.io/credo-ts-didcomm-mrtd@npm:0.0.12"
+  dependencies:
+    "@li0ard/tsemrtd": ^0.2.0
+    class-transformer: 0.5.1
+    class-validator: 0.14.1
+    esbuild: ^0.24.0
+    mrz: ^4.2.0
+    reflect-metadata: ^0.1.13
+    rxjs: ^7.2.0
+    tsyringe: ^4.8.0
+  peerDependencies:
+    "@credo-ts/core": ^0.5.10
+  checksum: 848db09a2666ac747fb457961967738589ade1dc8b1ef996866b5d5dd08752ac27b8c45260ffb0ff427f54f65954b8c0a3d196f3b9ff5ef7b9b67d42b3249e8b
   languageName: node
-  linkType: soft
+  linkType: hard
 
-"@2060.io/service-agent-model@link:../../packages/model::locator=demo-dts%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@2060.io/service-agent-model@link:../../packages/model::locator=demo-dts%40workspace%3A."
+"@2060.io/service-agent-client@npm:1.1.0-dev.41":
+  version: 1.1.0-dev.41
+  resolution: "@2060.io/service-agent-client@npm:1.1.0-dev.41"
+  dependencies:
+    "@2060.io/service-agent-model": "*"
+    class-transformer: 0.5.1
+    class-validator: 0.14.1
+    express: ^4.18.1
+    tslog: ^4.8.2
+  peerDependencies:
+    "@credo-ts/core": ^0.5.11
+  checksum: ce01fa41b130d4367abb0c4782e1610eacb3ea549b2b98578737b8b4666cab89b5dc790c63f159c287a9d598090f9d746cbe925b1e8c1745050aaa0bdb7db4cc
   languageName: node
-  linkType: soft
+  linkType: hard
 
-"@2060.io/service-agent-nestjs-client@link:../../packages/nestjs-client::locator=demo-dts%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@2060.io/service-agent-nestjs-client@link:../../packages/nestjs-client::locator=demo-dts%40workspace%3A."
+"@2060.io/service-agent-model@npm:1.1.0-dev.41":
+  version: 1.1.0-dev.41
+  resolution: "@2060.io/service-agent-model@npm:1.1.0-dev.41"
+  dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
+    "@credo-ts/core": ^0.5.11
+    class-transformer: 0.5.1
+    class-validator: 0.14.1
+    credo-ts-receipts: ^0.0.1-alpha.5
+    mrz: ^4.2.0
+  peerDependencies:
+    "@credo-ts/core": ^0.5.11
+  checksum: 9eb1d424498a22d6a17f7b24d83ba9bce9efc7a53560f6060d8c86fb7d18f99e20c7f102531cdbf18a199c727ab887a9c30028c7087d29b5b8b4c9383dd360de
   languageName: node
-  linkType: soft
+  linkType: hard
+
+"@2060.io/service-agent-nestjs-client@npm:1.1.0-dev.41":
+  version: 1.1.0-dev.41
+  resolution: "@2060.io/service-agent-nestjs-client@npm:1.1.0-dev.41"
+  dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
+    "@2060.io/service-agent-client": "*"
+    "@2060.io/service-agent-model": "*"
+    "@credo-ts/core": ^0.5.11
+    "@nestjs/common": ^10.0.0
+    "@nestjs/core": ^10.0.0
+    "@nestjs/platform-express": ^10.0.0
+    "@nestjs/typeorm": ^10.0.2
+    reflect-metadata: ^0.2.0
+    rxjs: ^7.8.1
+    typeorm: ^0.3.20
+  peerDependencies:
+    "@nestjs/common": ^10.0.0
+    "@nestjs/core": ^10.0.0
+  checksum: b212cf497c15132b020f0bf501c3cb949df891288bb43c449704e307bbe85adfe06ed548ed1faa689f318567e754f1baa0a2346c31d7de1698312ac364c99c32
+  languageName: node
+  linkType: hard
 
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.3.0
@@ -78,6 +131,34 @@ __metadata:
     ora: 5.4.1
     rxjs: 7.8.1
   checksum: efe1639d9c7770b02dbaff7bc53be763cde0d9a198261288c2fc2f6263298dd7f943389ba61b0229b664429d8f1b28aaad5d91d3756cebc63a1092c617a18e8c
+  languageName: node
+  linkType: hard
+
+"@animo-id/mdoc@npm:0.2.38":
+  version: 0.2.38
+  resolution: "@animo-id/mdoc@npm:0.2.38"
+  dependencies:
+    compare-versions: ^6.1.1
+  checksum: 6a12fb8ffc6fc903f83ad34aa68f2c5bc381c9e6adfad045ede19eb51d6c378ebaafd99b369ace3e8ae22f233f1b2ffe9641ccac1d728a0057db78e8eb3f9077
+  languageName: node
+  linkType: hard
+
+"@animo-id/pex@npm:4.1.1-alpha.0":
+  version: 4.1.1-alpha.0
+  resolution: "@animo-id/pex@npm:4.1.1-alpha.0"
+  dependencies:
+    "@astronautlabs/jsonpath": ^1.1.2
+    "@sd-jwt/decode": ^0.7.2
+    "@sd-jwt/present": ^0.7.2
+    "@sd-jwt/types": ^0.7.2
+    "@sphereon/pex-models": ^2.3.1
+    "@sphereon/ssi-types": 0.30.2-next.135
+    ajv: ^8.12.0
+    ajv-formats: ^2.1.1
+    jwt-decode: ^3.1.2
+    nanoid: ^3.3.7
+    uint8arrays: ^3.1.1
+  checksum: c299b2b23137d98d0087a6975a5b43a60920ec76b9ec350d2185710d6b4489f422aca29eaed20d67e3da0784bcb100da7c88fc17cc242beab1104e0c99175272
   languageName: node
   linkType: hard
 
@@ -512,6 +593,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@credo-ts/core@npm:^0.5.0-alpha.116":
+  version: 0.5.15
+  resolution: "@credo-ts/core@npm:0.5.15"
+  dependencies:
+    "@animo-id/mdoc": 0.2.38
+    "@animo-id/pex": 4.1.1-alpha.0
+    "@astronautlabs/jsonpath": ^1.1.2
+    "@digitalcredentials/jsonld": ^6.0.0
+    "@digitalcredentials/jsonld-signatures": ^9.4.0
+    "@digitalcredentials/vc": ^6.0.1
+    "@multiformats/base-x": ^4.0.1
+    "@noble/curves": ^1.6.0
+    "@noble/hashes": ^1.5.0
+    "@peculiar/asn1-ecc": ^2.3.8
+    "@peculiar/asn1-schema": ^2.3.8
+    "@peculiar/asn1-x509": ^2.3.8
+    "@peculiar/x509": ^1.11.0
+    "@sd-jwt/core": ^0.7.0
+    "@sd-jwt/decode": ^0.7.0
+    "@sd-jwt/jwt-status-list": ^0.7.0
+    "@sd-jwt/sd-jwt-vc": ^0.7.0
+    "@sd-jwt/types": ^0.7.0
+    "@sd-jwt/utils": ^0.7.0
+    "@sphereon/pex-models": ^2.3.1
+    "@sphereon/ssi-types": 0.30.2-next.135
+    "@stablelib/ed25519": ^1.0.2
+    "@types/ws": ^8.5.4
+    abort-controller: ^3.0.0
+    big-integer: ^1.6.51
+    borc: ^3.0.0
+    buffer: ^6.0.3
+    class-transformer: 0.5.1
+    class-validator: 0.14.1
+    did-resolver: ^4.1.0
+    lru_map: ^0.4.1
+    luxon: ^3.5.0
+    make-error: ^1.3.6
+    object-inspect: ^1.10.3
+    query-string: ^7.0.1
+    reflect-metadata: ^0.1.13
+    rxjs: ^7.8.0
+    tsyringe: ^4.8.0
+    uuid: ^9.0.0
+    varint: ^6.0.0
+    web-did-resolver: ^2.0.21
+    webcrypto-core: ^1.8.0
+  checksum: a8e4c4d534f52a689bc1fa9b94b4f4350e991385f3d13367446a1c7f6eac78ca29c00a743ea2d42673731ffefbe2f763a19ee1c084ee66e2b37e2d14c0238f28
+  languageName: node
+  linkType: hard
+
 "@credo-ts/core@npm:^0.5.11":
   version: 0.5.13
   resolution: "@credo-ts/core@npm:0.5.13"
@@ -780,6 +911,181 @@ __metadata:
     credentials-context: ^2.0.0
     fix-esm: ^1.0.1
   checksum: ce5dc64ffa6bccedadbc9b6145c52843f3070d037f79974eeac45d200d8da3ecd44361014300704ad123159a5a3fb795a17473171d47b61fc3511ee758f6ea8b
+  languageName: node
+  linkType: hard
+
+"@esbuild/aix-ppc64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/aix-ppc64@npm:0.24.2"
+  conditions: os=aix & cpu=ppc64
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/android-arm64@npm:0.24.2"
+  conditions: os=android & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-arm@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/android-arm@npm:0.24.2"
+  conditions: os=android & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@esbuild/android-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/android-x64@npm:0.24.2"
+  conditions: os=android & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/darwin-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/darwin-arm64@npm:0.24.2"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/darwin-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/darwin-x64@npm:0.24.2"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/freebsd-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/freebsd-arm64@npm:0.24.2"
+  conditions: os=freebsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/freebsd-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/freebsd-x64@npm:0.24.2"
+  conditions: os=freebsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-arm64@npm:0.24.2"
+  conditions: os=linux & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-arm@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-arm@npm:0.24.2"
+  conditions: os=linux & cpu=arm
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-ia32@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-ia32@npm:0.24.2"
+  conditions: os=linux & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-loong64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-loong64@npm:0.24.2"
+  conditions: os=linux & cpu=loong64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-mips64el@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-mips64el@npm:0.24.2"
+  conditions: os=linux & cpu=mips64el
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-ppc64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-ppc64@npm:0.24.2"
+  conditions: os=linux & cpu=ppc64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-riscv64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-riscv64@npm:0.24.2"
+  conditions: os=linux & cpu=riscv64
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-s390x@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-s390x@npm:0.24.2"
+  conditions: os=linux & cpu=s390x
+  languageName: node
+  linkType: hard
+
+"@esbuild/linux-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/linux-x64@npm:0.24.2"
+  conditions: os=linux & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/netbsd-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/netbsd-arm64@npm:0.24.2"
+  conditions: os=netbsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/netbsd-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/netbsd-x64@npm:0.24.2"
+  conditions: os=netbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openbsd-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/openbsd-arm64@npm:0.24.2"
+  conditions: os=openbsd & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/openbsd-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/openbsd-x64@npm:0.24.2"
+  conditions: os=openbsd & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/sunos-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/sunos-x64@npm:0.24.2"
+  conditions: os=sunos & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-arm64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/win32-arm64@npm:0.24.2"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-ia32@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/win32-ia32@npm:0.24.2"
+  conditions: os=win32 & cpu=ia32
+  languageName: node
+  linkType: hard
+
+"@esbuild/win32-x64@npm:0.24.2":
+  version: 0.24.2
+  resolution: "@esbuild/win32-x64@npm:0.24.2"
+  conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
@@ -1205,6 +1511,20 @@ __metadata:
   peerDependencies:
     "@js-joda/core": ">=1.11.0"
   checksum: 3f8f5a4a25fe03ebb22c7af42df0fd9c80ebb523e05fe104a3fe6525f6dc927a01e2e49c4a083ae5744f73142af8217bbd98a08d565c5e7e0170164111bcf960
+  languageName: node
+  linkType: hard
+
+"@li0ard/tsemrtd@npm:^0.2.0":
+  version: 0.2.2
+  resolution: "@li0ard/tsemrtd@npm:0.2.2"
+  dependencies:
+    "@peculiar/asn1-cms": ^2.3.13
+    "@peculiar/asn1-schema": ^2.3.13
+    "@peculiar/asn1-x509": ^2.3.13
+    node-tlv: ^1.5.14
+  peerDependencies:
+    typescript: ^5.0.0
+  checksum: b8b9267aac2c8aed009ee6ffc5c29407f860e712fedacd69f00a88be7a5bc7fdb6cd014f5a5c1577e7c6b11c400ab8f872b164d36639a24a0de8b46b69ac946a
   languageName: node
   linkType: hard
 
@@ -3724,6 +4044,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"credo-ts-receipts@npm:^0.0.1-alpha.5":
+  version: 0.0.1-alpha.5
+  resolution: "credo-ts-receipts@npm:0.0.1-alpha.5"
+  dependencies:
+    "@credo-ts/core": ^0.5.0-alpha.116
+    class-transformer: ^0.5.1
+    class-validator: ^0.14.1
+    reflect-metadata: ^0.1.13
+    rxjs: ^7.2.0
+    tsyringe: ^4.8.0
+    uuid: ^9.0.0
+  checksum: 57347d41f31f89a9a9f0a669f649025d3733723eb86f82337daaa2511d6f509925ce91214bbcd485f04cf0ade41d4cc508dc60d69c7af1ca6cf6def51af3c253
+  languageName: node
+  linkType: hard
+
 "cross-fetch@npm:^4.0.0":
   version: 4.0.0
   resolution: "cross-fetch@npm:4.0.0"
@@ -3869,9 +4204,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "demo-dts@workspace:."
   dependencies:
-    "@2060.io/service-agent-client": "link:../../packages/client"
-    "@2060.io/service-agent-model": "link:../../packages/model"
-    "@2060.io/service-agent-nestjs-client": "link:../../packages/nestjs-client"
+    "@2060.io/service-agent-client": ^1.1.0-dev.41
+    "@2060.io/service-agent-model": ^1.1.0-dev.41
+    "@2060.io/service-agent-nestjs-client": ^1.1.0-dev.41
     "@credo-ts/core": ^0.5.11
     "@nestjs/axios": ^3.1.1
     "@nestjs/cli": ^10.0.0
@@ -4133,6 +4468,92 @@ __metadata:
   version: 1.5.4
   resolution: "es-module-lexer@npm:1.5.4"
   checksum: a0cf04fb92d052647ac7d818d1913b98d3d3d0f5b9d88f0eafb993436e4c3e2c958599db68839d57f2dfa281fdf0f60e18d448eb78fc292c33c0f25635b6854f
+  languageName: node
+  linkType: hard
+
+"esbuild@npm:^0.24.0":
+  version: 0.24.2
+  resolution: "esbuild@npm:0.24.2"
+  dependencies:
+    "@esbuild/aix-ppc64": 0.24.2
+    "@esbuild/android-arm": 0.24.2
+    "@esbuild/android-arm64": 0.24.2
+    "@esbuild/android-x64": 0.24.2
+    "@esbuild/darwin-arm64": 0.24.2
+    "@esbuild/darwin-x64": 0.24.2
+    "@esbuild/freebsd-arm64": 0.24.2
+    "@esbuild/freebsd-x64": 0.24.2
+    "@esbuild/linux-arm": 0.24.2
+    "@esbuild/linux-arm64": 0.24.2
+    "@esbuild/linux-ia32": 0.24.2
+    "@esbuild/linux-loong64": 0.24.2
+    "@esbuild/linux-mips64el": 0.24.2
+    "@esbuild/linux-ppc64": 0.24.2
+    "@esbuild/linux-riscv64": 0.24.2
+    "@esbuild/linux-s390x": 0.24.2
+    "@esbuild/linux-x64": 0.24.2
+    "@esbuild/netbsd-arm64": 0.24.2
+    "@esbuild/netbsd-x64": 0.24.2
+    "@esbuild/openbsd-arm64": 0.24.2
+    "@esbuild/openbsd-x64": 0.24.2
+    "@esbuild/sunos-x64": 0.24.2
+    "@esbuild/win32-arm64": 0.24.2
+    "@esbuild/win32-ia32": 0.24.2
+    "@esbuild/win32-x64": 0.24.2
+  dependenciesMeta:
+    "@esbuild/aix-ppc64":
+      optional: true
+    "@esbuild/android-arm":
+      optional: true
+    "@esbuild/android-arm64":
+      optional: true
+    "@esbuild/android-x64":
+      optional: true
+    "@esbuild/darwin-arm64":
+      optional: true
+    "@esbuild/darwin-x64":
+      optional: true
+    "@esbuild/freebsd-arm64":
+      optional: true
+    "@esbuild/freebsd-x64":
+      optional: true
+    "@esbuild/linux-arm":
+      optional: true
+    "@esbuild/linux-arm64":
+      optional: true
+    "@esbuild/linux-ia32":
+      optional: true
+    "@esbuild/linux-loong64":
+      optional: true
+    "@esbuild/linux-mips64el":
+      optional: true
+    "@esbuild/linux-ppc64":
+      optional: true
+    "@esbuild/linux-riscv64":
+      optional: true
+    "@esbuild/linux-s390x":
+      optional: true
+    "@esbuild/linux-x64":
+      optional: true
+    "@esbuild/netbsd-arm64":
+      optional: true
+    "@esbuild/netbsd-x64":
+      optional: true
+    "@esbuild/openbsd-arm64":
+      optional: true
+    "@esbuild/openbsd-x64":
+      optional: true
+    "@esbuild/sunos-x64":
+      optional: true
+    "@esbuild/win32-arm64":
+      optional: true
+    "@esbuild/win32-ia32":
+      optional: true
+    "@esbuild/win32-x64":
+      optional: true
+  bin:
+    esbuild: bin/esbuild
+  checksum: e2303f8331887e31330b5a972fb9640ad93dfc5af76cb2156faa9eaa32bac5c403244096cbdafc45622829913e63664dfd88410987e3468df4354492f908a094
   languageName: node
   linkType: hard
 
@@ -6711,6 +7132,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mrz@npm:^4.2.0":
+  version: 4.2.1
+  resolution: "mrz@npm:4.2.1"
+  checksum: e9398a778543ce6e678a0bbfb275f5a6db2ebe93f6e7bf0de5ad927889b297c1c8c1cf0fb6e7d845f67090b81a053b064c7195a970179e5b84d0c3d6803b60bb
+  languageName: node
+  linkType: hard
+
 "ms@npm:2.0.0":
   version: 2.0.0
   resolution: "ms@npm:2.0.0"
@@ -6924,6 +7352,13 @@ __metadata:
   version: 2.0.18
   resolution: "node-releases@npm:2.0.18"
   checksum: ef55a3d853e1269a6d6279b7692cd6ff3e40bc74947945101138745bfdc9a5edabfe72cb19a31a8e45752e1910c4c65c77d931866af6357f242b172b7283f5b3
+  languageName: node
+  linkType: hard
+
+"node-tlv@npm:^1.5.14":
+  version: 1.5.14
+  resolution: "node-tlv@npm:1.5.14"
+  checksum: 5d00c6663c70fc06b35409db40316df055162382516f8919b9dff38221be3f135d19aad8415a800f25a7347599869aba0cfa389b18f8677ea5811da09eda41f1
   languageName: node
   linkType: hard
 
@@ -7825,6 +8260,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rxjs@npm:^7.2.0":
+  version: 7.8.2
+  resolution: "rxjs@npm:7.8.2"
+  dependencies:
+    tslib: ^2.1.0
+  checksum: 2f233d7c832a6c255dabe0759014d7d9b1c9f1cb2f2f0d59690fd11c883c9826ea35a51740c06ab45b6ade0d9087bde9192f165cba20b6730d344b831ef80744
+  languageName: node
+  linkType: hard
+
 "safe-buffer@npm:5.2.1, safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0, safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
@@ -8636,6 +9080,13 @@ __metadata:
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
+  languageName: node
+  linkType: hard
+
+"tslog@npm:^4.8.2":
+  version: 4.9.3
+  resolution: "tslog@npm:4.9.3"
+  checksum: 78e73f13a6bd508d6337e4847bf18f3c6f992ce83b76fa7dbbd8404f8b79e4c3001db4d96c7b9eb74e2af93f2a5eb6276b908533a898e17cbdce2c88b1d36536
   languageName: node
   linkType: hard
 

@@ -23,9 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@2060.io/service-agent-model": "link:../../packages/model",
-    "@2060.io/service-agent-nestjs-client": "link:../../packages/nestjs-client",
-    "@2060.io/service-agent-client": "link:../../packages/client",
+    "@2060.io/service-agent-client": "^1.1.0-dev.41",
+    "@2060.io/service-agent-model": "^1.1.0-dev.41",
+    "@2060.io/service-agent-nestjs-client": "^1.1.0-dev.41",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.0",
@@ -88,6 +88,9 @@
   },
   "resolutions": {
     "@types/express": "4.17.21",
-    "express": "4.21.0"
+    "express": "4.21.0",
+    "@2060.io/service-agent-client": "1.1.0-dev.41",
+    "@2060.io/service-agent-model": "1.1.0-dev.41",
+    "@2060.io/service-agent-nestjs-client": "1.1.0-dev.41"
   }
 }

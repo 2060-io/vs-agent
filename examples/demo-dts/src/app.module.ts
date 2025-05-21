@@ -5,7 +5,6 @@ import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
 import { EventsModule } from '@2060.io/service-agent-nestjs-client'
-import { ApiVersion } from '@2060.io/service-agent-client'
 import { CoreModule } from '@/core.module'
 
 @Module({
@@ -35,11 +34,11 @@ import { CoreModule } from '@/core.module'
       },
       options: {
         eventHandler: CoreService,
-        imports: [],
         url: process.env.SERVICE_AGENT_ADMIN_URL,
-        version: ApiVersion.V1,
       },
     }),
   ],
+  controllers: [],
+  providers: [CoreService],
 })
 export class AppModule {}
