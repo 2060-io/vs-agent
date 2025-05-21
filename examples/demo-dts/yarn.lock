@@ -23,24 +23,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@2060.io/service-agent-client@npm:1.1.0-dev.41":
-  version: 1.1.0-dev.41
-  resolution: "@2060.io/service-agent-client@npm:1.1.0-dev.41"
+"@2060.io/service-agent-client@npm:1.1.1-dev.1, @2060.io/service-agent-client@npm:^1.1.1-dev.1":
+  version: 1.1.1-dev.1
+  resolution: "@2060.io/service-agent-client@npm:1.1.1-dev.1"
   dependencies:
-    "@2060.io/service-agent-model": "*"
+    "@2060.io/service-agent-model": 1.1.1-dev.1
     class-transformer: 0.5.1
     class-validator: 0.14.1
     express: ^4.18.1
     tslog: ^4.8.2
   peerDependencies:
     "@credo-ts/core": ^0.5.11
-  checksum: ce01fa41b130d4367abb0c4782e1610eacb3ea549b2b98578737b8b4666cab89b5dc790c63f159c287a9d598090f9d746cbe925b1e8c1745050aaa0bdb7db4cc
+  checksum: bf23d2c8d98cb4fd5a76575401fc1f7a6a39956fb5e00660e9089bd56c2d4c50aacd0f8cf5fd8f17ed64218018b4f96b2fd14beedad9434dc78410a169dec378
   languageName: node
   linkType: hard
 
-"@2060.io/service-agent-model@npm:1.1.0-dev.41":
-  version: 1.1.0-dev.41
-  resolution: "@2060.io/service-agent-model@npm:1.1.0-dev.41"
+"@2060.io/service-agent-model@npm:1.1.1-dev.1, @2060.io/service-agent-model@npm:^1.1.1-dev.1":
+  version: 1.1.1-dev.1
+  resolution: "@2060.io/service-agent-model@npm:1.1.1-dev.1"
   dependencies:
     "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
     "@credo-ts/core": ^0.5.11
@@ -50,29 +50,30 @@ __metadata:
     mrz: ^4.2.0
   peerDependencies:
     "@credo-ts/core": ^0.5.11
-  checksum: 9eb1d424498a22d6a17f7b24d83ba9bce9efc7a53560f6060d8c86fb7d18f99e20c7f102531cdbf18a199c727ab887a9c30028c7087d29b5b8b4c9383dd360de
+  checksum: caaeaf993c1c12e0294b84c2da5f49ef98722fde73d1e7a8b3d42a81b36f64b791aeb33e957676029c843e235d37dc81ad162ec7f4fbdb65c209d4a6b4f823c7
   languageName: node
   linkType: hard
 
-"@2060.io/service-agent-nestjs-client@npm:1.1.0-dev.41":
-  version: 1.1.0-dev.41
-  resolution: "@2060.io/service-agent-nestjs-client@npm:1.1.0-dev.41"
+"@2060.io/service-agent-nestjs-client@npm:^1.1.1-dev.1":
+  version: 1.1.1-dev.1
+  resolution: "@2060.io/service-agent-nestjs-client@npm:1.1.1-dev.1"
   dependencies:
     "@2060.io/credo-ts-didcomm-mrtd": ^0.0.12
-    "@2060.io/service-agent-client": "*"
-    "@2060.io/service-agent-model": "*"
+    "@2060.io/service-agent-client": 1.1.1-dev.1
+    "@2060.io/service-agent-model": 1.1.1-dev.1
     "@credo-ts/core": ^0.5.11
     "@nestjs/common": ^10.0.0
     "@nestjs/core": ^10.0.0
     "@nestjs/platform-express": ^10.0.0
     "@nestjs/typeorm": ^10.0.2
     reflect-metadata: ^0.2.0
+    rhea: ^3.0.3
     rxjs: ^7.8.1
     typeorm: ^0.3.20
   peerDependencies:
     "@nestjs/common": ^10.0.0
     "@nestjs/core": ^10.0.0
-  checksum: b212cf497c15132b020f0bf501c3cb949df891288bb43c449704e307bbe85adfe06ed548ed1faa689f318567e754f1baa0a2346c31d7de1698312ac364c99c32
+  checksum: f01b4e39d1a94396bc262d9fde23d40012e423011dd7534373657812bc5d050624dc2eb653875f54dd865addf298da80b69daa1fed0cf41baa9d76a7743ffd15
   languageName: node
   linkType: hard
 
@@ -4140,6 +4141,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"debug@npm:^4.3.3":
+  version: 4.4.1
+  resolution: "debug@npm:4.4.1"
+  dependencies:
+    ms: ^2.1.3
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: a43826a01cda685ee4cec00fb2d3322eaa90ccadbef60d9287debc2a886be3e835d9199c80070ede75a409ee57828c4c6cd80e4b154f2843f0dc95a570dc0729
+  languageName: node
+  linkType: hard
+
 "decode-uri-component@npm:^0.2.2":
   version: 0.2.2
   resolution: "decode-uri-component@npm:0.2.2"
@@ -4204,9 +4217,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "demo-dts@workspace:."
   dependencies:
-    "@2060.io/service-agent-client": ^1.1.0-dev.41
-    "@2060.io/service-agent-model": ^1.1.0-dev.41
-    "@2060.io/service-agent-nestjs-client": ^1.1.0-dev.41
+    "@2060.io/service-agent-client": ^1.1.1-dev.1
+    "@2060.io/service-agent-model": ^1.1.1-dev.1
+    "@2060.io/service-agent-nestjs-client": ^1.1.1-dev.1
     "@credo-ts/core": ^0.5.11
     "@nestjs/axios": ^3.1.1
     "@nestjs/cli": ^10.0.0
@@ -8191,6 +8204,15 @@ __metadata:
   version: 1.0.4
   resolution: "reusify@npm:1.0.4"
   checksum: c3076ebcc22a6bc252cb0b9c77561795256c22b757f40c0d8110b1300723f15ec0fc8685e8d4ea6d7666f36c79ccc793b1939c748bf36f18f542744a4e379fcc
+  languageName: node
+  linkType: hard
+
+"rhea@npm:^3.0.3":
+  version: 3.0.4
+  resolution: "rhea@npm:3.0.4"
+  dependencies:
+    debug: ^4.3.3
+  checksum: 46b9952aa4a9632f5aea01e4dcd7dd3ccdedf98a2ce5a534217f570932b908e8b8cf3bfec031c2faf732ba1eccf9e68ed37a8d2d759e2cb16037cde98191e79d
   languageName: node
   linkType: hard
 
