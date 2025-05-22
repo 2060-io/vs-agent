@@ -21,9 +21,9 @@ jobs:
         with:
           node-version: 22
 
-      - name: Cache pnpm
+      - name: Corepack pnpm
         run: |
-          pnpm prepare
+          corepack enable
 
       - name: Install dependencies
         run: |
