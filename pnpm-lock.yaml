@@ -6,6 +6,17 @@ settings:
 
 overrides:
   '@types/node': 20.11.19
+  tsyringe: 4.8.0
+  '@hyperledger/anoncreds-nodejs': 0.2.4
+  '@hyperledger/aries-askar-nodejs': 0.2.3
+  '@hyperledger/anoncreds-shared': 0.2.4
+  '@hyperledger/aries-askar-shared': 0.2.3
+  '@credo-ts/action-menu': 0.5.11
+  '@credo-ts/core': 0.5.11
+  '@credo-ts/question-answer': 0.5.11
+  '@credo-ts/node': 0.5.11
+  '@credo-ts/askar': 0.5.11
+  '@credo-ts/anoncreds': 0.5.11
 
 importers:
 
@@ -98,7 +109,7 @@ importers:
         version: 2.8.18
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       '@types/node':
         specifier: 20.11.19
         version: 20.11.19
@@ -130,7 +141,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/nestjs-client
       '@credo-ts/core':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@nestjs/axios':
         specifier: ^3.1.1
@@ -195,7 +206,7 @@ importers:
         version: 10.4.17(@nestjs/common@10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.17)(@nestjs/platform-express@10.4.17)
       '@types/express':
         specifier: ^4.17.17
-        version: 4.17.21
+        version: 4.17.22
       '@types/jest':
         specifier: ^29.5.2
         version: 29.5.14
@@ -274,7 +285,7 @@ importers:
         version: 2.8.18
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       '@types/node':
         specifier: 20.11.19
         version: 20.11.19
@@ -326,7 +337,7 @@ importers:
         version: 2.8.18
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       '@types/node':
         specifier: 20.11.19
         version: 20.11.19
@@ -352,7 +363,7 @@ importers:
         specifier: workspace:*
         version: link:../model
       '@credo-ts/core':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       class-transformer:
         specifier: 0.5.1
@@ -362,7 +373,7 @@ importers:
         version: 0.14.1
       express:
         specifier: ^4.18.1
-        version: 4.21.0
+        version: 4.21.2
       tslog:
         specifier: ^4.8.2
         version: 4.9.3
@@ -372,7 +383,7 @@ importers:
         version: 10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       ts-node-dev:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@20.11.19)(typescript@5.8.3)
@@ -392,28 +403,28 @@ importers:
         specifier: workspace:*
         version: link:../model
       '@credo-ts/action-menu':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/anoncreds':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/askar':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(@hyperledger/aries-askar-shared@0.2.3)(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/core':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/node':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/question-answer':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@hyperledger/anoncreds-nodejs':
-        specifier: ^0.2.4
+        specifier: 0.2.4
         version: 0.2.4
       '@hyperledger/aries-askar-nodejs':
-        specifier: ^0.2.3
+        specifier: 0.2.3
         version: 0.2.3
       '@nestjs/bull':
         specifier: ^10.2.1
@@ -456,7 +467,7 @@ importers:
         version: 0.0.1-alpha.5(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       express:
         specifier: ^4.18.1
-        version: 4.21.0
+        version: 4.21.2
       qrcode:
         specifier: ^1.5.3
         version: 1.5.4
@@ -465,7 +476,7 @@ importers:
         version: 0.1.14
       swagger-ui-express:
         specifier: ^4.4.0
-        version: 4.6.3(express@4.21.0)
+        version: 4.6.3(express@4.21.2)
       tsyringe:
         specifier: 4.8.0
         version: 4.8.0
@@ -493,7 +504,7 @@ importers:
         version: 2.8.18
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       '@types/multer':
         specifier: ^1.4.7
         version: 1.4.12
@@ -522,7 +533,7 @@ importers:
         specifier: ^0.0.12
         version: 0.0.12(@credo-ts/core@0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.8.3)
       '@credo-ts/core':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       class-transformer:
         specifier: 0.5.1
@@ -556,7 +567,7 @@ importers:
         specifier: workspace:*
         version: link:../model
       '@credo-ts/core':
-        specifier: ^0.5.11
+        specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@nestjs/common':
         specifier: ^10.0.0
@@ -597,7 +608,7 @@ importers:
         version: 10.4.17(@nestjs/common@10.4.17(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.17)(@nestjs/platform-express@10.4.17)
       '@types/express':
         specifier: ^4.17.13
-        version: 4.17.21
+        version: 4.17.22
       credo-ts-receipts:
         specifier: ^0.0.1-alpha.5
         version: 0.0.1-alpha.5(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -621,17 +632,17 @@ packages:
   '@2060.io/credo-ts-didcomm-calls@0.0.10':
     resolution: {integrity: sha512-urgP0S6I2aJbOwlmELNnpPzGU7s0MYEGN43pMaiP3HC1r+cLTB+vCJZaSQ1SjRP7uN7CrvyP+SD6e98U83mcsQ==}
     peerDependencies:
-      '@credo-ts/core': ^0.5.10
+      '@credo-ts/core': 0.5.11
 
   '@2060.io/credo-ts-didcomm-mrtd@0.0.12':
     resolution: {integrity: sha512-VGFG9hfKnS8LhKa1ofCMZs80tUaZVwk9feHLClhk/JqbRuJZanbAnlKpP6hk8GQYJX2b0ryW2rL3UKNTRGAMTg==}
     peerDependencies:
-      '@credo-ts/core': ^0.5.10
+      '@credo-ts/core': 0.5.11
 
   '@2060.io/credo-ts-didcomm-user-profile@0.0.6':
     resolution: {integrity: sha512-W2UMVc5JcQq1e1AVCJKFIpPcolJknu0/Yg9V3FmSnm1pVSa6ZI6a0K4wNMO/uJvsAtNlWYrDRhbjPWjED/ng8g==}
     peerDependencies:
-      '@credo-ts/core': ^0.5.10
+      '@credo-ts/core': 0.5.11
 
   '@2060.io/ffi-napi@4.0.9':
     resolution: {integrity: sha512-JfVREbtkJhMXSUpya3JCzDumdjeZDCKv4PemiWK+pts5CYgdoMidxeySVlFeF5pHqbBpox4I0Be7sDwAq4N0VQ==}
@@ -1178,13 +1189,13 @@ packages:
   '@credo-ts/anoncreds@0.5.11':
     resolution: {integrity: sha512-CEB1QxQQP/J++Y3t4hTyZq7KVo94hQPM2wZ0MIOq+TsM8Wp0/0CMogDsWPtBJDi+jk7JZRbb7qPiOzBHo2hDtg==}
     peerDependencies:
-      '@hyperledger/anoncreds-shared': ^0.2.2
+      '@hyperledger/anoncreds-shared': 0.2.4
 
   '@credo-ts/askar@0.5.11':
     resolution: {integrity: sha512-KIBNOhEqF8mOWuFYEolPo/qU8hrHR+X4othq3WrzRWJoApJKe7OQk9mI6H9yjQ4H3eD2By7oHWEqgZCB4IDcwg==}
     peerDependencies:
       '@animo-id/expo-secure-environment': ^0.0.1-alpha.0
-      '@hyperledger/aries-askar-shared': ^0.2.3
+      '@hyperledger/aries-askar-shared': 0.2.3
     peerDependenciesMeta:
       '@animo-id/expo-secure-environment':
         optional: true
@@ -2187,8 +2198,8 @@ packages:
   '@types/express-serve-static-core@4.19.6':
     resolution: {integrity: sha512-N4LZ2xG7DatVqhCZzOGb1Yi5lMbXSZcmdLDe9EzSndPV2HpWYWzRbaerl2n27irrm94EPpprqa8KpskPT085+A==}
 
-  '@types/express@4.17.21':
-    resolution: {integrity: sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==}
+  '@types/express@4.17.22':
+    resolution: {integrity: sha512-eZUmSnhRX9YRSkplpz0N+k6NljUUn5l3EWZIKZvYzhvMphEuNiyyy1viH/ejgt66JWgALwC/gtSUAeQKtSwW/w==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -3167,12 +3178,12 @@ packages:
   cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
-  cookie@0.6.0:
-    resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
-    engines: {node: '>= 0.6'}
-
   cookie@0.7.1:
     resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
+    engines: {node: '>= 0.6'}
+
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
   cookiejar@2.1.4:
@@ -3215,9 +3226,9 @@ packages:
   credo-ts-didweb-anoncreds@0.0.1-alpha.14:
     resolution: {integrity: sha512-NLC2UzPKApw6wPE8o3ux/eVnxcOmQqA2AC+2ugTnM48Q+O9RxIZZFVBC90VfhvimV7TvpNdM+MyczEQfvAu09w==}
     peerDependencies:
-      '@credo-ts/anoncreds': ^0.5.6
-      '@credo-ts/core': ^0.5.6
-      '@hyperledger/anoncreds-shared': ^0.2.1
+      '@credo-ts/anoncreds': 0.5.11
+      '@credo-ts/core': 0.5.11
+      '@hyperledger/anoncreds-shared': 0.2.4
 
   credo-ts-media-sharing@0.0.1-alpha.9:
     resolution: {integrity: sha512-+Pa9qebBD5jlt0P3PJ/2w9FaS2qT1bIolMRV1N3ACdTCdZ7dvZDLVb/Pa7VmwlxNhri4puMpdOvOp17ZmQLhXw==}
@@ -3482,8 +3493,8 @@ packages:
   error-stack-parser@2.1.4:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
 
-  es-abstract@1.23.9:
-    resolution: {integrity: sha512-py07lI0wjxAC/DcfK1S6G7iANonniZwTISvdPzk9hzeH0IZIshbuuFxLIU96OyF89Yb9hiqWn8M/bY83KY5vzA==}
+  es-abstract@1.23.10:
+    resolution: {integrity: sha512-MtUbM072wlJNyeYAe0mhzrD+M6DIJa96CZAOBBrhDbgKnB4MApIKefcyAB1eOdYn8cUNZgvwBvEzdoAYsxgEIw==}
     engines: {node: '>= 0.4'}
 
   es-define-property@1.0.1:
@@ -3777,10 +3788,6 @@ packages:
 
   exponential-backoff@3.1.2:
     resolution: {integrity: sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA==}
-
-  express@4.21.0:
-    resolution: {integrity: sha512-VqcNGcj/Id5ZT1LZ/cfihi3ttTn+NJmkli2eZADigjq29qTlWi/hAQ43t/VLPq8+UX06FCEx3ByOYet6ZFblng==}
-    engines: {node: '>= 0.10.0'}
 
   express@4.21.2:
     resolution: {integrity: sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==}
@@ -4691,8 +4698,8 @@ packages:
     resolution: {integrity: sha512-CasD9OCEQSFIam2U8efFK81Yeg8vNMTBUqtMOHlrcWQHqUX3HeCl9Dr31u4toV7emlH8Mymk5+9p0lL6mKb/Xw==}
     engines: {node: '>=14.16'}
 
-  lan-network@0.1.6:
-    resolution: {integrity: sha512-0qPYjNoD89v+bfhkIqFBYGBAof1xhxLqjX8bkNN1kQdP81UHpZw5TDXgEjwB+X2iCFGQmzF8TRmvg4vQcykyDA==}
+  lan-network@0.1.7:
+    resolution: {integrity: sha512-mnIlAEMu4OyEvUNdzco9xpuB9YVcPkQec+QsgycBCtPZvEqWPCDPfbAE4OJMdBBWpZWtpCn1xw9jJYlwjWI5zQ==}
     hasBin: true
 
   leven@3.1.0:
@@ -5363,9 +5370,6 @@ packages:
   path-scurry@2.0.0:
     resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
     engines: {node: 20 || >=22}
-
-  path-to-regexp@0.1.10:
-    resolution: {integrity: sha512-7lf7qcQidTku0Gu3YDPc8DJ1q7OOucfa/BSsIwjuh56VU7katFvuM8hULfkwB3Fns/rsVF7PwPKVw1sl5KQS9w==}
 
   path-to-regexp@0.1.12:
     resolution: {integrity: sha512-RA1GjUVMnvYFxuqovrEqZoxxW5NUZqbwKtYz/Tt7nXerk0LbLblQmrsgdeOxV5SFHf0UDggjS/bSeOZwt1pmEQ==}
@@ -7686,7 +7690,7 @@ snapshots:
       '@2060.io/ffi-napi': 4.0.9
       '@2060.io/ref-napi': 3.0.6
       '@credo-ts/core': 0.5.11(expo@53.0.9(@babel/core@7.27.1)(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(web-streams-polyfill@3.3.3)
-      '@types/express': 4.17.21
+      '@types/express': 4.17.22
       express: 4.21.2
       ws: 8.18.2
     transitivePeerDependencies:
@@ -8027,7 +8031,7 @@ snapshots:
       freeport-async: 2.0.0
       getenv: 1.0.0
       glob: 10.4.5
-      lan-network: 0.1.6
+      lan-network: 0.1.7
       minimatch: 9.0.5
       node-forge: 1.3.1
       npm-package-arg: 11.0.3
@@ -9285,7 +9289,7 @@ snapshots:
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
 
-  '@types/express@4.17.21':
+  '@types/express@4.17.22':
     dependencies:
       '@types/body-parser': 1.19.5
       '@types/express-serve-static-core': 4.19.6
@@ -9323,7 +9327,7 @@ snapshots:
 
   '@types/multer@1.4.12':
     dependencies:
-      '@types/express': 4.17.21
+      '@types/express': 4.17.22
 
   '@types/node-fetch@2.6.12':
     dependencies:
@@ -9383,7 +9387,7 @@ snapshots:
 
   '@types/swagger-ui-express@4.1.8':
     dependencies:
-      '@types/express': 4.17.21
+      '@types/express': 4.17.22
       '@types/serve-static': 1.15.7
 
   '@types/uuid@10.0.0': {}
@@ -9872,7 +9876,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
       is-string: 1.1.1
@@ -9893,7 +9897,7 @@ snapshots:
       call-bind: 1.0.8
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       es-shim-unscopables: 1.1.0
@@ -9902,14 +9906,14 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-shim-unscopables: 1.1.0
 
   array.prototype.flatmap@1.3.3:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-shim-unscopables: 1.1.0
 
   arraybuffer.prototype.slice@1.0.4:
@@ -9917,7 +9921,7 @@ snapshots:
       array-buffer-byte-length: 1.0.2
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       is-array-buffer: 3.0.5
@@ -10471,9 +10475,9 @@ snapshots:
 
   cookie-signature@1.0.6: {}
 
-  cookie@0.6.0: {}
-
   cookie@0.7.1: {}
+
+  cookie@0.7.2: {}
 
   cookiejar@2.1.4: {}
 
@@ -10715,7 +10719,7 @@ snapshots:
 
   dotenv-expand@11.0.7:
     dependencies:
-      dotenv: 16.5.0
+      dotenv: 16.4.7
     optional: true
 
   dotenv@16.4.5: {}
@@ -10776,7 +10780,7 @@ snapshots:
       stackframe: 1.3.4
     optional: true
 
-  es-abstract@1.23.9:
+  es-abstract@1.23.10:
     dependencies:
       array-buffer-byte-length: 1.0.2
       arraybuffer.prototype.slice: 1.0.4
@@ -11226,42 +11230,6 @@ snapshots:
 
   exponential-backoff@3.1.2:
     optional: true
-
-  express@4.21.0:
-    dependencies:
-      accepts: 1.3.8
-      array-flatten: 1.1.1
-      body-parser: 1.20.3
-      content-disposition: 0.5.4
-      content-type: 1.0.5
-      cookie: 0.6.0
-      cookie-signature: 1.0.6
-      debug: 2.6.9
-      depd: 2.0.0
-      encodeurl: 2.0.0
-      escape-html: 1.0.3
-      etag: 1.8.1
-      finalhandler: 1.3.1
-      fresh: 0.5.2
-      http-errors: 2.0.0
-      merge-descriptors: 1.0.3
-      methods: 1.1.2
-      on-finished: 2.4.1
-      parseurl: 1.3.3
-      path-to-regexp: 0.1.10
-      proxy-addr: 2.0.7
-      qs: 6.13.0
-      range-parser: 1.2.1
-      safe-buffer: 5.2.1
-      send: 0.19.0
-      serve-static: 1.16.2
-      setprototypeof: 1.2.0
-      statuses: 2.0.1
-      type-is: 1.6.18
-      utils-merge: 1.0.1
-      vary: 1.1.2
-    transitivePeerDependencies:
-      - supports-color
 
   express@4.21.2:
     dependencies:
@@ -12497,7 +12465,7 @@ snapshots:
 
   ky@0.33.3: {}
 
-  lan-network@0.1.6:
+  lan-network@0.1.7:
     optional: true
 
   leven@3.1.0: {}
@@ -12998,7 +12966,7 @@ snapshots:
       accept-language-parser: 1.5.0
       chokidar: 3.6.0
       class-validator: 0.14.1
-      cookie: 0.7.1
+      cookie: 0.7.2
       iterare: 1.2.1
       js-yaml: 4.1.0
       rxjs: 7.8.2
@@ -13103,14 +13071,14 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-object-atoms: 1.1.1
 
   object.groupby@1.0.3:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
 
   object.values@1.2.1:
     dependencies:
@@ -13286,8 +13254,6 @@ snapshots:
     dependencies:
       lru-cache: 11.1.0
       minipass: 7.1.2
-
-  path-to-regexp@0.1.10: {}
 
   path-to-regexp@0.1.12: {}
 
@@ -13621,7 +13587,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -14047,7 +14013,7 @@ snapshots:
       call-bind: 1.0.8
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -14064,7 +14030,7 @@ snapshots:
       call-bound: 1.0.4
       define-data-property: 1.1.4
       define-properties: 1.2.1
-      es-abstract: 1.23.9
+      es-abstract: 1.23.10
       es-object-atoms: 1.1.1
       has-property-descriptors: 1.0.2
 
@@ -14205,9 +14171,9 @@ snapshots:
     dependencies:
       '@scarf/scarf': 1.4.0
 
-  swagger-ui-express@4.6.3(express@4.21.0):
+  swagger-ui-express@4.6.3(express@4.21.2):
     dependencies:
-      express: 4.21.0
+      express: 4.21.2
       swagger-ui-dist: 5.22.0
 
   symbol-observable@4.0.0: {}
