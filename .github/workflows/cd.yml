@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**']
+    branches: [main, 'release/**', ci/update-release-npm]
 
   workflow_dispatch:
 
@@ -26,6 +26,10 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
 
       - name: Install dependencies
         run: |
@@ -115,6 +119,6 @@ jobs:
           pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
           pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
           pnpm build
-          pnpm -r --filter '!@2060.io/service-agent-main' --filter '!...[private=true]' publish --access public
+          pnpm -r --filter '!@2060.io/service-agent-main' publish --access public
 
 
