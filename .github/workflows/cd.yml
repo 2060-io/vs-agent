@@ -108,7 +108,7 @@ jobs:
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Publish NPM packages
-        if: steps.semantic.outputs.new-release-published == 'true'
+        # if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
