@@ -35,9 +35,7 @@ import { CoreModule } from '@/core.module'
       },
       options: {
         eventHandler: CoreService,
-        imports: [],
         url: process.env.SERVICE_AGENT_ADMIN_URL,
-        version: ApiVersion.V1,
       },
     }),
   ],

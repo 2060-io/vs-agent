@@ -4,24 +4,25 @@
   "license": "Apache-2.0",
   "description": "Your gateway to 2060 ecosystem",
   "homepage": "https://2060.io",
-  "workspaces": [
-    "packages/*"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/2060-io/2060-service-agent"
   },
   "scripts": {
-    "build": "yarn workspaces foreach --topological run build",
-    "start": "yarn workspace @2060.io/service-agent-main run start",
-    "start:dev": "yarn workspace @2060.io/service-agent-main run start:dev",
-    "check-types": "yarn check-types:build",
-    "check-types:build": "yarn workspaces foreach run tsc --noEmit -p tsconfig.build.json",
+    "build": "pnpm -r --workspace-concurrency=1 --sort run build",
+    "start": "pnpm --filter @2060.io/service-agent-main start",
+    "start:dev": "pnpm --filter @2060.io/service-agent-main dev",
+    "start:chatbot": "pnpm --filter 2060-demo-chatbot start",
+    "start:verifier": "pnpm --filter 2060-demo-verifier start",
+    "start:dts": "pnpm --filter demo-dts start",
+    "check-types": "pnpm check-types:build",
+    "check-types:build": "pnpm -r --parallel exec tsc --noEmit",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",
     "check-format": "prettier -c \"packages/*/src/**/*.ts\"",
-    "test": "yarn workspaces foreach run test",
+    "test": "pnpm -r run test",
     "lint": "eslint \"{packages,apps,libs}/**/*.ts\" --fix",
-    "validate": "yarn lint && yarn check-types && yarn check-format"
+    "validate": "pnpm lint && pnpm check-types && pnpm check-format",
+    "prepare": "corepack enable"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
@@ -49,5 +50,5 @@
   "resolutions": {
     "@types/node": "20.11.19"
   },
-  "packageManager": "yarn@3.6.4"
+  "packageManager": "pnpm@9.15.3"
 }

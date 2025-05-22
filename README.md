@@ -71,8 +71,8 @@ These variables might be set also in `.env` file in the form of KEY=VALUE (one p
 2060-service-agent can be built and run on localhost by just setting the corresponding variables and executing:
 
 ```
-yarn build
-yarn dev
+pnpm build
+pnpm dev
 ```
 
 Upon a successful start, the following lines should be read in log:
