@@ -114,7 +114,7 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
-          pnpm -r exec --workspace-concurrency=1 --sort version --no-git-tag-version --new-version "$RELEASE_VERSION"
+          pnpm -r version "$RELEASE_VERSION" --no-git-tag-version
           pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
           pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
           pnpm build
