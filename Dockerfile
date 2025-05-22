@@ -1,17 +1,13 @@
 FROM node:20 as base
 
-# Setup yarn version
+# Setup pnpm version
 RUN corepack enable
-RUN yarn set version 3.6.4
-RUN corepack prepare yarn@3.6.4 --activate
 
 # AFJ specifc setup
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn/releases/ .yarn/releases/
-COPY .yarn/plugins/ .yarn/plugins/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 COPY packages/model/package.json packages/model/package.json
 COPY packages/main/package.json packages/main/package.json
@@ -19,7 +15,7 @@ COPY packages/main/package.json packages/main/package.json
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching
-RUN yarn install
+RUN pnpm install
 
 # Copy other depdencies
 COPY packages/model/src ./packages/model/src
@@ -37,5 +33,5 @@ COPY packages/main/tsconfig.json packages/main/tsconfig.json
 COPY packages/main/tsconfig.build.json packages/main/tsconfig.build.json
 COPY packages/main/nest-cli.json packages/main/nest-cli.json
 
-RUN yarn build
-CMD yarn start
+RUN pnpm build
+CMD pnpm start

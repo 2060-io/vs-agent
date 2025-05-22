@@ -7,6 +7,7 @@ env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: '2060-service-agent'      
+  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 jobs:
   build-and-push:
     name: Build and push docker images
@@ -16,17 +17,21 @@ jobs:
       - name: Checkout service-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup node v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
 
       - id: get_version
         uses: battila7/get-version-action@v2
           
       - name: Install dependencies
         run: |
-          yarn install
+          pnpm install
       - name: Log in to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
@@ -48,3 +53,22 @@ jobs:
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
             docker push $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}}
+
+      - name: Build and push Chatbot Demo Docker image
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}}
+
+      - name: Publish NPM packages
+        if: steps.get_version.outputs.is-semver == 'true'
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
+          pnpm -r version "${{steps.get_version.outputs.version}}" --no-git-tag-version
+          pnpm up @2060.io/service-agent-model@${{steps.get_version.outputs.version}}
+          pnpm up @2060.io/service-agent-client@${{steps.get_version.outputs.version}}
+          pnpm build
+          pnpm -r --filter '!@2060.io/service-agent-main' publish --no-git-checks --access public

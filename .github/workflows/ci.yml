@@ -16,23 +16,31 @@ jobs:
       - name: Checkout service-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
+
       - name: Install dependencies
         run: |
-          yarn install --immutable
+          pnpm install --frozen-lockfile
 
       - name: Build
         run: |
-          yarn build
+          pnpm build
 
       - name: Check Format
         run: |
-          yarn check-format
+          pnpm check-format
 
       - name: Check Types
         run: |
-          yarn check-types
+          pnpm check-types
+
+      - name: Test
+        run: |
+          pnpm test
