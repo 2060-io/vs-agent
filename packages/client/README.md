@@ -72,6 +72,10 @@ or
 ```sh
 yarn add @2060.io/service-agent-client
 ```
+or 
+```sh
+pnpm add @2060.io/service-agent-client
+```
 ## `ApiClient.ts`
 `ApiClient` class provides a simple interface for interacting with the Service Agent. It abstracts API calls and offers dedicated service methods for messaging, credential types, invitations, and revocation registries.
 
