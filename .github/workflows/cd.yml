@@ -112,6 +112,7 @@ jobs:
         # if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_VERSION: 0.0.0-alpha.${{ github.run_number }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
