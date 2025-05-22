@@ -21,11 +21,10 @@ jobs:
       - name: Checkout service-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup node v22
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
       - name: Corepack pnpm
         run: |
