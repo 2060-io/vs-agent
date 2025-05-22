@@ -9,7 +9,7 @@
     "url": "https://github.com/2060-io/2060-service-agent"
   },
   "scripts": {
-    "build": "pnpm -r --workspace-concurrency=1 --sort run build",
+    "build": "pnpm -r --parallel run build",
     "start": "pnpm --filter @2060.io/service-agent-main start",
     "start:dev": "pnpm --filter @2060.io/service-agent-main dev",
     "start:chatbot": "pnpm --filter 2060-demo-chatbot start",
