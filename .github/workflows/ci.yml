@@ -40,3 +40,7 @@ jobs:
       - name: Check Types
         run: |
           pnpm check-types
+
+      - name: Test
+        run: |
+          pnpm test
