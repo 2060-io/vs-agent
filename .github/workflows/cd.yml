@@ -2,7 +2,8 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**']
+    # branches: [main, 'release/**']
+    branches: [main, 'release/**', fix/generate-version-dev]
 
   workflow_dispatch:
 
@@ -114,10 +115,7 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
-          pnpm -r version "$RELEASE_VERSION" --no-git-tag-version
-          pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
-          pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
-          pnpm build
+          pnpm pnpm -r --topological version "$RELEASE_VERSION"
           pnpm -r --filter '!@2060.io/service-agent-main' publish --no-git-checks --access public
 
 

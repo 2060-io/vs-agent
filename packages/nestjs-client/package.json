@@ -16,6 +16,7 @@
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm build",
+    "version": "pnpm version",
     "test": "jest"
   },
   "dependencies": {
