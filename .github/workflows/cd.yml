@@ -2,8 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    # branches: [main, 'release/**']
-    branches: [main, 'release/**', ci/update-release-npm]
+    branches: [main, 'release/**']
 
   workflow_dispatch:
 
