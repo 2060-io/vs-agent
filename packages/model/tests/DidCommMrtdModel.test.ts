@@ -7,9 +7,9 @@ import {
 import { EMrtdDataSubmitMessage, MrtdSubmitState } from '../src/messages'
 
 describe('EMrtdDataSubmitMessage', () => {
-  let securityObjectOfDocument: DecodedSecurtyObjectOfDocument
-  let additionalPersonalData: DecodedAdditionalPersonalData
-  let image: DecodedImage
+  const securityObjectOfDocument: DecodedSecurtyObjectOfDocument = {} as DecodedSecurtyObjectOfDocument
+  const additionalPersonalData: DecodedAdditionalPersonalData = {} as DecodedAdditionalPersonalData
+  const image: DecodedImage = {} as DecodedImage
   it('should initialize with correct type and state', () => {
     const rawMock = { someKey: 'someValue' }
     const parsedMock = {

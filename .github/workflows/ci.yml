@@ -21,6 +21,10 @@ jobs:
         with:
           node-version: 20
           
+      - name: Prepare pnpm
+        run: |
+          pnpm prepare
+
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
