@@ -24,11 +24,12 @@ jobs:
       - name: Setup node v20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
         run: |
-          yarn install
+          pnpm install
 
       - uses: codfish/semantic-release-action@v3
         id: semantic
@@ -109,12 +110,11 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
-          yarn workspaces foreach --topological version $RELEASE_VERSION
-          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
-          yarn build
-          yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
-          
+          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
+          pnpm -r exec --workspace-concurrency=1 --sort version --no-git-tag-version --new-version "$RELEASE_VERSION"
+          pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
+          pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
+          pnpm build
+          pnpm -r --filter '!@2060.io/service-agent-main' --filter '!...[private=true]' publish --access public
 
 

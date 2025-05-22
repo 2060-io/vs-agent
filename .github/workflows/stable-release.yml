@@ -20,14 +20,15 @@ jobs:
       - name: Setup node v20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: pnpm
 
       - id: get_version
         uses: battila7/get-version-action@v2
           
       - name: Install dependencies
         run: |
-          yarn install
+          pnpm install
       - name: Log in to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
@@ -62,9 +63,9 @@ jobs:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
-          yarn workspaces foreach --topological version ${{steps.get_version.outputs.version}}
-          yarn up @2060.io/service-agent-model@${{steps.get_version.outputs.version}}
-          yarn up @2060.io/service-agent-client@${{steps.get_version.outputs.version}}
-          yarn build
-          yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
+          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
+          pnpm -r exec --workspace-concurrency=1 --sort version --no-git-tag-version --new-version ${{steps.get_version.outputs.version}}
+          pnpm up @2060.io/service-agent-model@${{steps.get_version.outputs.version}}
+          pnpm up @2060.io/service-agent-client@${{steps.get_version.outputs.version}}
+          pnpm build
+          pnpm -r --filter '!@2060.io/service-agent-main' --filter '!...[private=true]' publish --access public
