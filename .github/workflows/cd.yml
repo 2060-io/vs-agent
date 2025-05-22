@@ -118,6 +118,6 @@ jobs:
           pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
           pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
           pnpm build
-          pnpm -r --filter '!@2060.io/service-agent-main' publish --access public
+          pnpm -r --filter '!@2060.io/service-agent-main' publish --no-git-checks --access public
 
 
