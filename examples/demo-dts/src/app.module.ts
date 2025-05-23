@@ -37,8 +37,6 @@ import { CoreModule } from '@/core.module'
         url: process.env.SERVICE_AGENT_ADMIN_URL,
       },
     }),
-  ],
-  controllers: [],
-  providers: [CoreService],
+  ]
 })
 export class AppModule {}
