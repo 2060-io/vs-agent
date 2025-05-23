@@ -67,8 +67,5 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
-          pnpm -r version "${{steps.get_version.outputs.version}}" --no-git-tag-version
-          pnpm up @2060.io/service-agent-model@${{steps.get_version.outputs.version}}
-          pnpm up @2060.io/service-agent-client@${{steps.get_version.outputs.version}}
-          pnpm build
-          pnpm -r --filter '!@2060.io/service-agent-main' publish --no-git-checks --access public
+          pnpm pnpm -r --topological version "${{steps.get_version.outputs.version}}"
+          pnpm -r publish --no-git-checks --access public

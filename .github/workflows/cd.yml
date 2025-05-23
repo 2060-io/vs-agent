@@ -108,16 +108,13 @@ jobs:
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Publish NPM packages
-        # if: steps.semantic.outputs.new-release-published == 'true'
+        if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
-          pnpm -r version "$RELEASE_VERSION" --no-git-tag-version
-          pnpm up @2060.io/service-agent-model@$RELEASE_VERSION
-          pnpm up @2060.io/service-agent-client@$RELEASE_VERSION
-          pnpm build
-          pnpm -r --filter '!@2060.io/service-agent-main' publish --no-git-checks --access public
+          pnpm pnpm -r --topological version "$RELEASE_VERSION"
+          pnpm -r publish --access public
 
 

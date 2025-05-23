@@ -2,6 +2,7 @@
   "name": "@2060.io/service-agent-main",
   "main": "build/index",
   "types": "build/index",
+  "private": true,
   "version": "1.0.0",
   "files": [
     "build"
