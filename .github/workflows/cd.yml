@@ -115,6 +115,6 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm pnpm -r --topological version "$RELEASE_VERSION"
-          pnpm -r publish --access public
+          pnpm -r publish --no-git-checks --access public
 
 
