@@ -45,7 +45,7 @@ async function bootstrap() {
   await app.listen(port)
 
   // Retrieve application name and version from package.json
-  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'))
+  const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'))
   const appName = packageJson.name
   const appVersion = packageJson.version
 
