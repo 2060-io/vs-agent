@@ -27,26 +27,25 @@ export const addInvitationRoutes = async (app: express.Express, agent: ServiceAg
         return
       }
 
-      const connRecord = shortUrlRecord?.getTag('relatedFlowId') as string
-
-      // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
-      if (connRecord) {
-        const proofRecord = await agent.proofs.getById(connRecord)
-        const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
-          | { ref?: string; callbackUrl?: string }
-          | undefined
-        if (callbackParameters && callbackParameters.callbackUrl) {
-          await sendPresentationCallbackEvent({
-            proofExchangeId: proofRecord.id,
-            callbackUrl: callbackParameters.callbackUrl,
-            status: PresentationStatus.CONNECTED,
-            logger: (await agent.config.logger) as TsLogger,
-            ref: callbackParameters.ref,
-          })
-        }
-      }
-
       if (req.accepts('json')) {
+        const connRecord = shortUrlRecord?.getTag('relatedFlowId') as string
+
+        // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
+        if (connRecord) {
+          const proofRecord = await agent.proofs.getById(connRecord)
+          const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
+            | { ref?: string; callbackUrl?: string }
+            | undefined
+          if (callbackParameters && callbackParameters.callbackUrl) {
+            await sendPresentationCallbackEvent({
+              proofExchangeId: proofRecord.id,
+              callbackUrl: callbackParameters.callbackUrl,
+              status: PresentationStatus.SCANNED,
+              logger: (await agent.config.logger) as TsLogger,
+              ref: callbackParameters.ref,
+            })
+          }
+        }
         const invitation = await agent.oob.parseInvitation(longUrl)
         res.send(invitation.toJSON()).end()
       } else {
