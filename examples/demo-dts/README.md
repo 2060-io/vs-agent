@@ -371,6 +371,15 @@ To run the chatbot in a Docker container:
   ```bash
   yarn test
   ```
+  > 💡 **Note:** For local development, consider replacing the `@2060.io` library versions such as:
+> 
+> ```json
+> "@2060.io/service-agent-model": "workspace:*",
+> "@2060.io/service-agent-nestjs-client": "workspace:*",
+> "@2060.io/service-agent-client": "workspace:*"
+> ```
+> 
+> This allows you to work more easily with local packages during development.
 
 ---
 
