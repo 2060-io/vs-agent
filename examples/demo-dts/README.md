@@ -25,25 +25,209 @@ demo-dts/
 │   └── main.ts         # Entry point for the application
 └── tsconfig.json       # TypeScript configuration
 ```
-### **Core Service Overview**
-The `CoreService` class is the central component of the chatbot application. It handles incoming messages, manages sessions, and interacts with external services using the `2060.io/service-agent-client` and `2060.io/service-agent-model` libraries.
 
-### **App Module Overview**
-The `app.module.ts` file is the entry point for the application and defines the modules, services, and configurations required for the chatbot. Here's a breakdown of its components:
+## Getting Started
+This section provides a step-by-step guide to creating a chatbot using the 2060 Service Agent framework. The chatbot comes with default configurations that may not fit all use cases, so it is important to first define your requirements. 
 
-#### **1. Imports**
-- **`ConfigModule`**: Loads environment variables and configuration files.
-- **`TypeOrmModule`**: Configures the database connection and entities (e.g., `SessionEntity`).
-- **`I18nModule`**: Sets up internationalization for multilingual support.
-- **`EventsModule`**: Provides the `CredentialService` and other utilities for interacting with the Service Agent framework.
+### **Key Considerations**
+1. **Default Modules**:
+   - The `messages` and `connections` modules are recommended to always be enabled and connected to a PostgreSQL database (or any database supported by TypeORM).
+   - Modules like `credentials` or `statistics` are optional and should be added based on your specific needs. For more details, refer to the documentation of the [`nestjs-client`](../../packages/nestjs-client/README.md) library.
 
-#### **2. Providers**
-- **`CoreService`**: The main service for handling chatbot logic.
-- **Other Services**: Additional services can be added here for extended functionality.
+2. **Core Service**:
+   - The `CoreService` is the central component of the chatbot. It provides various methods to handle messages, manage connections, and implement a state machine for structured chatbot logic.
+   - While not all methods are mandatory, the recommended structure ensures a reliable state machine for handling user interactions.
 
-#### **3. Configuration**
-- **Database**: Configured using `TypeOrmModule.forRoot()` with connection details (e.g., host, username, password).
-- **Internationalization**: Configured with fallback languages and translation files.
+3. **Enums for State Machine**:
+   - The state machine steps and commands (e.g., contextual menu commands) are configured in enums. This is the recommended flow for managing user interactions.
+
+---
+
+### **Step 1: Install Dependencies**
+
+Ensure all dependencies are installed by running the following command in the `demo-dts` directory:
+
+```bash
+pnpm install
+```
+
+---
+
+### **Step 2: Configure the Application**
+
+Edit the `src/app.module.ts` and `src/core.module.ts` files to configure the database connection and enable the required modules (`messages`, `connections`, etc.). For example:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CoreModule } from './core.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.POSTGRES_DB_NAME,
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+    CoreModule,
+  ],
+})
+export class CoreModule {}
+```
+
+---
+
+### **Step 3: Implement the Core Service**
+
+The `CoreService` provides the main logic for handling messages, managing connections, and implementing the state machine. Below is an overview of its key methods:
+
+#### **Mandatory Methods**
+1. **`onModuleInit` (optional)**:
+   - Used to initialize global values, such as creating credential types.
+   - Example:
+     ```typescript
+     async onModuleInit() {
+       await this.credentialService.createType('demo dts', '1.0', ['fullName', 'issuanceDate'], {
+         supportRevocation: true,
+         maximumCredentialNumber: 5,
+       });
+     }
+     ```
+
+2. **`inputMessage` (mandatory)**:
+   - Entry point for all incoming messages. Processes the message based on its type and routes it to the appropriate handler.
+   - Example:
+     ```typescript
+     async inputMessage(message: BaseMessage): Promise<void> {
+       switch (message.type) {
+         case TextMessage.type:
+           const content = JsonTransformer.fromJSON(message, TextMessage);
+           await this.handleStateInput(content, session);
+           break;
+         // Handle other message types...
+       }
+     }
+     ```
+
+3. **`newConnection` (mandatory)**:
+   - Triggered when a new connection is detected. Typically used to send a welcome message.
+   - Example:
+     ```typescript
+     async newConnection(connectionId: string): Promise<void> {
+       const session = await this.handleSession(connectionId);
+       await this.sendContextualMenu(session);
+     }
+     ```
+
+4. **`closeConnection` (mandatory)**:
+   - Triggered when a connection is closed. Used to clean up user data.
+   - Example:
+     ```typescript
+     async closeConnection(connectionId: string): Promise<void> {
+       const session = await this.handleSession(connectionId);
+       await this.purgeUserData(session);
+     }
+     ```
+
+#### **Recommended Methods**
+1. **`sendText`**:
+   - Sends a text message to the user.
+   - Example:
+     ```typescript
+     private async sendText(connectionId: string, text: string, lang: string) {
+       await this.apiClient.messages.send(
+         new TextMessage({
+           connectionId,
+           content: this.getText(text, lang),
+         }),
+       );
+     }
+     ```
+
+2. **`getText`**:
+   - Retrieves localized text for a given key and language.
+   - Example:
+     ```typescript
+     private getText(text: string, lang: string): string {
+       return this.i18n.t(`msg.${text}`, { lang });
+     }
+     ```
+
+3. **`handleContextualAction`**:
+   - Processes user selections from a contextual menu.
+   - Example:
+     ```typescript
+     private async handleContextualAction(selectionId: string, session: SessionEntity): Promise<SessionEntity> {
+       if (selectionId === Cmd.CREDENTIAL) {
+         await this.credentialService.issue(session.connectionId, claims, { revokeIfAlreadyIssued: true });
+       }
+       return await this.sessionRepository.save(session);
+     }
+     ```
+
+4. **`handleStateInput`**:
+   - Centralizes state machine logic for processing messages.
+   - Example:
+     ```typescript
+     private async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
+       switch (session.state) {
+         case StateStep.START:
+           session.state = StateStep.NEXT;
+           break;
+         // Handle other states...
+       }
+       return await this.sendContextualMenu(session);
+     }
+     ```
+
+5. **`sendContextualMenu`**:
+   - Sends a contextual menu to the user based on their current state.
+   - Example:
+     ```typescript
+     private async sendContextualMenu(session: SessionEntity): Promise<SessionEntity> {
+       const items = [
+         new ContextualMenuItem({ id: Cmd.CREDENTIAL, title: this.getText('CMD.CREDENTIAL', session.lang) }),
+         new ContextualMenuItem({ id: Cmd.REVOKE, title: this.getText('CMD.REVOKE', session.lang) }),
+       ];
+       await this.apiClient.messages.send(
+         new ContextualMenuUpdateMessage({
+           connectionId: session.connectionId,
+           options: items,
+           timestamp: new Date(),
+         }),
+       );
+       return await this.sessionRepository.save(session);
+     }
+     ```
+
+---
+
+### **Step 4: Run the Chatbot**
+
+1. Compile the TypeScript code:
+   ```bash
+   pnpm build
+   ```
+
+2. Start the chatbot:
+   ```bash
+   pnpm start
+   ```
+
+---
+
+### **Next Steps**
+
+- Extend the chatbot by adding custom commands and states in the enums.
+- Integrate additional modules like `credentials` or `statistics` if needed.
+- Customize the state machine logic in `handleStateInput` to fit your use case.
+
+By following these steps, you can quickly set up a functional chatbot and start building on top of the provided framework.
 
 ---
 

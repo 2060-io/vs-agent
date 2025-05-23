@@ -33,7 +33,10 @@ import { CoreModule } from '@/core.module'
         credentials: true,
       },
       options: {
-        eventHandler: CoreService,
+        eventHandler: CoreService, // This is the service that will handle the events
+        imports: [], // Add any additional dependency injection modules here that are needed for the Core Service
+        // For example, if you need to inject a service from another module:
+        // imports: [SomeOtherModule],
         url: process.env.SERVICE_AGENT_ADMIN_URL,
       },
     }),
