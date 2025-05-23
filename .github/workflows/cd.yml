@@ -2,8 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    # branches: [main, 'release/**']
-    branches: [main, 'release/**', fix/generate-version-dev]
+    branches: [main, 'release/**']
 
   workflow_dispatch:
 
@@ -109,14 +108,13 @@ jobs:
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Publish NPM packages
-        # if: steps.semantic.outputs.new-release-published == 'true'
+        if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          RELEASE_VERSION: 0.0.0-alpha.${{ github.run_number }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm pnpm -r --topological version "$RELEASE_VERSION"
-          pnpm -r publish --no-git-checks --access public
+          pnpm -r publish --access public
 
 
