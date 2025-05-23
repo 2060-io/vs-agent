@@ -1,0 +1,50 @@
+name: Continuous Integration for Demo vs
+# This workflow is triggered on pull requests to the main branch and on pushes to the main branch.
+# It runs a series of steps to validate the code, including checking out the code, setting up Node.js, installing dependencies, building the project, and checking formatting and types.
+
+on:
+  push:
+    paths:
+      - "examples/demo-dts/**"
+    branches: [main]
+  pull_request:
+    paths:
+      - "examples/demo-dts/**"
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/demo-dts
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
+          
+      - name: Install dependencies
+        run: |
+          pnpm install
+
+      - name: Build
+        run: |
+          pnpm build
+
+      - name: Check Format
+        run: |
+          pnpm check-format
+
+      - name: Check Types
+        run: |
+          pnpm check-types

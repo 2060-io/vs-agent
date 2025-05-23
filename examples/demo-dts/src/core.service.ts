@@ -1,7 +1,6 @@
 import {
   BaseMessage,
   Claim,
-  ConnectionStateUpdated,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
@@ -41,10 +40,7 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.credentialService.createType(
-      'demo dts',
-      '1.0',
-      ['fullName', 'issuanceDate'], {
+    await this.credentialService.createType('demo dts', '1.0', ['fullName', 'issuanceDate'], {
       supportRevocation: true,
       maximumCredentialNumber: 5,
     })
