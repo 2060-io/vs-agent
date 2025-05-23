@@ -74,6 +74,9 @@ npm install @2060.io/service-agent-model
 or
 ```sh
 yarn add @2060.io/service-agent-model
+or
+```sh
+pnpm add @2060.io/service-agent-model
 ```
 
 ## Example

@@ -2,6 +2,7 @@
   "name": "@2060.io/service-agent-main",
   "main": "build/index",
   "types": "build/index",
+  "private": true,
   "version": "1.0.0",
   "files": [
     "build"
@@ -101,18 +102,5 @@
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "ts-node-dev": "^2.0.0"
-  },
-  "resolutions": {
-    "tsyringe": "4.8.0",
-    "@hyperledger/anoncreds-nodejs": "0.2.4",
-    "@hyperledger/aries-askar-nodejs": "0.2.3",
-    "@hyperledger/anoncreds-shared": "0.2.4",
-    "@hyperledger/aries-askar-shared": "0.2.3",
-    "@credo-ts/action-menu": "0.5.11",
-    "@credo-ts/core": "0.5.11",
-    "@credo-ts/question-answer": "0.5.11",
-    "@credo-ts/node": "0.5.11",
-    "@credo-ts/askar": "0.5.11",
-    "@credo-ts/anoncreds": "0.5.11"
   }
 }
