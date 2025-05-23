@@ -1,6 +1,9 @@
 FROM node:18 as base
 
-COPY package.json yarn.lock tsconfig.json tsconfig.build.json ./
+# Setup pnpm version
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.json tsconfig.build.json ./
 COPY packages/model/package.json packages/model/package.json
 COPY packages/client/package.json packages/client/package.json
 
@@ -12,8 +15,10 @@ COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
 COPY packages/client/tsconfig.json packages/client/tsconfig.json
 COPY packages/client/tsconfig.build.json packages/client/tsconfig.build.json
 
-RUN yarn install
-RUN yarn build
+COPY examples/verifier/ examples/verifier/
+
+RUN pnpm install
+RUN pnpm build
 
 FROM base as final
 
@@ -21,19 +26,9 @@ FROM base as final
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY examples/verifier/package.json examples/verifier/package.json
-COPY examples/verifier/yarn.lock examples/verifier/yarn.lock
-
 # Run install after copying only depdendency file
 # to make use of docker layer caching
-COPY --from=base packages/model /www/packages/model
-COPY --from=base packages/client /www/packages/client
-RUN yarn --cwd examples/verifier install
+COPY --from=base /www/packages ./packages
+COPY --from=base /www/examples ./examples
 
-
-# Copy other depdencies
-COPY examples/verifier/index.ts examples/verifier/index.ts
-COPY examples/verifier/tsconfig.json examples/verifier/tsconfig.json
-
-RUN yarn --cwd examples/verifier build
-CMD yarn --cwd examples/verifier start
+CMD pnpm start:verifier

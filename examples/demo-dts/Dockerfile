@@ -1,17 +1,13 @@
 FROM node:22-alpine as base
 
-# Setup yarn version
+# Setup pnpm version
 RUN corepack enable
-RUN yarn set version 3.6.4
-RUN corepack prepare yarn@3.6.4 --activate
 
 # AFJ specifc setup
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY package.json yarn.lock tsconfig.json tsconfig.build.json .yarnrc.yml ./
-COPY .yarn/releases/ .yarn/releases/
-COPY .yarn/plugins/ .yarn/plugins/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.json tsconfig.build.json ./
 COPY packages/model/package.json packages/model/package.json
 COPY packages/client/package.json packages/client/package.json
 COPY packages/nestjs-client/package.json packages/nestjs-client/package.json
@@ -27,8 +23,10 @@ COPY packages/client/tsconfig.build.json packages/client/tsconfig.build.json
 COPY packages/client/tsconfig.json packages/nestjs-client/tsconfig.json
 COPY packages/client/tsconfig.build.json packages/nestjs-client/tsconfig.build.json
 
-RUN yarn install
-RUN yarn build
+COPY examples/demo-dts/ examples/demo-dts/
+
+RUN pnpm install
+RUN pnpm build
 
 FROM base as final
 
@@ -36,14 +34,10 @@ FROM base as final
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY examples/demo-dts/ examples/demo-dts/
-
 # Run install after copying only depdendency file
 # to make use of docker layer caching
 COPY --from=base /www/packages ./packages
-WORKDIR /www/examples/chatbot
-RUN yarn install
-RUN yarn build
+COPY --from=base /www/examples ./examples
 
 WORKDIR /www/examples/demo-dts/build
 CMD ["node", "main.js"]

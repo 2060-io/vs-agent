@@ -11,10 +11,11 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "build": "yarn run clean && yarn run compile",
+    "build": "pnpm run clean && pnpm run compile",
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn run build",
+    "prepublishOnly": "pnpm run build",
+    "version": "pnpm version",
     "test": "jest"
   },
   "dependencies": {
