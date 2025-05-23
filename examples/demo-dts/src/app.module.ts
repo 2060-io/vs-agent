@@ -5,7 +5,6 @@ import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
 import { EventsModule } from '@2060.io/service-agent-nestjs-client'
-import { ApiVersion } from '@2060.io/service-agent-client'
 import { CoreModule } from '@/core.module'
 
 @Module({
@@ -34,7 +33,10 @@ import { CoreModule } from '@/core.module'
         credentials: true,
       },
       options: {
-        eventHandler: CoreService,
+        eventHandler: CoreService, // This is the service that will handle the events
+        imports: [], // Add any additional dependency injection modules here that are needed for the Core Service
+        // For example, if you need to inject a service from another module:
+        // imports: [SomeOtherModule],
         url: process.env.SERVICE_AGENT_ADMIN_URL,
       },
     }),
