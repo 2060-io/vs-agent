@@ -6,7 +6,7 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "build": "nest build && yarn run copy-i18n",
+    "build": "nest build && pnpm run copy-i18n",
     "copy-i18n": "cp -r ./src/i18n ./build/i18n",
     "check-format": "prettier -c \"src/**/*.ts\"",
     "check-types": "eslint \"{src,apps,libs,test}/**/*.ts\"",
@@ -16,16 +16,16 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@2060.io/service-agent-model": "link:../../packages/model",
-    "@2060.io/service-agent-nestjs-client": "link:../../packages/nestjs-client",
-    "@2060.io/service-agent-client": "link:../../packages/client",
+    "@2060.io/service-agent-model": "^1.2.0",
+    "@2060.io/service-agent-nestjs-client": "^1.2.0",
+    "@2060.io/service-agent-client": "^1.2.0",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.0",
@@ -86,8 +86,5 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "resolutions": {
-    "@types/express": "4.17.21",
-    "express": "4.21.0"
-  }
+  "packageManager": "pnpm@9.15.3"
 }

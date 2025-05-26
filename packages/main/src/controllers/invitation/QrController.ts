@@ -6,10 +6,6 @@ import QRCode from 'qrcode'
 import { AgentService } from '../../services/AgentService'
 import { createInvitation } from '../../utils/agent'
 
-declare global {
-  type HTMLCanvasElement = never
-}
-
 @ApiTags('qr')
 @Controller({
   path: 'qr',

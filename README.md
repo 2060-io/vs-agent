@@ -35,8 +35,8 @@ but likely needed for production and test deployments.
 | POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
 | POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
 | POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
-| REDIS_HOST       | Redis database host user. This system will only function if this variable is defined. (Recommended for production mode)                                                                                       | None                            |
-| REDIS_PASSWORD   | Redis database password                                                                                   | None                            |
+| REDIS_HOST       | Redis host used for message caching and asynchronous processing. The system requires this for production-ready performance.                                                                                       | None                            |
+| REDIS_PASSWORD   | Password for connecting to the Redis instance.                                                                                   | None                            |
 
 
 > **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
@@ -44,6 +44,10 @@ but likely needed for production and test deployments.
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 >
 > The Service Agent fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
+>
+> If the `POSTGRES_HOST` environment variable is defined, the Service Agent will handle the connection to operate with the specified database. Please note that this type of persistence is recommended because by default, an SQLite database is used for testing purposes. Due to SQLite's lack of robustness, it does not support a high throughput of messages per second. Therefore, for any production deployment, it is recommended to use a more robust PostgreSQL database, which allows processing large volumes of data efficiently and properly managing existing data and security credentials.  
+>
+> If the `REDIS_HOST` environment variable is defined, the Service Agent can leverage Redis as a caching system to achieve high-performance message processing. By offloading message handling and enabling asynchronous processing, Redis helps optimize I/O operations and significantly enhances the service’s capacity to manage large volumes of data efficiently.
 
 Possible log levels:
 
@@ -67,8 +71,8 @@ These variables might be set also in `.env` file in the form of KEY=VALUE (one p
 2060-service-agent can be built and run on localhost by just setting the corresponding variables and executing:
 
 ```
-yarn build
-yarn dev
+pnpm build
+pnpm dev
 ```
 
 Upon a successful start, the following lines should be read in log:
