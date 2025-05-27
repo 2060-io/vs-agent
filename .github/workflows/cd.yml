@@ -124,7 +124,7 @@ jobs:
           IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
         run: |
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
-          helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent --version $IMAGE_TAG
+          helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent
   
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
