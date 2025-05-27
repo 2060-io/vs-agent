@@ -37,6 +37,9 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
+      - name: Install yq
+        run: sudo apt-get install -y yq
+
       - uses: codfish/semantic-release-action@v3
         id: semantic
         with:
@@ -118,8 +121,9 @@ jobs:
 
       - name: Push Helm chart to Docker Hub OCI repo
         env:
-          IMAGE_TAG: 'dev'
+          IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
         run: |
+          sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
           helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent --version $IMAGE_TAG
   
       - name: Publish NPM packages
