@@ -1,0 +1,164 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  selector:
+    app: {{ .Values.name }}
+    color: {{ .Values.deployment.color }}
+  ports:
+  - name: didcomm
+    port: {{ .Values.agentPort }}
+    targetPort: {{ .Values.agentPort }}
+    protocol: TCP
+  - name: admin
+    port: {{ .Values.adminPort }}
+    targetPort: {{ .Values.adminPort }}
+    protocol: TCP
+---
+# Private ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: private-{{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.deployment.privacy.whitelist }}"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - a.{{ .Values.name }}.{{ .Values.domain }}
+      secretName: private-{{ .Values.name }}.{{ .Values.domain }}-cert
+  rules:
+    - host: a.{{ .Values.name }}.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.name }}
+                 port:
+                   number: {{ .Values.adminPort }}
+---
+# Public ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: public-{{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.name }}.{{ .Values.domain }}
+      secretName: public.{{ .Values.name }}.{{ .Values.domain }}-cert
+  rules:
+    - host: {{ .Values.name }}.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.name }}
+                 port:
+                   number: {{ .Values.agentPort }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-sa-pv
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+    color: {{ .Values.deployment.color }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: {{ .Values.storage.storageClassName | default "csi-cinder-high-speed" }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size | default "1Gi" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+   name: {{ .Values.name }}-{{ .Values.deployment.color }}
+   namespace: {{ .Values.namespace }}
+spec:
+   serviceName: {{ .Values.name }}
+   replicas: {{ .Values.replicas }}
+   selector:
+      matchLabels:
+         app: {{ .Values.name }}
+         color: {{ .Values.deployment.color }}
+   template:
+      metadata:
+         labels:
+            app: {{ .Values.name }}
+            color: {{ .Values.deployment.color }}
+      spec:
+         containers:
+         -  name: {{ .Values.name }}-sa-container
+            image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
+            imagePullPolicy: Always
+            env:
+            - name: AGENT_PORT
+              value: "{{ .Values.agentPort }}"
+            - name: ADMIN_PORT
+              value: "{{ .Values.adminPort }}"
+            - name: AGENT_ENDPOINT
+              value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
+            - name: AGENT_LABEL
+              value: {{ .Values.agentName }}
+            - name: AGENT_INVITATION_IMAGE_URL
+              value: "{{ .Values.images.invitationUrl }}"
+            - name: EVENTS_BASE_URL
+              value: "{{ .Values.eventsBaseUrl }}"
+            - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
+              value: "{{ .Values.redirectDefaultUrlToInvitationUrl }}"
+            - name: AGENT_PUBLIC_DID
+              value: "did:web:{{ .Values.name }}.{{ .Values.domain }}"
+            - name: ANONCREDS_SERVICE_BASE_URL
+              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+            {{- if .Values.postgresql }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.postgresql.auth.host }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.auth.username }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.auth.password }}
+            {{- end }}
+            {{- if .Values.redis }}
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.host }}"
+            {{- end }}
+            {{- if .Values.redis.password }}
+            - name: REDIS_PASSWORD
+              value: "{{ .Values.redis.password }}"
+            {{- end }}
+            ...
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            ports:
+            -  containerPort: {{ .Values.adminPort }}
+            -  containerPort: {{ .Values.agentPort }}
+            volumeMounts:
+            - name: {{ .Values.name }}-sa-pv
+              mountPath: /root/.afj
+
+         volumes:
+         - name: {{ .Values.name }}-sa-pv
+           persistentVolumeClaim:
+             claimName: {{ .Values.name }}-sa-pv

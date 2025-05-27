@@ -1,0 +1,56 @@
+# General configuration
+name: vs-agent
+namespace: default
+replicas: 1
+domain: example.com
+
+deployment:
+  color: blue
+  privacy:
+    whitelist: "0.0.0.0/0"
+
+# Image configuration
+images:
+  agent:
+    repository: io2060/2060-service-agent
+    tag: v1.2.0
+  invitationUrl: "https://example.com/invitation.png"
+
+# Ports
+adminPort: 3000
+agentPort: 3001
+
+# Helm subchart for PostgreSQL (Bitnami)
+postgresql:
+  enabled: true
+  auth:
+    username: myuser
+    password: mypassword
+    database: mydatabase
+  primary:
+    persistence:
+      enabled: true
+      storageClass: csi-cinder-classic
+      size: 1Gi
+
+# Redis configuration
+redis:
+  enabled: true
+  host: ""
+  password: myRedisPass123
+
+  architecture: standalone
+  auth:
+    password: myRedisPass123
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-classic
+    size: 1Gi
+
+# Extra environment variables (extensible)
+extraEnv: []
+
+# Persistent volume configuration for app
+storage:
+  size: 1Gi
+  storageClassName: csi-cinder-high-speed

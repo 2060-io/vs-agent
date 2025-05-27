@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
+      
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - uses: codfish/semantic-release-action@v3
         id: semantic
@@ -107,6 +110,16 @@ jobs:
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
+      - name: Validate Helm chart
+        run: helm lint ./charts/vs-agent
+
+      - name: Log in to Docker Hub Helm Registry
+        run: helm registry login -u $DH_USERNAME -p $DH_TOKEN docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        run: |
+          helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent --version $IMAGE_TAG
+  
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:
