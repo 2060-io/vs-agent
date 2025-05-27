@@ -119,7 +119,7 @@ jobs:
         run: |
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
           helm package ./charts/vs-agent -d ./charts
-          helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent
+          helm push ./charts/vs-agent-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME/vs-agent
   
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
