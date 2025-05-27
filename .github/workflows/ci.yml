@@ -40,6 +40,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Validate Helm chart
+        run: helm lint ./charts/vs-agent
+
   validate-demo-dts:
     name: Validate Demo DTS
     runs-on: ubuntu-latest

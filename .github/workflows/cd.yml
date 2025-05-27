@@ -37,9 +37,6 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
-      - name: Install yq
-        run: sudo apt-get install -y yq
-
       - uses: codfish/semantic-release-action@v3
         id: semantic
         with:
@@ -113,9 +110,6 @@ jobs:
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
-      - name: Validate Helm chart
-        run: helm lint ./charts/vs-agent
-
       - name: Log in to Docker Hub Helm Registry
         run: helm registry login -u $DH_USERNAME -p $DH_TOKEN docker.io
 
@@ -124,6 +118,7 @@ jobs:
           IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
         run: |
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
+          helm package ./charts/vs-agent -d ./charts
           helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent
   
       - name: Publish NPM packages
