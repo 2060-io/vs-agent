@@ -1,4 +1,4 @@
-# VS-Agent Helm Chart
+# VS Agent Helm Chart
 
 This Helm chart deploys the **VS-Agent** application with a StatefulSet, supporting private and public ingress, persistent storage, and configurable environment variables. It is designed to be flexible, supporting PostgreSQL and Redis integrations.
 
@@ -30,7 +30,6 @@ This Helm chart deploys the **VS-Agent** application with a StatefulSet, support
 | `namespace`                    | Kubernetes namespace                        | `default`     |
 | `replicas`                     | Number of agent pods                        | `1`           |
 | `domain`                       | Domain for ingress hosts                    | `example.com` |
-| `deployment.color`             | Deployment color label (for versioning/env) | `blue`        |
 | `deployment.privacy.whitelist` | CIDR whitelist for private ingress          | `0.0.0.0/0`   |
 
 ### Images

@@ -8,7 +8,6 @@ metadata:
 spec:
   selector:
     app: {{ .Values.name }}
-    color: {{ .Values.deployment.color }}
   ports:
   - name: didcomm
     port: {{ .Values.agentPort }}
@@ -27,7 +26,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.deployment.privacy.whitelist }}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.ingress.privacy.whitelist }}"
 spec:
   ingressClassName: nginx
   tls:
@@ -75,11 +74,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.name }}-sa-pv
+  name: {{ .Values.name }}-vsa-pv
   namespace: {{ .Values.namespace }}
   labels:
     app: {{ .Values.name }}
-    color: {{ .Values.deployment.color }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -93,7 +91,7 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-   name: {{ .Values.name }}-{{ .Values.deployment.color }}
+   name: {{ .Values.name }}
    namespace: {{ .Values.namespace }}
 spec:
    serviceName: {{ .Values.name }}
@@ -101,12 +99,10 @@ spec:
    selector:
       matchLabels:
          app: {{ .Values.name }}
-         color: {{ .Values.deployment.color }}
    template:
       metadata:
          labels:
             app: {{ .Values.name }}
-            color: {{ .Values.deployment.color }}
       spec:
          containers:
          -  name: {{ .Values.name }}-sa-container
@@ -154,10 +150,10 @@ spec:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.agentPort }}
             volumeMounts:
-            - name: {{ .Values.name }}-sa-pv
+            - name: {{ .Values.name }}-vsa-pv
               mountPath: /root/.afj
 
          volumes:
-         - name: {{ .Values.name }}-sa-pv
+         - name: {{ .Values.name }}-vsa-pv
            persistentVolumeClaim:
-             claimName: {{ .Values.name }}-sa-pv
+             claimName: {{ .Values.name }}-vsa-pv

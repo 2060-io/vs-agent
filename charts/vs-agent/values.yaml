@@ -4,8 +4,7 @@ namespace: default
 replicas: 1
 domain: example.com
 
-deployment:
-  color: blue
+ingress:
   privacy:
     whitelist: "0.0.0.0/0"
 
