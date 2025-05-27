@@ -119,6 +119,7 @@ jobs:
           IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
         run: |
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
+          helm dependency update ./charts/vs-agent
           helm package ./charts/vs-agent -d ./charts
           helm push ./charts/vs-agent-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
   
