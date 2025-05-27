@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**']
+    branches: [main, 'release/**', 'fix/create-helm-chart-on-vs-a']
 
   workflow_dispatch:
 
@@ -117,6 +117,8 @@ jobs:
         run: helm registry login -u $DH_USERNAME -p $DH_TOKEN docker.io
 
       - name: Push Helm chart to Docker Hub OCI repo
+        env:
+          IMAGE_TAG: 'dev'
         run: |
           helm push ./charts/vs-agent oci://docker.io/$DH_USERNAME/vs-agent --version $IMAGE_TAG
   
