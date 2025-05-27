@@ -22,7 +22,7 @@ agentPort: 3001
 
 # Helm subchart for PostgreSQL (Bitnami)
 postgresql:
-  enabled: true
+  enabled: false
   auth:
     username: myuser
     password: mypassword
@@ -35,17 +35,17 @@ postgresql:
 
 # Redis configuration
 redis:
-  enabled: true
-  host: ""
-  password: myRedisPass123
-
+  enabled: false
   architecture: standalone
+
   auth:
     password: myRedisPass123
+
   persistence:
     enabled: true
     storageClass: csi-cinder-classic
     size: 1Gi
+
 
 # Extra environment variables (extensible)
 extraEnv: []
