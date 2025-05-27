@@ -111,7 +111,8 @@ jobs:
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
       - name: Log in to Docker Hub Helm Registry
-        run: helm registry login -u $DH_USERNAME -p $DH_TOKEN docker.io
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
 
       - name: Push Helm chart to Docker Hub OCI repo
         env:
