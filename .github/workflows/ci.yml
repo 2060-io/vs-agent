@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
+  validate-root:
+    name: Validate Root
     runs-on: ubuntu-latest
 
     steps:
@@ -21,26 +22,51 @@ jobs:
         with:
           node-version: 22
 
-      - name: Corepack pnpm
-        run: |
-          corepack enable
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: |
-          pnpm build
+        run: pnpm build
 
       - name: Check Format
-        run: |
-          pnpm check-format
+        run: pnpm check-format
 
       - name: Check Types
-        run: |
-          pnpm check-types
+        run: pnpm check-types
 
       - name: Test
-        run: |
-          pnpm test
+        run: pnpm test
+
+  validate-demo-dts:
+    name: Validate Demo DTS
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/demo-dts
+
+    steps:
+      - name: Checkout service-agent
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Check Format
+        run: pnpm check-format
+
+      - name: Check Types
+        run: pnpm check-types
