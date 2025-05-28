@@ -126,8 +126,6 @@ spec:
               value: "{{ .Values.redirectDefaultUrlToInvitationUrl }}"
             - name: AGENT_PUBLIC_DID
               value: "did:web:a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
-            - name: ANONCREDS_SERVICE_BASE_URL
-              value: "https://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             {{- if .Values.postgresql.enabled }}
             - name: POSTGRES_HOST
               value: {{ .Values.postgresql.auth.host }}
