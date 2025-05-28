@@ -4,6 +4,10 @@ namespace: default
 replicas: 1
 domain: example.com
 
+# Ports
+adminPort: 3000
+agentPort: 3001
+
 ingress:
   privacy:
     whitelist: "0.0.0.0/0"
@@ -14,10 +18,6 @@ images:
     repository: io2060/2060-service-agent
     tag: v1.2.0
   invitationUrl: "https://example.com/invitation.png"
-
-# Ports
-adminPort: 3000
-agentPort: 3001
 
 # Helm subchart for PostgreSQL (Bitnami)
 postgresql:
