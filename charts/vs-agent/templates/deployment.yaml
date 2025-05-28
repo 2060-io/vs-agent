@@ -122,8 +122,6 @@ spec:
               value: "{{ .Values.images.invitationUrl }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
-            - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
-              value: "{{ .Values.redirectDefaultUrlToInvitationUrl }}"
             - name: AGENT_PUBLIC_DID
               value: "did:web:a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             {{- if .Values.postgresql.enabled }}
