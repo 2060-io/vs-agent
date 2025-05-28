@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  name: {{ .Values.vsAgentName }}
+  namespace: {{ .Values.vsAgentNamespace }}
   labels:
-    app: {{ .Values.name }}
+    app: {{ .Values.vsAgentName }}
 spec:
   selector:
-    app: {{ .Values.name }}
+    app: {{ .Values.vsAgentName }}
   ports:
   - name: didcomm
     port: {{ .Values.agentPort }}
@@ -22,8 +22,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: private-{{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  name: private-{{ .Values.vsAgentName }}
+  namespace: {{ .Values.vsAgentNamespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.ingress.privacy.whitelist }}"
@@ -31,17 +31,17 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - a.{{ .Values.name }}.{{ .Values.domain }}
-      secretName: private-{{ .Values.name }}.{{ .Values.domain }}-cert
+        - a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+      secretName: private-{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
   rules:
-    - host: a.{{ .Values.name }}.{{ .Values.domain }}
+    - host: a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                 name: {{ .Values.name }}
+                 name: {{ .Values.vsAgentName }}
                  port:
                    number: {{ .Values.adminPort }}
 ---
@@ -49,35 +49,35 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: public-{{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  name: public-{{ .Values.vsAgentName }}
+  namespace: {{ .Values.vsAgentNamespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.domain }}
-      secretName: public.{{ .Values.name }}.{{ .Values.domain }}-cert
+        - {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+      secretName: public.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
   rules:
-    - host: {{ .Values.name }}.{{ .Values.domain }}
+    - host: {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                 name: {{ .Values.name }}
+                 name: {{ .Values.vsAgentName }}
                  port:
                    number: {{ .Values.agentPort }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.name }}-vsa-pv
-  namespace: {{ .Values.namespace }}
+  name: {{ .Values.vsAgentName }}-vsa-pv
+  namespace: {{ .Values.vsAgentNamespace }}
   labels:
-    app: {{ .Values.name }}
+    app: {{ .Values.vsAgentName }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -91,21 +91,21 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-   name: {{ .Values.name }}
-   namespace: {{ .Values.namespace }}
+   name: {{ .Values.vsAgentName }}
+   namespace: {{ .Values.vsAgentNamespace }}
 spec:
-   serviceName: {{ .Values.name }}
-   replicas: {{ .Values.replicas }}
+   serviceName: {{ .Values.vsAgentName }}
+   replicas: {{ .Values.vsAgentReplicas }}
    selector:
       matchLabels:
-         app: {{ .Values.name }}
+         app: {{ .Values.vsAgentName }}
    template:
       metadata:
          labels:
-            app: {{ .Values.name }}
+            app: {{ .Values.vsAgentName }}
       spec:
          containers:
-         -  name: {{ .Values.name }}-sa-container
+         -  name: {{ .Values.vsAgentName }}-sa-container
             image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
             imagePullPolicy: Always
             env:
@@ -117,7 +117,7 @@ spec:
             - name: ADMIN_PORT
               value: "{{ .Values.adminPort }}"
             - name: AGENT_ENDPOINT
-              value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
+              value: "wss://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -127,9 +127,9 @@ spec:
             - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
               value: "{{ .Values.redirectDefaultUrlToInvitationUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ .Values.name }}.{{ .Values.domain }}"
+              value: "did:web:{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             - name: ANONCREDS_SERVICE_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+              value: "https://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             {{- if .Values.postgresql }}
             - name: POSTGRES_HOST
               value: {{ .Values.postgresql.auth.host }}
@@ -140,7 +140,7 @@ spec:
             {{- end }}
             {{- if .Values.redis }}
             - name: REDIS_HOST
-              value: "{{ .Release.Name }}-redis-master"
+              value: "{{ .Release.vsAgentName }}-redis-master"
             {{- end }}
             {{- if .Values.redis.password }}
             - name: REDIS_PASSWORD
@@ -150,10 +150,10 @@ spec:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.agentPort }}
             volumeMounts:
-            - name: {{ .Values.name }}-vsa-pv
+            - name: {{ .Values.vsAgentName }}-vsa-pv
               mountPath: /root/.afj
 
          volumes:
-         - name: {{ .Values.name }}-vsa-pv
+         - name: {{ .Values.vsAgentName }}-vsa-pv
            persistentVolumeClaim:
-             claimName: {{ .Values.name }}-vsa-pv
+             claimName: {{ .Values.vsAgentName }}-vsa-pv
