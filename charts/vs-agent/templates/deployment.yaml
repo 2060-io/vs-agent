@@ -53,6 +53,7 @@ metadata:
   namespace: {{ .Values.vsAgentNamespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "{{ .Values.ingress.public.enableCors | default "true" }}"
 spec:
   ingressClassName: nginx
   tls:
