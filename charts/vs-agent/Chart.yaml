@@ -3,12 +3,3 @@ name: vs-agent
 description: A Helm chart for deploying the VS Agent application
 version: 0.0.1
 appVersion: "1.0.0"
-dependencies:
-  - name: postgresql
-    version: 13.2.19
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
-  - name: redis
-    version: 17.4.2
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled

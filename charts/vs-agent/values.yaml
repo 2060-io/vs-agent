@@ -19,33 +19,6 @@ images:
     tag: v1.2.0
   invitationUrl: "https://example.com/invitation.png"
 
-# Helm subchart for PostgreSQL (Bitnami)
-postgresql:
-  enabled: false
-  auth:
-    username: myuser
-    password: mypassword
-    database: mydatabase
-  primary:
-    persistence:
-      enabled: true
-      storageClass: csi-cinder-classic
-      size: 1Gi
-
-# Redis configuration
-redis:
-  enabled: false
-  architecture: standalone
-
-  auth:
-    password: myRedisPass123
-
-  persistence:
-    enabled: true
-    storageClass: csi-cinder-classic
-    size: 1Gi
-
-
 # Extra environment variables (extensible)
 extraEnv: []
 
