@@ -109,9 +109,6 @@ spec:
             image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
             imagePullPolicy: Always
             env:
-            {{- with .Values.extraEnv }}
-            {{- toYaml . | nindent 6 }}
-            {{- end }}
             - name: AGENT_PORT
               value: "{{ .Values.agentPort }}"
             - name: ADMIN_PORT
@@ -145,7 +142,10 @@ spec:
             {{- if .Values.redis.password }}
             - name: REDIS_PASSWORD
               value: "{{ .Values.redis.password }}"
-            {{- end }}
+{{- end }}
+{{- with .Values.extraEnv }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.agentPort }}
