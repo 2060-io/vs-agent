@@ -11,8 +11,6 @@ agentPort: 3001
 ingress:
   public:
     enableCors: true
-  privacy:
-    whitelist: "0.0.0.0/0"
 
 # Image configuration
 images:
