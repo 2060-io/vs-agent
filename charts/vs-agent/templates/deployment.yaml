@@ -115,7 +115,7 @@ spec:
             - name: ADMIN_PORT
               value: "{{ .Values.adminPort }}"
             - name: AGENT_ENDPOINT
-              value: "wss://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
+              value: "wss://a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -125,7 +125,7 @@ spec:
             - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
               value: "{{ .Values.redirectDefaultUrlToInvitationUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
+              value: "did:web:a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             - name: ANONCREDS_SERVICE_BASE_URL
               value: "https://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             {{- if .Values.postgresql.enabled }}
