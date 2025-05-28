@@ -115,8 +115,6 @@ jobs:
           echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
 
       - name: Push Helm chart to Docker Hub OCI repo
-        env:
-          IMAGE_TAG: ${{ github.run_number }}-${{ github.sha }}
         run: |
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
           helm dependency update ./charts/vs-agent
