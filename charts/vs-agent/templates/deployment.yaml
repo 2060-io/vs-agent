@@ -127,7 +127,7 @@ spec:
               value: "did:web:{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
             - name: ANONCREDS_SERVICE_BASE_URL
               value: "https://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
-            {{- if .Values.postgresql }}
+            {{- if .Values.postgresql.enabled }}
             - name: POSTGRES_HOST
               value: {{ .Values.postgresql.auth.host }}
             - name: POSTGRES_USER
@@ -135,14 +135,14 @@ spec:
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresql.auth.password }}
             {{- end }}
-            {{- if .Values.redis }}
+            {{- if .Values.redis.enabled }}
             - name: REDIS_HOST
               value: "{{ .Release.vsAgentName }}-redis-master"
             {{- end }}
             {{- if .Values.redis.password }}
             - name: REDIS_PASSWORD
               value: "{{ .Values.redis.password }}"
-{{- end }}
+            {{- end }}
 {{- with .Values.extraEnv }}
 {{- toYaml . | nindent 12 }}
 {{- end }}
