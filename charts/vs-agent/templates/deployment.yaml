@@ -18,33 +18,6 @@ spec:
     targetPort: {{ .Values.adminPort }}
     protocol: TCP
 ---
-# Private ingress
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: private-{{ .Values.vsAgentName }}
-  namespace: {{ .Values.vsAgentNamespace }}
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.ingress.privacy.whitelist }}"
-spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
-      secretName: private-{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
-  rules:
-    - host: a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                 name: {{ .Values.vsAgentName }}
-                 port:
-                   number: {{ .Values.adminPort }}
----
 # Public ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -58,10 +31,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+        - a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       secretName: public.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
   rules:
-    - host: {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+    - host: a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       http:
         paths:
           - path: /
@@ -110,10 +83,6 @@ spec:
             image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
             imagePullPolicy: Always
             env:
-            - name: AGENT_PORT
-              value: "{{ .Values.agentPort }}"
-            - name: ADMIN_PORT
-              value: "{{ .Values.adminPort }}"
             - name: AGENT_ENDPOINT
               value: "wss://a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
             - name: AGENT_LABEL
