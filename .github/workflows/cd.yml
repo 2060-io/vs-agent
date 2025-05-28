@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**', 'fix/create-helm-chart-on-vs-a']
+    branches: [main, 'release/**']
 
   workflow_dispatch:
 
