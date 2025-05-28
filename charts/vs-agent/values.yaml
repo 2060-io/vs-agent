@@ -1,8 +1,8 @@
 # General configuration
-name: vs-agent
-namespace: default
-replicas: 1
-domain: example.com
+vsAgentName: vs-agent
+vsAgentNamespace: default
+vsAgentReplicas: 1
+vsAgentDomain: example.com
 
 # Ports
 adminPort: 3000
