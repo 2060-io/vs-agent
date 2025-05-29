@@ -23,7 +23,7 @@ COPY packages/client/tsconfig.build.json packages/client/tsconfig.build.json
 COPY packages/client/tsconfig.json packages/nestjs-client/tsconfig.json
 COPY packages/client/tsconfig.build.json packages/nestjs-client/tsconfig.build.json
 
-COPY examples/demo-dts/ examples/demo-dts/
+COPY examples/nestjs-vs/ examples/nestjs-vs/
 
 RUN pnpm install
 RUN pnpm build
@@ -39,5 +39,5 @@ ENV RUN_MODE="docker"
 COPY --from=base /www/packages ./packages
 COPY --from=base /www/examples ./examples
 
-WORKDIR /www/examples/demo-dts/build
+WORKDIR /www/examples/nestjs-vs/build
 CMD ["node", "main.js"]

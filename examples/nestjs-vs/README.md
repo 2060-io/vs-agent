@@ -1,17 +1,17 @@
-# Demo DTS Chatbot - User Guide
+# Demo NestJS VS Chatbot - User Guide
 
-The `demo-dts` directory contains a demonstration of a chatbot application built using VS Agent framework. This guide provides an overview of the directory structure, setup instructions, and usage details.
+The `nestjs-vs` directory contains a demonstration of a chatbot application built using VS Agent NestJS client. This guide provides an overview of the directory structure, setup instructions, and usage details.
 
 ---
 
 ## Directory Structure
 
-The `demo-dts` directory is organized as follows:
+The `nestjs-vs` directory is organized as follows:
 
 ```
-demo-dts/
+nestjs-vs/
 ├── Dockerfile          # Docker configuration for building and running the chatbot
-├── README.md           # Documentation for the demo-dts chatbot
+├── README.md           # Documentation for the nestjs-vs chatbot
 ├── src/                # Source code for the chatbot
 │   ├── app.module.ts   # Main application module
 │   ├── core.module.ts  # Core module for database and service integration
@@ -27,7 +27,7 @@ demo-dts/
 ```
 
 ## Getting Started
-This section provides a step-by-step guide to creating a chatbot using VS Agent framework. The chatbot comes with default configurations that may not fit all use cases, so it is important to first define your requirements. 
+This section provides a step-by-step guide to creating a chatbot using VS Agent NestJS client. The chatbot comes with default configurations that may not fit all use cases, so it is important to first define your requirements. 
 
 ### **Key Considerations**
 1. **Default Modules**:
@@ -45,7 +45,7 @@ This section provides a step-by-step guide to creating a chatbot using VS Agent 
 
 ### **Step 1: Install Dependencies**
 
-Ensure all dependencies are installed by running the following command in the `demo-dts` directory:
+Ensure all dependencies are installed by running the following command in the `nestjs-vs` directory:
 
 ```bash
 pnpm install
@@ -298,7 +298,7 @@ Before running the chatbot, ensure you have the following installed:
 ## Setup Instructions
 
 1. **Install Dependencies**:
-   Navigate to the `demo-dts` directory and install the required dependencies:
+   Navigate to the `nestjs-vs` directory and install the required dependencies:
    ```bash
    yarn install
    ```
@@ -332,12 +332,12 @@ To run the chatbot in a Docker container:
 
 1. **Build the Docker Image**:
    ```bash
-   docker build -t demo-dts-chatbot .
+   docker build -t nestjs-vs-chatbot .
    ```
 
 2. **Run the Container**:
    ```bash
-   docker run -p 3000:3000 -e VS_AGENT_ADMIN_URL=<url> demo-dts-chatbot
+   docker run -p 3000:3000 -e VS_AGENT_ADMIN_URL=<url> nestjs-vs-chatbot
    ```
 
 ---

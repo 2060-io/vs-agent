@@ -15,14 +15,14 @@ export const didcommMessageState: Record<string, MessageState> = {
   viewed: MessageState.Viewed,
 }
 
-export interface ServiceAgentMessageReceiptOptions {
+export interface VsAgentMessageReceiptOptions {
   messageId: string
   state: string
   timestamp: Date
 }
 
-export class ServiceAgentMessageReceipt {
-  public constructor(options: ServiceAgentMessageReceiptOptions) {
+export class VsAgentMessageReceipt {
+  public constructor(options: VsAgentMessageReceiptOptions) {
     if (options) {
       this.messageId = options.messageId
       this.state = options.state
@@ -47,7 +47,7 @@ export interface ReceiptsMessageOptions {
   threadId?: string
   connectionId: string
   timestamp?: Date
-  receipts: ServiceAgentMessageReceiptOptions[]
+  receipts: VsAgentMessageReceiptOptions[]
 }
 
 export class ReceiptsMessage extends BaseMessage {
@@ -67,9 +67,9 @@ export class ReceiptsMessage extends BaseMessage {
   public static readonly type = MessageType.ReceiptsMessage
 
   @Expose()
-  @Type(() => ServiceAgentMessageReceipt)
+  @Type(() => VsAgentMessageReceipt)
   @IsArray()
   @ValidateNested()
-  @IsInstance(ServiceAgentMessageReceipt, { each: true })
-  public receipts!: ServiceAgentMessageReceipt[]
+  @IsInstance(VsAgentMessageReceipt, { each: true })
+  public receipts!: VsAgentMessageReceipt[]
 }

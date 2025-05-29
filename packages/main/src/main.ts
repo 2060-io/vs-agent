@@ -11,11 +11,11 @@ import * as path from 'path'
 
 import packageJson from '../package.json'
 
-import { ServiceAgentModule } from './app.module'
+import { VsAgentModule } from './app.module'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgent } from './utils/VsAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
 import {
@@ -27,8 +27,8 @@ import {
   POSTGRES_HOST,
 } from './utils/walletConfig'
 
-export const startAdminServer = async (agent: ServiceAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(ServiceAgentModule.register(agent))
+export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
+  const app = await NestFactory.create(VsAgentModule.register(agent))
 
   // Version
   app.enableVersioning({

@@ -64,7 +64,7 @@ import {
 } from 'credo-ts-media-sharing'
 import { ReceiptsEventTypes } from 'credo-ts-receipts'
 
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 import { createDataUrl } from '../utils/parsers'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
@@ -72,7 +72,7 @@ import { sendWebhookEvent } from './WebhookEvent'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
 // as soon as the corresponding extension is added to them
-export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) => {
+export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
   agent.events.on(AgentEventTypes.AgentMessageProcessed, async ({ payload }: AgentMessageProcessedEvent) => {
     config.logger.debug(`AgentMessageProcessedEvent received: ${JSON.stringify(payload.message)}`)
     const { message, connection } = payload
@@ -530,7 +530,7 @@ export const messageEvents = async (agent: ServiceAgent, config: ServerConfig) =
 }
 
 const sendMessageReceivedEvent = async (
-  agent: ServiceAgent,
+  agent: VsAgent,
   message: BaseMessage,
   timestamp: Date,
   config: ServerConfig,
@@ -544,7 +544,7 @@ const sendMessageReceivedEvent = async (
 }
 
 const sendMessageStateUpdatedEvent = async (options: {
-  agent: ServiceAgent
+  agent: VsAgent
   messageId: string
   connectionId: string
   state: MessageState
@@ -563,7 +563,7 @@ const sendMessageStateUpdatedEvent = async (options: {
   await sendWebhookEvent(config.webhookUrl + '/message-state-updated', body, config.logger)
 }
 
-const getRecordId = async (agent: ServiceAgent, id: string): Promise<string> => {
+const getRecordId = async (agent: VsAgent, id: string): Promise<string> => {
   const record = await agent.genericRecords.findById(id)
   return (record?.getTag('messageId') as string) ?? id
 }

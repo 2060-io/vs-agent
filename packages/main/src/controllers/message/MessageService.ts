@@ -36,7 +36,7 @@ import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answ
 import { Injectable, Logger } from '@nestjs/common'
 
 import { AgentService } from '../../services/AgentService'
-import { didcommReceiptFromServiceAgentReceipt, parsePictureData } from '../../utils/parsers'
+import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../utils/parsers'
 
 @Injectable()
 export class MessageService {
@@ -89,7 +89,7 @@ export class MessageService {
         const textMsg = JsonTransformer.fromJSON(message, ReceiptsMessage)
         await agent.modules.receipts.send({
           connectionId: textMsg.connectionId,
-          receipts: textMsg.receipts.map(didcommReceiptFromServiceAgentReceipt),
+          receipts: textMsg.receipts.map(didcommReceiptFromVsAgentReceipt),
         })
       } else if (messageType === MenuDisplayMessage.type) {
         const msg = JsonTransformer.fromJSON(message, MenuDisplayMessage)

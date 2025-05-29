@@ -1,6 +1,6 @@
 import { AgentMessage, HandshakeProtocol } from '@credo-ts/core'
 
-import { ServiceAgent } from './ServiceAgent'
+import { VsAgent } from './VsAgent'
 
 /**
  * Creates an out of band invitation that will equal to the public DID in case the agent has one defined,
@@ -9,7 +9,7 @@ import { ServiceAgent } from './ServiceAgent'
  * @param agent
  * @returns
  */
-export async function createInvitation(agent: ServiceAgent, messages?: AgentMessage[]) {
+export async function createInvitation(agent: VsAgent, messages?: AgentMessage[]) {
   const outOfBandInvitation = (
     await agent.oob.createInvitation({
       label: agent.config.label,

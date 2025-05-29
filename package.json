@@ -14,7 +14,7 @@
     "start:dev": "pnpm --filter @2060.io/vs-agent-main start:dev",
     "start:chatbot": "pnpm --filter 2060-demo-chatbot start",
     "start:verifier": "pnpm --filter 2060-demo-verifier start",
-    "start:dts": "pnpm --filter demo-dts start",
+    "start:nestjsvs": "pnpm --filter nestjs-vs start",
     "check-types": "pnpm check-types:build",
     "check-types:build": "pnpm -r --parallel exec tsc --noEmit",
     "format": "prettier \"packages/*/src/**/*.ts\" --write",

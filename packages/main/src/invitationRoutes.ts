@@ -4,12 +4,12 @@ import express from 'express'
 import QRCode from 'qrcode'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './events/CallbackEvent'
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgent } from './utils/VsAgent'
 import { createInvitation } from './utils/agent'
 import { TsLogger } from './utils/logger'
 
 // Add invitation endpoints (TODO: remove as it should be part of an external API)
-export const addInvitationRoutes = async (app: express.Express, agent: ServiceAgent) => {
+export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) => {
   // Retrieve the URL that corresponds to a given short URL
   app.get('/s', async (req, res) => {
     try {

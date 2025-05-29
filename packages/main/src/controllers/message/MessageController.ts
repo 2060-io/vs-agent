@@ -4,7 +4,7 @@ import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nest
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { AgentService } from '../../services/AgentService'
-import { ServiceAgent } from '../../utils/ServiceAgent'
+import { VsAgent } from '../../utils/VsAgent'
 
 import { MessageServiceFactory } from './services/MessageServiceFactory'
 
@@ -78,7 +78,7 @@ export class MessageController {
     }
   }
 
-  private async checkForDuplicateId(agent: ServiceAgent, message: BaseMessage): Promise<void> {
+  private async checkForDuplicateId(agent: VsAgent, message: BaseMessage): Promise<void> {
     const records = message.id
       ? await agent.genericRecords.findAllByQuery({
           messageId: message.id,

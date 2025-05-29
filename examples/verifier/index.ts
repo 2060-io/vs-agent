@@ -4,7 +4,6 @@ import express from 'express'
 import path from 'path'
 import { Logger } from 'tslog'
 
-
 const logger = new Logger()
 
 const PORT = Number(process.env.PORT || 5100)

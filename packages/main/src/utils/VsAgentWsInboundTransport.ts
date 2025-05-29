@@ -19,7 +19,7 @@ interface ExtWebSocket extends WebSocket {
   lastActivity: Date
 }
 
-export class ServiceAgentWsInboundTransport implements InboundTransport {
+export class VsAgentWsInboundTransport implements InboundTransport {
   private socketServer: Server
   private logger!: Logger
 

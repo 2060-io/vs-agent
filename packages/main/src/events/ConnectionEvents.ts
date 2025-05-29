@@ -15,12 +15,12 @@ import {
   HangupMessage,
 } from '@credo-ts/core'
 
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
 
-export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig) => {
+export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
   agent.events.on(
     ConnectionEventTypes.ConnectionStateChanged,
     async ({ payload }: ConnectionStateChangedEvent) => {

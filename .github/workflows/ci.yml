@@ -40,12 +40,12 @@ jobs:
       - name: Test
         run: pnpm test
 
-  validate-demo-dts:
-    name: Validate Demo DTS
+  validate-nestjs-vs:
+    name: Validate Demo NestJS VS
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: examples/demo-dts
+        working-directory: examples/nestjs-vs
 
     steps:
       - name: Checkout vs-agent

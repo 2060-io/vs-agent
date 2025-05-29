@@ -13,9 +13,9 @@ import express from 'express'
 import fs from 'fs'
 import multer, { diskStorage } from 'multer'
 
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgent } from './utils/VsAgent'
 
-export const startDidWebServer = async (agent: ServiceAgent, config: DidWebServerConfig) => {
+export const startDidWebServer = async (agent: VsAgent, config: DidWebServerConfig) => {
   const app = config.app ?? express()
 
   if (config.cors) {
@@ -71,7 +71,7 @@ const fileStorage = diskStorage({
 
 export const addDidWebRoutes = async (
   app: express.Express,
-  agent: ServiceAgent,
+  agent: VsAgent,
   anoncredsBaseUrl?: string,
 ) => {
   // DidDocument

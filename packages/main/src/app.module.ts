@@ -17,13 +17,13 @@ import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { HandledRedisModule } from './modules/redis.module'
 import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgent } from './utils/VsAgent'
 
 @Module({})
-export class ServiceAgentModule {
-  static register(agent: ServiceAgent): DynamicModule {
+export class VsAgentModule {
+  static register(agent: VsAgent): DynamicModule {
     return {
-      module: ServiceAgentModule,
+      module: VsAgentModule,
       imports: [HandledRedisModule.forRoot()],
       controllers: [
         AgentController,

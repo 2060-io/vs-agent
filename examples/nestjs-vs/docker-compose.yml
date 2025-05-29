@@ -3,7 +3,7 @@ version: '3'
 services:
   vs-agent:
     build: ../..
-    image: 2060-vs-agent
+    image: vs-agent
     container_name: chatbot-vs-agent
     restart: always
     networks:
@@ -31,9 +31,9 @@ services:
   chatbot-dts:
     build: 
       context: ../../
-      dockerfile: ./examples/demo-dts/Dockerfile
-    image: 2060-chatbot-dts
-    container_name: chatbot-dts
+      dockerfile: ./examples/nestjs-vs/Dockerfile
+    image: nestjs-vs-chatbot
+    container_name: nestjs-vs-chatbot
     restart: always
     depends_on:
       - vs-agent

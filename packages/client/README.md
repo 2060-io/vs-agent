@@ -20,7 +20,7 @@ Find the public repository here: [VS Agent](../../README.md)
 
 package "2060 Ecosystem" {
     package "VS Agent (VS-A)" {
-        class ServiceAgent {
+        class VsAgent {
             + Handles DIDComm communication
             + Manages agent wallet and credentials
             + Exposes API for client interactions
@@ -54,11 +54,11 @@ package "2060 Ecosystem" {
     }
 }
 
-NestJSClient --> ServiceAgent : Uses
-Client --> ServiceAgent : Sends requests
-Client --> ServiceAgent : Receives requests
+NestJSClient --> VsAgent : Uses
+Client --> VsAgent : Sends requests
+Client --> VsAgent : Receives requests
 Client --> ModelLibrary : Uses models
-ModelLibrary --> ServiceAgent : Provides data models
+ModelLibrary --> VsAgent : Provides data models
 NestJSClient --> ModelLibrary : Uses models
 
 @enduml

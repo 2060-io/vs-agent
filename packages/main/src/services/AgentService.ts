@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common'
 
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 
 @Injectable()
 export class AgentService {
-  constructor(@Inject('AGENT') private agent: ServiceAgent) {}
+  constructor(@Inject('AGENT') private agent: VsAgent) {}
 
-  async getAgent(): Promise<ServiceAgent> {
+  async getAgent(): Promise<VsAgent> {
     if (!this.agent.isInitialized) {
       await this.agent.initialize()
     }
