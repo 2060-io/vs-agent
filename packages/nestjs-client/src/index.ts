@@ -1,5 +1,5 @@
-export * from '@2060.io/service-agent-client'
-export * from '@2060.io/service-agent-model'
+export * from '@2060.io/vs-agent-client'
+export * from '@2060.io/vs-agent-model'
 export * from './app.module'
 export * from './connections'
 export * from './credentials'

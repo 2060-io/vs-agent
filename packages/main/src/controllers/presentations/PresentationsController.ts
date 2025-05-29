@@ -1,4 +1,4 @@
-import { PresentationData, RequestedCredential, Claim } from '@2060.io/service-agent-model'
+import { PresentationData, RequestedCredential, Claim } from '@2060.io/vs-agent-model'
 import { ProofExchangeRecord } from '@credo-ts/core'
 import {
   BadRequestException,

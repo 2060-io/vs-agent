@@ -18,7 +18,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
   CredentialRevocationMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import {
@@ -397,7 +397,7 @@ export class MessageService {
           tags: { messageId: message.id, connectionId: message.connectionId },
         })
       this.logger.debug!(`messageId saved: ${messageId}`)
-      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
+      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and VS Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new Error(`something went wrong: ${error}`)

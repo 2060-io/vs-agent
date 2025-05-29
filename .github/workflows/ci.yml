@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
       - name: Setup Node.js v22
@@ -48,7 +48,7 @@ jobs:
         working-directory: examples/demo-dts
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
       - name: Setup Node.js v22

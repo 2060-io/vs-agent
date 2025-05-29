@@ -38,7 +38,7 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
     const config = agent.dependencyManager.resolve(AgentConfig)
 
     this.logger = agent.context.config.logger
-    this.logger.debug('Service Agent Ws Inbound transport start')
+    this.logger.debug('VS Agent Ws Inbound transport start')
 
     const wsEndpoint = config.endpoints.find(e => e.startsWith('ws'))
     this.logger.debug(`Starting WS inbound transport`, {

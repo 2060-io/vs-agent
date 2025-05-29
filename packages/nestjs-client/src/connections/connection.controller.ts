@@ -1,5 +1,5 @@
-import { HttpUtils } from '@2060.io/service-agent-client'
-import { ConnectionStateUpdated, EventType } from '@2060.io/service-agent-model'
+import { HttpUtils } from '@2060.io/vs-agent-client'
+import { ConnectionStateUpdated, EventType } from '@2060.io/vs-agent-model'
 import { Body, Controller, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 

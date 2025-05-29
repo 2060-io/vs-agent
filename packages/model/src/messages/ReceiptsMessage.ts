@@ -6,7 +6,7 @@ import { MessageState } from 'credo-ts-receipts'
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'
 
-// FIXME: Do a better conversion between DIDComm protocol and Service Agent protocol constants
+// FIXME: Do a better conversion between DIDComm protocol and VS Agent protocol constants
 export const didcommMessageState: Record<string, MessageState> = {
   created: MessageState.Created,
   deleted: MessageState.Deleted,

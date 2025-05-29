@@ -1,4 +1,4 @@
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
 import cors from 'cors'
 import express from 'express'
 import path from 'path'
@@ -8,7 +8,7 @@ import { Logger } from 'tslog'
 const logger = new Logger()
 
 const PORT = Number(process.env.PORT || 5100)
-const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
+const SERVICE_AGENT_BASE_URL = process.env.VS_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5100'
 const app = express()
 

@@ -2,7 +2,7 @@ import {
   CreateCredentialOfferResult,
   CreatePresentationRequestResult,
   CreateInvitationResult,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'

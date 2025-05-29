@@ -1,10 +1,10 @@
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
+import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
 import {
   CredentialReceptionMessage,
   MessageReceived,
   ProfileMessage,
   ReceiptsMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { CredentialState, JsonTransformer } from '@credo-ts/core'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 import { MessageState } from 'credo-ts-receipts'

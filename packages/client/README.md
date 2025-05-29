@@ -1,25 +1,25 @@
-`@2060.io/service-agent-client`
+`@2060.io/vs-agent-client`
 
-# Service Agent Client
-**Service Agent Client** is a TypeScript library designed to simplify the interaction with **Service Agent** (`@2060.io/service-agent-main`). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
+# VS Agent Client
+**VS Agent Client** is a TypeScript library designed to simplify the interaction with **VS Agent** (`@2060.io/vs-agent-main`). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
 
-This package ensures that the client stays updated with the latest API versioning of the **Service Agent** to maintain compatibility with evolving endpoints.
+This package ensures that the client stays updated with the latest API versioning of the **VS Agent** to maintain compatibility with evolving endpoints.
 
 ## Features
-- **Simplified API interaction:** Provides an easy-to-use client to interact with the Service Agent.
+- **Simplified API interaction:** Provides an easy-to-use client to interact with VS Agent.
 - **Event handling:** Includes an ExpressEventHandler for quick integration into Express-based applications.
 - **Service-based structure:** Dedicated services for messaging, credentials, invitations, and revocation registries.
-- **Versioning support:** Supports API versioning to maintain compatibility with different Service Agent versions.
+- **Versioning support:** Supports API versioning to maintain compatibility with different VS Agent versions.
 
 ## Repository
-Find the public repository here: [2060 Service Agent](../../README.md)
+Find the public repository here: [VS Agent](../../README.md)
 
 ## How to work
 ```plantuml
 @startuml
 
 package "2060 Ecosystem" {
-    package "Service Agent (SA)" {
+    package "VS Agent (VS-A)" {
         class ServiceAgent {
             + Handles DIDComm communication
             + Manages agent wallet and credentials
@@ -66,22 +66,22 @@ NestJSClient --> ModelLibrary : Uses models
 
 ## Installation
 ```sh
-npm install @2060.io/service-agent-client
+npm install @2060.io/vs-agent-client
 ```
 or 
 ```sh
-yarn add @2060.io/service-agent-client
+yarn add @2060.io/vs-agent-client
 ```
 or 
 ```sh
-pnpm add @2060.io/service-agent-client
+pnpm add @2060.io/vs-agent-client
 ```
 ## `ApiClient.ts`
-`ApiClient` class provides a simple interface for interacting with the Service Agent. It abstracts API calls and offers dedicated service methods for messaging, credential types, invitations, and revocation registries.
+`ApiClient` class provides a simple interface for interacting with VS Agent. It abstracts API calls and offers dedicated service methods for messaging, credential types, invitations, and revocation registries.
 
 ### Example Usage
 ```ts
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
+import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
 
 const apiClient = new ApiClient('http://localhost:3000', ApiVersion.V1)
 
@@ -107,7 +107,7 @@ The `ExpressEventHandler` simplifies event handling for Express applications, ma
 ### Example Usage
 ```ts
 import express from 'express'
-import { ExpressEventHandler } from '@2060.io/service-agent-client'
+import { ExpressEventHandler } from '@2060.io/vs-agent-client'
 
 const app = express()
 const eventHandler = new ExpressEventHandler(app)
@@ -126,10 +126,10 @@ app.listen(3000, () => console.log('Server running on port 3000'))
 - `messageReceived` (`POST /message-received`)
 
 ## Contributing
-This library evolves alongside the Service Agent. Contributions are welcome!
+This library evolves alongside VS Agent. Contributions are welcome!
 - Fork the repository.
 - Create a feature branch.
 - Commit changes.
 - Open a pull request.
 
-For more details, visit the [official repository](https://github.com/2060-io/2060-service-agent).
+For more details, visit the [official repository](https://github.com/2060-io/vs-agent).

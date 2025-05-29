@@ -1,4 +1,4 @@
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
 import {
   CallOfferRequestMessage,
   ContextualMenuSelectMessage,
@@ -24,7 +24,7 @@ import {
   MediaMessage,
   MrtdSubmitState,
   CredentialReceptionMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'
@@ -38,7 +38,7 @@ import phoneCredDefData from './phone-cred-def-dev.json'
 const logger = new Logger()
 
 const PORT = Number(process.env.PORT || 5000)
-const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
+const SERVICE_AGENT_BASE_URL = process.env.VS_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
 const VISION_SERVICE_BASE_URL =
   process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'

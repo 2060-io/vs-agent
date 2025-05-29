@@ -1,12 +1,12 @@
-import { HttpUtils } from '@2060.io/service-agent-client'
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { HttpUtils } from '@2060.io/vs-agent-client'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { ConnectionsEventController } from './connection.controller'
 import { ConnectionsEventService } from './connection.service'
 
-jest.mock('@2060.io/service-agent-client', () => ({
+jest.mock('@2060.io/vs-agent-client', () => ({
   HttpUtils: {
     handleException: jest.fn(),
   },

@@ -2,7 +2,7 @@ import {
   CredentialTypeInfo,
   CredentialTypeResult,
   ImportCredentialTypeOptions,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,

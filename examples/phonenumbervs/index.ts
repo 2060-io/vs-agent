@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import path from 'path'
 
 const PORT = Number(process.env.PORT || 3002)
-const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000'
+const SERVICE_AGENT_BASE_URL = process.env.VS_AGENT_ADMIN_BASE_URL || 'http://localhost:3000'
 
 const app = express()
 
@@ -52,7 +52,7 @@ export const getCredentialTypes = async () => {
   const types = await response.json()
 
   if (!Array.isArray(types)) {
-    throw new Error('Invalid response from Service Agent')
+    throw new Error('Invalid response from VS Agent')
   }
   return types.map(value => value as CredentialTypeInfo)
 }

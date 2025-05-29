@@ -23,9 +23,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@2060.io/service-agent-model": "^1.2.0",
-    "@2060.io/service-agent-nestjs-client": "^1.2.0",
-    "@2060.io/service-agent-client": "^1.2.0",
+    "@2060.io/vs-agent-model": "workspace:*",
+    "@2060.io/vs-agent-nestjs-client": "workspace:*",
+    "@2060.io/vs-agent-client": "workspace:*",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.0",

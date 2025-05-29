@@ -1,4 +1,4 @@
-import { Claim } from '@2060.io/service-agent-model'
+import { Claim } from '@2060.io/vs-agent-model'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository, EntityManager } from 'typeorm'
@@ -25,7 +25,7 @@ const mockGetAll = jest.fn().mockResolvedValue([
     revocationSupported: true,
   },
 ])
-jest.mock('@2060.io/service-agent-client', () => ({
+jest.mock('@2060.io/vs-agent-client', () => ({
   ApiClient: jest.fn().mockImplementation(() => ({
     credentialTypes: {
       getAll: mockGetAll,

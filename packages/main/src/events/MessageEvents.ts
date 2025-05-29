@@ -42,7 +42,7 @@ import {
   MessageReceived,
   MrtdSubmitState,
   CallAcceptRequestMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
 import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'

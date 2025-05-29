@@ -1,5 +1,5 @@
 import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { EventHandler } from '../interfaces'

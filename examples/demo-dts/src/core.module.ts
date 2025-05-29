@@ -6,7 +6,7 @@ import {
   ConnectionEntity,
   CredentialEntity,
   RevocationRegistryEntity,
-} from '@2060.io/service-agent-nestjs-client'
+} from '@2060.io/vs-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Global()
