@@ -35,14 +35,14 @@ import {
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Injectable, Logger } from '@nestjs/common'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../utils/parsers'
 
 @Injectable()
 export class MessageService {
   private readonly logger = new Logger(MessageService.name)
 
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
     try {

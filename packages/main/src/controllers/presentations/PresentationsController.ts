@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 
 @ApiTags('presentations')
 @Controller({
@@ -22,7 +22,7 @@ import { AgentService } from '../../services/AgentService'
 export class PresentationsController {
   private readonly logger = new Logger(PresentationsController.name)
 
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   /**
    * Get all created credential types

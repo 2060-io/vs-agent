@@ -35,7 +35,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly configService: ConfigService,
     private readonly credentialService: CredentialService,
   ) {
-    const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
+    const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
   }
 

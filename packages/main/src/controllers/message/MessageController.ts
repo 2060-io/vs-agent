@@ -3,7 +3,7 @@ import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 import { VsAgent } from '../../utils/VsAgent'
 
 import { MessageServiceFactory } from './services/MessageServiceFactory'
@@ -18,7 +18,7 @@ export class MessageController {
 
   constructor(
     private readonly messageServiceFactory: MessageServiceFactory,
-    private readonly agentService: AgentService,
+    private readonly agentService: VsAgentService,
   ) {}
 
   @Post('/')

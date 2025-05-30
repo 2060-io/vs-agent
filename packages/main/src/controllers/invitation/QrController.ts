@@ -3,7 +3,7 @@ import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 import QRCode from 'qrcode'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 import { createInvitation } from '../../utils/agent'
 
 @ApiTags('qr')
@@ -12,7 +12,7 @@ import { createInvitation } from '../../utils/agent'
   version: '1',
 })
 export class QrController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   @Get('/')
   @ApiQuery({ name: 'size', required: false, type: Number })

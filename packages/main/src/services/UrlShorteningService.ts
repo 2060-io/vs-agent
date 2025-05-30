@@ -4,7 +4,7 @@ import { VsAgent } from '../utils/VsAgent'
 
 @Injectable()
 export class UrlShorteningService {
-  constructor(@Inject('AGENT') private agent: VsAgent) {}
+  constructor(@Inject('VSAGENT') private agent: VsAgent) {}
 
   async createShortUrl(options: { longUrl: string; relatedFlowId?: string }) {
     const { longUrl, relatedFlowId } = options

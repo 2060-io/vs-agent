@@ -7,7 +7,7 @@ import type {
 
 import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
 
-export interface AgentInfo {
+export interface VsAgentInfo {
   label: string
   endpoints: string[]
   isInitialized: boolean

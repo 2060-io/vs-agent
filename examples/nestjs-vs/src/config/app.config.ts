@@ -46,7 +46,7 @@ export default registerAs('appConfig', () => ({
    * Defaults to 'http://localhost:3000' if VS_AGENT_ADMIN_URL is not set in the environment variables.
    * @type {string}
    */
-  serviceAgentAdminUrl: process.env.VS_AGENT_ADMIN_URL || 'http://localhost:3000',
+  vsAgentAdminUrl: process.env.VS_AGENT_ADMIN_URL || 'http://localhost:3000',
 
   /**
    * Base URL for the application.
