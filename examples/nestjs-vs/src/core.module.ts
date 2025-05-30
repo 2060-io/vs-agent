@@ -2,11 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { SessionEntity } from '@/models'
 import { CoreService } from '@/core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
-import {
-  ConnectionEntity,
-  CredentialEntity,
-  RevocationRegistryEntity,
-} from '@2060.io/vs-agent-nestjs-client'
+import { ConnectionEntity, CredentialEntity, RevocationRegistryEntity } from '@2060.io/vs-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Global()

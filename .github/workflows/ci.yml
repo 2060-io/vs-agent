@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate-root:
-    name: Validate Root
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -40,33 +40,3 @@ jobs:
       - name: Test
         run: pnpm test
 
-  validate-nestjs-vs:
-    name: Validate Demo NestJS VS
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: examples/nestjs-vs
-
-    steps:
-      - name: Checkout vs-agent
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js v22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
-
-      - name: Check Format
-        run: pnpm check-format
-
-      - name: Check Types
-        run: pnpm check-types
