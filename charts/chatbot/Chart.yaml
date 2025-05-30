@@ -1,0 +1,13 @@
+apiVersion: v2
+name: chatbot
+description: Helm chart for deploying a demo chatbot to validate new functionalities of VS-Agent.
+type: application
+version: 0.0.1
+appVersion: 1.0.0
+dependencies:
+  - name: vs-agent
+    version: 150-9c181b78dba10dab2fd3aa7b2f8bbfec9a1430e2
+    repository: "oci://docker.io/io2060/vs-agent"
+    condition: vsAgent.enabled
+    tags:
+      - vsAgent
