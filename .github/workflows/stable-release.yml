@@ -60,6 +60,29 @@ jobs:
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}} .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}}
 
+      - name: Log in to Docker Hub Helm Registry
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/vs-agent/Chart.yaml
+          helm dependency update ./charts/vs-agent
+          helm package ./charts/vs-agent -d ./charts
+          helm push ./charts/vs-agent-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/chatbot-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+
       - name: Publish NPM packages
         if: steps.get_version.outputs.is-semver == 'true'
         env:
