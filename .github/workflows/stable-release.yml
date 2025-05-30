@@ -79,9 +79,10 @@ jobs:
           sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
           # update the dependencies version in the Chart.yaml
           sed -i "s/^\([[:space:]]*version:\).*/\1 "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
           helm dependency update ./charts/chatbot
           helm package ./charts/chatbot -d ./charts
-          helm push ./charts/chatbot-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/${CHART_NAME}-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
 
       - name: Publish NPM packages
         if: steps.get_version.outputs.is-semver == 'true'
