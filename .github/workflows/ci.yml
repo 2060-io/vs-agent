@@ -43,6 +43,9 @@ jobs:
       - name: Validate Helm chart
         run: helm lint ./charts/vs-agent
 
+      - name: Validate Helm chart Chatbot
+        run: helm lint ./charts/chatbot
+
   validate-demo-dts:
     name: Validate Demo DTS
     runs-on: ubuntu-latest
