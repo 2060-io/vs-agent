@@ -1,4 +1,4 @@
-name: chatbot
+name: demo-chatbot-vs
 namespace: default
 replicas: 1
 domain: example.dev.io
