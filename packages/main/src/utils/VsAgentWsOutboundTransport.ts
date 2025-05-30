@@ -26,7 +26,7 @@ interface ExtWebSocket extends WebSocket {
   lastActivity: Date
 }
 
-export class ServiceAgentWsOutboundTransport implements OutboundTransport {
+export class VsAgentWsOutboundTransport implements OutboundTransport {
   private transportTable: Map<string, WebSocket> = new Map<string, WebSocket>()
   private agent!: Agent
   private logger!: Logger

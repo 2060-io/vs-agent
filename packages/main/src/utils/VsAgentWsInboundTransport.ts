@@ -19,7 +19,7 @@ interface ExtWebSocket extends WebSocket {
   lastActivity: Date
 }
 
-export class ServiceAgentWsInboundTransport implements InboundTransport {
+export class VsAgentWsInboundTransport implements InboundTransport {
   private socketServer: Server
   private logger!: Logger
 
@@ -38,7 +38,7 @@ export class ServiceAgentWsInboundTransport implements InboundTransport {
     const config = agent.dependencyManager.resolve(AgentConfig)
 
     this.logger = agent.context.config.logger
-    this.logger.debug('Service Agent Ws Inbound transport start')
+    this.logger.debug('VS Agent Ws Inbound transport start')
 
     const wsEndpoint = config.endpoints.find(e => e.startsWith('ws'))
     this.logger.debug(`Starting WS inbound transport`, {

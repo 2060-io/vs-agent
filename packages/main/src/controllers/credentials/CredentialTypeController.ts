@@ -2,7 +2,7 @@ import {
   CredentialTypeInfo,
   CredentialTypeResult,
   ImportCredentialTypeOptions,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
@@ -32,7 +32,7 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -45,7 +45,7 @@ import { CreateCredentialTypeDto } from './CredentialTypeDto'
 export class CredentialTypesController {
   private readonly logger = new Logger(CredentialTypesController.name)
 
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   /**
    * Get all created credential types

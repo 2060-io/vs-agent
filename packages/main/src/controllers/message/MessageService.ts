@@ -18,7 +18,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
   CredentialRevocationMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import {
@@ -35,14 +35,14 @@ import {
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Injectable, Logger } from '@nestjs/common'
 
-import { AgentService } from '../../services/AgentService'
-import { didcommReceiptFromServiceAgentReceipt, parsePictureData } from '../../utils/parsers'
+import { VsAgentService } from '../../services/VsAgentService'
+import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../utils/parsers'
 
 @Injectable()
 export class MessageService {
   private readonly logger = new Logger(MessageService.name)
 
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
     try {
@@ -89,7 +89,7 @@ export class MessageService {
         const textMsg = JsonTransformer.fromJSON(message, ReceiptsMessage)
         await agent.modules.receipts.send({
           connectionId: textMsg.connectionId,
-          receipts: textMsg.receipts.map(didcommReceiptFromServiceAgentReceipt),
+          receipts: textMsg.receipts.map(didcommReceiptFromVsAgentReceipt),
         })
       } else if (messageType === MenuDisplayMessage.type) {
         const msg = JsonTransformer.fromJSON(message, MenuDisplayMessage)
@@ -397,7 +397,7 @@ export class MessageService {
           tags: { messageId: message.id, connectionId: message.connectionId },
         })
       this.logger.debug!(`messageId saved: ${messageId}`)
-      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
+      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and VS Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new Error(`something went wrong: ${error}`)

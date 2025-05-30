@@ -1,4 +1,4 @@
-import { ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'

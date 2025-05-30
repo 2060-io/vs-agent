@@ -1,4 +1,4 @@
-import { Event } from '@2060.io/service-agent-model'
+import { Event } from '@2060.io/vs-agent-model'
 import fetch from 'node-fetch'
 
 import { TsLogger } from '../utils/logger'

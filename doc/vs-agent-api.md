@@ -1,8 +1,8 @@
-# Service Agent API
+# VS Agent API
 
-This document describes the main interface between a 2060 Service Agent instance and the backend that controls it.
+This document describes the main interface between a VS Agent instance and the backend that controls it.
 
-Service Agent API consists on a REST-like interface that exposes endpoints to:
+VS Agent API consists on a REST-like interface that exposes endpoints to:
 
 - Send messages to other agents
 - Register new credential types on Verifiable Data Registry
@@ -11,7 +11,7 @@ Service Agent API consists on a REST-like interface that exposes endpoints to:
 
 In addition, it supports a notification mechanism to subscribe to any event the consumer is interested in, through either HTTP Webhooks (POST endpoints exposed by the consumer) or a long-lived WebSocket connection.
 
-- [Service Agent API](#service-agent-api)
+- [VS Agent API](#vs-agent-api)
   - [Messaging](#messaging)
     - [Messaging to/from other agents](#messaging-tofrom-other-agents)
     - [Message types](#message-types)
@@ -79,7 +79,7 @@ Messages are submitted in a JSON format, whose base is as follows:
 
 To message other agents, a single endpoint is used (`/message`), which receives by POST a JSON body containing the message.
 
-Response from Service Agent will generally result in a 200 HTTP response code and include a JSON object with the details of the submission.
+Response from VS-A will generally result in a 200 HTTP response code and include a JSON object with the details of the submission.
 
 ```json
 {
@@ -650,7 +650,7 @@ When a Verifiable Credential is processed, a result message may be generated. It
 
 ## Events
 
-Service Agent Notification interface supports the following event topics:
+VS Agent Notification interface supports the following event topics:
 
 - Connection State Updated (`connection-state-updated`): usually for new connections
 - Message State Updated (`message-state-updated`): used to keep track of sent messages
@@ -719,18 +719,18 @@ Payload contains the message itself, as specified in the previous section.
 
 ### Subscribing to events
 
-> **NOTE**: Not yet supported by Service Agent implementation
+> **NOTE**: Not yet supported by VS Agent implementation
 > Subscription to events is maanaged in a REST route (`/event-subscriptions`) that allows to list, create and remove Webhooks for different topics.
 
 Subscriptions are composed by:
 
 - (optional) type: EventType (or array of Event Types). If not specified, send all events to the endpoint
 - (optional) filter: send only events that match specific fields. This only works when a particular EventType is defined in type
-- endpoint: URL where the Service Agent will connect to send the notifications (it could be HTTP or WS)
+- endpoint: URL where VS Agent will connect to send the notifications (it could be HTTP or WS)
 
 ## Invitations
 
-Service Agent supports the creation of invitation codes that are used to start flows with agents where a persistent DIDComm connection is not yet established. For that purpose, three types of invitations are provided:
+VS Agent supports the creation of invitation codes that are used to start flows with agents where a persistent DIDComm connection is not yet established. For that purpose, three types of invitations are provided:
 
 - Connection Invitation: invite other agents to create a persistent, general purpose DIDComm connection. Codes created can be re-used by multiple agents that want to connect by processing it
 - Presentation Request: invite other agent to start a Presentation Request flow. Codes created can only be used once
@@ -740,7 +740,7 @@ Service Agent supports the creation of invitation codes that are used to start f
 
 It's a GET request to `/invitation`. It does not receive any parameter. 
 
-Response from Service Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:
+Response from VS Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:
 
 
 ```json
@@ -749,7 +749,7 @@ Response from Service Agent is a JSON object containing an URL-encoded invitatio
 }
 ```
 
-Note that the following Service Agent configuration environment variables are used when creating invitations:
+Note that the following VS Agent configuration environment variables are used when creating invitations:
 
 - AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
@@ -761,7 +761,7 @@ Presentation Request invitation codes are created by specifying details of the c
 
 This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess. 
 At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified,
-then Service Agent will ask for all attributes in the credential.
+then VS Agent will ask for all attributes in the credential.
 
 It's a POST to `/invitation/presentation-request` which receives a JSON object in the body
 
@@ -778,7 +778,7 @@ It's a POST to `/invitation/presentation-request` which receives a JSON object i
 }
 ```
 
-`callbackUrl` is an URL that will be called by Service Agent when the flow completes. The request follows the [Presentation Callback API](#presentation-callback-api).
+`callbackUrl` is an URL that will be called by VS Agent when the flow completes. The request follows the [Presentation Callback API](#presentation-callback-api).
 
 `ref` is an optional, arbitrary string that will be included in the body of the request to the callback URL.
 
@@ -792,7 +792,7 @@ Response will include the invitation code in both short and long form URL format
 }
 ```
 
-Note that the following Service Agent configuration environment variables are used when creating presentation request invitations:
+Note that the following VS Agent configuration environment variables are used when creating presentation request invitations:
 
 - AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
@@ -801,7 +801,7 @@ Note that the following Service Agent configuration environment variables are us
 
 #### Presentation Callback API
 
-When the presentation flow is completed (either successfully or not), Service Agent calls its `callbackUrl` as an HTTP POST with the following body:
+When the presentation flow is completed (either successfully or not), VS Agent calls its `callbackUrl` as an HTTP POST with the following body:
 
 ```json
 {
@@ -845,7 +845,7 @@ Response will include the invitation code in both short and long form URL format
 }
 ```
 
-Note that the following Service Agent configuration environment variables are used when creating credential offer invitations:
+Note that the following VS Agent configuration environment variables are used when creating credential offer invitations:
 
 - AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
@@ -854,7 +854,7 @@ Note that the following Service Agent configuration environment variables are us
 
 ## Presentations
 
-It is possible to query all presentation flows created by Service Agent through the endpoint `/presentations`, which will respond with records using the following format:
+It is possible to query all presentation flows created by VS Agent through the endpoint `/presentations`, which will respond with records using the following format:
 
 - proofExchangeId: flow identifier (the same as the one used in events and other responses)
 - state: current state of the presentation flow (e.g. `request-sent` when it was just started, `done` when finished)
@@ -868,7 +868,7 @@ It is possible to query for a single presentation by executing a GET to `/presen
 
 ## Verifiable Data Registry Operations
 
-This section specifies the different endpoints provided by the Service Agent to operate with the VDR.
+This section specifies the different endpoints provided by the VS Agent to operate with the VDR.
 
 ### Create Credential Type
 
@@ -885,7 +885,7 @@ It's a POST request to `/credential-types` which receives a JSON object in the b
 }
 ```
 
-Response from Service Agent will generally result in a 200 HTTP response code and include a JSON object with the details of the submission.
+Response from VS Agent will generally result in a 200 HTTP response code and include a JSON object with the details of the submission.
 
 ```json
 {

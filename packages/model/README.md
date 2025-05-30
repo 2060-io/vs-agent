@@ -1,28 +1,28 @@
-`@2060.io/service-agent-model`
-# Service Agent Model
+`@2060.io/vs-agent-model`
+# VS Agent Model
 
-This package provides the data models used by **Service Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
+This package provides the data models used by **VS Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
 
 ## Packages Using This Library
 
 The models in this package are used by the following services and libraries:
 
-- **[@2060.io/service-agent-main](../../README.md)** – The core Service Agent.
-- **[@2060.io/service-agent-nestjs-client](../nestjs-client/README.md)** – A NestJS client for interacting with the Service Agent.
-- **[@2060.io/service-agent-client](../client/README.md)** – A general-purpose api client for the Service Agent.
+- **[@2060.io/vs-agent-main](../../README.md)** – The core VS Agent.
+- **[@2060.io/vs-agent-nestjs-client](../nestjs-client/README.md)** – A NestJS client for interacting with VS Agent.
+- **[@2060.io/vs-agent-client](../client/README.md)** – A general-purpose api client for VS Agent.
 
 
 ## Usage
 
-This package defines essential models that support structured communication and event handling within the Service Agent ecosystem. It is designed to be used by chatbot services and other integrations that rely on a standardized message format.
+This package defines essential models that support structured communication and event handling within the VS Agent ecosystem. It is designed to be used by chatbot services and other integrations that rely on a standardized message format.
 
 ## How to work
 ```plantuml
 @startuml
 
 package "2060 Ecosystem" {
-    package "Service Agent (SA)" {
-        class ServiceAgent {
+    package "VS Agent (VS-A)" {
+        class VsAgent {
             + Handles DIDComm communication
             + Manages agent wallet and credentials
             + Exposes API for client interactions
@@ -56,11 +56,11 @@ package "2060 Ecosystem" {
     }
 }
 
-NestJSClient --> ServiceAgent : Uses
-Client --> ServiceAgent : Sends requests
-Client --> ServiceAgent : Receives requests
+NestJSClient --> VsAgent : Uses
+Client --> VsAgent : Sends requests
+Client --> VsAgent : Receives requests
 Client --> ModelLibrary : Uses models
-ModelLibrary --> ServiceAgent : Provides data models
+ModelLibrary --> VsAgent : Provides data models
 NestJSClient --> ModelLibrary : Uses models
 
 @enduml
@@ -69,14 +69,14 @@ NestJSClient --> ModelLibrary : Uses models
 ### Installation
 
 ```sh
-npm install @2060.io/service-agent-model
+npm install @2060.io/vs-agent-model
 ```
 or
 ```sh
-yarn add @2060.io/service-agent-model
+yarn add @2060.io/vs-agent-model
 or
 ```sh
-pnpm add @2060.io/service-agent-model
+pnpm add @2060.io/vs-agent-model
 ```
 
 ## Example
@@ -84,7 +84,7 @@ pnpm add @2060.io/service-agent-model
 Importing and using a message model:
 
 ```typescript
-import { CallOfferRequestMessage } from '@2060.io/service-agent-model';
+import { CallOfferRequestMessage } from '@2060.io/vs-agent-model';
 
 const callOffer = new CallOfferRequestMessage({
     connectionId: 'connectionId',

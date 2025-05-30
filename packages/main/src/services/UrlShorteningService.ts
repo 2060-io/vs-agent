@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
 
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 
 @Injectable()
 export class UrlShorteningService {
-  constructor(@Inject('AGENT') private agent: ServiceAgent) {}
+  constructor(@Inject('VSAGENT') private agent: VsAgent) {}
 
   async createShortUrl(options: { longUrl: string; relatedFlowId?: string }) {
     const { longUrl, relatedFlowId } = options

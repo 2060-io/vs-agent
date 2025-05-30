@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/service-agent-nestjs-client",
+  "name": "@2060.io/vs-agent-nestjs-client",
   "version": "0.0.1",
   "description": "",
   "main": "build/index",
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-mrtd": "^0.0.12",
-    "@2060.io/service-agent-client": "workspace:*",
-    "@2060.io/service-agent-model": "workspace:*",
+    "@2060.io/vs-agent-client": "workspace:*",
+    "@2060.io/vs-agent-model": "workspace:*",
     "@credo-ts/core": "^0.5.11",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",

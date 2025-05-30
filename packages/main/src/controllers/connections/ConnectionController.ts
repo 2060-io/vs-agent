@@ -13,7 +13,7 @@ import {
 import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 
 @ApiTags('connections')
 @Controller({
@@ -21,7 +21,7 @@ import { AgentService } from '../../services/AgentService'
   version: '1',
 })
 export class ConnectionController {
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   /**
    * Retrieve all connections records

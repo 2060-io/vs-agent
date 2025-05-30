@@ -1,5 +1,5 @@
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/service-agent-model'
+import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
+import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/vs-agent-model'
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'

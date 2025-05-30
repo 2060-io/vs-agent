@@ -1,5 +1,5 @@
-import { ApiVersion } from '@2060.io/service-agent-client'
-import { ProfileMessageOptions } from '@2060.io/service-agent-model'
+import { ApiVersion } from '@2060.io/vs-agent-client'
+import { ProfileMessageOptions } from '@2060.io/vs-agent-model'
 import { DynamicModule, ForwardReference, Type } from '@nestjs/common'
 
 import { EventHandler } from './interfaces'
