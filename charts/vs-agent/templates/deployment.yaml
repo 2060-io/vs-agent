@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.vsAgentName }}
+  namespace: {{ .Values.vsAgentNamespace }}
+  labels:
+    app: {{ .Values.vsAgentName }}
+spec:
+  selector:
+    app: {{ .Values.vsAgentName }}
+  ports:
+  - name: didcomm
+    port: {{ .Values.agentPort }}
+    targetPort: {{ .Values.agentPort }}
+    protocol: TCP
+  - name: admin
+    port: {{ .Values.adminPort }}
+    targetPort: {{ .Values.adminPort }}
+    protocol: TCP
+---
+# Public ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: public-{{ .Values.vsAgentName }}
+  namespace: {{ .Values.vsAgentNamespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "{{ .Values.ingress.public.enableCors | default "true" }}"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+      secretName: public.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
+  rules:
+    - host: a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.vsAgentName }}
+                 port:
+                   number: {{ .Values.agentPort }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.vsAgentName }}-vsa-pv
+  namespace: {{ .Values.vsAgentNamespace }}
+  labels:
+    app: {{ .Values.vsAgentName }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: {{ .Values.storage.storageClassName | default "csi-cinder-high-speed" }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.size | default "1Gi" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+   name: {{ .Values.vsAgentName }}
+   namespace: {{ .Values.vsAgentNamespace }}
+spec:
+   serviceName: {{ .Values.vsAgentName }}
+   replicas: {{ .Values.vsAgentReplicas }}
+   selector:
+      matchLabels:
+         app: {{ .Values.vsAgentName }}
+   template:
+      metadata:
+         labels:
+            app: {{ .Values.vsAgentName }}
+      spec:
+         containers:
+         -  name: {{ .Values.vsAgentName }}-sa-container
+            image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
+            imagePullPolicy: Always
+            env:
+            - name: AGENT_ENDPOINT
+              value: "wss://a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
+            - name: AGENT_LABEL
+              value: {{ .Values.agentName }}
+            - name: AGENT_INVITATION_IMAGE_URL
+              value: "{{ .Values.images.invitationUrl }}"
+            - name: EVENTS_BASE_URL
+              value: "{{ .Values.eventsBaseUrl }}"
+            - name: AGENT_PUBLIC_DID
+              value: "did:web:a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
+{{- with .Values.extraEnv }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
+            ports:
+            -  containerPort: {{ .Values.adminPort }}
+            -  containerPort: {{ .Values.agentPort }}
+            volumeMounts:
+            - name: {{ .Values.vsAgentName }}-vsa-pv
+              mountPath: /root/.afj
+
+         volumes:
+         - name: {{ .Values.vsAgentName }}-vsa-pv
+           persistentVolumeClaim:
+             claimName: {{ .Values.vsAgentName }}-vsa-pv

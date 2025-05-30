@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
+      
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - uses: codfish/semantic-release-action@v3
         id: semantic
@@ -107,6 +110,29 @@ jobs:
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
+      - name: Log in to Docker Hub Helm Registry
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/vs-agent/Chart.yaml
+          helm dependency update ./charts/vs-agent
+          helm package ./charts/vs-agent -d ./charts
+          helm push ./charts/vs-agent-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 $IMAGE_TAG/" ./charts/chatbot/Chart.yaml
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/chatbot-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
+  
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:

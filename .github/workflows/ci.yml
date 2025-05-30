@@ -40,3 +40,12 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Validate all Helm charts
+        run: |
+          for chart in ./charts/*; do
+            if [ -d "$chart" ] && [ -f "$chart/Chart.yaml" ]; then
+              echo "🔍 Validating chart: $chart"
+              helm lint "$chart"
+            fi
+          done      
+

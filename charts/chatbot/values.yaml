@@ -1,0 +1,49 @@
+name: demo-chatbot-vs
+namespace: default
+replicas: 1
+domain: example.dev.io
+
+images:
+  backend:
+    repository: io2060/demo-chatbot-backend
+    tag: dev
+    env:
+      vsAgentAdminUrl: "http://chatbot-agent:3000"
+      visionUrl: "https://vision-service.mydomain.com"
+      webrtcUrl: "https://webrtc-server.mydomain.com"
+      port: 5000
+
+configMap:
+  name: chatbot-demo-config
+
+vs-agent:
+  enabled: true
+  vsAgentName: chatbot-agent
+  vsAgentNamespace: default
+  vsAgentReplicas: 1
+  vsAgentDomain: example.dev.io
+  agentName: Demo Chatbot Agent
+  eventsBaseUrl: https://chatbot.example.dev.io
+  adminPort: 3000
+  agentPort: 3001
+  ingress:
+    public:
+      enableCors: true
+
+  images:
+    agent:
+      repository: io2060/2060-service-agent
+      tag: v1.2.0
+    invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+
+  extraEnv: 
+    - name: ANONCREDS_SERVICE_BASE_URL
+      value: https://a.chatbot-agent.test.dev.2060.io
+    - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
+      value: "true"
+    - name: AGENT_WALLET_ID
+      value: "Chatbot Agent"
+    - name: AGENT_WALLET_KEY
+      value: "Chatbot Agent"
+    - name: AGENT_WALLET_KEY_DERIVATION_METHOD
+      value: "ARGON2I_MOD"
