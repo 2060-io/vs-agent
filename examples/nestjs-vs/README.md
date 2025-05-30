@@ -1,17 +1,17 @@
-# Demo DTS Chatbot - User Guide
+# Demo NestJS VS Chatbot - User Guide
 
-The `demo-dts` directory contains a demonstration of a chatbot application built using the 2060 Service Agent framework. This guide provides an overview of the directory structure, setup instructions, and usage details.
+The `nestjs-vs` directory contains a demonstration of a chatbot application built using VS Agent NestJS client. This guide provides an overview of the directory structure, setup instructions, and usage details.
 
 ---
 
 ## Directory Structure
 
-The `demo-dts` directory is organized as follows:
+The `nestjs-vs` directory is organized as follows:
 
 ```
-demo-dts/
+nestjs-vs/
 ├── Dockerfile          # Docker configuration for building and running the chatbot
-├── README.md           # Documentation for the demo-dts chatbot
+├── README.md           # Documentation for the nestjs-vs chatbot
 ├── src/                # Source code for the chatbot
 │   ├── app.module.ts   # Main application module
 │   ├── core.module.ts  # Core module for database and service integration
@@ -27,7 +27,7 @@ demo-dts/
 ```
 
 ## Getting Started
-This section provides a step-by-step guide to creating a chatbot using the 2060 Service Agent framework. The chatbot comes with default configurations that may not fit all use cases, so it is important to first define your requirements. 
+This section provides a step-by-step guide to creating a chatbot using VS Agent NestJS client. The chatbot comes with default configurations that may not fit all use cases, so it is important to first define your requirements. 
 
 ### **Key Considerations**
 1. **Default Modules**:
@@ -45,7 +45,7 @@ This section provides a step-by-step guide to creating a chatbot using the 2060 
 
 ### **Step 1: Install Dependencies**
 
-Ensure all dependencies are installed by running the following command in the `demo-dts` directory:
+Ensure all dependencies are installed by running the following command in the `nestjs-vs` directory:
 
 ```bash
 pnpm install
@@ -233,7 +233,7 @@ By following these steps, you can quickly set up a functional chatbot and start 
 
 ### **Setup Process**
 1. **Environment Variables**:
-   - Ensure all required variables (e.g., `SERVICE_AGENT_ADMIN_URL`, `DATABASE_HOST`) are set.
+   - Ensure all required variables (e.g., `VS_AGENT_ADMIN_URL`, `DATABASE_HOST`) are set.
 
 2. **Database Configuration**:
    - Use `TypeOrmModule` to connect to a PostgreSQL database.
@@ -243,8 +243,8 @@ By following these steps, you can quickly set up a functional chatbot and start 
    - Configure `I18nModule` with translation files for supported languages.
    - Use `i18n.t()` in the `CoreService` to retrieve localized text.
 
-4. **Service Agent Integration**:
-   - Use `ApiClient` to send messages and interact with the Service Agent Admin API.
+4. **VS Agent Integration**:
+   - Use `ApiClient` to send messages and interact with VS Agent Admin API.
    - Use `CredentialService` to issue and revoke credentials.
 
 ---
@@ -260,7 +260,7 @@ By following these steps, you can quickly set up a functional chatbot and start 
   - Handles credential issuance and revocation.
 
 - **`ApiClient`**:
-  - Sends messages (e.g., text, contextual menus) to the Service Agent Admin API.
+  - Sends messages (e.g., text, contextual menus) to VS Agent Admin API.
 
 - **`I18nService`**:
   - Provides localized text for multilingual support.
@@ -268,13 +268,13 @@ By following these steps, you can quickly set up a functional chatbot and start 
 ---
 
 ### **Library Documentation**
-- **`@2060.io/service-agent-model`**:
+- **`@2060.io/vs-agent-model`**:
   - Defines message models (e.g., `TextMessage`, `ContextualMenuItem`) for communication.
 
-- **`@2060.io/service-agent-client`**:
-  - Provides the `ApiClient` for interacting with the Service Agent Admin API.
+- **`@2060.io/vs-agent-client`**:
+  - Provides the `ApiClient` for interacting with VS Agent Admin API.
 
-- **`@2060.io/service-agent-nestjs-client`**:
+- **`@2060.io/vs-agent-nestjs-client`**:
   - Offers utilities like `CredentialService` for managing credentials.
 
 - **`nestjs-i18n`**:
@@ -298,7 +298,7 @@ Before running the chatbot, ensure you have the following installed:
 ## Setup Instructions
 
 1. **Install Dependencies**:
-   Navigate to the `demo-dts` directory and install the required dependencies:
+   Navigate to the `nestjs-vs` directory and install the required dependencies:
    ```bash
    yarn install
    ```
@@ -317,7 +317,7 @@ Before running the chatbot, ensure you have the following installed:
 
 4. **Environment Variables**:
    Ensure the following environment variables are set:
-   - `SERVICE_AGENT_ADMIN_URL`: URL of the Service Agent Admin API.
+   - `VS_AGENT_ADMIN_URL`: URL of VS Agent Admin API.
    - `DATABASE_HOST`: Hostname of the PostgreSQL database.
    - `DATABASE_USER`: Username for the database.
    - `DATABASE_PASSWORD`: Password for the database.
@@ -332,12 +332,12 @@ To run the chatbot in a Docker container:
 
 1. **Build the Docker Image**:
    ```bash
-   docker build -t demo-dts-chatbot .
+   docker build -t nestjs-vs-chatbot .
    ```
 
 2. **Run the Container**:
    ```bash
-   docker run -p 3000:3000 -e SERVICE_AGENT_ADMIN_URL=<url> demo-dts-chatbot
+   docker run -p 3000:3000 -e VS_AGENT_ADMIN_URL=<url> nestjs-vs-chatbot
    ```
 
 ---
@@ -374,9 +374,9 @@ To run the chatbot in a Docker container:
   > 💡 **Note:** For local development, consider replacing the `@2060.io` library versions such as:
 > 
 > ```json
-> "@2060.io/service-agent-model": "workspace:*",
-> "@2060.io/service-agent-nestjs-client": "workspace:*",
-> "@2060.io/service-agent-client": "workspace:*"
+> "@2060.io/vs-agent-model": "workspace:*",
+> "@2060.io/vs-agent-nestjs-client": "workspace:*",
+> "@2060.io/vs-agent-client": "workspace:*"
 > ```
 > 
 > This allows you to work more easily with local packages during development.

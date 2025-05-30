@@ -1,12 +1,12 @@
-import { VCAuthnEvent } from '@2060.io/service-agent-model'
+import { VCAuthnEvent } from '@2060.io/vs-agent-model'
 import { ProofEventTypes, ProofState, ProofStateChangedEvent } from '@credo-ts/core'
 
 import { ServerConfig } from '../utils/ServerConfig'
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 
 import { sendWebhookEvent } from './WebhookEvent'
 
-export const vcAuthnEvents = async (agent: ServiceAgent, config: ServerConfig) => {
+export const vcAuthnEvents = async (agent: VsAgent, config: ServerConfig) => {
   agent.events.on(ProofEventTypes.ProofStateChanged, async ({ payload }: ProofStateChangedEvent) => {
     const record = payload.proofRecord
 

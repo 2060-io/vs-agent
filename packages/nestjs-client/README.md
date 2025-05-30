@@ -1,6 +1,6 @@
-`@2060.io/service-agent-nestjs-client`
-# Nestjs-client for Service Agent
-The `nestjs-client` library simplifies the integration of 2060 Service Agent components in your NestJS applications. It provides several modules that follow a plug-and-play architecture, allowing you to incorporate them based on your needs. Certain modules, such as credential management, recommend using the message handling module for seamless operation.
+`@2060.io/vs-agent-nestjs-client`
+# Nestjs-client for VS Agent
+The `nestjs-client` library simplifies the integration of VS Agent components in your NestJS applications. It provides several modules that follow a plug-and-play architecture, allowing you to incorporate them based on your needs. Certain modules, such as credential management, recommend using the message handling module for seamless operation.
 
 ## Available Modules
 1. Message Handling:
@@ -17,8 +17,8 @@ The `nestjs-client` library simplifies the integration of 2060 Service Agent com
 @startuml
 
 package "2060 Ecosystem" {
-    package "Service Agent (SA)" {
-        class ServiceAgent {
+    package "VS Agent (VS-A)" {
+        class VsAgent {
             + Handles DIDComm communication
             + Manages agent wallet and credentials
             + Exposes API for client interactions
@@ -53,11 +53,11 @@ package "2060 Ecosystem" {
     }
 }
 
-NestJSClient --> ServiceAgent : Uses
-Client --> ServiceAgent : Sends requests
-Client --> ServiceAgent : Receives requests
+NestJSClient --> VsAgent : Uses
+Client --> VsAgent : Sends requests
+Client --> VsAgent : Receives requests
 Client --> ModelLibrary : Uses models
-ModelLibrary --> ServiceAgent : Provides data models
+ModelLibrary --> VsAgent : Provides data models
 NestJSClient --> ModelLibrary : Uses models
 
 @enduml
@@ -69,8 +69,8 @@ The `nestjs-client` allows dynamic configuration through various module options 
 ### Key Configuration Options
 - `eventHandler`: Specifies the event handler class to handle incoming events. It must implement the `EventHandler` interface.
 - `imports`: An array of additional modules to import, such as service modules or other shared functionality.
-- `url`: The URL of the service agent for connecting to it.
-- `version`: Specifies the version of the service agent API to use.
+- `url`: VS Agent Admin API URL
+- `version`: Specifies the version of VS Agent API to use.
 - `statOptions`: Configuration options for the **JMS (Jakarta Message Service) broker**, including host, port, queue name, authentication, and reconnection settings. The default broker used is **Apache Artemis**. 
 
 ### `statOptions` Parameters  
@@ -132,7 +132,7 @@ This example demonstrates how to use each module separately:
     MessageEventModule.forRoot({
       messageHandler: CustomMessageHandler, // Class with input method
       imports: [],
-      url: 'http://sa-url.com',
+      url: 'http://vsa-url.com',
       version: ApiVersion.V1,
     }),
     CredentialManagementModule.forRoot({
@@ -156,7 +156,7 @@ The recommended approach is to use the `EventsModule` to register multiple modul
       options: {
         eventHandler: CoreService,
         imports: [],
-        url: process.env.SERVICE_AGENT_ADMIN_URL,
+        url: process.env.VS_AGENT_ADMIN_URL,
         version: ApiVersion.V1,
       },
     }),

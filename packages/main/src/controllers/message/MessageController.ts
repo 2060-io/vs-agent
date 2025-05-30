@@ -1,10 +1,10 @@
-import { BaseMessage } from '@2060.io/service-agent-model'
+import { BaseMessage } from '@2060.io/vs-agent-model'
 import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
-import { ServiceAgent } from '../../utils/ServiceAgent'
+import { VsAgentService } from '../../services/VsAgentService'
+import { VsAgent } from '../../utils/VsAgent'
 
 import { MessageServiceFactory } from './services/MessageServiceFactory'
 
@@ -18,7 +18,7 @@ export class MessageController {
 
   constructor(
     private readonly messageServiceFactory: MessageServiceFactory,
-    private readonly agentService: AgentService,
+    private readonly agentService: VsAgentService,
   ) {}
 
   @Post('/')
@@ -78,7 +78,7 @@ export class MessageController {
     }
   }
 
-  private async checkForDuplicateId(agent: ServiceAgent, message: BaseMessage): Promise<void> {
+  private async checkForDuplicateId(agent: VsAgent, message: BaseMessage): Promise<void> {
     const records = message.id
       ? await agent.genericRecords.findAllByQuery({
           messageId: message.id,

@@ -6,7 +6,7 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: '2060-service-agent'      
+  IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 jobs:
   build-and-push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
       - name: Setup node v22

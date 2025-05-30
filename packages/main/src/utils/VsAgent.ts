@@ -34,7 +34,7 @@ import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { CachedWebDidResolver } from './CachedWebDidResolver'
 
-type ServiceAgentModules = {
+type VsAgentModules = {
   askar: AskarModule
   anoncreds: AnonCredsModule
   actionMenu: ActionMenuModule
@@ -52,30 +52,30 @@ type ServiceAgentModules = {
   userProfile: UserProfileModule
 }
 
-interface AgentOptions<ServiceAgentModules> {
+interface AgentOptions<VsAgentModules> {
   config: InitConfig
-  modules?: ServiceAgentModules
+  modules?: VsAgentModules
   dependencies: AgentDependencies
 }
 
-export class ServiceAgent extends Agent<ServiceAgentModules> {
+export class VsAgent extends Agent<VsAgentModules> {
   public did?: string
 
-  public constructor(options: AgentOptions<ServiceAgentModules>, did?: string) {
+  public constructor(options: AgentOptions<VsAgentModules>, did?: string) {
     super(options)
     this.did = did
   }
 }
 
-export interface ServiceAgentOptions {
+export interface VsAgentOptions {
   config: InitConfig
   did?: string
   dependencies: AgentDependencies
   anoncredsServiceBaseUrl?: string
 }
 
-export const createServiceAgent = (options: ServiceAgentOptions): ServiceAgent => {
-  return new ServiceAgent(
+export const createVsAgent = (options: VsAgentOptions): VsAgent => {
+  return new VsAgent(
     {
       config: options.config,
       dependencies: options.dependencies,

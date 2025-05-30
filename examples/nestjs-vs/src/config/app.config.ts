@@ -42,11 +42,11 @@ export default registerAs('appConfig', () => ({
   postgresPassword: process.env.POSTGRES_PASSWORD || '2060demo',
 
   /**
-   * Base URL for the Service Agent Admin.
-   * Defaults to 'http://localhost:3000' if SERVICE_AGENT_ADMIN_URL is not set in the environment variables.
+   * Base URL for VS Agent Admin.
+   * Defaults to 'http://localhost:3000' if VS_AGENT_ADMIN_URL is not set in the environment variables.
    * @type {string}
    */
-  serviceAgentAdminUrl: process.env.SERVICE_AGENT_ADMIN_URL || 'http://localhost:3000',
+  vsAgentAdminUrl: process.env.VS_AGENT_ADMIN_URL || 'http://localhost:3000',
 
   /**
    * Base URL for the application.

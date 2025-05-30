@@ -1,4 +1,4 @@
-import { IBaseMessage } from '@2060.io/service-agent-model'
+import { IBaseMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord, utils } from '@credo-ts/core'
 import { Process, Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
