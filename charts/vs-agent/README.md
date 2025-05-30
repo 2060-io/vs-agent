@@ -36,7 +36,7 @@ This Helm chart deploys the **VS-Agent** application with a StatefulSet, support
 
 | Parameter                 | Description                           | Example                              |
 | ------------------------- | ------------------------------------- | ------------------------------------ |
-| `images.agent.repository` | Docker repository for the agent image | `io2060/2060-service-agent`          |
+| `images.agent.repository` | Docker repository for the agent image | `io2060/vs-agent`          |
 | `images.agent.tag`        | Agent Docker image tag                | `v1.2.0`                             |
 | `images.invitationUrl`    | URL for invitation image              | `https://example.com/invitation.png` |
 
