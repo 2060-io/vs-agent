@@ -1,5 +1,5 @@
 apiVersion: v2
-name: vs-agent-demo-chatbot
+name: demo-chatbot-vs
 description: Helm chart for deploying a demo chatbot to validate new functionalities of VS-Agent.
 type: application
 version: 0.0.1
