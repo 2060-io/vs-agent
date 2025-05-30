@@ -1,6 +1,6 @@
 # VS Agent Helm Chart
 
-This Helm chart deploys the **VS-Agent** application with a StatefulSet, supporting private and public ingress, persistent storage, and configurable environment variables. It is designed to be flexible, supporting PostgreSQL and Redis integrations.
+This Helm chart deploys **VS Agent** application with a StatefulSet, supporting private and public ingress, persistent storage, and configurable environment variables. It is designed to be flexible, supporting PostgreSQL and Redis integrations.
 
 ## Features
 
