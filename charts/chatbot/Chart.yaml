@@ -8,6 +8,4 @@ dependencies:
   - name: vs-agent
     version: 150-9c181b78dba10dab2fd3aa7b2f8bbfec9a1430e2
     repository: "oci://docker.io/io2060/vs-agent"
-    condition: vsAgent.enabled
-    tags:
-      - vsAgent
+    condition: vs-agent.enabled

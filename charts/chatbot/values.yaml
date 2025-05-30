@@ -16,10 +16,10 @@ images:
 configMap:
   name: chatbot-demo-config
 
-vsAgent:
+vs-agent:
   enabled: true
   vsAgentName: chatbot-agent
-  vsAgentNamespace: andres
+  vsAgentNamespace: default
   vsAgentReplicas: 1
   vsAgentDomain: example.dev.io
   agentName: Demo Chatbot Agent
