@@ -40,11 +40,14 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Validate Helm chart
-        run: helm lint ./charts/vs-agent
-
-      - name: Validate Helm chart Chatbot
-        run: helm lint ./charts/chatbot
+      - name: Validate all Helm charts
+        run: |
+          for chart in ./charts/*; do
+            if [ -d "$chart" ] && [ -f "$chart/Chart.yaml" ]; then
+              echo "🔍 Validating chart: $chart"
+              helm lint "$chart"
+            fi
+          done      
 
   validate-demo-dts:
     name: Validate Demo DTS
