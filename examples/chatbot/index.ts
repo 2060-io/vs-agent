@@ -101,24 +101,24 @@ const server = app.listen(PORT, async () => {
     phoneNumberCredentialDefinitionId = phoneNumberCredentialType?.id
     if (!phoneNumberCredentialDefinitionId) {
       const filePath = path.resolve(__dirname, 'phone-cred-def-dev.json')
-    
+
       try {
         let cred
         if (existsSync(filePath)) {
           const data = await readFile(filePath, 'utf-8')
-          const phoneCredDefData = JSON.parse(data);
+          const phoneCredDefData = JSON.parse(data)
           cred = await apiClient.credentialTypes.import(phoneCredDefData)
           console.log(`Imported credential definition from file: ${filePath}`)
         } else {
           cred = await apiClient.credentialTypes.create({
             id: randomUUID(),
-            name: "phoneNumber",
-            version: "1.0",
-            attributes: ["phoneNumber"],
+            name: 'phoneNumber',
+            version: '1.0',
+            attributes: ['phoneNumber'],
             supportRevocation: true,
           })
           console.log(`Created new credential definition with ID: ${cred.id}`)
-    
+
           const exported = await apiClient.credentialTypes.export(cred.id)
           await writeFile(filePath, JSON.stringify(exported, null, 2), 'utf-8')
           console.log(`Exported credential definition to file: ${filePath}`)
