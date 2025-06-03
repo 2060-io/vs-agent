@@ -3,7 +3,7 @@ import {
   CreateCredentialOfferOptions,
   CreatePresentationRequestOptions,
   RequestedCredential,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty } from 'class-validator'
 

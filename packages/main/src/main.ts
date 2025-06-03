@@ -11,11 +11,11 @@ import * as path from 'path'
 
 import packageJson from '../package.json'
 
-import { ServiceAgentModule } from './app.module'
+import { VsAgentModule } from './app.module'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgent } from './utils/VsAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
 import {
@@ -27,8 +27,8 @@ import {
   POSTGRES_HOST,
 } from './utils/walletConfig'
 
-export const startAdminServer = async (agent: ServiceAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(ServiceAgentModule.register(agent))
+export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
+  const app = await NestFactory.create(VsAgentModule.register(agent))
 
   // Version
   app.enableVersioning({
@@ -68,13 +68,13 @@ const run = async () => {
     endpoints,
     port: Number(process.env.AGENT_PORT) || 3001,
     walletConfig: {
-      id: AGENT_WALLET_ID || process.env.AGENT_NAME || 'test-service-agent',
-      key: AGENT_WALLET_KEY || process.env.AGENT_NAME || 'test-service-agent',
+      id: AGENT_WALLET_ID || process.env.AGENT_NAME || 'test-vs-agent',
+      key: AGENT_WALLET_KEY || process.env.AGENT_NAME || 'test-vs-agent',
       keyDerivationMethod:
         keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KeyDerivationMethod.Argon2IMod],
       storage: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
-    label: process.env.AGENT_LABEL || 'Test Service Agent',
+    label: process.env.AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: process.env.AGENT_INVITATION_IMAGE_URL,
     publicDid: process.env.AGENT_PUBLIC_DID,
     logLevel: process.env.AGENT_LOG_LEVEL ? Number(process.env.AGENT_LOG_LEVEL) : LogLevel.warn,
@@ -120,7 +120,7 @@ const run = async () => {
   vcAuthnEvents(agent, conf)
 
   console.log(
-    `Service Agent v${packageJson['version']} running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,
+    `VS Agent v${packageJson['version']} running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,
   )
 }
 

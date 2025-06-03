@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  selector:
+    app: {{ .Values.name }}
+  ports:
+  - name: backend
+    port: {{ .Values.images.backend.env.port | default 5000 }}
+    targetPort: {{ .Values.images.backend.env.port | default 5000 }}
+    protocol: TCP    
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.name }}.{{ .Values.domain }}
+      secretName: {{ .Values.name }}.{{ .Values.domain }}-cert
+  rules:
+    - host: {{ .Values.name }}.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.name }}
+                 port:
+                   number: {{ .Values.images.backend.env.port | default 5000 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMap.name }}
+  namespace: {{ .Values.namespace }}
+data:
+  phone-cred-def-dev.json: |-
+{{ .Files.Get "config/phone-cred-def-dev.json" | indent 4 }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+   name: {{ .Values.name }}
+   namespace: {{ .Values.namespace }}
+spec:
+   serviceName: {{ .Values.name }}
+   replicas: {{ .Values.replicas }}
+   selector:
+      matchLabels:
+         app: {{ .Values.name }}
+   template:
+      metadata:
+         labels:
+            app: {{ .Values.name }}
+      spec:
+         containers:
+         -  name: {{ .Values.name }}-backend-container
+            image: "{{ .Values.images.backend.repository }}:{{ .Values.images.backend.tag }}"
+            imagePullPolicy: Always
+            env:
+            - name: SERVICE_AGENT_ADMIN_BASE_URL
+              value: "{{ .Values.images.backend.env.vsAgentAdminUrl }}/v1"
+            - name: PUBLIC_BASE_URL
+              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+            - name: VISION_SERVICE_BASE_URL
+              value: "{{ .Values.images.backend.env.visionUrl }}"
+            - name: WEBRTC_SERVER_BASE_URL
+              value: "{{ .Values.images.backend.env.webrtcUrl }}"
+            ports:
+            -  containerPort: {{ .Values.images.backend.env.port | default 5000 }}
+            volumeMounts:
+              - name: {{ .Values.name }}-cred-pv
+                mountPath: /www/examples/chatbot/build/phone-cred-def-dev.json
+                subPath: phone-cred-def-dev.json
+
+         volumes:
+         - name: {{ .Values.name }}-cred-pv
+           configMap:
+             name: {{ .Values.configMap.name }}
+
+

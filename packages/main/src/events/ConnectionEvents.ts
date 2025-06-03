@@ -5,7 +5,7 @@ import type {
   DiscoverFeaturesDisclosureReceivedEvent,
 } from '@credo-ts/core'
 
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,
@@ -15,12 +15,12 @@ import {
   HangupMessage,
 } from '@credo-ts/core'
 
-import { ServiceAgent } from '../utils/ServiceAgent'
+import { VsAgent } from '../utils/VsAgent'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
 
-export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig) => {
+export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
   agent.events.on(
     ConnectionEventTypes.ConnectionStateChanged,
     async ({ payload }: ConnectionStateChangedEvent) => {
@@ -86,7 +86,7 @@ export const connectionEvents = async (agent: ServiceAgent, config: ServerConfig
     },
   )
 
-  // When a hangup message is received for a given connection, it will be effectively terminated. Service Agent controller
+  // When a hangup message is received for a given connection, it will be effectively terminated. VS Agent controller
   // will be notified about this 'termination' status
   agent.events.on(AgentEventTypes.AgentMessageProcessed, async ({ payload }: AgentMessageProcessedEvent) => {
     const { message, connection } = payload

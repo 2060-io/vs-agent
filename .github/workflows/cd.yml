@@ -9,7 +9,7 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: '2060-service-agent'      
+  IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
 
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
       - name: Setup node v22
@@ -33,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install
+      
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - uses: codfish/semantic-release-action@v3
         id: semantic
@@ -107,6 +110,30 @@ jobs:
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
 
+      - name: Log in to Docker Hub Helm Registry
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: $RELEASE_VERSION/" ./charts/vs-agent/Chart.yaml
+          helm dependency update ./charts/vs-agent
+          helm package ./charts/vs-agent -d ./charts
+          helm push ./charts/vs-agent-$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
+  
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:

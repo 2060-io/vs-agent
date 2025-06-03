@@ -26,9 +26,9 @@ import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
-import { createServiceAgent } from './ServiceAgent'
-import { ServiceAgentWsInboundTransport } from './ServiceAgentWsInboundTransport'
-import { ServiceAgentWsOutboundTransport } from './ServiceAgentWsOutboundTransport'
+import { createVsAgent } from './VsAgent'
+import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
+import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
 
 export const setupAgent = async ({
@@ -62,7 +62,7 @@ export const setupAgent = async ({
     throw new Error('No transport has been enabled. Set at least one of HTTP and WS')
   }
 
-  const agent = createServiceAgent({
+  const agent = createVsAgent({
     config: {
       label,
       connectionImageUrl: displayPictureUrl,
@@ -95,8 +95,8 @@ export const setupAgent = async ({
 
   if (enableWs) {
     webSocketServer = new WebSocket.Server({ noServer: true })
-    agent.registerInboundTransport(new ServiceAgentWsInboundTransport({ server: webSocketServer }))
-    agent.registerOutboundTransport(new ServiceAgentWsOutboundTransport())
+    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
+    agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
   }
 
   await agent.initialize()

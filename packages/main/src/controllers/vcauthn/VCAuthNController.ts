@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
+import { VsAgentService } from '../../services/VsAgentService'
 
 import { OobInvitationDto, OutOfBandInvitationCreateResult } from './OobInvitationDto'
 import { PresentProofCreateDto, PresentProofCreateResult } from './PresentProofCreateDto'
@@ -26,7 +26,7 @@ import { PresentProofCreateDto, PresentProofCreateResult } from './PresentProofC
 export class VCAuthNController {
   private readonly logger = new Logger(VCAuthNController.name)
 
-  constructor(private readonly agentService: AgentService) {}
+  constructor(private readonly agentService: VsAgentService) {}
 
   @Post('/present-proof/create-request')
   @HttpCode(200)

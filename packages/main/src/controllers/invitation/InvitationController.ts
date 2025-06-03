@@ -2,13 +2,13 @@ import {
   CreateCredentialOfferResult,
   CreatePresentationRequestResult,
   CreateInvitationResult,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AgentService } from '../../services/AgentService'
 import { UrlShorteningService } from '../../services/UrlShorteningService'
+import { VsAgentService } from '../../services/VsAgentService'
 import { createInvitation } from '../../utils/agent'
 
 import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
@@ -20,7 +20,7 @@ import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './Invita
 })
 export class InvitationController {
   constructor(
-    private readonly agentService: AgentService,
+    private readonly agentService: VsAgentService,
     private readonly urlShortenerService: UrlShorteningService,
   ) {}
 

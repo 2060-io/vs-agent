@@ -1,4 +1,4 @@
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/service-agent-model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Test, TestingModule } from '@nestjs/testing'
 
 import { ConnectionsRepository, EventHandler, ConnectionsEventService } from '../../src'

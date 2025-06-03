@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import { AgentController } from './controllers/agent/AgentController'
+import { VsAgentController } from './controllers/agent/VsAgentController'
 import { ConnectionController } from './controllers/connections/ConnectionController'
 import { CredentialTypesController } from './controllers/credentials/CredentialTypeController'
 import { InvitationController } from './controllers/invitation/InvitationController'
@@ -15,18 +15,18 @@ import { MessageController } from './controllers/message/MessageController'
 import { PresentationsController } from './controllers/presentations/PresentationsController'
 import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { HandledRedisModule } from './modules/redis.module'
-import { AgentService } from './services/AgentService'
 import { UrlShorteningService } from './services/UrlShorteningService'
-import { ServiceAgent } from './utils/ServiceAgent'
+import { VsAgentService } from './services/VsAgentService'
+import { VsAgent } from './utils/VsAgent'
 
 @Module({})
-export class ServiceAgentModule {
-  static register(agent: ServiceAgent): DynamicModule {
+export class VsAgentModule {
+  static register(agent: VsAgent): DynamicModule {
     return {
-      module: ServiceAgentModule,
+      module: VsAgentModule,
       imports: [HandledRedisModule.forRoot()],
       controllers: [
-        AgentController,
+        VsAgentController,
         ConnectionController,
         CredentialTypesController,
         MessageController,
@@ -37,17 +37,17 @@ export class ServiceAgentModule {
       ],
       providers: [
         {
-          provide: 'AGENT',
+          provide: 'VSAGENT',
           useValue: agent,
         },
-        AgentService,
+        VsAgentService,
         UrlShorteningService,
         MessageService,
         RedisMessageService,
         CoreMessageService,
         MessageServiceFactory,
       ],
-      exports: [AgentService],
+      exports: [VsAgentService],
     }
   }
 }

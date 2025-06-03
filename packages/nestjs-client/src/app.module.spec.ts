@@ -1,4 +1,4 @@
-import { ApiVersion } from '@2060.io/service-agent-client'
+import { ApiVersion } from '@2060.io/vs-agent-client'
 
 import { ConnectionsEventModule, EventsModule, MessageEventModule } from '../src'
 

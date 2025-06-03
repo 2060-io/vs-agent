@@ -1,0 +1,28 @@
+# General configuration
+vsAgentName: vs-agent
+vsAgentNamespace: default
+vsAgentReplicas: 1
+vsAgentDomain: example.com
+
+# Ports
+adminPort: 3000
+agentPort: 3001
+
+ingress:
+  public:
+    enableCors: true
+
+# Image configuration
+images:
+  agent:
+    repository: io2060/2060-service-agent
+    tag: v1.2.0
+  invitationUrl: "https://example.com/invitation.png"
+
+# Extra environment variables (extensible)
+extraEnv: []
+
+# Persistent volume configuration for app
+storage:
+  size: 1Gi
+  storageClassName: csi-cinder-high-speed
