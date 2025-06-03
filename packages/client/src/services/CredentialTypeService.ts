@@ -44,6 +44,17 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
+  public async export(credentialTypeId: string) {
+    logger.info(`Exporting credential type ${credentialTypeId}`)
+    const response = await fetch(`${this.url}/export/${encodeURIComponent(credentialTypeId)}`, {
+      method: 'GET',
+      headers: { accept: 'application/json' },
+    })
+    if (!response.ok) throw new Error(`Cannot export credential type: status ${response.status}}`)
+
+    return await response.json()
+  }
+
   public async create(credentialType: CredentialTypeInfo): Promise<CredentialTypeInfo> {
     const response = await fetch(`${this.url}`, {
       method: 'POST',
