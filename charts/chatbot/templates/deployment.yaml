@@ -69,7 +69,7 @@ spec:
             image: "{{ .Values.images.backend.repository }}:{{ .Values.images.backend.tag }}"
             imagePullPolicy: Always
             env:
-            - name: SERVICE_AGENT_ADMIN_BASE_URL
+            - name: VS_AGENT_ADMIN_BASE_URL
               value: "{{ .Values.images.backend.env.vsAgentAdminUrl }}/v1"
             - name: PUBLIC_BASE_URL
               value: "https://{{ .Values.name }}.{{ .Values.domain }}"
