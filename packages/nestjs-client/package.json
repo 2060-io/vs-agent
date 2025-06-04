@@ -20,7 +20,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/credo-ts-didcomm-mrtd": "0.0.12",
+    "@2060.io/credo-ts-didcomm-mrtd": "0.0.13",
     "@2060.io/vs-agent-client": "workspace:*",
     "@2060.io/vs-agent-model": "workspace:*",
     "@credo-ts/core": "0.5.15",
