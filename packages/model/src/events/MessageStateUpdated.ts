@@ -1,6 +1,6 @@
+import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
 import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
-import { MessageState } from 'credo-ts-receipts'
 
 import { Event } from './Event'
 import { EventType } from './EventType'

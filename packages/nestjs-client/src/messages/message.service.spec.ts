@@ -1,3 +1,4 @@
+import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
 import { ApiVersion } from '@2060.io/vs-agent-client'
 import {
   CredentialReceptionMessage,
@@ -7,7 +8,6 @@ import {
 } from '@2060.io/vs-agent-model'
 import { CredentialState } from '@credo-ts/core'
 import { Test, TestingModule } from '@nestjs/testing'
-import { MessageState } from 'credo-ts-receipts'
 
 import {
   ConnectionsEventService,
