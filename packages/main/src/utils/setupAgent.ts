@@ -40,6 +40,7 @@ export const setupAgent = async ({
   logLevel,
   anoncredsServiceBaseUrl,
   publicDid,
+  autoDiscloseUserProfile,
   enableWs,
   enableHttp,
   useCors,
@@ -51,6 +52,7 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   anoncredsServiceBaseUrl?: string
+  autoDiscloseUserProfile?: boolean
   publicDid?: string
   enableWs?: boolean
   enableHttp?: boolean
@@ -72,6 +74,7 @@ export const setupAgent = async ({
       logger,
     },
     did: publicDid,
+    autoDiscloseUserProfile,
     dependencies: agentDependencies,
     anoncredsServiceBaseUrl,
   })
@@ -118,18 +121,14 @@ export const setupAgent = async ({
     })
   }
 
-  const currentUserProfile = await agent.modules.userProfile.getUserProfileData()
+  // Make sure default User Profile corresponds to settings in environment variables
+  const imageUrl = displayPictureUrl ?? process.env.AGENT_INVITATION_IMAGE_URL
+  const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
-  // Profile not initialized yet: add default values based on environment variables
-  if (!currentUserProfile.displayName) {
-    const imageUrl = displayPictureUrl ?? process.env.AGENT_INVITATION_IMAGE_URL
-    const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
-
-    await agent.modules.userProfile.updateUserProfileData({
-      displayName: label,
-      displayPicture,
-    })
-  }
+  await agent.modules.userProfile.updateUserProfileData({
+    displayName: label,
+    displayPicture,
+  })
 
   if (publicDid) {
     // If a public did is specified, check if it's already stored in the wallet. If it's not the case,

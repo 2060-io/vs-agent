@@ -16,7 +16,7 @@ images:
 configMap:
   name: chatbot-demo-config
 
-vs-agent:
+vs-agent-chart:
   enabled: true
   vsAgentName: chatbot-agent
   vsAgentNamespace: default
