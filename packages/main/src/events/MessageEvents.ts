@@ -1,6 +1,6 @@
 import type { ServerConfig } from '../utils/ServerConfig'
+import type { MessageReceiptsReceivedEvent, MessageState } from '@2060.io/credo-ts-didcomm-receipts'
 import type { CredentialStateChangedEvent } from '@credo-ts/core'
-import type { MessageReceiptsReceivedEvent, MessageState } from 'credo-ts-receipts'
 
 import {
   CallAcceptMessage,
@@ -9,12 +9,19 @@ import {
   CallRejectMessage,
 } from '@2060.io/credo-ts-didcomm-calls'
 import {
+  MediaSharingEventTypes,
+  MediaSharingRole,
+  MediaSharingState,
+  MediaSharingStateChangedEvent,
+} from '@2060.io/credo-ts-didcomm-media-sharing'
+import {
   EMrtdDataReceivedEvent,
   MrtdEventTypes,
   MrtdProblemReportEvent,
   MrtdProblemReportReason,
   MrzDataReceivedEvent,
 } from '@2060.io/credo-ts-didcomm-mrtd'
+import { ReceiptsEventTypes } from '@2060.io/credo-ts-didcomm-receipts'
 import {
   ConnectionProfileUpdatedEvent,
   ProfileEventTypes,
@@ -56,13 +63,6 @@ import {
   V2PresentationMessage,
 } from '@credo-ts/core'
 import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
-import {
-  MediaSharingEventTypes,
-  MediaSharingRole,
-  MediaSharingState,
-  MediaSharingStateChangedEvent,
-} from 'credo-ts-media-sharing'
-import { ReceiptsEventTypes } from 'credo-ts-receipts'
 
 import { VsAgent } from '../utils/VsAgent'
 import { createDataUrl } from '../utils/parsers'

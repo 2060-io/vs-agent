@@ -1,5 +1,7 @@
 import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
+import { MediaSharingModule } from '@2060.io/credo-ts-didcomm-media-sharing'
 import { DidCommMrtdModule } from '@2060.io/credo-ts-didcomm-mrtd'
+import { ReceiptsModule } from '@2060.io/credo-ts-didcomm-receipts'
 import { UserProfileModule, UserProfileModuleConfig } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
@@ -27,8 +29,6 @@ import { QuestionAnswerModule } from '@credo-ts/question-answer'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
-import { MediaSharingModule } from 'credo-ts-media-sharing'
-import { ReceiptsModule } from 'credo-ts-receipts'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
