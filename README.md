@@ -19,6 +19,7 @@ but likely needed for production and test deployments.
 | AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
 | ENABLE_WS                  | Enable Web Socket transport for Agent                                                                             | true                  |
 | ENABLE_HTTP                | Enable HTTP transport for Agent                                                                                   | true                  |
+| USER_PROFILE_AUTODISCLOSE | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message | false                  |
 | AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test VS Agent    |
 | AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-vs-agent    |
 | AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-vs-agent    |

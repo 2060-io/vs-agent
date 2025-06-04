@@ -428,13 +428,12 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
     config.logger.debug(`UserProfileRequestedEvent received. Connection id: ${payload.connection.id} 
       Query: ${JSON.stringify(payload.query)}`)
 
-    // TODO: Allow to manually manage this setting
     // Currently we only send the profile if we are using our "main" connection
     const outOfBandRecordId = payload.connection.outOfBandId
     if (outOfBandRecordId) {
       const outOfBandRecord = await agent.oob.findById(outOfBandRecordId)
       const parentConnectionId = outOfBandRecord?.getTag('parentConnectionId') as string | undefined
-      if (!parentConnectionId)
+      if (!parentConnectionId && agent.autoDiscloseUserProfile)
         await agent.modules.userProfile.sendUserProfile({ connectionId: payload.connection.id })
     }
   })
