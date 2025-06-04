@@ -8,4 +8,4 @@ dependencies:
   - name: vs-agent-chart
     version: 0.0.1
     repository: oci://registry-1.docker.io/io2060
-    condition: vs-agent.enabled
+    condition: vs-agent-chart.enabled
