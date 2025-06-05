@@ -31,10 +31,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+        - {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       secretName: public.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
   rules:
-    - host: a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+    - host: {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
       http:
         paths:
           - path: /
@@ -84,7 +84,7 @@ spec:
             imagePullPolicy: Always
             env:
             - name: AGENT_ENDPOINT
-              value: "wss://a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
+              value: "wss://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -92,7 +92,7 @@ spec:
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:a.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
+              value: "did:web:{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
 {{- with .Values.extraEnv }}
 {{- toYaml . | nindent 12 }}
 {{- end }}
