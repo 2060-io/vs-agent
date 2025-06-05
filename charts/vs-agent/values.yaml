@@ -8,6 +8,13 @@ vsAgentDomain: example.com
 adminPort: 3000
 agentPort: 3001
 
+# DB and Redis configuration
+database:
+  enabled: false
+  host: localhost
+  user: unicid
+  pwd: mypassword123
+
 ingress:
   public:
     enableCors: true
@@ -18,6 +25,10 @@ images:
     repository: io2060/2060-service-agent
     tag: v1.2.0
   invitationUrl: "https://example.com/invitation.png"
+  redis: 
+    enabled: false
+    repository: redis
+    tag: alpine
 
 # Extra environment variables (extensible)
 extraEnv: []
