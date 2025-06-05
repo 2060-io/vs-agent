@@ -8,7 +8,7 @@ images:
     repository: io2060/demo-chatbot-backend
     tag: dev
     env:
-      vsAgentAdminUrl: "ttp://chatbot-agent:3000
+      vsAgentAdminUrl: http://chatbot-agent:3000
       visionUrl: https://vision-service.mydomain.com
       webrtcUrl: https://webrtc-server.mydomain.com
       port: 5000
