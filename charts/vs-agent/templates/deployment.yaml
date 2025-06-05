@@ -17,6 +17,14 @@ spec:
     port: {{ .Values.adminPort }}
     targetPort: {{ .Values.adminPort }}
     protocol: TCP
+  - name: db
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
 ---
 # Public ingress
 apiVersion: networking.k8s.io/v1
@@ -62,6 +70,44 @@ spec:
     requests:
       storage: {{ .Values.storage.size | default "1Gi" }}
 ---
+{{- if .Values.database.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-pg-pv-main
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: csi-cinder-classic
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+---
+{{- if .Values.images.redis.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-redis-main
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: csi-cinder-classic
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -99,6 +145,33 @@ spec:
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.agentPort }}
+        {{- if .Values.database.enabled }}
+         -  name: postgres
+            image: postgres:15.2
+            imagePullPolicy: Always
+            env:
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.database.pwd }}
+            - name: POSTGRES_USER
+              value: {{ .Values.database.user }}
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+            ports:
+            -  containerPort: 5432
+            volumeMounts:
+            - name: {{ .Values.name }}-pg-pv-main
+              mountPath: /var/lib/postgresql/data
+        {{- end }}
+        {{- if .Values.images.redis.enabled }}
+         -  name: {{ .Values.name }}-redis-container
+            image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
+            imagePullPolicy: Always
+            ports:
+            -  containerPort: 6379
+            volumeMounts:
+            - name: {{ .Values.name }}-redis-main
+              mountPath: /home/data
+        {{- end }}
             volumeMounts:
             - name: {{ .Values.vsAgentName }}-vsa-pv
               mountPath: /root/.afj
@@ -107,3 +180,13 @@ spec:
          - name: {{ .Values.vsAgentName }}-vsa-pv
            persistentVolumeClaim:
              claimName: {{ .Values.vsAgentName }}-vsa-pv
+        {{- if .Values.database.enabled }}
+         - name: {{ .Values.name }}-pg-pv-main
+           persistentVolumeClaim:
+             claimName: {{ .Values.name }}-pg-pv-main
+        {{- end }}
+        {{- if .Values.images.redis.enabled }}
+         - name: {{ .Values.name }}-redis-main
+           persistentVolumeClaim:
+             claimName: {{ .Values.name }}-redis-main
+        {{- end }}

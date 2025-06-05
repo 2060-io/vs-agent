@@ -26,6 +26,8 @@ vs-agent-chart:
   eventsBaseUrl: https://chatbot.example.dev.io
   adminPort: 3000
   agentPort: 3001
+  database:
+    enabled: false
   ingress:
     public:
       enableCors: true
@@ -35,6 +37,8 @@ vs-agent-chart:
       repository: io2060/2060-service-agent
       tag: v1.2.0
     invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+    redis: 
+      enabled: false
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
