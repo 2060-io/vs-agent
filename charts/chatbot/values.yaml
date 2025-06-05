@@ -38,7 +38,7 @@ vs-agent-chart:
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://a.chatbot-agent.test.dev.2060.io
+      value: https://chatbot-agent.test.dev.2060.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: AGENT_WALLET_ID
