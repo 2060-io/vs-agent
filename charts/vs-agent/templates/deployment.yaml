@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.vsAgentName }}
-  namespace: {{ .Values.vsAgentNamespace }}
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.vsAgentName }}
+    app: {{ .Values.name }}
 spec:
   selector:
-    app: {{ .Values.vsAgentName }}
+    app: {{ .Values.name }}
   ports:
   - name: didcomm
     port: {{ .Values.agentPort }}
@@ -30,8 +30,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: public-{{ .Values.vsAgentName }}
-  namespace: {{ .Values.vsAgentNamespace }}
+  name: public-{{ .Values.name }}
+  namespace: {{ .Values.namespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/enable-cors: "{{ .Values.ingress.public.enableCors | default "true" }}"
@@ -39,27 +39,27 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
-      secretName: public.{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}-cert
+        - {{ .Values.name }}.{{ .Values.domain }}
+      secretName: public.{{ .Values.name }}.{{ .Values.domain }}-cert
   rules:
-    - host: {{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}
+    - host: {{ .Values.name }}.{{ .Values.domain }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                 name: {{ .Values.vsAgentName }}
+                 name: {{ .Values.name }}
                  port:
                    number: {{ .Values.agentPort }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.vsAgentName }}-vsa-pv
-  namespace: {{ .Values.vsAgentNamespace }}
+  name: {{ .Values.name }}-vsa-pv
+  namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.vsAgentName }}
+    app: {{ .Values.name }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -74,10 +74,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.vsAgentName }}-pg-pv-main
+  name: {{ .Values.name }}-pg-pv-main
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.vsAgentName }}
+    app: {{ .Values.name }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -93,10 +93,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.vsAgentName }}-redis-main
+  name: {{ .Values.name }}-redis-main
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.vsAgentName }}
+    app: {{ .Values.name }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -111,26 +111,26 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-   name: {{ .Values.vsAgentName }}
-   namespace: {{ .Values.vsAgentNamespace }}
+   name: {{ .Values.name }}
+   namespace: {{ .Values.namespace }}
 spec:
-   serviceName: {{ .Values.vsAgentName }}
-   replicas: {{ .Values.vsAgentReplicas }}
+   serviceName: {{ .Values.name }}
+   replicas: {{ .Values.replicas }}
    selector:
       matchLabels:
-         app: {{ .Values.vsAgentName }}
+         app: {{ .Values.name }}
    template:
       metadata:
          labels:
-            app: {{ .Values.vsAgentName }}
+            app: {{ .Values.name }}
       spec:
          containers:
-         -  name: {{ .Values.vsAgentName }}-sa-container
+         -  name: {{ .Values.name }}-sa-container
             image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
             imagePullPolicy: Always
             env:
             - name: AGENT_ENDPOINT
-              value: "wss://{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}:443"
+              value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -138,7 +138,7 @@ spec:
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ .Values.vsAgentName }}.{{ .Values.vsAgentDomain }}"
+              value: "did:web:{{ .Values.name }}.{{ .Values.domain }}"
 {{- with .Values.extraEnv }}
 {{- toYaml . | nindent 12 }}
 {{- end }}
@@ -159,34 +159,34 @@ spec:
             ports:
             -  containerPort: 5432
             volumeMounts:
-            - name: {{ .Values.vsAgentName }}-pg-pv-main
+            - name: {{ .Values.name }}-pg-pv-main
               mountPath: /var/lib/postgresql/data
         {{- end }}
         {{- if .Values.images.redis.enabled }}
-         -  name: {{ .Values.vsAgentName }}-redis-container
+         -  name: {{ .Values.name }}-redis-container
             image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
             imagePullPolicy: Always
             ports:
             -  containerPort: 6379
             volumeMounts:
-            - name: {{ .Values.vsAgentName }}-redis-main
+            - name: {{ .Values.name }}-redis-main
               mountPath: /home/data
         {{- end }}
             volumeMounts:
-            - name: {{ .Values.vsAgentName }}-vsa-pv
+            - name: {{ .Values.name }}-vsa-pv
               mountPath: /root/.afj
 
          volumes:
-         - name: {{ .Values.vsAgentName }}-vsa-pv
+         - name: {{ .Values.name }}-vsa-pv
            persistentVolumeClaim:
-             claimName: {{ .Values.vsAgentName }}-vsa-pv
+             claimName: {{ .Values.name }}-vsa-pv
         {{- if .Values.database.enabled }}
-         - name: {{ .Values.vsAgentName }}-pg-pv-main
+         - name: {{ .Values.name }}-pg-pv-main
            persistentVolumeClaim:
-             claimName: {{ .Values.vsAgentName }}-pg-pv-main
+             claimName: {{ .Values.name }}-pg-pv-main
         {{- end }}
         {{- if .Values.images.redis.enabled }}
-         - name: {{ .Values.vsAgentName }}-redis-main
+         - name: {{ .Values.name }}-redis-main
            persistentVolumeClaim:
-             claimName: {{ .Values.vsAgentName }}-redis-main
+             claimName: {{ .Values.name }}-redis-main
         {{- end }}
