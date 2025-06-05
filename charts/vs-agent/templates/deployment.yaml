@@ -74,10 +74,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.name }}-pg-pv-main
+  name: {{ .Values.vsAgentName }}-pg-pv-main
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.name }}
+    app: {{ .Values.vsAgentName }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -93,10 +93,10 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.name }}-redis-main
+  name: {{ .Values.vsAgentName }}-redis-main
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.name }}
+    app: {{ .Values.vsAgentName }}
   annotations:
     helm.sh/resource-policy: keep
 spec:
@@ -159,17 +159,17 @@ spec:
             ports:
             -  containerPort: 5432
             volumeMounts:
-            - name: {{ .Values.name }}-pg-pv-main
+            - name: {{ .Values.vsAgentName }}-pg-pv-main
               mountPath: /var/lib/postgresql/data
         {{- end }}
         {{- if .Values.images.redis.enabled }}
-         -  name: {{ .Values.name }}-redis-container
+         -  name: {{ .Values.vsAgentName }}-redis-container
             image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
             imagePullPolicy: Always
             ports:
             -  containerPort: 6379
             volumeMounts:
-            - name: {{ .Values.name }}-redis-main
+            - name: {{ .Values.vsAgentName }}-redis-main
               mountPath: /home/data
         {{- end }}
             volumeMounts:
@@ -181,12 +181,12 @@ spec:
            persistentVolumeClaim:
              claimName: {{ .Values.vsAgentName }}-vsa-pv
         {{- if .Values.database.enabled }}
-         - name: {{ .Values.name }}-pg-pv-main
+         - name: {{ .Values.vsAgentName }}-pg-pv-main
            persistentVolumeClaim:
-             claimName: {{ .Values.name }}-pg-pv-main
+             claimName: {{ .Values.vsAgentName }}-pg-pv-main
         {{- end }}
         {{- if .Values.images.redis.enabled }}
-         - name: {{ .Values.name }}-redis-main
+         - name: {{ .Values.vsAgentName }}-redis-main
            persistentVolumeClaim:
-             claimName: {{ .Values.name }}-redis-main
+             claimName: {{ .Values.vsAgentName }}-redis-main
         {{- end }}
