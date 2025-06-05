@@ -18,10 +18,10 @@ configMap:
 
 vs-agent-chart:
   enabled: true
-  vsAgentName: chatbot-agent
-  vsAgentNamespace: default
-  vsAgentReplicas: 1
-  vsAgentDomain: example.dev.io
+  name: chatbot-agent
+  namespace: default
+  replicas: 1
+  domain: example.dev.io
   agentName: Demo Chatbot Agent
   eventsBaseUrl: https://chatbot.example.dev.io
   adminPort: 3000

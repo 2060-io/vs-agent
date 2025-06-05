@@ -1,17 +1,20 @@
 # General configuration
-vsAgentName: vs-agent
-vsAgentNamespace: default
-vsAgentReplicas: 1
-vsAgentDomain: example.com
+name: vs-agent
+namespace: default
+replicas: 1
+domain: example.com
 
 # Ports
 adminPort: 3000
 agentPort: 3001
 
+# Agent configuration
+agentName: "VS Agent"
+eventsBaseUrl: "https://events.example.com"
+
 # DB and Redis configuration
 database:
   enabled: false
-  host: localhost
   user: unicid
   pwd: mypassword123
 
