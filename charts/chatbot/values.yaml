@@ -1,4 +1,4 @@
-name: demo-chatbot-vs
+name: chatbot-backend
 namespace: default
 replicas: 1
 domain: example.dev.io
@@ -8,22 +8,22 @@ images:
     repository: io2060/demo-chatbot-backend
     tag: dev
     env:
-      vsAgentAdminUrl: "http://chatbot-agent:3000"
-      visionUrl: "https://vision-service.mydomain.com"
-      webrtcUrl: "https://webrtc-server.mydomain.com"
+      vsAgentAdminUrl: "ttp://chatbot-agent:3000
+      visionUrl: https://vision-service.mydomain.com
+      webrtcUrl: https://webrtc-server.mydomain.com
       port: 5000
 
 configMap:
-  name: chatbot-demo-config
+  name: phone-cred-config
 
 vs-agent-chart:
   enabled: true
-  name: chatbot-agent
+  name: chatbot
   namespace: default
   replicas: 1
   domain: example.dev.io
-  agentName: Demo Chatbot Agent
-  eventsBaseUrl: https://chatbot.example.dev.io
+  agentName: Chatbot Agent
+  eventsBaseUrl: https://chatbot-backend.test.dev.2060.io
   adminPort: 3000
   agentPort: 3001
   database:
@@ -42,7 +42,7 @@ vs-agent-chart:
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://chatbot-agent.test.dev.2060.io
+      value: https://chatbot.test.dev.2060.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: AGENT_WALLET_ID
