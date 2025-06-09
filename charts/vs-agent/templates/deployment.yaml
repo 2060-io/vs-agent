@@ -101,7 +101,7 @@ spec:
 # PersistentVolumeClaim for the Redis database
 # This PVC is used to store the Redis data
 # If Redis is enabled, this PVC will be created
-{{- if .Values.images.redis.enabled }}
+{{- if .Values.redis.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -153,7 +153,7 @@ spec:
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
-              value: "{{ .Values.images.invitationUrl }}"
+              value: "{{ .Values.invitationUrl }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
@@ -181,9 +181,9 @@ spec:
             - name: {{ .Values.name }}-pg-pv-main
               mountPath: /var/lib/postgresql/data
         {{- end }}
-        {{- if .Values.images.redis.enabled }}
+        {{- if .Values.redis.enabled }}
          -  name: {{ .Values.name }}-redis-container
-            image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
+            image: redis:alpine
             imagePullPolicy: Always
             ports:
             -  containerPort: 6379
@@ -204,7 +204,7 @@ spec:
            persistentVolumeClaim:
              claimName: {{ .Values.name }}-pg-pv-main
         {{- end }}
-        {{- if .Values.images.redis.enabled }}
+        {{- if .Values.redis.enabled }}
          - name: {{ .Values.name }}-redis-main
            persistentVolumeClaim:
              claimName: {{ .Values.name }}-redis-main
