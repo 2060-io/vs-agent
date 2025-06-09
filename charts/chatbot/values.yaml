@@ -1,33 +1,61 @@
+# Backend service name for the chatbot application
 name: chatbot-backend
+# Namespace where the chatbot application is deployed
 namespace: default
+# Number of replicas for the chatbot backend service
 replicas: 1
+# Domain for the chatbot application
 domain: example.dev.io
 
+# Image configuration for the chatbot backend service
+# The repository and tag for the image used in the deployment
 images:
   backend:
     repository: io2060/demo-chatbot-backend
     tag: dev
     env:
+      # vsAgent URL for the chatbot backend service
       vsAgentAdminUrl: http://chatbot-agent:3000
+      # Base URL for the Vision Service
       visionUrl: https://vision-service.mydomain.com
+      # Base URL for the WebRTC service
       webrtcUrl: https://webrtc-server.mydomain.com
+      # Port for the backend service
       port: 5000
 
+# ConfigMap configuration
+# This ConfigMap contains the phone credential definition used by the chatbot application
 configMap:
   name: phone-cred-config
 
+# VS Agent Chart dependency configuration
+# This section defines the configuration for the VS Agent chart that is used by the chatbot application
+# It includes the agent name, namespace, replicas, domain, and other settings
 vs-agent-chart:
+  # Indicates whether the VS Agent chart is enabled
   enabled: true
+  # Name of the VS Agent chart (this name is used in the qr code generation, recomended to be the app name)
   name: chatbot
+  # Namespace where the VS Agent is deployed
   namespace: default
+  # Number of replicas for the VS Agent
   replicas: 1
+  # Domain for the VS Agent
   domain: example.dev.io
+  # Chatbot name to display on the invitation QR code
   agentName: Chatbot Agent
+  # Base URL for the chatbot backend service
   eventsBaseUrl: https://chatbot-backend.test.dev.2060.io
+  # Port configuration for the VS Agent
+  # adminPort is the port for the Agent Admin API
   adminPort: 3000
+  # agentPort is the port for the Agent Service API
   agentPort: 3001
+  # PostgreSQL database configuration for the VS Agent
+  # Disabled by default, can be enabled if needed
   database:
     enabled: false
+  # Enable cors for the VS Agent
   ingress:
     public:
       enableCors: true
@@ -36,10 +64,14 @@ vs-agent-chart:
     agent:
       repository: io2060/2060-service-agent
       tag: v1.2.0
+    # Image for the chatbot invitation QR code
     invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+    # Redis configuration for the VS Agent
+    # Disabled by default, can be enabled if needed
     redis: 
       enabled: false
 
+  # Environment variables specific to the chatbot backend service
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
       value: https://chatbot.test.dev.2060.io

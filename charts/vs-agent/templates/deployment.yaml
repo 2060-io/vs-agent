@@ -1,3 +1,4 @@
+# Service deployment for the VS Agent
 apiVersion: v1
 kind: Service
 metadata:
@@ -26,7 +27,9 @@ spec:
     targetPort: 6379
     protocol: TCP
 ---
-# Public ingress
+# Ingress resource for the VS Agent
+# This resource defines how external traffic can access the VS Agent service
+# It routes traffic to the agent service and provides TLS termination
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -53,6 +56,9 @@ spec:
                  port:
                    number: {{ .Values.agentPort }}
 ---
+# PersistentVolumeClaim for the VS Agent
+# This PVC is used to store the agent's data and configuration
+# It is created with a storage class and size defined in the values.yaml file
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -70,6 +76,9 @@ spec:
     requests:
       storage: {{ .Values.storage.size | default "1Gi" }}
 ---
+# PersistentVolumeClaim for the PostgreSQL database
+# This PVC is used to store the PostgreSQL data
+# If the database is enabled, this PVC will be created
 {{- if .Values.database.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -89,6 +98,9 @@ spec:
       storage: 1Gi
 {{- end }}
 ---
+# PersistentVolumeClaim for the Redis database
+# This PVC is used to store the Redis data
+# If Redis is enabled, this PVC will be created
 {{- if .Values.images.redis.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -108,6 +120,13 @@ spec:
       storage: 1Gi
 {{- end }}
 ---
+# StatefulSet description for the VS Agent
+# This StatefulSet manages the deployment of the VS Agent service
+# It includes the agent container, PostgreSQL database (if enabled), and Redis (if enabled)
+# The StatefulSet ensures that the agent service is deployed with a stable identity and persistent storage
+# The agent service is configured with environment variables for the agent endpoint, label, invitation image URL, and public DID
+# The PostgreSQL database is configured with environment variables for the user and password
+# The Redis service is configured with its own container and persistent storage
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
