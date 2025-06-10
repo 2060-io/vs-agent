@@ -145,7 +145,7 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-sa-container
-            image: "{{ .Values.images.agent.repository }}:{{ .Values.images.agent.tag }}"
+            image: io2060/vs-agent:{{ .Chart.version }}
             imagePullPolicy: Always
             env:
             - name: AGENT_ENDPOINT
@@ -153,7 +153,7 @@ spec:
             - name: AGENT_LABEL
               value: {{ .Values.agentName }}
             - name: AGENT_INVITATION_IMAGE_URL
-              value: "{{ .Values.invitationUrl }}"
+              value: "{{ .Values.agentInvitationImageUrl }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID

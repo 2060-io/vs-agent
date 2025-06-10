@@ -4,18 +4,11 @@ name: chatbot-backend # Name of the chatbot backend service
 namespace: default # Namespace where the chatbot backend service is deployed
 replicas: 1 # Number of replicas for the chatbot backend service
 domain: example.dev.io # Domain for the chatbot backend service
-
-# Image configuration for the chatbot backend service
-# The repository and tag for the image used in the deployment
-images:
-  backend:
-    repository: io2060/demo-chatbot-backend
-    tag: dev
-    env:
-      vsAgentAdminUrl: http://chatbot-agent:3000 # URL for the VS Agent Admin API
-      visionUrl: https://vision-service.mydomain.com # URL for the Vision Service
-      webrtcUrl: https://webrtc-server.mydomain.com #
-      port: 5000 # Port on which the chatbot backend service listens
+env:
+  vsAgentAdminUrl: http://chatbot-agent:3000 # URL for the VS Agent Admin API
+  visionUrl: https://vision-service.mydomain.com # URL for the Vision Service
+  webrtcUrl: https://webrtc-server.mydomain.com #
+  port: 5000 # Port on which the chatbot backend service listens
 
 # ConfigMap configuration
 # This ConfigMap contains the phone credential definition used by the chatbot application
@@ -33,7 +26,7 @@ vs-agent-chart:
   domain: example.dev.io # Domain for the VS Agent service
   agentName: Chatbot Agent # Chatbot name to display on the invitation QR code
   eventsBaseUrl: https://chatbot-backend.test.dev.2060.io # Base URL for the chatbot backend service
-  invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png # Image for the chatbot invitation QR code
+  agentInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png # Image for the chatbot invitation QR code
   # Port configuration for the VS Agent
   adminPort: 3000 # adminPort is the port for the Agent Admin API
   agentPort: 3001 # Port for the Agent Service API
@@ -41,12 +34,6 @@ vs-agent-chart:
   ingress:
     public:
       enableCors: true
-
-  # Image configuration for the VS Agent (only for image build)
-  # images:
-  #   agent:
-  #     repository: io2060/vs-agent
-  #     tag: dev
 
   # Environment variables specific to the chatbot backend service
   extraEnv: 

@@ -11,7 +11,7 @@ agentPort: 3001
 # Agent configuration
 agentName: "VS Agent"
 eventsBaseUrl: "https://events.example.com"
-invitationUrl: "https://example.com/invitation.png"
+agentInvitationImageUrl: "https://example.com/invitation.png"
 
 # DB and Redis configuration
 database:
@@ -24,12 +24,6 @@ redis:
 ingress:
   public:
     enableCors: true
-
-# Image configuration, this section is only used for image build
-# images:
-#   agent:
-#     repository: io2060/vs-agent
-#     tag: dev
 
 # Extra environment variables (extensible)
 extraEnv: []

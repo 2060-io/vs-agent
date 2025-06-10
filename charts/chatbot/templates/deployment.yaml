@@ -11,8 +11,8 @@ spec:
     app: {{ .Values.name }}
   ports:
   - name: backend
-    port: {{ .Values.images.backend.env.port | default 5000 }} # Port exposed by the service
-    targetPort: {{ .Values.images.backend.env.port | default 5000 }} # Port on the container to which the service routes traffic
+    port: {{ .Values.env.port | default 5000 }} # Port exposed by the service
+    targetPort: {{ .Values.env.port | default 5000 }} # Port on the container to which the service routes traffic
     protocol: TCP    
 ---
 # Ingress resource for chatbot application
@@ -41,7 +41,7 @@ spec:
               service:
                  name: {{ .Values.name }}
                  port:
-                   number: {{ .Values.images.backend.env.port | default 5000 }} # Port on the service to which the ingress routes traffic
+                   number: {{ .Values.env.port | default 5000 }} # Port on the service to which the ingress routes traffic
 ---
 # ConfigMap for chatbot application
 # This ConfigMap contains the phone credential definition used by the chatbot application
@@ -78,23 +78,23 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-backend-container
-            image: "{{ .Values.images.backend.repository }}:{{ .Values.images.backend.tag }}"
+            image: io2060/demo-chatbot-backend:{{ .Chart.version }}
             imagePullPolicy: Always
             env:
             # Base URL for the Agent Admin API
             - name: VS_AGENT_ADMIN_BASE_URL
-              value: "{{ .Values.images.backend.env.vsAgentAdminUrl }}/v1"
+              value: "{{ .Values.env.vsAgentAdminUrl }}/v1"
             # Base URL for the Service API
             - name: PUBLIC_BASE_URL
               value: "https://{{ .Values.name }}.{{ .Values.domain }}"
             # Base URL for the Vision Service
             - name: VISION_SERVICE_BASE_URL
-              value: "{{ .Values.images.backend.env.visionUrl }}"
+              value: "{{ .Values.env.visionUrl }}"
             # Base URL for the WebRTC server
             - name: WEBRTC_SERVER_BASE_URL
-              value: "{{ .Values.images.backend.env.webrtcUrl }}"
+              value: "{{ .Values.env.webrtcUrl }}"
             ports:
-            -  containerPort: {{ .Values.images.backend.env.port | default 5000 }}
+            -  containerPort: {{ .Values.env.port | default 5000 }}
             # Mount the ConfigMap as a volume to replace the phone-cred-def-dev.json file
             volumeMounts:
               - name: {{ .Values.name }}-cred-pv
