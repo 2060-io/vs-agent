@@ -6,7 +6,7 @@ replicas: 1 # Number of replicas for the chatbot backend service
 domain: example.io # Domain for the chatbot backend service
 env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
-  visionUrl: https://vision-service.example.io # URL for the Vision Service
+  visionUrl: https://pymediasoup-demo-service.example.io # URL for the Vision Service demo
   webrtcUrl: https://webrtc-server.example.io #
   port: 5000 # Port on which the chatbot backend service listens
 
