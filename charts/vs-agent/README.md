@@ -35,7 +35,7 @@ This Helm chart deploys **VS Agent** application with a StatefulSet, supporting 
 | Parameter     | Description                              | Default |
 | ------------- | ---------------------------------------- | ------- |
 | `adminPort`   | Port for admin interface                 | `3000`  |
-| `agentPort`   | Port for agent communication (`didcomm`) | `3001`  |
+| `didcommPort`   | Port for agent communication (`didcomm`) | `3001`  |
 
 ### Didcomm Configuration
 

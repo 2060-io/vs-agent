@@ -6,7 +6,7 @@ domain: example.io
 
 # Ports
 adminPort: 3000
-agentPort: 3001
+didcommPort: 3001
 
 # Agent configuration
 didcommLabel: "VS Agent"

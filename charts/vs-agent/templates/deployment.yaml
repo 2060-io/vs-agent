@@ -11,8 +11,8 @@ spec:
     app: {{ .Values.name }}
   ports:
   - name: didcomm
-    port: {{ .Values.agentPort }}
-    targetPort: {{ .Values.agentPort }}
+    port: {{ .Values.didcommPort }}
+    targetPort: {{ .Values.didcommPort }}
     protocol: TCP
   - name: admin
     port: {{ .Values.adminPort }}
@@ -54,7 +54,7 @@ spec:
               service:
                  name: {{ .Values.name }}
                  port:
-                   number: {{ .Values.agentPort }}
+                   number: {{ .Values.didcommPort }}
 ---
 # PersistentVolumeClaim for the VS Agent
 # This PVC is used to store the agent's data and configuration
@@ -163,7 +163,7 @@ spec:
 {{- end }}
             ports:
             -  containerPort: {{ .Values.adminPort }}
-            -  containerPort: {{ .Values.agentPort }}
+            -  containerPort: {{ .Values.didcommPort }}
         {{- if .Values.database.enabled }}
          -  name: postgres
             image: postgres:15.2
