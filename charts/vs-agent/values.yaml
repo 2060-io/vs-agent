@@ -2,7 +2,7 @@
 name: vs-agent
 namespace: default
 replicas: 1
-domain: example.com
+domain: example.io
 
 # Ports
 adminPort: 3000
@@ -10,8 +10,8 @@ agentPort: 3001
 
 # Agent configuration
 agentName: "VS Agent"
-eventsBaseUrl: "https://events.example.com"
-agentInvitationImageUrl: "https://example.com/invitation.png"
+eventsBaseUrl: "https://events.example.io"
+agentInvitationImageUrl: "https://example.io/invitation.png"
 
 # DB and Redis configuration
 database:
