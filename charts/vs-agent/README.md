@@ -15,7 +15,6 @@ This Helm chart deploys **VS Agent** application with a StatefulSet, supporting 
 
 * **Service:** Exposes two TCP ports, one for the agent (`didcomm`) and one for admin access.
 * **Ingress:**
-  * Private ingress restricted by IP whitelist
   * Public ingress for external access with TLS
 * **PersistentVolumeClaim:** Provides persistent storage for agent data.
 * **StatefulSet:** Runs the VS-Agent container(s) with configurable replicas.
@@ -30,58 +29,51 @@ This Helm chart deploys **VS Agent** application with a StatefulSet, supporting 
 | `namespace`                    | Kubernetes namespace                        | `default`     |
 | `replicas`                     | Number of agent pods                        | `1`           |
 | `domain`                       | Domain for ingress hosts                    | `example.com` |
-| `deployment.privacy.whitelist` | CIDR whitelist for private ingress          | `0.0.0.0/0`   |
-
-### Images
-
-| Parameter                 | Description                           | Example                              |
-| ------------------------- | ------------------------------------- | ------------------------------------ |
-| `images.agent.repository` | Docker repository for the agent image | `io2060/vs-agent`          |
-| `images.agent.tag`        | Agent Docker image tag                | `v1.2.0`                             |
-| `images.invitationUrl`    | URL for invitation image              | `https://example.com/invitation.png` |
 
 ### Ports
 
-| Parameter   | Description                              | Default |
-| ----------- | ---------------------------------------- | ------- |
-| `adminPort` | Port for admin interface                 | `3000`  |
-| `agentPort` | Port for agent communication (`didcomm`) | `3001`  |
+| Parameter     | Description                              | Default |
+| ------------- | ---------------------------------------- | ------- |
+| `adminPort`   | Port for admin interface                 | `3000`  |
+| `didcommPort`   | Port for agent communication (`didcomm`) | `3001`  |
 
-### PostgreSQL (Optional)
+### Didcomm Configuration
 
-Enable PostgreSQL with credentials and persistence:
+| Parameter                  | Description                                      | Default                          |
+| -------------------------- | ------------------------------------------------ | -------------------------------- |
+| `didcommLabel`                | Label for the agent                              | `VS Agent`                      |
+| `eventsBaseUrl`            | Base URL for events                              | `https://events.example.com`    |
+| `didcommInvitationImageUrl`  | URL for the agent invitation image               | `https://example.com/invitation.png` |
+| `extraEnv`                 | Additional environment variables for the agent   | `[]`                            |
 
-```yaml
-postgresql:
-  enabled: true
-  auth:
-    username: myuser
-    password: mypassword
-    database: mydatabase
-  primary:
-    persistence:
-      enabled: true
-      storageClass: csi-cinder-classic
-      size: 1Gi
-```
+### Database Configuration (Optional)
 
-### Redis (Optional)
+| Parameter                  | Description                                      | Default                          |
+| -------------------------- | ------------------------------------------------ | -------------------------------- |
+| `database.enabled`         | Enable PostgreSQL database                       | `false`                         |
+| `database.user`            | PostgreSQL username                              | `unicid`                        |
+| `database.pwd`             | PostgreSQL password                              | `mypassword123`                 |
 
-Enable Redis with connection details and persistence:
+### Redis Configuration (Optional)
 
-```yaml
-redis:
-  enabled: true
-  host: your-redis-host
-  password: myRedisPass123
-  architecture: standalone
-  auth:
-    password: myRedisPass123
-  persistence:
-    enabled: true
-    storageClass: csi-cinder-classic
-    size: 1Gi
-```
+| Parameter                  | Description                                      | Default                          |
+| -------------------------- | ------------------------------------------------ | -------------------------------- |
+| `redis.enabled`            | Enable Redis                                     | `false`                         |
+| `redis.host`               | Redis host                                       | `your-redis-host`               |
+| `redis.password`           | Redis password                                   | `myRedisPass123`                |
+
+### Persistent Storage
+
+| Parameter                  | Description                                      | Default                          |
+| -------------------------- | ------------------------------------------------ | -------------------------------- |
+| `storage.size`             | Size of the persistent volume for the agent      | `1Gi`                           |
+| `storage.storageClassName` | Storage class for the persistent volume          | `csi-cinder-high-speed`         |
+
+### Ingress
+
+| Parameter                      | Description                                 | Default       |
+| ------------------------------ | ------------------------------------------- | ------------- |
+| `ingress.public.enableCors`    | Enable CORS for public ingress              | `true`        |
 
 ### Extra Environment Variables
 

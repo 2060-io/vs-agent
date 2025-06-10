@@ -2,36 +2,28 @@
 name: vs-agent
 namespace: default
 replicas: 1
-domain: example.com
+domain: example.io
 
 # Ports
 adminPort: 3000
-agentPort: 3001
+didcommPort: 3001
 
 # Agent configuration
-agentName: "VS Agent"
-eventsBaseUrl: "https://events.example.com"
+didcommLabel: "VS Agent"
+eventsBaseUrl: "https://events.example.io"
+didcommInvitationImageUrl: "https://example.io/invitation.png"
 
 # DB and Redis configuration
 database:
   enabled: false
   user: unicid
   pwd: mypassword123
+redis: 
+  enabled: false
 
 ingress:
   public:
     enableCors: true
-
-# Image configuration
-images:
-  agent:
-    repository: io2060/2060-service-agent
-    tag: v1.2.0
-  invitationUrl: "https://example.com/invitation.png"
-  redis: 
-    enabled: false
-    repository: redis
-    tag: alpine
 
 # Extra environment variables (extensible)
 extraEnv: []
