@@ -108,6 +108,7 @@ jobs:
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
+          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
 
