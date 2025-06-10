@@ -41,9 +41,9 @@ This Helm chart deploys **VS Agent** application with a StatefulSet, supporting 
 
 | Parameter                  | Description                                      | Default                          |
 | -------------------------- | ------------------------------------------------ | -------------------------------- |
-| `agentName`                | Label for the agent                              | `VS Agent`                      |
+| `didcommLabel`                | Label for the agent                              | `VS Agent`                      |
 | `eventsBaseUrl`            | Base URL for events                              | `https://events.example.com`    |
-| `agentInvitationImageUrl`  | URL for the agent invitation image               | `https://example.com/invitation.png` |
+| `didcommInvitationImageUrl`  | URL for the agent invitation image               | `https://example.com/invitation.png` |
 | `extraEnv`                 | Additional environment variables for the agent   | `[]`                            |
 
 ### Database Configuration (Optional)

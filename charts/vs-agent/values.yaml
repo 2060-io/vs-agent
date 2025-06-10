@@ -9,9 +9,9 @@ adminPort: 3000
 agentPort: 3001
 
 # Agent configuration
-agentName: "VS Agent"
+didcommLabel: "VS Agent"
 eventsBaseUrl: "https://events.example.io"
-agentInvitationImageUrl: "https://example.io/invitation.png"
+didcommInvitationImageUrl: "https://example.io/invitation.png"
 
 # DB and Redis configuration
 database:

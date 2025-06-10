@@ -151,9 +151,9 @@ spec:
             - name: AGENT_ENDPOINT
               value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
             - name: AGENT_LABEL
-              value: {{ .Values.agentName }}
+              value: {{ .Values.didcommLabel }}
             - name: AGENT_INVITATION_IMAGE_URL
-              value: "{{ .Values.agentInvitationImageUrl }}"
+              value: "{{ .Values.didcommInvitationImageUrl }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
