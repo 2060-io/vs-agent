@@ -24,7 +24,7 @@ vs-agent-chart:
   namespace: default # Namespace where the VS Agent is deployed
   replicas: 1 # Number of replicas for the VS Agent service
   domain: example.io # Domain for the VS Agent service
-  agentName: Chatbot Agent # Chatbot name to display on the invitation QR code
+  didcommLabel: Chatbot Agent # Chatbot name to display on the invitation QR code
   eventsBaseUrl: https://chatbot-backend.example.io # Base URL for the chatbot backend service
   agentInvitationImageUrl: https://i.unic-id-issuer.example.io/avatar.png # Image for the chatbot invitation QR code
   # Port configuration for the VS Agent
