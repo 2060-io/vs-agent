@@ -5,7 +5,7 @@ namespace: default # Namespace where the chatbot backend service is deployed
 replicas: 1 # Number of replicas for the chatbot backend service
 domain: example.io # Domain for the chatbot backend service
 env:
-  vsAgentAdminUrl: http://chatbot-agent:3000 # URL for the VS Agent Admin API
+  vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
   visionUrl: https://vision-service.example.io # URL for the Vision Service
   webrtcUrl: https://webrtc-server.example.io #
   port: 5000 # Port on which the chatbot backend service listens
@@ -19,7 +19,7 @@ configMap:
 # This section defines the configuration for the VS Agent chart that is used by the chatbot application
 # It includes the agent name, namespace, replicas, domain, and other settings
 vs-agent-chart:
-  enabled: true # Indicates whether the VS Agent chart is enabled
+  enabled: false # Indicates whether the VS Agent chart is enabled
   name: chatbot # Name of the VS Agent chart
   namespace: default # Namespace where the VS Agent is deployed
   replicas: 1 # Number of replicas for the VS Agent service
