@@ -1,9 +1,6 @@
 import 'reflect-metadata'
 
 import express from 'express'
-import fs from 'fs'
-import multer from 'multer'
-import path from 'path'
 import QRCode from 'qrcode'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './events/CallbackEvent'
@@ -102,16 +99,4 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
       res.json({ error: error.message }).end()
     }
   })
-
-  // TODO: This local disk-based image upload solution is temporary.
-  // Serves static files from the "public" folder under the "/i" route
-  app.use(
-    '/i',
-    express.static(path.join(__dirname, 'public'), {
-      fallthrough: false,
-      dotfiles: 'deny',
-      extensions: ['png', 'jpg', 'jpeg', 'gif'],
-      maxAge: '1d',
-    }),
-  )
 }
