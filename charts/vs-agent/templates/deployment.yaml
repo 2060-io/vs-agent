@@ -164,6 +164,9 @@ spec:
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.didcommPort }}
+            volumeMounts:
+            - name: {{ .Values.name }}-vsa-pv
+              mountPath: /root/.afj
         {{- if .Values.database.enabled }}
          -  name: postgres
             image: postgres:15.2
@@ -191,9 +194,6 @@ spec:
             - name: {{ .Values.name }}-redis-main
               mountPath: /home/data
         {{- end }}
-            volumeMounts:
-            - name: {{ .Values.name }}-vsa-pv
-              mountPath: /root/.afj
 
          volumes:
          - name: {{ .Values.name }}-vsa-pv
