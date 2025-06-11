@@ -114,29 +114,4 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
       maxAge: '1d',
     }),
   )
-
-  // Multer storage configuration to save uploaded images to the local "public" directory
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      const dir = path.join(__dirname, 'public')
-      fs.mkdirSync(dir, { recursive: true })
-      cb(null, dir)
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.originalname)
-    },
-  })
-  // Initialize Multer with the defined storage settings
-  const upload = multer({ storage })
-  // Respond with the uploaded image information
-  app.post('/i', upload.single('image'), (req, res) => {
-    if (!req.file) {
-      return res.status(400).send('No image uploaded')
-    }
-    res.status(201).send({
-      message: 'Image uploaded successfully',
-      fileName: req.file.filename,
-      url: `/i/${req.file.filename}`,
-    })
-  })
 }
