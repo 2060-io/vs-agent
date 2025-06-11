@@ -27,7 +27,7 @@ but likely needed for production and test deployments.
 | AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test VS Agent    |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 | ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
-| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
+| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs, **uploaded image access**)                                                            | http://localhost:3001 |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
@@ -49,6 +49,36 @@ but likely needed for production and test deployments.
 > If the `POSTGRES_HOST` environment variable is defined, VS-A will handle the connection to operate with the specified database. Please note that this type of persistence is recommended because by default, an SQLite database is used for testing purposes. Due to SQLite's lack of robustness, it does not support a high throughput of messages per second. Therefore, for any production deployment, it is recommended to use a more robust PostgreSQL database, which allows processing large volumes of data efficiently and properly managing existing data and security credentials.  
 >
 > If the `REDIS_HOST` environment variable is defined, VS-A can leverage Redis as a caching system to achieve high-performance message processing. By offloading message handling and enabling asynchronous processing, Redis helps optimize I/O operations and significantly enhances the service’s capacity to manage large volumes of data efficiently.
+
+> 🔄 **Image Upload Support (temporary solution)**
+> VS-A currently includes a **temporary local image upload feature** under the `/i` endpoint.
+> When `PUBLIC_API_BASE_URL` is defined (e.g. `http://localhost:3001`), images uploaded using a `POST` request to `/i` can be accessed at:
+>
+> ```
+> [PUBLIC_API_BASE_URL]/i/<imageFileName>
+> ```
+>
+> **Example usage:**
+>
+> ```bash
+> curl -X POST -F "image=@/path/to/image.png" http://localhost:3001/i
+> ```
+>
+> **Expected response:**
+>
+> ```json
+> {
+>   "message": "Image uploaded successfully",
+>   "fileName": "image.png",
+>   "url": "/i/image.png"
+> }
+> ```
+>
+> Then access it at:
+> `http://localhost:3001/i/image.png`
+>
+> ⚠️ **Important:**
+> This is a temporary and non-persistent solution for VS-Agent v1.
 
 Possible log levels:
 

@@ -103,6 +103,8 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
     }
   })
 
+  // TODO: This local disk-based image upload solution is temporary.
+  // Serves static files from the "public" folder under the "/i" route
   app.use('/i', express.static(path.join(__dirname, 'public'), {
     fallthrough: false,
     dotfiles: 'deny',
@@ -110,6 +112,7 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
     maxAge: '1d', // Cache
   }))
 
+  // Multer storage configuration to save uploaded images to the local "public" directory
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       const dir = path.join(__dirname, 'public')
@@ -120,7 +123,9 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
       cb(null, file.originalname)
     },
   })
+  // Initialize Multer with the defined storage settings
   const upload = multer({ storage })
+  // Respond with the uploaded image information
   app.post('/i', upload.single('image'), (req, res) => {
     if (!req.file) {
       return res.status(400).send('No image uploaded')
