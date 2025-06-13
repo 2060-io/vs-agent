@@ -29,10 +29,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.domain }}
-      secretName: {{ .Values.name }}.{{ .Values.domain }}-cert
+        - {{ .Values.name }}.{{ .Values.global.domain }}
+      secretName: {{ .Values.name }}.{{ .Values.global.domain }}-cert
   rules:
-    - host: {{ .Values.name }}.{{ .Values.domain }}
+    - host: {{ .Values.name }}.{{ .Values.global.domain }}
       http:
         paths:
           - path: /
@@ -86,7 +86,7 @@ spec:
               value: "{{ .Values.env.vsAgentAdminUrl }}/v1"
             # Base URL for the Service API
             - name: PUBLIC_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
             # Base URL for the Vision Service
             - name: VISION_SERVICE_BASE_URL
               value: "{{ .Values.env.visionUrl }}"

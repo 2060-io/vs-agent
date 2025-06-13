@@ -1,4 +1,8 @@
 # This file contains the configuration values for the chatbot application deployment
+# Global configuration for the chatbot application
+global: 
+  domain: example.io # Domain for the chatbot application
+
 # General configuration
 name: chatbot-backend # Name of the chatbot backend service
 replicas: 1 # Number of replicas for the chatbot backend service
@@ -15,7 +19,6 @@ env:
 vs-agent-chart:
   enabled: false # Indicates whether the VS Agent chart is enabled
   name: chatbot # Name of the VS Agent chart
-  domain: example.io # Domain for the VS Agent service
   didcommLabel: Chatbot Agent # Chatbot name to display on the invitation QR code
   eventsBaseUrl: http://chatbot-backend:5000 # Base URL for the chatbot backend service
   didcommInvitationImageUrl: https://image.example.io/avatar.png # Image for the chatbot invitation QR code

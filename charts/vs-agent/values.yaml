@@ -1,7 +1,10 @@
+# Global configuration for the application
+global: 
+  domain: example.io # Domain for the application
+
 # General configuration
 name: vs-agent
 replicas: 1 # Number of replicas for the VS Agent service
-domain: example.io
 
 # Ports
 adminPort: 3000 # adminPort is the port for the Agent Admin API
