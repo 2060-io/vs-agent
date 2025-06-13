@@ -19,7 +19,6 @@ env:
 
 # VS Agent Chart dependency configuration
 # This section defines the configuration for the VS Agent chart that is used by the chatbot application
-# It includes the agent name, replicas, domain, and other settings
 vs-agent-chart:
   enabled: false # Indicates whether the VS Agent chart is enabled
   name: chatbot # Name of the VS Agent chart
