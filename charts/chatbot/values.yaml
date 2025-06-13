@@ -9,8 +9,10 @@ replicas: 1 # Number of replicas for the chatbot backend service
 domain: example.io # Domain for the chatbot backend service
 env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
-  visionUrl: http://pymediasoup-demo-service.namespace:5000 # URL for the Vision Service demo
-  webrtcUrl: http://webrtc-server.namespace:443 #
+  visionUrl: http://webrtc-pymediasoup-client.example.io # URL for the Vision Service demo
+  # visionServiceName: webrtc-pymediasoup-client # Name of the Vision Service, used to construct the URL if not provided visionUrl
+  webrtcUrl: https://webrtc.example.io # WebRTC server URL, used for video calls and media streaming 
+  # webrtcServiceName: webrtc-server # Name of the WebRTC service, used to construct the URL if not provide webrtcUrl
   port: 5000 # Port on which the chatbot backend service listens
 
 # VS Agent Chart dependency configuration

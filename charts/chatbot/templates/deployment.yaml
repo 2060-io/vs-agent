@@ -70,11 +70,21 @@ spec:
             - name: PUBLIC_BASE_URL
               value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
             # Base URL for the Vision Service
+{{- if .Values.env.visionServiceName }}
+            - name: VISION_SERVICE_BASE_URL
+              value: "https://{{ .Values.env.visionServiceName }}.{{ .Values.global.domain }}"
+{{- else }}
             - name: VISION_SERVICE_BASE_URL
               value: "{{ .Values.env.visionUrl }}"
+{{- end }}
             # Base URL for the WebRTC server
+{{- if .Values.env.webrtcServiceName }}
+            - name: WEBRTC_SERVER_BASE_URL
+              value: "https://{{ .Values.env.webrtcServiceName }}.{{ .Values.global.domain }}"
+{{- else }}
             - name: WEBRTC_SERVER_BASE_URL
               value: "{{ .Values.env.webrtcUrl }}"
+{{- end }}
             ports:
             -  containerPort: {{ .Values.env.port | default 5000 }}
 
