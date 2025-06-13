@@ -106,7 +106,7 @@ Configures credential management. The following properties are available:
 
 #### `StatsOptions`
 Configures stats management. The following properties are available:
-- `imports` (optional)
+- `imports` (optional).
 - `statOptions` (optional).
 
 ##### Example of Using the `StatEventModule`
