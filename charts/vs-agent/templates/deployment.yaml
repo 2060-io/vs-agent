@@ -153,7 +153,7 @@ spec:
             - name: AGENT_LABEL
               value: {{ .Values.didcommLabel }}
             - name: AGENT_INVITATION_IMAGE_URL
-              value: "{{ .Values.didcommInvitationImageUrl }}"
+              value: "{{ tpl .Values.didcommInvitationImageUrl . }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
