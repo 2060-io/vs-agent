@@ -20,7 +20,6 @@ vs-agent-chart:
   didcommLabel: Chatbot Agent # Chatbot name to display on the invitation QR code
   eventsBaseUrl: http://chatbot-backend:5000 # Base URL for the chatbot backend service
   didcommInvitationImageUrl: https://image.{{ .Values.global.domain }}/avatar.png # Image for the chatbot invitation QR code
-  includeAnoncredsEnv: true # Whether to include AnonCreds environment
 
   # Environment variables specific to the chatbot backend service
   extraEnv: 
