@@ -1,17 +1,19 @@
+# Global configuration for the application
+global: 
+  domain: example.io # Domain for the application
+
 # General configuration
 name: vs-agent
-namespace: default
-replicas: 1
-domain: example.io
+replicas: 1 # Number of replicas for the VS Agent service
 
 # Ports
-adminPort: 3000
-didcommPort: 3001
+adminPort: 3000 # adminPort is the port for the Agent Admin API
+didcommPort: 3001 # Port for DIDComm
 
 # Agent configuration
 didcommLabel: "VS Agent"
 eventsBaseUrl: "https://events.example.io"
-didcommInvitationImageUrl: "https://example.io/invitation.png"
+didcommInvitationImageUrl: "https://image.{{ .Values.global.domain }}/invitation.png"
 
 # DB and Redis configuration
 database:
@@ -21,6 +23,7 @@ database:
 redis: 
   enabled: false
 
+# Enable cors for the VS Agent
 ingress:
   public:
     enableCors: true

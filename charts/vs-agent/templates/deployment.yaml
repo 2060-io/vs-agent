@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.name }}
 spec:
@@ -34,7 +34,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: public-{{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/enable-cors: "{{ .Values.ingress.public.enableCors | default "true" }}"
@@ -42,10 +42,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.domain }}
-      secretName: public.{{ .Values.name }}.{{ .Values.domain }}-cert
+        - {{ .Values.name }}.{{ .Values.global.domain }}
+      secretName: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
   rules:
-    - host: {{ .Values.name }}.{{ .Values.domain }}
+    - host: {{ .Values.name }}.{{ .Values.global.domain }}
       http:
         paths:
           - path: /
@@ -63,7 +63,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.name }}-vsa-pv
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.name }}
   annotations:
@@ -84,7 +84,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.name }}-pg-pv-main
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.name }}
   annotations:
@@ -106,7 +106,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.name }}-redis-main
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.name }}
   annotations:
@@ -131,10 +131,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
    name: {{ .Values.name }}
-   namespace: {{ .Values.namespace }}
+   namespace: {{ .Release.Namespace }}
 spec:
    serviceName: {{ .Values.name }}
-   replicas: {{ .Values.replicas }}
+   replicas: {{ default 1 .Values.replicas }}
    selector:
       matchLabels:
          app: {{ .Values.name }}
@@ -149,17 +149,20 @@ spec:
             imagePullPolicy: Always
             env:
             - name: AGENT_ENDPOINT
-              value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
+              value: "wss://{{ .Values.name }}.{{ .Values.global.domain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.didcommLabel }}
             - name: AGENT_INVITATION_IMAGE_URL
-              value: "{{ .Values.didcommInvitationImageUrl }}"
+              value: "{{ tpl .Values.didcommInvitationImageUrl . }}"
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ .Values.name }}.{{ .Values.domain }}"
+              value: "did:web:{{ .Values.name }}.{{ .Values.global.domain }}"
 {{- with .Values.extraEnv }}
-{{- toYaml . | nindent 12 }}
+{{- range . }}
+            - name: {{ .name }}
+              value: {{ tpl .value $ | quote }}
+{{- end }}
 {{- end }}
             ports:
             -  containerPort: {{ .Values.adminPort }}

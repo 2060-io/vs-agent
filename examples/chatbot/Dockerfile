@@ -19,7 +19,11 @@ COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
 COPY packages/client/tsconfig.json packages/client/tsconfig.json
 COPY packages/client/tsconfig.build.json packages/client/tsconfig.build.json
 
-COPY examples/chatbot/ examples/chatbot/
+COPY examples/chatbot/package.json examples/chatbot/package.json
+COPY examples/chatbot/tsconfig.json examples/chatbot/tsconfig.json
+COPY examples/chatbot/data.ts examples/chatbot/data.ts
+COPY examples/chatbot/index.ts examples/chatbot/index.ts
+COPY examples/chatbot/public/ examples/chatbot/public/
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm build

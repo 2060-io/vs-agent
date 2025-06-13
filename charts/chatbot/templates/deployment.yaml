@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Values.name }}
 spec:
@@ -22,17 +22,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.name }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.domain }}
-      secretName: {{ .Values.name }}.{{ .Values.domain }}-cert
+        - {{ .Values.name }}.{{ .Values.global.domain }}
+      secretName: {{ .Values.name }}.{{ .Values.global.domain }}-cert
   rules:
-    - host: {{ .Values.name }}.{{ .Values.domain }}
+    - host: {{ .Values.name }}.{{ .Values.global.domain }}
       http:
         paths:
           - path: /
@@ -42,32 +42,14 @@ spec:
                  name: {{ .Values.name }}
                  port:
                    number: {{ .Values.env.port | default 5000 }} # Port on the service to which the ingress routes traffic
----
-# ConfigMap for chatbot application
-# This ConfigMap contains the phone credential definition used by the chatbot application
-# It is mounted as a volume in the StatefulSet
-# The phone-cred-def-dev.json file is used to define the phone credential schema
-# and is loaded into the application at runtime
-# The ConfigMap is created from the file located at config/phone-cred-def-dev.json
-# The file is indented to ensure proper formatting in the ConfigMap
-# The name of the ConfigMap is defined in the values.yaml file under configMap.name
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.configMap.name }}
-  namespace: {{ .Values.namespace }}
-data:
-  phone-cred-def-dev.json: |-
-{{ .Files.Get "config/phone-cred-def-dev.json" | indent 4 }}
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
    name: {{ .Values.name }}
-   namespace: {{ .Values.namespace }}
+   namespace: {{ .Release.Namespace }}
 spec:
    serviceName: {{ .Values.name }}
-   replicas: {{ .Values.replicas }}
+   replicas: {{ default 1 .Values.replicas }}
    selector:
       matchLabels:
          app: {{ .Values.name }}
@@ -86,24 +68,14 @@ spec:
               value: "{{ .Values.env.vsAgentAdminUrl }}/v1"
             # Base URL for the Service API
             - name: PUBLIC_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
             # Base URL for the Vision Service
             - name: VISION_SERVICE_BASE_URL
-              value: "{{ .Values.env.visionUrl }}"
+              value: "{{ tpl .Values.env.visionUrl . }}"
             # Base URL for the WebRTC server
             - name: WEBRTC_SERVER_BASE_URL
-              value: "{{ .Values.env.webrtcUrl }}"
+              value: "{{ tpl .Values.env.webrtcUrl . }}"
             ports:
             -  containerPort: {{ .Values.env.port | default 5000 }}
-            # Mount the ConfigMap as a volume to replace the phone-cred-def-dev.json file
-            volumeMounts:
-              - name: {{ .Values.name }}-cred-pv
-                mountPath: /www/examples/chatbot/build/phone-cred-def-dev.json
-                subPath: phone-cred-def-dev.json
-
-         volumes:
-         - name: {{ .Values.name }}-cred-pv
-           configMap:
-             name: {{ .Values.configMap.name }}
 
 

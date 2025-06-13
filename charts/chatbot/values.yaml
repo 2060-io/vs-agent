@@ -1,44 +1,31 @@
 # This file contains the configuration values for the chatbot application deployment
+# Global configuration for the chatbot application
+global: 
+  domain: example.io # Domain for the chatbot application
+
 # General configuration
 name: chatbot-backend # Name of the chatbot backend service
-namespace: default # Namespace where the chatbot backend service is deployed
 replicas: 1 # Number of replicas for the chatbot backend service
-domain: example.io # Domain for the chatbot backend service
 env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
-  visionUrl: https://pymediasoup-demo-service.example.io # URL for the Vision Service demo
-  webrtcUrl: https://webrtc-server.example.io #
+  visionUrl: "http://webrtc-pymediasoup-client.{{ .Values.global.domain }}" # URL for the Vision Service demo
+  webrtcUrl: "https://webrtc.{{ .Values.global.domain }}" # WebRTC server URL, used for video calls and media streaming 
   port: 5000 # Port on which the chatbot backend service listens
-
-# ConfigMap configuration
-# This ConfigMap contains the phone credential definition used by the chatbot application
-configMap:
-  name: phone-cred-config
 
 # VS Agent Chart dependency configuration
 # This section defines the configuration for the VS Agent chart that is used by the chatbot application
-# It includes the agent name, namespace, replicas, domain, and other settings
 vs-agent-chart:
   enabled: false # Indicates whether the VS Agent chart is enabled
   name: chatbot # Name of the VS Agent chart
-  namespace: default # Namespace where the VS Agent is deployed
-  replicas: 1 # Number of replicas for the VS Agent service
-  domain: example.io # Domain for the VS Agent service
   didcommLabel: Chatbot Agent # Chatbot name to display on the invitation QR code
-  eventsBaseUrl: https://chatbot-backend.example.io # Base URL for the chatbot backend service
-  didcommInvitationImageUrl: https://i.unic-id-issuer.example.io/avatar.png # Image for the chatbot invitation QR code
-  # Port configuration for the VS Agent
-  adminPort: 3000 # adminPort is the port for the Agent Admin API
-  didcommPort: 3001 # Port for DIDComm
-  # Enable cors for the VS Agent
-  ingress:
-    public:
-      enableCors: true
+  eventsBaseUrl: http://chatbot-backend:5000 # Base URL for the chatbot backend service
+  didcommInvitationImageUrl: https://image.{{ .Values.global.domain }}/avatar.png # Image for the chatbot invitation QR code
+  includeAnoncredsEnv: true # Whether to include AnonCreds environment
 
   # Environment variables specific to the chatbot backend service
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://chatbot.example.io
+      value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: AGENT_WALLET_ID
