@@ -11,8 +11,10 @@ env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
   visionUrl: http://webrtc-pymediasoup-client.example.io # URL for the Vision Service demo
   # visionServiceName: webrtc-pymediasoup-client # Name of the Vision Service, used to construct the URL if not provided visionUrl
+  # only recomended if the Vision Service is not running in the same cluster
   webrtcUrl: https://webrtc.example.io # WebRTC server URL, used for video calls and media streaming 
   # webrtcServiceName: webrtc-server # Name of the WebRTC service, used to construct the URL if not provide webrtcUrl
+  # only recomended if the webrtc server is not running in the same cluster
   port: 5000 # Port on which the chatbot backend service listens
 
 # VS Agent Chart dependency configuration
