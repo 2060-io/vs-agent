@@ -24,6 +24,8 @@ vs-agent-chart:
 
   # Environment variables specific to the chatbot backend service
   extraEnv: 
+    - name: ANONCREDS_SERVICE_BASE_URL
+      value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: AGENT_WALLET_ID

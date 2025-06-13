@@ -158,16 +158,11 @@ spec:
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
               value: "did:web:{{ .Values.name }}.{{ .Values.global.domain }}"
-{{- if .Values.includeAnoncredsEnv }}
-            - name: ANONCREDS_SERVICE_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
-{{- end }}
-{{- if .Values.includePublicApiEnv }}
-            - name: PUBLIC_API_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
-{{- end }}
 {{- with .Values.extraEnv }}
-{{- toYaml . | nindent 12 }}
+{{- range . }}
+            - name: {{ .name }}
+              value: {{ tpl .value $ | quote }}
+{{- end }}
 {{- end }}
             ports:
             -  containerPort: {{ .Values.adminPort }}
