@@ -42,10 +42,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.domain }}
-      secretName: public.{{ .Values.name }}.{{ .Values.domain }}-cert
+        - {{ .Values.name }}.{{ .Values.global.domain }}
+      secretName: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
   rules:
-    - host: {{ .Values.name }}.{{ .Values.domain }}
+    - host: {{ .Values.name }}.{{ .Values.global.domain }}
       http:
         paths:
           - path: /
@@ -149,7 +149,7 @@ spec:
             imagePullPolicy: Always
             env:
             - name: AGENT_ENDPOINT
-              value: "wss://{{ .Values.name }}.{{ .Values.domain }}:443"
+              value: "wss://{{ .Values.name }}.{{ .Values.global.domain }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.didcommLabel }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -157,10 +157,10 @@ spec:
             - name: EVENTS_BASE_URL
               value: "{{ .Values.eventsBaseUrl }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ .Values.name }}.{{ .Values.domain }}"
+              value: "did:web:{{ .Values.name }}.{{ .Values.global.domain }}"
 {{- if .Values.includeAnoncredsEnv }}
             - name: ANONCREDS_SERVICE_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.domain }}"
+              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
 {{- end }}
 {{- with .Values.extraEnv }}
 {{- toYaml . | nindent 12 }}
