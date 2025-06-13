@@ -135,7 +135,7 @@ EventsModule.register({
         delay: 1000,
       },
     eventHandler: CoreService,
-    url: 'http://loaclhost',
+    url: 'http://localhost',
     imports: [],
   },
 })
