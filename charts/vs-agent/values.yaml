@@ -15,6 +15,7 @@ didcommLabel: "VS Agent"
 eventsBaseUrl: "https://events.example.io"
 didcommInvitationImageUrl: "https://example.io/invitation.png"
 includeAnoncredsEnv: false # Include AnonCreds service
+includePublicApiEnv: false # Include Public API service
 
 # DB and Redis configuration
 database:

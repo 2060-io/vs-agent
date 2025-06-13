@@ -162,6 +162,10 @@ spec:
             - name: ANONCREDS_SERVICE_BASE_URL
               value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
 {{- end }}
+{{- if .Values.includePublicApiEnv }}
+            - name: PUBLIC_API_BASE_URL
+              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
+{{- end }}
 {{- with .Values.extraEnv }}
 {{- toYaml . | nindent 12 }}
 {{- end }}
