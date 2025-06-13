@@ -106,8 +106,65 @@ Configures credential management. The following properties are available:
 
 #### `StatsOptions`
 Configures stats management. The following properties are available:
-- `imports` (optional).
+- `imports` (optional)
 - `statOptions` (optional).
+
+##### Example of Using the `StatEventModule`
+
+This example demonstrates how to configure and use the `StatEventModule` to send and process statistics using a JMS broker:
+
+- **AppModule**
+```typescript
+import { Module } from '@nestjs/common';
+import { StatEventModule } from '@2060.io/vs-agent-nestjs-client';
+
+EventsModule.register({
+  modules: {
+    ...
+    stats: true,
+  },
+  options: {
+    statOptions: {
+        host: 'jms-broker.example.com',
+        port: 61616,
+        queue: 'stats-queue', // The queue must be unique
+        username: 'admin',
+        password: 'password123',
+        reconnectLimit: 5,
+        threads: 10,
+        delay: 1000,
+      },
+    eventHandler: CoreService,
+    url: 'http://loaclhost',
+    imports: [],
+  },
+})
+```
+
+- **STAT_KPI**
+```typescript
+export enum STAT_KPI {
+  USER_CONNECTED,
+}
+```
+
+- **StatProducerService**
+After configuring the `StatEventModule`, you can inject the `StatProducerService` into your services to send statistics to the configured JMS broker:
+
+```typescript
+import { STAT_KPI } from './common'
+import { StatEnum, StatProducerService } from '@2060.io/vs-agent-nestjs-client'
+
+export class CoreService implements EventHandler, OnModuleInit {
+  constructor(
+    @InjectRepository(SessionEntity)
+    private readonly statProducer: StatProducerService,
+  ) {}
+  
+  await this.statProducer.spool(STAT_KPI.USER_CONNECTED, 'uuid', [new StatEnum(0, 'string')])
+}
+```
+
 
 #### `ModulesConfig`
 This interface defines the configuration for enabling or disabling modules:
