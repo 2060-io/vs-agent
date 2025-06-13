@@ -1,19 +1,21 @@
 import {
+  ApiClient,
+  ApiVersion,
   BaseMessage,
   Claim,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
   CredentialReceptionMessage,
+  CredentialService,
   EMrtdDataSubmitMessage,
+  EventHandler,
   MediaMessage,
   MenuSelectMessage,
   MrzDataSubmitMessage,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/vs-agent-model'
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
-import { CredentialService, EventHandler } from '@2060.io/vs-agent-nestjs-client'
+} from '@2060.io/vs-agent-nestjs-client'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'
