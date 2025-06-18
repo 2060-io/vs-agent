@@ -25,6 +25,8 @@ redis:
 
 # Enable cors for the VS Agent
 ingress:
+  host: "{{ .Values.name }}.{{ .Values.global.domain }}"
+  tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
   public:
     enableCors: true
 
