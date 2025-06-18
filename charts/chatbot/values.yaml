@@ -24,7 +24,7 @@ vs-agent-chart:
   eventsBaseUrl: http://chatbot-backend:5000 # Base URL for the chatbot backend service
   didcommInvitationImageUrl: https://image.{{ .Values.global.domain }}/avatar.png # Image for the chatbot invitation QR code
   ingress:
-    host: {{ .Values.name }}.{{ .Values.global.domain }} # Host for the vs agent service
+    host: "{{ .Values.name }}.{{ .Values.global.domain }}" # Host for the vs agent service
     tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert # TLS secret for the vs agent service
 
   # Environment variables specific to the chatbot backend service
