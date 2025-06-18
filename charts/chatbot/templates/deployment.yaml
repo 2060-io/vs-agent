@@ -69,7 +69,7 @@ spec:
               value: "{{ .Values.env.vsAgentAdminUrl }}/v1"
             # Base URL for the Service API
             - name: PUBLIC_BASE_URL
-              value: "https://{{ .Values.ingress.host }}"
+              value: "https://{{ tpl .Values.ingress.host . }}"
             # Base URL for the Vision Service
             - name: VISION_SERVICE_BASE_URL
               value: "{{ tpl .Values.env.visionUrl . }}"
