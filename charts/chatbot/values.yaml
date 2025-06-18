@@ -7,7 +7,7 @@ global:
 name: chatbot-backend # Name of the chatbot backend service
 replicas: 1 # Number of replicas for the chatbot backend service
 ingress:
-  host: {{ .Values.name }}.{{ .Values.global.domain }}
+  host: "{{ .Values.name }}.{{ .Values.global.domain }}"
   tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
 env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
