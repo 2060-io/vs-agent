@@ -6,6 +6,9 @@ global:
 # General configuration
 name: chatbot-backend # Name of the chatbot backend service
 replicas: 1 # Number of replicas for the chatbot backend service
+ingress:
+  host: {{ .Values.name }}.{{ .Values.global.domain }}
+  tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
 env:
   vsAgentAdminUrl: http://chatbot:3000 # URL for the VS Agent Admin API
   visionUrl: "http://webrtc-pymediasoup-client.{{ .Values.global.domain }}" # URL for the Vision Service demo
@@ -20,6 +23,9 @@ vs-agent-chart:
   didcommLabel: Chatbot Agent # Chatbot name to display on the invitation QR code
   eventsBaseUrl: http://chatbot-backend:5000 # Base URL for the chatbot backend service
   didcommInvitationImageUrl: https://image.{{ .Values.global.domain }}/avatar.png # Image for the chatbot invitation QR code
+  ingress:
+    host: {{ .Values.name }}.{{ .Values.global.domain }} # Host for the vs agent service
+    tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert # TLS secret for the vs agent service
 
   # Environment variables specific to the chatbot backend service
   extraEnv: 
