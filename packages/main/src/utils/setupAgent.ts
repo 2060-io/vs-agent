@@ -2,7 +2,6 @@ import {
   ConnectionEventTypes,
   ConnectionStateChangedEvent,
   convertPublicKeyToX25519,
-  DidCommV1Service,
   DidDocumentBuilder,
   DidDocumentRole,
   DidDocumentService,
@@ -10,12 +9,13 @@ import {
   DidRecord,
   DidRepository,
   HttpOutboundTransport,
+  JsonTransformer,
   KeyType,
   LogLevel,
   TypedArrayEncoder,
   utils,
   WalletConfig,
-} from '@credo-ts/core'
+  Buffer} from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
 import express from 'express'
@@ -157,10 +157,10 @@ export const setupAgent = async ({
 
     // Create a set of keys suitable for did communication
     if (endpoints && endpoints.length > 0) {
-      const verificationMethodId = `${publicDid}#verkey`
       const keyAgreementId = `${publicDid}#key-agreement-1`
-
+      
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
+      const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
         convertPublicKeyToX25519(TypedArrayEncoder.fromBase58(ed25519.publicKeyBase58)),
       )
@@ -183,17 +183,21 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
+        .addService(
+          new DidDocumentService({
+            id: `${publicDid}#vpr-schemas-trust-registry-1234`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            type: 'VerifiablePublicRegistry',
+          })
+        )
 
       for (let i = 0; i < agent.config.endpoints.length; i++) {
         builder.addService(
-          new DidCommV1Service({
-            id: `${publicDid}#did-communication`,
-            serviceEndpoint: agent.config.endpoints[i],
-            priority: i,
-            routingKeys: [], // TODO: Support mediation
-            recipientKeys: [keyAgreementId],
-            accept: ['didcomm/aip2;env=rfc19'],
-          }),
+          new DidDocumentService({
+            id: `${publicDid}#vpr-schemas-${i}`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            type: 'LinkedVerifiablePresentation',
+          })
         )
       }
 
@@ -206,7 +210,25 @@ export const setupAgent = async ({
           }),
         )
       }
+      const documentToSign = JsonTransformer.toJSON(builder.build())
+      const documentBytes = new TextEncoder().encode(JSON.stringify(documentToSign))
+
+      const signature = await agent.context.wallet.sign({
+        data: Buffer.from(documentBytes),
+        key: ed25519,
+      })
+      const signedDocument = {
+        ...documentToSign,
+        proof: {
+          type: 'Ed25519Signature2018',
+          created: new Date().toISOString(),
+          verificationMethod: verificationMethodId,
+          proofPurpose: 'assertionMethod',
+          proofValue: TypedArrayEncoder.toBase58(signature)
+        }
+      }
     }
+
 
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
     if (existingRecord) {
