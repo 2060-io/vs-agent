@@ -15,7 +15,8 @@ import {
   TypedArrayEncoder,
   utils,
   WalletConfig,
-  Buffer} from '@credo-ts/core'
+  Buffer,
+} from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
 import express from 'express'
@@ -158,7 +159,7 @@ export const setupAgent = async ({
     // Create a set of keys suitable for did communication
     if (endpoints && endpoints.length > 0) {
       const keyAgreementId = `${publicDid}#key-agreement-1`
-      
+
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
       const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
@@ -188,7 +189,7 @@ export const setupAgent = async ({
             id: `${publicDid}#vpr-schemas-trust-registry-1234`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}`,
             type: 'VerifiablePublicRegistry',
-          })
+          }),
         )
 
       for (let i = 0; i < agent.config.endpoints.length; i++) {
@@ -197,14 +198,14 @@ export const setupAgent = async ({
             id: `${publicDid}#vpr-ecs-service-c-vp`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-service-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
-          })
+          }),
         )
         builder.addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-org-c-vp`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-org-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
-          })
+          }),
         )
       }
 
@@ -231,11 +232,10 @@ export const setupAgent = async ({
           created: new Date().toISOString(),
           verificationMethod: verificationMethodId,
           proofPurpose: 'assertionMethod',
-          proofValue: TypedArrayEncoder.toBase58(signature)
-        }
+          proofValue: TypedArrayEncoder.toBase58(signature),
+        },
       }
     }
-
 
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
     if (existingRecord) {

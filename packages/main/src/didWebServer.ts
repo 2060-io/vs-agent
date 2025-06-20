@@ -7,6 +7,15 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
+import {
+  ClaimFormat,
+  DidRepository,
+  JsonTransformer,
+  VerificationMethod,
+  W3cCredential,
+  W3cCredentialSubject,
+  W3cJsonLdSignCredentialOptions,
+} from '@credo-ts/core'
 import cors from 'cors'
 import { createHash } from 'crypto'
 import express from 'express'
@@ -14,7 +23,6 @@ import fs from 'fs'
 import multer, { diskStorage } from 'multer'
 
 import { VsAgent } from './utils/VsAgent'
-import { ClaimFormat, DidRepository, JsonTransformer, KeyType, VerificationMethod, W3cCredential, W3cCredentialSubject, W3cJsonLdSignCredentialOptions, W3cJsonLdVerifiableCredential, W3cPresentation } from '@credo-ts/core'
 
 export const startDidWebServer = async (agent: VsAgent, config: DidWebServerConfig) => {
   const app = config.app ?? express()
@@ -283,22 +291,22 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           degree: {
             type: 'BachelorDegree',
             name: 'Ingeniería de Sistemas',
-            university: 'Universidad de Ejemplo'
-          }
-        }
+            university: 'Universidad de Ejemplo',
+          },
+        },
       }
 
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
-          'https://www.w3.org/2018/credentials/examples/v1'
+          'https://www.w3.org/2018/credentials/examples/v1',
         ],
         id: agent.did,
         type: ['VerifiableCredential', 'UniversityDegreeCredential'],
         issuer: 'did:example:issuer456',
         issuanceDate: new Date().toISOString(),
         expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
-        credentialSubject
+        credentialSubject,
       })
       const didRepository = agent.context.dependencyManager.resolve(DidRepository)
       const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
@@ -306,13 +314,14 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         format: ClaimFormat.LdpVc,
         credential: unsignedCredential,
         proofType: 'Ed25519Signature2018',
-        verificationMethod: JsonTransformer.fromJSON(verificationMethod?.didDocument?.verificationMethod?.[0], VerificationMethod).id,
+        verificationMethod: JsonTransformer.fromJSON(
+          verificationMethod?.didDocument?.verificationMethod?.[0],
+          VerificationMethod,
+        ).id,
         challenge: 'challenge-' + Date.now(),
-        domain: 'example.com'
+        domain: 'example.com',
       } as W3cJsonLdSignCredentialOptions)
 
-
-      
       res.setHeader('Content-Type', 'application/json')
       res.send(signedCredential)
     })
@@ -329,22 +338,22 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           degree: {
             type: 'BachelorDegree',
             name: 'Ingeniería de Sistemas',
-            university: 'Universidad de Ejemplo'
-          }
-        }
+            university: 'Universidad de Ejemplo',
+          },
+        },
       }
 
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
-          'https://www.w3.org/2018/credentials/examples/v1'
+          'https://www.w3.org/2018/credentials/examples/v1',
         ],
         id: agent.did,
         type: ['VerifiableCredential', 'UniversityDegreeCredential'],
         issuer: 'did:example:issuer456',
         issuanceDate: new Date().toISOString(),
         expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
-        credentialSubject
+        credentialSubject,
       })
       const didRepository = agent.context.dependencyManager.resolve(DidRepository)
       const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
@@ -352,13 +361,14 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         format: ClaimFormat.LdpVc,
         credential: unsignedCredential,
         proofType: 'Ed25519Signature2018',
-        verificationMethod: JsonTransformer.fromJSON(verificationMethod?.didDocument?.verificationMethod?.[0], VerificationMethod).id,
+        verificationMethod: JsonTransformer.fromJSON(
+          verificationMethod?.didDocument?.verificationMethod?.[0],
+          VerificationMethod,
+        ).id,
         challenge: 'challenge-' + Date.now(),
-        domain: 'example.com'
+        domain: 'example.com',
       } as W3cJsonLdSignCredentialOptions)
 
-
-      
       res.setHeader('Content-Type', 'application/json')
       res.send(signedCredential)
     })
