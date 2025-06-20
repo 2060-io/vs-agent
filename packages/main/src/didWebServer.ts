@@ -14,6 +14,7 @@ import fs from 'fs'
 import multer, { diskStorage } from 'multer'
 
 import { VsAgent } from './utils/VsAgent'
+import { ClaimFormat, DidRepository, JsonTransformer, KeyType, VerificationMethod, W3cCredential, W3cCredentialSubject, W3cJsonLdSignCredentialOptions, W3cJsonLdVerifiableCredential, W3cPresentation } from '@credo-ts/core'
 
 export const startDidWebServer = async (agent: VsAgent, config: DidWebServerConfig) => {
   const app = config.app ?? express()
@@ -269,5 +270,97 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         res.status(200).end()
       },
     )
+
+    // Create a Verifiable Presentation for ECS Service
+    // TODO: It's only for testing purposes, remove it later
+    app.get('/ecs-service-c-vp.json', async (req, res) => {
+      agent.config.logger.info(`ECS Service C VP requested`)
+      const credentialSubject: W3cCredentialSubject = {
+        id: 'did:example:subject123',
+        claims: {
+          name: 'Juan Pérez',
+          email: 'juan.perez@example.com',
+          degree: {
+            type: 'BachelorDegree',
+            name: 'Ingeniería de Sistemas',
+            university: 'Universidad de Ejemplo'
+          }
+        }
+      }
+
+      const unsignedCredential = new W3cCredential({
+        context: [
+          'https://www.w3.org/2018/credentials/v1',
+          'https://www.w3.org/2018/credentials/examples/v1'
+        ],
+        id: agent.did,
+        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+        issuer: 'did:example:issuer456',
+        issuanceDate: new Date().toISOString(),
+        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
+        credentialSubject
+      })
+      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+      const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
+      const signedCredential = await agent.w3cCredentials.signCredential({
+        format: ClaimFormat.LdpVc,
+        credential: unsignedCredential,
+        proofType: 'Ed25519Signature2018',
+        verificationMethod: JsonTransformer.fromJSON(verificationMethod?.didDocument?.verificationMethod?.[0], VerificationMethod).id,
+        challenge: 'challenge-' + Date.now(),
+        domain: 'example.com'
+      } as W3cJsonLdSignCredentialOptions)
+
+
+      
+      res.setHeader('Content-Type', 'application/json')
+      res.send(signedCredential)
+    })
+
+    // Create a Verifiable Presentation for ECS Org
+    // TODO: It's only for testing purposes, remove it later
+    app.get('/ecs-org-c-vp.json', async (req, res) => {
+      agent.config.logger.info(`ECS ORG C VP requested`)
+      const credentialSubject: W3cCredentialSubject = {
+        id: 'did:example:subject123',
+        claims: {
+          name: 'Juan Pérez',
+          email: 'juan.perez@example.com',
+          degree: {
+            type: 'BachelorDegree',
+            name: 'Ingeniería de Sistemas',
+            university: 'Universidad de Ejemplo'
+          }
+        }
+      }
+
+      const unsignedCredential = new W3cCredential({
+        context: [
+          'https://www.w3.org/2018/credentials/v1',
+          'https://www.w3.org/2018/credentials/examples/v1'
+        ],
+        id: agent.did,
+        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+        issuer: 'did:example:issuer456',
+        issuanceDate: new Date().toISOString(),
+        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
+        credentialSubject
+      })
+      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+      const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
+      const signedCredential = await agent.w3cCredentials.signCredential({
+        format: ClaimFormat.LdpVc,
+        credential: unsignedCredential,
+        proofType: 'Ed25519Signature2018',
+        verificationMethod: JsonTransformer.fromJSON(verificationMethod?.didDocument?.verificationMethod?.[0], VerificationMethod).id,
+        challenge: 'challenge-' + Date.now(),
+        domain: 'example.com'
+      } as W3cJsonLdSignCredentialOptions)
+
+
+      
+      res.setHeader('Content-Type', 'application/json')
+      res.send(signedCredential)
+    })
   }
 }

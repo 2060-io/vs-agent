@@ -186,7 +186,7 @@ export const setupAgent = async ({
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-schemas-trust-registry-1234`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}`,
             type: 'VerifiablePublicRegistry',
           })
         )
@@ -194,8 +194,15 @@ export const setupAgent = async ({
       for (let i = 0; i < agent.config.endpoints.length; i++) {
         builder.addService(
           new DidDocumentService({
-            id: `${publicDid}#vpr-schemas-${i}`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            id: `${publicDid}#vpr-ecs-service-c-vp`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-service-c-vp.json`,
+            type: 'LinkedVerifiablePresentation',
+          })
+        )
+        builder.addService(
+          new DidDocumentService({
+            id: `${publicDid}#vpr-ecs-org-c-vp`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-org-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           })
         )
