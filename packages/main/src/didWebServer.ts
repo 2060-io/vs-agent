@@ -16,6 +16,8 @@ import {
   W3cCredentialSchema,
   W3cCredentialSubject,
   W3cJsonLdSignCredentialOptions,
+  W3cJsonLdSignPresentationOptions,
+  W3cPresentation,
 } from '@credo-ts/core'
 import cors from 'cors'
 import { createHash } from 'crypto'
@@ -382,8 +384,27 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           domain: 'example.com',
         } as W3cJsonLdSignCredentialOptions)
 
+        const unsignedPresentation = new W3cPresentation({
+          context: ['https://www.w3.org/2018/credentials/v1'],
+          id: agent.did,
+          type: ['VerifiablePresentation'],
+          holder: agent.did,
+          verifiableCredential: [signedCredential],
+        })
+        const signedPresentation = await agent.w3cCredentials.signPresentation({
+          format: ClaimFormat.LdpVp,
+          presentation: unsignedPresentation,
+          proofType: 'Ed25519Signature2018',
+          verificationMethod: JsonTransformer.fromJSON(
+            verificationMethod?.didDocument?.verificationMethod?.[0],
+            VerificationMethod,
+          ).id,
+          challenge: 'challenge-' + Date.now(),
+          domain: 'example.com',
+        } as W3cJsonLdSignPresentationOptions)
+
         res.setHeader('Content-Type', 'application/json')
-        res.send(signedCredential)
+        res.send(signedPresentation)
       })
     }
   }
