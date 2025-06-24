@@ -364,7 +364,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           credentialSubject: {
             id: credentialSubject.id,
             claims: addDigestSRI(credentialSubject.claims!),
-          }
+          },
         })
         unsignedCredential.credentialSchema = addDigestSRI(credentialSchema)
 

@@ -9,13 +9,11 @@ import {
   DidRecord,
   DidRepository,
   HttpOutboundTransport,
-  JsonTransformer,
   KeyType,
   LogLevel,
   TypedArrayEncoder,
   utils,
   WalletConfig,
-  Buffer,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
@@ -218,23 +216,26 @@ export const setupAgent = async ({
           }),
         )
       }
-      const documentToSign = JsonTransformer.toJSON(builder.build())
-      const documentBytes = new TextEncoder().encode(JSON.stringify(documentToSign))
 
-      const signature = await agent.context.wallet.sign({
-        data: Buffer.from(documentBytes),
-        key: ed25519,
-      })
-      const signedDocument = {
-        ...documentToSign,
-        proof: {
-          type: 'Ed25519Signature2018',
-          created: new Date().toISOString(),
-          verificationMethod: verificationMethodId,
-          proofPurpose: 'assertionMethod',
-          proofValue: TypedArrayEncoder.toBase58(signature),
-        },
-      }
+      // TODO: Fix this when the signing of did:web documents is implemented
+
+      // const documentToSign = JsonTransformer.toJSON(builder.build())
+      // const documentBytes = new TextEncoder().encode(JSON.stringify(documentToSign))
+
+      // const signature = await agent.context.wallet.sign({
+      //   data: Buffer.from(documentBytes),
+      //   key: ed25519,
+      // })
+      // const signedDocument = {
+      //   ...documentToSign,
+      //   proof: {
+      //     type: 'Ed25519Signature2018',
+      //     created: new Date().toISOString(),
+      //     verificationMethod: verificationMethodId,
+      //     proofPurpose: 'assertionMethod',
+      //     proofValue: TypedArrayEncoder.toBase58(signature),
+      //   },
+      // }
     }
 
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
