@@ -24,6 +24,7 @@ import { createHash } from 'crypto'
 import express from 'express'
 import fs from 'fs'
 import multer, { diskStorage } from 'multer'
+import path from 'path'
 
 import { VsAgent } from './utils/VsAgent'
 
@@ -342,11 +343,11 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       'ECS SERVICE',
       ['VerifiableCredential', 'JsonSchemaCredential'],
       {
-        id: 'vpr:verana:mainnet/cs/v1/js/12345678',
+        id: `${anoncredsBaseUrl}/mainnet/cs/v1/js/12345671`,
         claims: {
           type: 'JsonSchema',
           jsonSchema: {
-            $ref: 'vpr:verana:mainnet/cs/v1/js/12345678',
+            $ref: `${anoncredsBaseUrl}/mainnet/cs/v1/js/12345671`,
           },
         },
       },
@@ -364,11 +365,11 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       'ECS ORG C',
       ['VerifiableCredential', 'JsonSchemaCredential'],
       {
-        id: 'vpr:verana:mainnet/cs/v1/js/12345678',
+        id: `${anoncredsBaseUrl}/mainnet/cs/v1/js/12345672`,
         claims: {
           type: 'JsonSchema',
           jsonSchema: {
-            $ref: 'vpr:verana:mainnet/cs/v1/js/12345678',
+            $ref: `${anoncredsBaseUrl}/mainnet/cs/v1/js/12345672`,
           },
         },
       },
@@ -465,5 +466,43 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           )
       })
     }
+
+    app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
+      const schemaMap: Record<string, string> = {
+        '12345671': 'ecs-service',
+        '12345672': 'ecs-org',
+      }
+      try {
+        const schemaKey = schemaMap[req.params.schemaId]
+
+        if (!schemaKey) {
+          return res.status(404).json({ error: 'Schema not found' })
+        }
+
+        const filePath = path.join(__dirname, '../../../../', 'public', 'data.json')
+        const module = await import(filePath)
+        const ecsSchema = module[schemaKey]
+
+        res.json({
+          id: 101,
+          tr_id: 1002,
+          created: '2024-03-12T12:00:00Z',
+          modified: '2024-03-12T12:30:00Z',
+          archived: '',
+          deposit: 5000,
+          json_schema: JSON.stringify(ecsSchema),
+          issuer_grantor_validation_validity_period: 365,
+          verifier_grantor_validation_validity_period: 180,
+          issuer_validation_validity_period: 730,
+          verifier_validation_validity_period: 90,
+          holder_validation_validity_period: 60,
+          issuer_perm_management_mode: 'STRICT',
+          verifier_perm_management_mode: 'FLEXIBLE',
+        })
+      } catch (error) {
+        agent.config.logger.error(`Error loading schema file: ${error.message}`)
+        res.status(500).json({ error: 'Failed to load schema' })
+      }
+    })
   }
 }
