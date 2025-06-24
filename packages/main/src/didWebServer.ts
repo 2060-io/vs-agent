@@ -287,6 +287,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
     registerVerifiableCredentialEndpoint(
       '/ecs-service-c-vp.json',
       'ECS Service C',
+      ['VerifiableCredential', 'VerifiableTrustCredential'],
       {
         id: 'did:example:subject123',
         claims: {
@@ -304,14 +305,16 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       app,
       agent,
       {
-        id: 'did:example:subject123',
-        type: 'JsonSchema',
+        id: `${anoncredsBaseUrl}/schemas-example-service.json`,
+        type: 'JsonSchemaCredential',
       },
+      true,
     )
 
     registerVerifiableCredentialEndpoint(
       '/ecs-org-c-vp.json',
       'ECS ORG C',
+      ['VerifiableCredential', 'VerifiableTrustCredential'],
       {
         id: 'did:example:university123',
         claims: {
@@ -327,11 +330,58 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       app,
       agent,
       {
-        id: 'did:example:subject123',
-        type: 'JsonSchema',
+        id: `${anoncredsBaseUrl}/schemas-example-org.json`,
+        type: 'JsonSchemaCredential',
       },
+      true,
     )
 
+    // Verifiable JsonSchemaCredential
+    registerVerifiableCredentialEndpoint(
+      '/schemas-example-service.json',
+      'ECS SERVICE',
+      ['VerifiableCredential', 'JsonSchemaCredential'],
+      {
+        id: 'vpr:verana:mainnet/cs/v1/js/12345678',
+        claims: {
+          type: 'JsonSchema',
+          jsonSchema: {
+            $ref: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          },
+        },
+      },
+      app,
+      agent,
+      {
+        id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
+        type: 'JsonSchema',
+      },
+      false,
+    )
+
+    registerVerifiableCredentialEndpoint(
+      '/schemas-example-org.json',
+      'ECS ORG C',
+      ['VerifiableCredential', 'JsonSchemaCredential'],
+      {
+        id: 'vpr:verana:mainnet/cs/v1/js/12345678',
+        claims: {
+          type: 'JsonSchema',
+          jsonSchema: {
+            $ref: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          },
+        },
+      },
+      app,
+      agent,
+      {
+        id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
+        type: 'JsonSchema',
+      },
+      false,
+    )
+
+    // TODO: remove testing functions
     function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
       const hash = createHash(algorithm).update(content).digest('base64')
       return `${algorithm}-${hash}`
@@ -345,10 +395,12 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
     function registerVerifiableCredentialEndpoint(
       path: string,
       logTag: string,
+      type: string[],
       credentialSubject: W3cCredentialSubject,
       app: express.Application,
       agent: VsAgent,
       credentialSchema: W3cCredentialSchema,
+      isPresentation: boolean,
     ) {
       app.get(path, async (req, res) => {
         agent.config.logger.info(`${logTag} VP requested`)
@@ -359,7 +411,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
             'https://www.w3.org/2018/credentials/examples/v1',
           ],
           id: agent.did,
-          type: ['VerifiableCredential', 'JsonSchemaCredential'],
+          type,
           issuer: 'did:example:issuer456',
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
@@ -404,7 +456,13 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         } as W3cJsonLdSignPresentationOptions)
 
         res.setHeader('Content-Type', 'application/json')
-        res.send(signedPresentation)
+        if (isPresentation) res.send(signedPresentation)
+        else
+          res.send(
+            Array.isArray(signedPresentation.verifiableCredential)
+              ? signedPresentation.verifiableCredential.map((v: any) => v.jsonCredential)
+              : signedPresentation.verifiableCredential.jsonCredential,
+          )
       })
     }
   }
