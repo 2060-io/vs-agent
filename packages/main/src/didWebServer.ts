@@ -13,6 +13,7 @@ import {
   JsonTransformer,
   VerificationMethod,
   W3cCredential,
+  W3cCredentialSchema,
   W3cCredentialSubject,
   W3cJsonLdSignCredentialOptions,
 } from '@credo-ts/core'
@@ -281,96 +282,107 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
 
     // Create a Verifiable Presentation for ECS Service
     // TODO: It's only for testing purposes, remove it later
-    app.get('/ecs-service-c-vp.json', async (req, res) => {
-      agent.config.logger.info(`ECS Service C VP requested`)
-      const credentialSubject: W3cCredentialSubject = {
+    registerVerifiableCredentialEndpoint(
+      '/ecs-service-c-vp.json',
+      'ECS Service C',
+      {
         id: 'did:example:subject123',
         claims: {
-          name: 'Juan Pérez',
-          email: 'juan.perez@example.com',
-          degree: {
-            type: 'BachelorDegree',
-            name: 'Ingeniería de Sistemas',
-            university: 'Universidad de Ejemplo',
-          },
+          name: 'Student Health Portal',
+          type: 'WEB_PORTAL',
+          description: 'Portal to access physical and mental health services for students.',
+          logo: 'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
+          minimumAgeRequired: 16,
+          termsAndConditions: 'https://university.edu.co/Health-portal/terms',
+          termsAndConditionsHash: 'sha256-YWJjZGVmMTIzNDU2Nzg5MA==',
+          privacyPolicy: 'https://university.edu.co/Health-portal/privacity',
+          privacyPolicyHash: 'sha256-ZXl6amdoa2xtbnByc3R1dnd4eXo=',
         },
-      }
-
-      const unsignedCredential = new W3cCredential({
-        context: [
-          'https://www.w3.org/2018/credentials/v1',
-          'https://www.w3.org/2018/credentials/examples/v1',
-        ],
-        id: agent.did,
-        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-        issuer: 'did:example:issuer456',
-        issuanceDate: new Date().toISOString(),
-        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
-        credentialSubject,
-      })
-      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-      const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
-      const signedCredential = await agent.w3cCredentials.signCredential({
-        format: ClaimFormat.LdpVc,
-        credential: unsignedCredential,
-        proofType: 'Ed25519Signature2018',
-        verificationMethod: JsonTransformer.fromJSON(
-          verificationMethod?.didDocument?.verificationMethod?.[0],
-          VerificationMethod,
-        ).id,
-        challenge: 'challenge-' + Date.now(),
-        domain: 'example.com',
-      } as W3cJsonLdSignCredentialOptions)
-
-      res.setHeader('Content-Type', 'application/json')
-      res.send(signedCredential)
-    })
-
-    // Create a Verifiable Presentation for ECS Org
-    // TODO: It's only for testing purposes, remove it later
-    app.get('/ecs-org-c-vp.json', async (req, res) => {
-      agent.config.logger.info(`ECS ORG C VP requested`)
-      const credentialSubject: W3cCredentialSubject = {
+      },
+      app,
+      agent,
+      {
         id: 'did:example:subject123',
+        type: 'JsonSchema',
+      },
+    )
+
+    registerVerifiableCredentialEndpoint(
+      '/ecs-org-c-vp.json',
+      'ECS ORG C',
+      {
+        id: 'did:example:university123',
         claims: {
-          name: 'Juan Pérez',
-          email: 'juan.perez@example.com',
-          degree: {
-            type: 'BachelorDegree',
-            name: 'Ingeniería de Sistemas',
-            university: 'Universidad de Ejemplo',
-          },
+          name: 'National University of Technology',
+          logo: 'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
+          registryId: 'UNI-NT-2025',
+          registryUrl: 'https://registry.education.ma.us/massachusetts-institute-of-technology',
+          address: '77 Massachusetts Ave, Cambridge, MA 02139, United States',
+          type: 'PUBLIC',
+          countryCode: 'CO',
         },
+      },
+      app,
+      agent,
+      {
+        id: 'did:example:subject123',
+        type: 'JsonSchema',
+      },
+    )
+
+    function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
+      const hash = createHash(algorithm).update(content).digest('base64')
+      return `${algorithm}-${hash}`
+    }
+    function addDigestSRI<T extends object>(data: T): T & { digestSRI: string } {
+      return {
+        ...data,
+        digestSRI: generateDigestSRI(JSON.stringify(data)),
       }
+    }
+    function registerVerifiableCredentialEndpoint(
+      path: string,
+      logTag: string,
+      credentialSubject: W3cCredentialSubject,
+      app: express.Application,
+      agent: VsAgent,
+      credentialSchema: W3cCredentialSchema,
+    ) {
+      app.get(path, async (req, res) => {
+        agent.config.logger.info(`${logTag} VP requested`)
 
-      const unsignedCredential = new W3cCredential({
-        context: [
-          'https://www.w3.org/2018/credentials/v1',
-          'https://www.w3.org/2018/credentials/examples/v1',
-        ],
-        id: agent.did,
-        type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-        issuer: 'did:example:issuer456',
-        issuanceDate: new Date().toISOString(),
-        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
-        credentialSubject,
+        const unsignedCredential = new W3cCredential({
+          context: [
+            'https://www.w3.org/2018/credentials/v1',
+            'https://www.w3.org/2018/credentials/examples/v1',
+          ],
+          id: agent.did,
+          type: ['VerifiableCredential', 'JsonSchemaCredential'],
+          issuer: 'did:example:issuer456',
+          issuanceDate: new Date().toISOString(),
+          expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
+          credentialSubject,
+        })
+        unsignedCredential.credentialSubject = addDigestSRI(credentialSubject)
+        unsignedCredential.credentialSchema = addDigestSRI(credentialSchema)
+
+        const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+        const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
+        const signedCredential = await agent.w3cCredentials.signCredential({
+          format: ClaimFormat.LdpVc,
+          credential: unsignedCredential,
+          proofType: 'Ed25519Signature2018',
+          verificationMethod: JsonTransformer.fromJSON(
+            verificationMethod?.didDocument?.verificationMethod?.[0],
+            VerificationMethod,
+          ).id,
+          challenge: 'challenge-' + Date.now(),
+          domain: 'example.com',
+        } as W3cJsonLdSignCredentialOptions)
+
+        res.setHeader('Content-Type', 'application/json')
+        res.send(signedCredential)
       })
-      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-      const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
-      const signedCredential = await agent.w3cCredentials.signCredential({
-        format: ClaimFormat.LdpVc,
-        credential: unsignedCredential,
-        proofType: 'Ed25519Signature2018',
-        verificationMethod: JsonTransformer.fromJSON(
-          verificationMethod?.didDocument?.verificationMethod?.[0],
-          VerificationMethod,
-        ).id,
-        challenge: 'challenge-' + Date.now(),
-        domain: 'example.com',
-      } as W3cJsonLdSignCredentialOptions)
-
-      res.setHeader('Content-Type', 'application/json')
-      res.send(signedCredential)
-    })
+    }
   }
 }
