@@ -360,10 +360,12 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: 'did:example:issuer456',
           issuanceDate: new Date().toISOString(),
-          expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año
-          credentialSubject,
+          expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          credentialSubject: {
+            id: credentialSubject.id,
+            claims: addDigestSRI(credentialSubject.claims!),
+          }
         })
-        unsignedCredential.credentialSubject = addDigestSRI(credentialSubject)
         unsignedCredential.credentialSchema = addDigestSRI(credentialSchema)
 
         const didRepository = agent.context.dependencyManager.resolve(DidRepository)
