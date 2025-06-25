@@ -285,7 +285,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
 
     // Create a Verifiable Presentation for ECS Service
     // TODO: It's only for testing purposes, remove it later
-    registerVerifiableCredentialEndpoint(
+    registerVerifiablePresentationEndpoint(
       '/ecs-service-c-vp.json',
       'ECS Service C',
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -309,10 +309,9 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         id: `${anoncredsBaseUrl}/schemas-example-service.json`,
         type: 'JsonSchemaCredential',
       },
-      true,
     )
 
-    registerVerifiableCredentialEndpoint(
+    registerVerifiablePresentationEndpoint(
       '/ecs-org-c-vp.json',
       'ECS ORG C',
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -334,7 +333,6 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         id: `${anoncredsBaseUrl}/schemas-example-org.json`,
         type: 'JsonSchemaCredential',
       },
-      true,
     )
 
     // Verifiable JsonSchemaCredential
@@ -357,7 +355,6 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
         type: 'JsonSchema',
       },
-      false,
     )
 
     registerVerifiableCredentialEndpoint(
@@ -379,7 +376,6 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
         type: 'JsonSchema',
       },
-      false,
     )
 
     // TODO: remove testing functions
@@ -413,7 +409,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       app: express.Application,
       agent: VsAgent,
       credentialSchema: W3cCredentialSchema,
-      isPresentation: boolean,
+      presentation?: W3cPresentation,
     ) {
       app.get(path, async (req, res) => {
         agent.config.logger.info(`${logTag} VP requested`)
@@ -429,11 +425,13 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           issuanceDate: new Date().toISOString(),
           expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           credentialSubject: {
-            id: credentialSubject.id,
-            claims: addDigestSRI(credentialSubject.claims!),
+            id: subjectId,
+            claims: presentation ? claims : await addDigestSRI(subjectId, claims),
           },
         })
-        unsignedCredential.credentialSchema = addDigestSRI(credentialSchema)
+        unsignedCredential.credentialSchema = presentation
+          ? credentialSchema
+          : await addDigestSRI(credentialSchema.id, credentialSchema)
 
         const didRepository = agent.context.dependencyManager.resolve(DidRepository)
         const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
@@ -449,29 +447,51 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
           domain: 'example.com',
         } as W3cJsonLdSignCredentialOptions)
 
-        const unsignedPresentation = new W3cPresentation({
-          context: ['https://www.w3.org/2018/credentials/v1'],
-          id: agent.did,
-          type: ['VerifiablePresentation'],
-          holder: agent.did,
-          verifiableCredential: [signedCredential],
-        })
-        const signedPresentation = await agent.w3cCredentials.signPresentation({
-          format: ClaimFormat.LdpVp,
-          presentation: unsignedPresentation,
-          proofType: 'Ed25519Signature2018',
-          verificationMethod: JsonTransformer.fromJSON(
-            verificationMethod?.didDocument?.verificationMethod?.[0],
-            VerificationMethod,
-          ).id,
-          challenge: 'challenge-' + Date.now(),
-          domain: 'example.com',
-        } as W3cJsonLdSignPresentationOptions)
-
         res.setHeader('Content-Type', 'application/json')
-        if (isPresentation) res.send(signedPresentation)
-        else res.send(signedCredential.jsonCredential)
+        if (presentation) {
+          presentation.verifiableCredential = [signedCredential]
+          const signedPresentation = await agent.w3cCredentials.signPresentation({
+            format: ClaimFormat.LdpVp,
+            presentation,
+            proofType: 'Ed25519Signature2018',
+            verificationMethod: JsonTransformer.fromJSON(
+              verificationMethod?.didDocument?.verificationMethod?.[0],
+              VerificationMethod,
+            ).id,
+            challenge: 'challenge-' + Date.now(),
+            domain: 'example.com',
+          } as W3cJsonLdSignPresentationOptions)
+          res.send(signedPresentation)
+        } else res.send(signedCredential.jsonCredential)
       })
+    }
+
+    function registerVerifiablePresentationEndpoint(
+      path: string,
+      logTag: string,
+      type: string[],
+      subject: W3cCredentialSubject,
+      app: express.Application,
+      agent: VsAgent,
+      credentialSchema: W3cCredentialSchema,
+    ) {
+      const presentation = new W3cPresentation({
+        context: ['https://www.w3.org/2018/credentials/v1'],
+        id: agent.did,
+        type: ['VerifiablePresentation'],
+        holder: agent.did,
+        verifiableCredential: [],
+      })
+      registerVerifiableCredentialEndpoint(
+        path,
+        logTag,
+        type,
+        subject,
+        app,
+        agent,
+        credentialSchema,
+        presentation,
+      )
     }
 
     app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
