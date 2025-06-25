@@ -14,6 +14,7 @@ services:
     environment:
       - AGENT_ENDPOINT=ws://10.82.14.7:3001
       - AGENT_INVITATION_IMAGE_URL=http://10.82.14.7:3001/avatar.png
+      - PUBLIC_API_BASE_URL=http://10.82.14.7:3001
       - AGENT_LABEL=Chatbot Agent
       - USE_CORS=true
       - EVENTS_BASE_URL=http://chatbot-backend:5000

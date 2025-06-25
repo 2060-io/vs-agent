@@ -5,6 +5,7 @@
     "baseUrl": "."
   },
   "include": [
+    "apps",
     "packages",
     "./.eslintrc.js",
     "./jest.config.ts",
