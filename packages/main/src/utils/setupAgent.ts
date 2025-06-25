@@ -184,8 +184,8 @@ export const setupAgent = async ({
         .addKeyAgreement(keyAgreementId)
         .addService(
           new DidDocumentService({
-            id: `${publicDid}#vpr-schemas-trust-registry-1234`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}`,
+            id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+            serviceEndpoint: `${anoncredsServiceBaseUrl}/invitation`,
             type: 'VerifiablePublicRegistry',
           }),
         )
