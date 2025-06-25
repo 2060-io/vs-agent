@@ -458,12 +458,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
 
         res.setHeader('Content-Type', 'application/json')
         if (isPresentation) res.send(signedPresentation)
-        else
-          res.send(
-            Array.isArray(signedPresentation.verifiableCredential)
-              ? signedPresentation.verifiableCredential.map((v: any) => v.jsonCredential)
-              : signedPresentation.verifiableCredential.jsonCredential,
-          )
+        else res.send(signedCredential.jsonCredential)
       })
     }
 
