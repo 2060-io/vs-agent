@@ -384,7 +384,9 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
 
     // TODO: remove testing functions
     function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
-      const hash = createHash(algorithm).update(content).digest('base64')
+      const hash = createHash(algorithm)
+        .update(JSON.stringify(JSON.parse(content)), 'utf8')
+        .digest('base64')
       return `${algorithm}-${hash}`
     }
     function addDigestSRI<T extends object>(data: T): T & { digestSRI: string } {
