@@ -409,7 +409,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       path: string,
       logTag: string,
       type: string[],
-      credentialSubject: W3cCredentialSubject,
+      { id: subjectId, claims }: W3cCredentialSubject,
       app: express.Application,
       agent: VsAgent,
       credentialSchema: W3cCredentialSchema,
@@ -509,6 +509,20 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       } catch (error) {
         agent.config.logger.error(`Error loading schema file: ${error.message}`)
         res.status(500).json({ error: 'Failed to load schema' })
+      }
+    })
+
+    app.get('/perm/v1/find_with_did', (req, res) => {
+      const did = req.query.did as string
+      if (!did) {
+        return res.status(400).json({ error: 'Missing required "did" query parameter.' })
+      }
+
+      try {
+        res.json({ type: 'ISSUER' })
+      } catch (err) {
+        console.error('Error in findWithDid:', err)
+        res.status(500).json({ error: 'Internal server error.' })
       }
     })
   }
