@@ -389,12 +389,22 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         .digest('base64')
       return `${algorithm}-${hash}`
     }
-    function addDigestSRI<T extends object>(data: T): T & { digestSRI: string } {
+
+    async function addDigestSRI<T extends object>(id?: string, data?: T): Promise<T & { digestSRI: string }> {
+      if (!id || !data) {
+        throw new Error(`id and data has requiered`)
+      }
+      const response = await fetch(id)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}`)
+      }
+      const schemaContent = await response.text()
       return {
         ...data,
-        digestSRI: generateDigestSRI(JSON.stringify(data)),
+        digestSRI: generateDigestSRI(schemaContent),
       }
     }
+
     function registerVerifiableCredentialEndpoint(
       path: string,
       logTag: string,
