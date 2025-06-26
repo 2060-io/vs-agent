@@ -14,6 +14,7 @@ import {
 } from '@credo-ts/core'
 import { createHash } from 'crypto'
 import express from 'express'
+import * as fs from 'fs'
 import path from 'path'
 
 import { VsAgent } from './utils/VsAgent'
@@ -253,9 +254,8 @@ export const addVerreWebRoutes = async (
         return res.status(404).json({ error: 'Schema not found' })
       }
 
-      const filePath = path.join(__dirname, '../../../../', 'public', 'data.json')
-      const module = await import(filePath)
-      const ecsSchema = module[schemaKey]
+      const data = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
+      const ecsSchema = data[schemaKey]
 
       res.json({
         id: 101,
