@@ -153,40 +153,7 @@ export const addVerreWebRoutes = async (
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
-      if (!claims) {
-        const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
-        // Default data example
-        if (record?.content) {
-          claims = record.content
-        } else {
-          claims = {
-            id: agent.did,
-            claims:
-              logTag === 'ecs-service'
-                ? {
-                    name: 'Health Portal',
-                    type: 'WEB_PORTAL',
-                    description: 'Some description',
-                    logo: 'base64string',
-                    minimumAgeRequired: 18,
-                    termsAndConditions: 'https://example.com/terms',
-                    termsAndConditionsHash: 'hash',
-                    privacyPolicy: 'https://example.com/privacy',
-                    privacyPolicyHash: 'hash',
-                  }
-                : {
-                    name: 'University Name',
-                    logo: 'base64string',
-                    registryId: 'ID-123',
-                    registryUrl: 'https://example.com/registry',
-                    address: 'Some address',
-                    type: 'PUBLIC',
-                    countryCode: 'CO',
-                  },
-          }
-        }
-      }
-
+      if (!claims) claims = await getClaims(agent, { id: subjectId },logTag)
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
@@ -237,6 +204,50 @@ export const addVerreWebRoutes = async (
         res.send(signedPresentation)
       } else res.send(signedCredential.jsonCredential)
     })
+  }
+
+  /**
+   * Retrieves claims (attributes) for a verifiable credential based on a `subjectId` and a `logTag`.
+   *
+   * - If a corresponding generic record exists, its content is returned.
+   * - If not, default claims are returned depending on the value of `logTag`.
+   *
+   * @param agent - An instance of `VsAgent` used to query generic records.
+   * @param subject - A `W3cCredentialSubject` object containing the subject `id`.
+   * @param logTag - A string tag used to identify the type of credential (e.g., 'ecs-service').
+   *
+   * @returns An object containing the credential claims, to be used as the `credentialSubject` in a verifiable credential.
+   */
+  async function getClaims(
+    agent: VsAgent,
+    { id: subjectId }: W3cCredentialSubject,
+    logTag: string
+  ) {
+    const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`);
+    if (record?.content) return record.content;
+
+    if (logTag === 'ecs-service') {
+      return {
+        name: 'Health Portal',
+        type: 'WEB_PORTAL',
+        description: 'Some description',
+        logo: 'base64string',
+        minimumAgeRequired: 18,
+        termsAndConditions: 'https://example.com/terms',
+        termsAndConditionsHash: 'hash',
+        privacyPolicy: 'https://example.com/privacy',
+        privacyPolicyHash: 'hash',
+      };
+    }
+    return {
+      name: 'University Name',
+      logo: 'base64string',
+      registryId: 'ID-123',
+      registryUrl: 'https://example.com/registry',
+      address: 'Some address',
+      type: 'PUBLIC',
+      countryCode: 'CO',
+    };
   }
 
   // Function to Create a Presentation
