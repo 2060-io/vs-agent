@@ -1,7 +1,7 @@
 `@2060.io/vs-agent-client`
 
 # VS Agent Client
-**VS Agent Client** is a TypeScript library designed to simplify the interaction with **VS Agent** (`@2060.io/vs-agent-main`). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
+**VS Agent Client** is a TypeScript library designed to simplify the interaction with [**VS Agent**](https://github.com/2060-io/vs-agent). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
 
 This package ensures that the client stays updated with the latest API versioning of the **VS Agent** to maintain compatibility with evolving endpoints.
 
@@ -14,7 +14,7 @@ This package ensures that the client stays updated with the latest API versionin
 ## Repository
 Find the public repository here: [VS Agent](../../README.md)
 
-## How to work
+## How it works
 ```plantuml
 @startuml
 

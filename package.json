@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build": "pnpm -r --workspace-concurrency=1 --sort run build",
-    "start": "pnpm --filter @2060.io/vs-agent-main start",
-    "start:dev": "pnpm --filter @2060.io/vs-agent-main start:dev",
+    "start": "pnpm --filter @2060.io/vs-agent start",
+    "start:dev": "pnpm --filter @2060.io/vs-agent start:dev",
     "start:chatbot": "pnpm --filter 2060-demo-chatbot start",
     "start:verifier": "pnpm --filter 2060-demo-verifier start",
     "start:nestjsvs": "pnpm --filter nestjs-vs start",

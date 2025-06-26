@@ -7,9 +7,9 @@ This package provides the data models used by **VS Agent** and its related servi
 
 The models in this package are used by the following services and libraries:
 
-- **[@2060.io/vs-agent-main](../../README.md)** – The core VS Agent.
+- **[@2060.io/vs-agent](../../apps/vs-agent/README.md)** – VS Agent.
 - **[@2060.io/vs-agent-nestjs-client](../nestjs-client/README.md)** – A NestJS client for interacting with VS Agent.
-- **[@2060.io/vs-agent-client](../client/README.md)** – A general-purpose api client for VS Agent.
+- **[@2060.io/vs-agent-client](../client/README.md)** – A general-purpose API client for VS Agent.
 
 
 ## Usage

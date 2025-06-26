@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "@2060.io/vs-agent-client": ["packages/client/src"],
-      "@2060.io/vs-agent-main": ["packages/main/src"],
+      "@2060.io/vs-agent": ["apps/main/src"],
       "@2060.io/vs-agent-model": ["packages/model/src"],
       "@2060.io/vs-agent-nestjs-client": ["packages/nestjs-client/src"],
     },
