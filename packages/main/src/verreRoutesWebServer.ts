@@ -12,13 +12,16 @@ import {
   W3cJsonLdSignPresentationOptions,
   W3cPresentation,
 } from '@credo-ts/core'
+import Ajv from 'ajv/dist/2020'
+import addFormats from 'ajv-formats'
 import { createHash } from 'crypto'
 import express from 'express'
 import * as fs from 'fs'
-import path from 'path'
+import * as path from 'path'
 
 import { VsAgent } from './utils/VsAgent'
 
+const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
 export const addVerreWebRoutes = async (
   app: express.Express,
   agent: VsAgent,
@@ -27,24 +30,10 @@ export const addVerreWebRoutes = async (
   // Create a Verifiable Presentation for ECS Service
   // TODO: It's only for testing purposes, remove it later
   // Verifiable JsonSchemaCredential
-  registerVerifiablePresentationEndpoint(
+  await registerVerifiablePresentationEndpoint(
     '/ecs-service-c-vp.json',
-    'ECS Service C',
+    'ecs-service',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
-    {
-      id: 'did:example:subject123',
-      claims: {
-        name: 'Student Health Portal',
-        type: 'WEB_PORTAL',
-        description: 'Portal to access physical and mental health services for students.',
-        logo: 'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
-        minimumAgeRequired: 18,
-        termsAndConditions: 'https://university.edu.co/Health-portal/terms',
-        termsAndConditionsHash: 'sha256-YWJjZGVmMTIzNDU2Nzg5MA==',
-        privacyPolicy: 'https://university.edu.co/Health-portal/privacity',
-        privacyPolicyHash: 'sha256-ZXl6amdoa2xtbnByc3R1dnd4eXo=',
-      },
-    },
     app,
     agent,
     {
@@ -54,22 +43,10 @@ export const addVerreWebRoutes = async (
   )
 
   // Verifiable JsonSchemaCredential
-  registerVerifiablePresentationEndpoint(
+  await registerVerifiablePresentationEndpoint(
     '/ecs-org-c-vp.json',
-    'ECS ORG C',
+    'ecs-org',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
-    {
-      id: 'did:example:university123',
-      claims: {
-        name: 'National University of Technology',
-        logo: 'iVBORw0KGgoAAAANSUhEUgAAAAUA...',
-        registryId: 'UNI-NT-2025',
-        registryUrl: 'https://registry.education.ma.us/massachusetts-institute-of-technology',
-        address: '77 Massachusetts Ave, Cambridge, MA 02139, United States',
-        type: 'PUBLIC',
-        countryCode: 'CO',
-      },
-    },
     app,
     agent,
     {
@@ -159,6 +136,40 @@ export const addVerreWebRoutes = async (
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
+      if (!claims) {
+        const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
+        // Default data example
+        if (record?.content) {
+          claims = record.content
+        } else {
+          claims = {
+            id: agent.did,
+            claims:
+              logTag === 'ecs-service'
+                ? {
+                    name: 'Health Portal',
+                    type: 'WEB_PORTAL',
+                    description: 'Some description',
+                    logo: 'base64string',
+                    minimumAgeRequired: 18,
+                    termsAndConditions: 'https://example.com/terms',
+                    termsAndConditionsHash: 'hash',
+                    privacyPolicy: 'https://example.com/privacy',
+                    privacyPolicyHash: 'hash',
+                  }
+                : {
+                    name: 'University Name',
+                    logo: 'base64string',
+                    registryId: 'ID-123',
+                    registryUrl: 'https://example.com/registry',
+                    address: 'Some address',
+                    type: 'PUBLIC',
+                    countryCode: 'CO',
+                  },
+          }
+        }
+      }
+
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
@@ -213,11 +224,10 @@ export const addVerreWebRoutes = async (
 
   // Function to Create a Presentation
   // this function call credential endpoint
-  function registerVerifiablePresentationEndpoint(
+  async function registerVerifiablePresentationEndpoint(
     path: string,
     logTag: string,
     type: string[],
-    subject: W3cCredentialSubject,
     app: express.Application,
     agent: VsAgent,
     credentialSchema: W3cCredentialSchema,
@@ -233,7 +243,7 @@ export const addVerreWebRoutes = async (
       path,
       logTag,
       type,
-      subject,
+      { id: agent.did },
       app,
       agent,
       credentialSchema,
@@ -253,9 +263,7 @@ export const addVerreWebRoutes = async (
       if (!schemaKey) {
         return res.status(404).json({ error: 'Schema not found' })
       }
-
-      const data = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
-      const ecsSchema = data[schemaKey]
+      const ecsSchema = ecsSchemas[schemaKey]
 
       res.json({
         id: 101,
@@ -276,6 +284,48 @@ export const addVerreWebRoutes = async (
     } catch (error) {
       agent.config.logger.error(`Error loading schema file: ${error.message}`)
       res.status(500).json({ error: 'Failed to load schema' })
+    }
+  })
+
+  app.post('/upload/:schemaId', async (req, res) => {
+    const ecsSchema = ecsSchemas[req.params.schemaId]
+    try {
+      if (!ecsSchema) {
+        return res.status(404).json({ error: 'Schema not defined in data.json' })
+      }
+
+      const ajv = new Ajv({ strict: false })
+      addFormats(ajv)
+      const validate = ajv.compile(ecsSchema.properties.credentialSubject)
+      const isValid = validate({ ...req.body, id: agent.did })
+      if (!isValid) {
+        return res.status(400).json({
+          error: 'Invalid data',
+          details: validate.errors?.map(e => ({
+            message: e.message,
+            path: e.instancePath,
+            keyword: e.keyword,
+            params: e.params,
+          })),
+        })
+      }
+
+      const recordId = `${agent.did}-${req.params.schemaId}`
+      try {
+        const existing = await agent.genericRecords.findById(recordId)
+        if (existing) {
+          await agent.genericRecords.delete(existing)
+        }
+      } catch (err) {}
+
+      await agent.genericRecords.save({
+        id: recordId,
+        content: req.body,
+      })
+      return res.status(200).json({ message: 'Data is valid and accepted' })
+    } catch (error) {
+      console.error(`Error validating data: ${error.message}`)
+      return res.status(500).json({ error: 'Internal Server Error' })
     }
   })
 
