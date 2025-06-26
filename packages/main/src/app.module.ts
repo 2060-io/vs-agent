@@ -18,6 +18,7 @@ import { HandledRedisModule } from './modules/redis.module'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { VsAgentService } from './services/VsAgentService'
 import { VsAgent } from './utils/VsAgent'
+import { SdkController } from './controllers/sdk/sdkController'
 
 @Module({})
 export class VsAgentModule {
@@ -33,6 +34,7 @@ export class VsAgentModule {
         PresentationsController,
         InvitationController,
         QrController,
+        SdkController,
         VCAuthNController,
       ],
       providers: [
