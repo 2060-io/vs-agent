@@ -1,18 +1,18 @@
 /**
  * @file verreRoutesWebServer.ts
- * 
+ *
  * @description
  * This module defines temporary HTTP endpoints for testing and development purposes
  * related to Verifiable Credentials and Presentations (W3C VC/VP) using JSON Schema.
- * 
+ *
  * The routes include:
  * - Endpoints to issue example credentials and presentations.
  * - Endpoints to retrieve and validate JSON Schemas.
  * - Endpoints to upload and validate credential data.
  * - Utilities for SRI (Subresource Integrity) calculation.
- * 
+ *
  * ⚠️ WARNING: This file is for development/testing only and should be removed before deploying to production.
- * 
+ *
  * @todo Remove this file and its functions before production.
  */
 import 'reflect-metadata'
@@ -153,7 +153,7 @@ export const addVerreWebRoutes = async (
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
-      if (!claims) claims = await getClaims(agent, { id: subjectId },logTag)
+      if (!claims) claims = await getClaims(agent, { id: subjectId }, logTag)
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
@@ -218,13 +218,9 @@ export const addVerreWebRoutes = async (
    *
    * @returns An object containing the credential claims, to be used as the `credentialSubject` in a verifiable credential.
    */
-  async function getClaims(
-    agent: VsAgent,
-    { id: subjectId }: W3cCredentialSubject,
-    logTag: string
-  ) {
-    const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`);
-    if (record?.content) return record.content;
+  async function getClaims(agent: VsAgent, { id: subjectId }: W3cCredentialSubject, logTag: string) {
+    const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
+    if (record?.content) return record.content
 
     if (logTag === 'ecs-service') {
       return {
@@ -237,7 +233,7 @@ export const addVerreWebRoutes = async (
         termsAndConditionsHash: 'hash',
         privacyPolicy: 'https://example.com/privacy',
         privacyPolicyHash: 'hash',
-      };
+      }
     }
     return {
       name: 'University Name',
@@ -247,7 +243,7 @@ export const addVerreWebRoutes = async (
       address: 'Some address',
       type: 'PUBLIC',
       countryCode: 'CO',
-    };
+    }
   }
 
   // Function to Create a Presentation
