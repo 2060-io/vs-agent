@@ -500,7 +500,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       )
     }
 
-    // GET Function to Retrieve JSON Schemas 
+    // GET Function to Retrieve JSON Schemas
     app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
       const schemaMap: Record<string, string> = {
         '12345671': 'ecs-service',
