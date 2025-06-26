@@ -2,6 +2,7 @@ import {
   ConnectionEventTypes,
   ConnectionStateChangedEvent,
   convertPublicKeyToX25519,
+  DidCommV1Service,
   DidDocumentBuilder,
   DidDocumentRole,
   DidDocumentService,
@@ -23,13 +24,13 @@ import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
+import { addVerreWebRoutes } from '../verreRoutesWebServer'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
-import { addVerreWebRoutes } from '../verreRoutesWebServer'
 
 export const setupAgent = async ({
   port,
@@ -191,20 +192,30 @@ export const setupAgent = async ({
             type: 'VerifiablePublicRegistry',
           }),
         )
-
-      for (let i = 0; i < agent.config.endpoints.length; i++) {
-        builder.addService(
+        .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-service-c-vp`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-service-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           }),
         )
-        builder.addService(
+        .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-org-c-vp`,
             serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-org-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
+          }),
+        )
+
+      for (let i = 0; i < agent.config.endpoints.length; i++) {
+        builder.addService(
+          new DidCommV1Service({
+            id: `${publicDid}#did-communication`,
+            serviceEndpoint: agent.config.endpoints[i],
+            priority: i,
+            routingKeys: [], // TODO: Support mediation
+            recipientKeys: [keyAgreementId],
+            accept: ['didcomm/aip2;env=rfc19'],
           }),
         )
       }

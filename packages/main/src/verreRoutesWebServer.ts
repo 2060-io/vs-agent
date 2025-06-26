@@ -18,7 +18,11 @@ import path from 'path'
 
 import { VsAgent } from './utils/VsAgent'
 
-export const addVerreWebRoutes = async (app: express.Express, agent: VsAgent, veranaBaseUrl: string = 'http://localhost:3001') => {
+export const addVerreWebRoutes = async (
+  app: express.Express,
+  agent: VsAgent,
+  veranaBaseUrl: string = 'http://localhost:3001',
+) => {
   // Create a Verifiable Presentation for ECS Service
   // TODO: It's only for testing purposes, remove it later
   // Verifiable JsonSchemaCredential
