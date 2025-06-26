@@ -1,5 +1,7 @@
 /**
  * @file verreRoutesWebServer.ts
+ * This file is for development/testing only. Do not use in production.
+ * All endpoints and logic here are temporary and should be removed before release.
  *
  * @description
  * This module defines temporary HTTP endpoints for testing and development purposes
@@ -15,6 +17,7 @@
  *
  * @todo Remove this file and its functions before production.
  */
+
 import 'reflect-metadata'
 
 import {
@@ -38,7 +41,12 @@ import * as path from 'path'
 
 import { VsAgent } from './utils/VsAgent'
 
+// Load schemas from data.json at startup (used for schema validation and mock responses)
 const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
+const ajv = new Ajv({ strict: false })
+addFormats(ajv)
+
+// Main function to add all test routes to the Express app
 export const addVerreWebRoutes = async (
   app: express.Express,
   agent: VsAgent,
@@ -47,6 +55,7 @@ export const addVerreWebRoutes = async (
   // Create a Verifiable Presentation for ECS Service
   // TODO: It's only for testing purposes, remove it later
   // Verifiable JsonSchemaCredential
+  // Register endpoints for example Verifiable Presentations (for testing only)
   await registerVerifiablePresentationEndpoint(
     '/ecs-service-c-vp.json',
     'ecs-service',
@@ -60,6 +69,7 @@ export const addVerreWebRoutes = async (
   )
 
   // Verifiable JsonSchemaCredential
+  // Register endpoints for example Verifiable Presentations (for testing only)
   await registerVerifiablePresentationEndpoint(
     '/ecs-org-c-vp.json',
     'ecs-org',
@@ -73,16 +83,17 @@ export const addVerreWebRoutes = async (
   )
 
   // Verifiable JsonSchema
+  // Register endpoints for example Verifiable Credential (for testing only)
   registerVerifiableCredentialEndpoint(
     '/schemas-example-service.json',
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${veranaBaseUrl}/mainnet/cs/v1/js/12345671`,
+      id: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/12345671`,
+          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-service`,
         },
       },
     },
@@ -95,16 +106,17 @@ export const addVerreWebRoutes = async (
   )
 
   // Verifiable JsonSchema
+  // Register endpoints for example Verifiable Credential (for testing only)
   registerVerifiableCredentialEndpoint(
     '/schemas-example-org.json',
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${veranaBaseUrl}/mainnet/cs/v1/js/12345672`,
+      id: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/12345672`,
+          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-org`,
         },
       },
     },
@@ -277,17 +289,12 @@ export const addVerreWebRoutes = async (
 
   // GET Function to Retrieve JSON Schemas
   app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
-    const schemaMap: Record<string, string> = {
-      '12345671': 'ecs-service',
-      '12345672': 'ecs-org',
-    }
     try {
-      const schemaKey = schemaMap[req.params.schemaId]
-
-      if (!schemaKey) {
+      const { schemaId } = req.params
+      if (!schemaId) {
         return res.status(404).json({ error: 'Schema not found' })
       }
-      const ecsSchema = ecsSchemas[schemaKey]
+      const ecsSchema = ecsSchemas[schemaId]
 
       res.json({
         id: 101,
@@ -318,8 +325,6 @@ export const addVerreWebRoutes = async (
         return res.status(404).json({ error: 'Schema not defined in data.json' })
       }
 
-      const ajv = new Ajv({ strict: false })
-      addFormats(ajv)
       const validate = ajv.compile(ecsSchema.properties.credentialSubject)
       const isValid = validate({ ...req.body, id: agent.did })
       if (!isValid) {
