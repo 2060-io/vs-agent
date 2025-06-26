@@ -79,7 +79,7 @@ jobs:
       - name: Build Docker image
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
  
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.semantic.outputs.new-release-published == 'true'

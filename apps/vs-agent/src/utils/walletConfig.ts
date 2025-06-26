@@ -1,4 +1,4 @@
-import type { AskarWalletPostgresStorageConfig } from '@credo-ts/askar/build/wallet'
+import type { AskarWalletPostgresStorageConfig } from '@credo-ts/askar'
 
 import { KeyDerivationMethod } from '@credo-ts/core'
 

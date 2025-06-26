@@ -28,13 +28,13 @@ import {
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'
+import { existsSync } from 'fs'
+import { readFile, writeFile } from 'fs/promises'
 import fetch from 'node-fetch'
 import path from 'path'
 import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
-import { readFile, writeFile } from 'fs/promises'
-import { existsSync } from 'fs'
 
 const logger = new Logger()
 

@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/vs-agent-main",
+  "name": "@2060.io/vs-agent",
   "main": "build/index",
   "types": "build/index",
   "private": true,
