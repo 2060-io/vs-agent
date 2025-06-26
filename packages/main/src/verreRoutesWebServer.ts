@@ -1,3 +1,20 @@
+/**
+ * @file verreRoutesWebServer.ts
+ * 
+ * @description
+ * This module defines temporary HTTP endpoints for testing and development purposes
+ * related to Verifiable Credentials and Presentations (W3C VC/VP) using JSON Schema.
+ * 
+ * The routes include:
+ * - Endpoints to issue example credentials and presentations.
+ * - Endpoints to retrieve and validate JSON Schemas.
+ * - Endpoints to upload and validate credential data.
+ * - Utilities for SRI (Subresource Integrity) calculation.
+ * 
+ * ⚠️ WARNING: This file is for development/testing only and should be removed before deploying to production.
+ * 
+ * @todo Remove this file and its functions before production.
+ */
 import 'reflect-metadata'
 
 import {
