@@ -29,6 +29,7 @@ import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
+import { addVerreWebRoutes } from '../verreRoutesWebServer'
 
 export const setupAgent = async ({
   port,
@@ -107,6 +108,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
+  addVerreWebRoutes(app, agent, process.env.PUBLIC_API_BASE_URL)
 
   addInvitationRoutes(app, agent)
 
@@ -216,26 +218,6 @@ export const setupAgent = async ({
           }),
         )
       }
-
-      // TODO: Fix this when the signing of did:web documents is implemented
-
-      // const documentToSign = JsonTransformer.toJSON(builder.build())
-      // const documentBytes = new TextEncoder().encode(JSON.stringify(documentToSign))
-
-      // const signature = await agent.context.wallet.sign({
-      //   data: Buffer.from(documentBytes),
-      //   key: ed25519,
-      // })
-      // const signedDocument = {
-      //   ...documentToSign,
-      //   proof: {
-      //     type: 'Ed25519Signature2018',
-      //     created: new Date().toISOString(),
-      //     verificationMethod: verificationMethodId,
-      //     proofPurpose: 'assertionMethod',
-      //     proofValue: TypedArrayEncoder.toBase58(signature),
-      //   },
-      // }
     }
 
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
