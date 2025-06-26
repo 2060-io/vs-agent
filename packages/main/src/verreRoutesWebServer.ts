@@ -318,6 +318,38 @@ export const addVerreWebRoutes = async (
     }
   })
 
+  /**
+   * POST /upload/:schemaId
+   *
+   * Upload and validate credential data against the JSON schema defined in data.json.
+   *
+   * Usage:
+   *   - :schemaId must be either "ecs-service" or "ecs-org" (as defined in data.json).
+   *   - The request body should be a JSON object matching the schema at data.json > [schemaId] > properties > credentialSubject.
+   *   - The "id" field is automatically set to the agent's DID.
+   *
+   * Example using curl:
+   *
+   *   curl -X POST http://localhost:3001/upload/ecs-service \
+   *     -H "Content-Type: application/json" \
+   *     -d '{
+   *       "name": "Health Portal",
+   *       "type": "WEB_PORTAL",
+   *       "description": "Some description",
+   *       "logo": "base64string",
+   *       "minimumAgeRequired": 18,
+   *       "termsAndConditions": "https://example.com/terms",
+   *       "termsAndConditionsHash": "hash",
+   *       "privacyPolicy": "https://example.com/privacy",
+   *       "privacyPolicyHash": "hash"
+   *     }'
+   *
+   * Responses:
+   *   - 200 OK: Data is valid and accepted.
+   *   - 400 Bad Request: Data is invalid according to the schema.
+   *   - 404 Not Found: schemaId does not exist in data.json.
+   *   - 500 Internal Server Error: Unexpected error.
+   */
   app.post('/upload/:schemaId', async (req, res) => {
     const ecsSchema = ecsSchemas[req.params.schemaId]
     try {
