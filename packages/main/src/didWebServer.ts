@@ -285,6 +285,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
 
     // Create a Verifiable Presentation for ECS Service
     // TODO: It's only for testing purposes, remove it later
+    // Verifiable JsonSchemaCredential
     registerVerifiablePresentationEndpoint(
       '/ecs-service-c-vp.json',
       'ECS Service C',
@@ -311,6 +312,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       },
     )
 
+    // Verifiable JsonSchemaCredential
     registerVerifiablePresentationEndpoint(
       '/ecs-org-c-vp.json',
       'ECS ORG C',
@@ -335,7 +337,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       },
     )
 
-    // Verifiable JsonSchemaCredential
+    // Verifiable JsonSchema
     registerVerifiableCredentialEndpoint(
       '/schemas-example-service.json',
       'ECS SERVICE',
@@ -357,6 +359,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       },
     )
 
+    // Verifiable JsonSchema
     registerVerifiableCredentialEndpoint(
       '/schemas-example-org.json',
       'ECS ORG C',
@@ -401,6 +404,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       }
     }
 
+    // Function to Create a Credential Endpoint
     function registerVerifiableCredentialEndpoint(
       path: string,
       logTag: string,
@@ -466,6 +470,8 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       })
     }
 
+    // Function to Create a Presentation
+    // this function call credential endpoint
     function registerVerifiablePresentationEndpoint(
       path: string,
       logTag: string,
@@ -494,6 +500,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       )
     }
 
+    // GET Function to Retrieve JSON Schemas 
     app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
       const schemaMap: Record<string, string> = {
         '12345671': 'ecs-service',
@@ -532,6 +539,7 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
       }
     })
 
+    // This function retrieve issuer permission for testing
     app.get('/perm/v1/find_with_did', (req, res) => {
       const did = req.query.did as string
       if (!did) {
