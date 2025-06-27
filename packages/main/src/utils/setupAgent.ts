@@ -112,7 +112,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
-  addSelfVtrRoutes(app, agent, publicApiBaseUrl)
+  if (process.env.SELF_VTR_ENABLED === 'true') addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -188,27 +188,30 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-            serviceEndpoint: `${publicApiBaseUrl}/.well-known/did.json`,
-            type: 'VerifiablePublicRegistry',
-          }),
-        )
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-service-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
-            type: 'LinkedVerifiablePresentation',
-          }),
-        )
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-org-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
-            type: 'LinkedVerifiablePresentation',
-          }),
-        )
+      if (process.env.SELF_VTR_ENABLED === 'true') {
+        builder
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+              serviceEndpoint: `${publicApiBaseUrl}/.well-known/did.json`,
+              type: 'VerifiablePublicRegistry',
+            }),
+          )
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-service-c-vp`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
+              type: 'LinkedVerifiablePresentation',
+            }),
+          )
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-org-c-vp`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
+              type: 'LinkedVerifiablePresentation',
+            }),
+          )
+      }
 
       for (let i = 0; i < agent.config.endpoints.length; i++) {
         builder.addService(
