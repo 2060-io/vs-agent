@@ -1,7 +1,7 @@
 /**
  * @file verreRoutesWebServer.ts
- * This file is for development/testing only. Do not use in production.
- * All endpoints and logic here are temporary and should be removed before release.
+ * This file is for testing only.
+ * All endpoints and logic here are temporary.
  *
  * @description
  * This module defines temporary HTTP endpoints for testing and development purposes
@@ -13,9 +13,7 @@
  * - Endpoints to upload and validate credential data.
  * - Utilities for SRI (Subresource Integrity) calculation.
  *
- * ⚠️ WARNING: This file is for development/testing only and should be removed before deploying to production.
- *
- * @todo Remove this file and its functions before production.
+ * @todo Once the TSR has been implemented, remove this self-validation.
  */
 
 import 'reflect-metadata'
@@ -123,7 +121,6 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     },
   )
 
-  // TODO: remove testing functions
   function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
     const hash = createHash(algorithm)
       .update(JSON.stringify(JSON.parse(content)), 'utf8')
