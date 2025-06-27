@@ -53,7 +53,6 @@ export const addVerreWebRoutes = async (
   veranaBaseUrl: string = 'http://localhost:3001',
 ) => {
   // Create a Verifiable Presentation for ECS Service
-  // TODO: It's only for testing purposes, remove it later
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations (for testing only)
   await registerVerifiablePresentationEndpoint(
