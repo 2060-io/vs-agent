@@ -52,13 +52,13 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/ecs-service-c-vp.json',
+    '/self-vtr/ecs-service-c-vp.json',
     'ecs-service',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/schemas-example-service.json`,
+      id: `${publicApiBaseUrl}/self-vtr/schemas-example-service.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -66,13 +66,13 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/ecs-org-c-vp.json',
+    '/self-vtr/ecs-org-c-vp.json',
     'ecs-org',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/schemas-example-org.json`,
+      id: `${publicApiBaseUrl}/self-vtr/schemas-example-org.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -80,15 +80,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/schemas-example-service.json',
+    '/self-vtr/schemas-example-service.json',
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-service`,
+      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-service`,
+          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
         },
       },
     },
@@ -103,15 +103,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/schemas-example-org.json',
+    '/self-vtr/schemas-example-org.json',
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-org`,
+      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-org`,
+          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
         },
       },
     },
@@ -283,7 +283,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   }
 
   // GET Function to Retrieve JSON Schemas
-  app.get('/mainnet/cs/v1/js/:schemaId', async (req, res) => {
+  app.get('/self-vtr/cs/v1/js/:schemaId', async (req, res) => {
     try {
       const { schemaId } = req.params
       if (!schemaId) {
@@ -345,7 +345,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
    *   - 404 Not Found: schemaId does not exist in data.json.
    *   - 500 Internal Server Error: Unexpected error.
    */
-  app.post('/upload/:schemaId', async (req, res) => {
+  app.post('/self-vtr/upload/:schemaId', async (req, res) => {
     const ecsSchema = ecsSchemas[req.params.schemaId]
     try {
       if (!ecsSchema) {
@@ -386,7 +386,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   })
 
   // This function retrieve issuer permission for testing
-  app.get('/perm/v1/find_with_did', (req, res) => {
+  app.get('/self-vtr/perm/v1/find_with_did', (req, res) => {
     const did = req.query.did as string
     if (!did) {
       return res.status(400).json({ error: 'Missing required "did" query parameter.' })

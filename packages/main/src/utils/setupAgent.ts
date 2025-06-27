@@ -198,14 +198,14 @@ export const setupAgent = async ({
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-service-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/ecs-service-c-vp.json`,
+            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           }),
         )
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-org-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/ecs-org-c-vp.json`,
+            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           }),
         )
