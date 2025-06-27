@@ -50,7 +50,7 @@ addFormats(ajv)
 export const addVerreWebRoutes = async (
   app: express.Express,
   agent: VsAgent,
-  veranaBaseUrl: string = 'http://localhost:3001',
+  publicApiBaseUrl: string = 'http://localhost:3001',
 ) => {
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
