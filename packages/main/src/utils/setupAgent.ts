@@ -41,6 +41,7 @@ export const setupAgent = async ({
   logLevel,
   anoncredsServiceBaseUrl,
   publicApiBaseUrl,
+  selfVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
   enableWs,
@@ -55,6 +56,7 @@ export const setupAgent = async ({
   logLevel?: LogLevel
   anoncredsServiceBaseUrl?: string
   publicApiBaseUrl: string
+  selfVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
   enableWs?: boolean
@@ -112,7 +114,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
-  if (process.env.SELF_VTR_ENABLED === 'true') addSelfVtrRoutes(app, agent, publicApiBaseUrl)
+  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -188,7 +190,7 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
-      if (process.env.SELF_VTR_ENABLED === 'true') {
+      if (selfVtrEnabled) {
         builder
           .addService(
             new DidDocumentService({
