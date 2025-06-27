@@ -187,7 +187,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
           verificationMethod?.didDocument?.verificationMethod?.[0],
           VerificationMethod,
         ).id,
-        challenge: 'challenge-' + Date.now(),
+        challenge: 'challenge',
         domain: 'example.com',
       } as W3cJsonLdSignCredentialOptions)
 
@@ -202,7 +202,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
             verificationMethod?.didDocument?.verificationMethod?.[0],
             VerificationMethod,
           ).id,
-          challenge: 'challenge-' + Date.now(),
+          challenge: 'challenge',
           domain: 'example.com',
         } as W3cJsonLdSignPresentationOptions)
         res.send(signedPresentation)
