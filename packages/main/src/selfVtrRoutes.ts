@@ -310,6 +310,11 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     }
   })
 
+  // Heathcheck
+  app.get('/self-vtr', (req, res) => {
+    res.status(200).json({ status: 'ok' })
+  })
+
   /**
    * POST /upload/:schemaId
    *

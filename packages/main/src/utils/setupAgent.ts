@@ -193,7 +193,7 @@ export const setupAgent = async ({
           .addService(
             new DidDocumentService({
               id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-              serviceEndpoint: `${publicApiBaseUrl}/.well-known/did.json`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr`,
               type: 'VerifiablePublicRegistry',
             }),
           )
