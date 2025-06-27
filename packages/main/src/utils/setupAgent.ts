@@ -109,7 +109,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
-  addVerreWebRoutes(app, agent, process.env.PUBLIC_API_BASE_URL)
+  addSelfVtrRoutes(app, agent, process.env.PUBLIC_API_BASE_URL)
 
   addInvitationRoutes(app, agent)
 
