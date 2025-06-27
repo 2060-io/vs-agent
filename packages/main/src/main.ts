@@ -87,6 +87,8 @@ const run = async () => {
         ? Boolean(process.env.ENABLE_WS === 'true' || process.env.ENABLE_WS === '1')
         : true,
     anoncredsServiceBaseUrl: process.env.ANONCREDS_SERVICE_BASE_URL,
+    publicApiBaseUrl: process.env.PUBLIC_API_BASE_URL || 'http://localhost:3001',
+    selfVtrEnabled: process.env.SELF_VTR_ENABLED === 'true',
     autoDiscloseUserProfile: Boolean(process.env.USER_PROFILE_AUTODISCLOSE === 'true'),
   })
 

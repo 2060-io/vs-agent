@@ -401,6 +401,12 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.0
         version: 1.5.5
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.17.1)
       axios:
         specifier: ^1.7.9
         version: 1.9.0
@@ -2572,6 +2578,14 @@ packages:
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+
+  ajv-formats@3.0.1:
+    resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
     peerDependencies:
       ajv: ^8.0.0
     peerDependenciesMeta:
@@ -9810,6 +9824,10 @@ snapshots:
       ajv: 8.12.0
 
   ajv-formats@2.1.1(ajv@8.17.1):
+    optionalDependencies:
+      ajv: 8.17.1
+
+  ajv-formats@3.0.1(ajv@8.17.1):
     optionalDependencies:
       ajv: 8.17.1
 

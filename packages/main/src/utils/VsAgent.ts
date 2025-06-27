@@ -77,6 +77,7 @@ export interface VsAgentOptions {
   autoDiscloseUserProfile?: boolean
   dependencies: AgentDependencies
   anoncredsServiceBaseUrl?: string
+  publicApiBaseUrl: string
 }
 
 export const createVsAgent = (options: VsAgentOptions): VsAgent => {
