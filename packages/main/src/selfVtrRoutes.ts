@@ -4,7 +4,7 @@
  * All endpoints and logic here are temporary.
  *
  * @description
- * This module defines temporary HTTP endpoints for testing and development purposes
+ * This module defines HTTP endpoints for testing and development purposes
  * related to Verifiable Credentials and Presentations (W3C VC/VP) using JSON Schema.
  *
  * The routes include:
