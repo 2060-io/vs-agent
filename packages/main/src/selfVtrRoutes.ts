@@ -165,7 +165,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
         ],
         id: agent.did,
         type,
-        issuer: 'did:example:issuer456',
+        issuer: agent.did!,
         issuanceDate: new Date().toISOString(),
         expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
         credentialSubject: {
