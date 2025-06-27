@@ -47,14 +47,10 @@ const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
 // Main function to add all test routes to the Express app
-export const addVerreWebRoutes = async (
-  app: express.Express,
-  agent: VsAgent,
-  publicApiBaseUrl: string = 'http://localhost:3001',
-) => {
+export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
-  // Register endpoints for example Verifiable Presentations (for testing only)
+  // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
     '/ecs-service-c-vp.json',
     'ecs-service',
@@ -62,13 +58,13 @@ export const addVerreWebRoutes = async (
     app,
     agent,
     {
-      id: `${veranaBaseUrl}/schemas-example-service.json`,
+      id: `${publicApiBaseUrl}/schemas-example-service.json`,
       type: 'JsonSchemaCredential',
     },
   )
 
   // Verifiable JsonSchemaCredential
-  // Register endpoints for example Verifiable Presentations (for testing only)
+  // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
     '/ecs-org-c-vp.json',
     'ecs-org',
@@ -76,23 +72,23 @@ export const addVerreWebRoutes = async (
     app,
     agent,
     {
-      id: `${veranaBaseUrl}/schemas-example-org.json`,
+      id: `${publicApiBaseUrl}/schemas-example-org.json`,
       type: 'JsonSchemaCredential',
     },
   )
 
   // Verifiable JsonSchema
-  // Register endpoints for example Verifiable Credential (for testing only)
+  // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
     '/schemas-example-service.json',
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-service`,
+      id: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-service`,
+          $ref: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-service`,
         },
       },
     },
@@ -105,17 +101,17 @@ export const addVerreWebRoutes = async (
   )
 
   // Verifiable JsonSchema
-  // Register endpoints for example Verifiable Credential (for testing only)
+  // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
     '/schemas-example-org.json',
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-org`,
+      id: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${veranaBaseUrl}/mainnet/cs/v1/js/ecs-org`,
+          $ref: `${publicApiBaseUrl}/mainnet/cs/v1/js/ecs-org`,
         },
       },
     },

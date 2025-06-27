@@ -24,7 +24,7 @@ import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
-import { addVerreWebRoutes } from '../verreRoutesWebServer'
+import { addSelfVtrRoutes } from '../selfVtrRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -40,6 +40,7 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   anoncredsServiceBaseUrl,
+  publicApiBaseUrl,
   publicDid,
   autoDiscloseUserProfile,
   enableWs,
@@ -53,6 +54,7 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   anoncredsServiceBaseUrl?: string
+  publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
   publicDid?: string
   enableWs?: boolean
@@ -78,6 +80,7 @@ export const setupAgent = async ({
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
     anoncredsServiceBaseUrl,
+    publicApiBaseUrl,
   })
 
   const app = express()
@@ -109,7 +112,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
-  addSelfVtrRoutes(app, agent, process.env.PUBLIC_API_BASE_URL)
+  addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -188,21 +191,21 @@ export const setupAgent = async ({
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/.well-known/did.json`,
+            serviceEndpoint: `${publicApiBaseUrl}/.well-known/did.json`,
             type: 'VerifiablePublicRegistry',
           }),
         )
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-service-c-vp`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-service-c-vp.json`,
+            serviceEndpoint: `${publicApiBaseUrl}/ecs-service-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           }),
         )
         .addService(
           new DidDocumentService({
             id: `${publicDid}#vpr-ecs-org-c-vp`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/ecs-org-c-vp.json`,
+            serviceEndpoint: `${publicApiBaseUrl}/ecs-org-c-vp.json`,
             type: 'LinkedVerifiablePresentation',
           }),
         )
