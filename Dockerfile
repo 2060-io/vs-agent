@@ -25,6 +25,7 @@ COPY ./public ./public
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.build.json tsconfig.build.json
 COPY packages/main/discovery.json packages/main/discovery.json
+COPY packages/main/data.json packages/main/data.json
 
 COPY packages/model/tsconfig.json packages/model/tsconfig.json
 COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
