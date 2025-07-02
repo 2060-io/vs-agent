@@ -24,6 +24,7 @@ COPY apps/vs-agent/src ./apps/vs-agent/src
 COPY tsconfig.json tsconfig.json
 COPY tsconfig.build.json tsconfig.build.json
 COPY apps/vs-agent/discovery.json apps/vs-agent/discovery.json
+COPY apps/vs-agent/discovery.json apps/vs-agent/data.json
 
 COPY packages/model/tsconfig.json packages/model/tsconfig.json
 COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
