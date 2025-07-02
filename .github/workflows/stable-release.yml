@@ -40,7 +40,7 @@ jobs:
       - name: Build Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
  
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'

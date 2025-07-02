@@ -2,7 +2,9 @@ version: '3'
 
 services:
   vs-agent:
-    build: ../..
+    build: 
+      context: ../..
+      dockerfile: ./apps/vs-agent/Dockerfile
     image: 2060-vs-agent
     container_name: verifier-vs-agent
     restart: always
@@ -25,7 +27,7 @@ services:
 
   verifier-backend:
     build: 
-      context: ../../
+      context: ../..
       dockerfile: ./examples/verifier/Dockerfile
     image: 2060-vs-agent-verifier
     container_name: verifier-backend

@@ -2,7 +2,9 @@ version: '3'
 
 services:
   vs-agent:
-    build: ../..
+    build: 
+      context: ../..
+      dockerfile: ./apps/vs-agent/Dockerfile
     image: vs-agent
     container_name: chatbot-vs-agent
     restart: always
@@ -14,6 +16,7 @@ services:
     environment:
       - AGENT_ENDPOINT=ws://10.82.14.7:3001
       - AGENT_INVITATION_IMAGE_URL=http://10.82.14.7:3001/avatar.png
+      - PUBLIC_API_BASE_URL=http://10.82.14.7:3001
       - AGENT_LABEL=Chatbot Agent
       - USE_CORS=true
       - EVENTS_BASE_URL=http://chatbot-backend:5000
@@ -24,7 +27,7 @@ services:
 
   chatbot-backend:
     build: 
-      context: ../../
+      context: ../..
       dockerfile: ./examples/chatbot/Dockerfile
     image: vs-agent-chatbot
     container_name: chatbot-backend

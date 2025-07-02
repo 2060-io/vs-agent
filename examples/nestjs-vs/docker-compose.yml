@@ -2,7 +2,9 @@ version: '3'
 
 services:
   vs-agent:
-    build: ../..
+    build: 
+      context: ../..
+      dockerfile: apps/vs-agent/Dockerfile
     image: vs-agent
     container_name: chatbot-vs-agent
     restart: always
@@ -15,7 +17,7 @@ services:
       - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
       - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
       - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
-      - AGENT_LABEL=Chatbot demo dts
+      - AGENT_LABEL=NestJS Client Demo VS
       - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
       - USE_CORS=true
       - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
@@ -28,9 +30,9 @@ services:
     volumes:
       - ./afj:/root/.afj
 
-  chatbot-dts:
+  chatbot-vs:
     build: 
-      context: ../../
+      context: ../..
       dockerfile: ./examples/nestjs-vs/Dockerfile
     image: nestjs-vs-chatbot
     container_name: nestjs-vs-chatbot
