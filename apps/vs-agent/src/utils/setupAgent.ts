@@ -24,6 +24,7 @@ import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
+import { addSelfVtrRoutes } from '../selfVtrRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -39,6 +40,8 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   anoncredsServiceBaseUrl,
+  publicApiBaseUrl,
+  selfVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
   enableWs,
@@ -52,6 +55,8 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   anoncredsServiceBaseUrl?: string
+  publicApiBaseUrl: string
+  selfVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
   enableWs?: boolean
@@ -77,6 +82,7 @@ export const setupAgent = async ({
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
     anoncredsServiceBaseUrl,
+    publicApiBaseUrl,
   })
 
   const app = express()
@@ -108,6 +114,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
+  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -157,10 +164,10 @@ export const setupAgent = async ({
 
     // Create a set of keys suitable for did communication
     if (endpoints && endpoints.length > 0) {
-      const verificationMethodId = `${publicDid}#verkey`
       const keyAgreementId = `${publicDid}#key-agreement-1`
 
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
+      const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
         convertPublicKeyToX25519(TypedArrayEncoder.fromBase58(ed25519.publicKeyBase58)),
       )
@@ -183,6 +190,30 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
+      if (selfVtrEnabled) {
+        builder
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr`,
+              type: 'VerifiablePublicRegistry',
+            }),
+          )
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-service-c-vp`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
+              type: 'LinkedVerifiablePresentation',
+            }),
+          )
+          .addService(
+            new DidDocumentService({
+              id: `${publicDid}#vpr-ecs-org-c-vp`,
+              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
+              type: 'LinkedVerifiablePresentation',
+            }),
+          )
+      }
 
       for (let i = 0; i < agent.config.endpoints.length; i++) {
         builder.addService(

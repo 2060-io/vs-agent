@@ -1,4 +1,4 @@
-# Verifiable Service Agent (VS-A)
+## VS Agent
 
 2060 Agent running in a container, used as gateway for any service to access 2060 ecosystem.
 
@@ -27,6 +27,7 @@ but likely needed for production and test deployments.
 | AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test VS Agent    |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 | ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
+| SELF_VTR_ENABLED | Enable Self Verifiable Trust Registry Service (test only)                              | false                  |
 | PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
@@ -44,11 +45,12 @@ but likely needed for production and test deployments.
 >
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 >
-VS-A fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
-
-If the `POSTGRES_HOST` environment variable is defined, VS-A will handle the connection to operate with the specified database. Please note that this type of persistence is recommended because by default, an SQLite database is used for testing purposes. Due to SQLite's lack of robustness, it does not support a high throughput of messages per second. Therefore, for any production deployment, it is recommended to use a more robust PostgreSQL database, which allows processing large volumes of data efficiently and properly managing existing data and security credentials.  
-
-If the `REDIS_HOST` environment variable is defined, VS-A can leverage Redis as a caching system to achieve high-performance message processing. By offloading message handling and enabling asynchronous processing, Redis helps optimize I/O operations and significantly enhances the service’s capacity to manage large volumes of data efficiently.
+> VS-A fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
+>
+> If the `POSTGRES_HOST` environment variable is defined, VS-A will handle the connection to operate with the specified database. Please note that this type of persistence is recommended because by default, an SQLite database is used for testing purposes. Due to SQLite's lack of robustness, it does not support a high throughput of messages per second. Therefore, for any production deployment, it is recommended to use a more robust PostgreSQL database, which allows processing large volumes of data efficiently and properly managing existing data and security credentials.  
+>
+> If the `REDIS_HOST` environment variable is defined, VS-A can leverage Redis as a caching system to achieve high-performance message processing. By offloading message handling and enabling asynchronous processing, Redis helps optimize I/O operations and significantly enhances the service’s capacity to manage large volumes of data efficiently.
+> If the `SELF_VTR_ENABLED` environment variable is set to `true`, VS-A will enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](./doc/self-vtr-routes.md)).
 
 Possible log levels:
 
