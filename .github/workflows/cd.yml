@@ -4,14 +4,12 @@ on:
   push:
     branches: [main, 'release/**']
 
-  workflow_dispatch:
-
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
-  IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
+  IMAGE_TAG: dev
 
 jobs:
   build:
@@ -84,25 +82,19 @@ jobs:
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
-            docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
-     
-      - name: Add tags to Docker image and push to Docker Hub (specific to releases)
-        if: github.ref == 'refs/heads/release' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}
+          TAGS=(
+            "v${RELEASE_MAJOR}-${IMAGE_TAG}"
+            "v${RELEASE_MAJOR}.${RELEASE_MINOR}-${IMAGE_TAG}"
+            "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
+            "v${RELEASE_VERSION}"
+          )
+
+          docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
+
+          for tag in "${TAGS[@]}"; do
+            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:$tag
+            docker push $DH_USERNAME/$IMAGE_NAME:$tag
+          done
 
       - name: Build and push Chatbot Demo Docker image
         if: steps.semantic.outputs.new-release-published == 'true'
