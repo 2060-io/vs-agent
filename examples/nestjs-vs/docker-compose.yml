@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  vs-agent:
+    build: 
+      context: ../..
+      dockerfile: apps/vs-agent/Dockerfile
+    image: vs-agent
+    container_name: chatbot-vs-agent
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 2800:3000
+      - 2801:3001
+    environment:
+      - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
+      - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
+      - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
+      - AGENT_LABEL=NestJS Client Demo VS
+      - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
+      - USE_CORS=true
+      - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=gaia
+      - POSTGRES_PASSWORD=2060demo
+      - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
+      - REDIRECT_DEFAULT_URL_TO_INVITATION_URL=true
+      - REDIS_HOST=redis
+    volumes:
+      - ./afj:/root/.afj
+
+  chatbot-vs:
+    build: 
+      context: ../..
+      dockerfile: ./examples/nestjs-vs/Dockerfile
+    image: nestjs-vs-chatbot
+    container_name: nestjs-vs-chatbot
+    restart: always
+    depends_on:
+      - vs-agent
+    networks:
+      - chatbot
+    ports:
+      - 2802:5000
+    environment:
+      - AGENT_PORT=5000
+      - VS_AGENT_ADMIN_URL=https://p2800.ovpndev.2060.io
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=gaia
+      - POSTGRES_DB_NAME=gaia
+      - POSTGRES_PASSWORD=2060demo
+      - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 6379:6379
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+
+  postgres:
+    image: postgres:15.2
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=2060demo
+      - POSTGRES_USER=gaia
+networks:
+  chatbot:

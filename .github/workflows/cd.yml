@@ -9,7 +9,7 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: '2060-service-agent'      
+  IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
 
@@ -18,17 +18,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup node v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
 
       - name: Install dependencies
         run: |
-          yarn install
+          pnpm install
+      
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - uses: codfish/semantic-release-action@v3
         id: semantic
@@ -72,7 +79,7 @@ jobs:
       - name: Build Docker image
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
  
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.semantic.outputs.new-release-published == 'true'
@@ -101,19 +108,43 @@ jobs:
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
+          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
+          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
 
+      - name: Log in to Docker Hub Helm Registry
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: v$RELEASE_VERSION/" ./charts/vs-agent/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/vs-agent
+          helm package ./charts/vs-agent -d ./charts
+          helm push ./charts/${CHART_NAME}-v$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        if: steps.semantic.outputs.new-release-published == 'true'
+        run: |
+          sed -i "s/^version:.*/version: v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/${CHART_NAME}-v$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
+  
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          yarn config set npmAuthToken ${NPM_AUTH_TOKEN}
-          yarn workspaces foreach --topological version $RELEASE_VERSION
-          yarn up @2060.io/service-agent-model@$RELEASE_VERSION
-          yarn up @2060.io/service-agent-client@$RELEASE_VERSION
-          yarn workspaces foreach --topological --no-private --exclude @2060.io/service-agent-main npm publish
-          
+          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
+          pnpm pnpm -r --topological version "$RELEASE_VERSION"
+          pnpm -r publish --no-git-checks --access public
 
 

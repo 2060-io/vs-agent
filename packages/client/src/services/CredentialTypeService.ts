@@ -4,7 +4,7 @@ import {
   CredentialTypeInfo,
   CredentialTypeResult,
   ImportCredentialTypeOptions,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'
@@ -44,6 +44,17 @@ export class CredentialTypeService {
     return (await response.json()) as CredentialTypeInfo
   }
 
+  public async export(credentialTypeId: string) {
+    logger.info(`Exporting credential type ${credentialTypeId}`)
+    const response = await fetch(`${this.url}/export/${encodeURIComponent(credentialTypeId)}`, {
+      method: 'GET',
+      headers: { accept: 'application/json' },
+    })
+    if (!response.ok) throw new Error(`Cannot export credential type: status ${response.status}}`)
+
+    return await response.json()
+  }
+
   public async create(credentialType: CredentialTypeInfo): Promise<CredentialTypeInfo> {
     const response = await fetch(`${this.url}`, {
       method: 'POST',
@@ -62,7 +73,7 @@ export class CredentialTypeService {
     const types = await response.json()
 
     if (!Array.isArray(types)) {
-      throw new Error('Invalid response from Service Agent')
+      throw new Error('Invalid response from VS Agent')
     }
 
     return types.map(value => value as CredentialTypeResult)

@@ -1,0 +1,82 @@
+# Service deployment for chatbot application
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  selector:
+    app: {{ .Values.name }}
+  ports:
+  - name: backend
+    port: {{ .Values.env.port | default 5000 }} # Port exposed by the service
+    targetPort: {{ .Values.env.port | default 5000 }} # Port on the container to which the service routes traffic
+    protocol: TCP    
+---
+# Ingress resource for chatbot application
+# This resource defines how external traffic can access the chatbot service
+# routes traffic to the backend service
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ tpl .Values.ingress.host . }}
+      secretName: {{ tpl .Values.ingress.tlsSecret . }}
+  rules:
+    - host: {{ tpl .Values.ingress.host . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.name }}
+                 port:
+                   number: {{ .Values.env.port | default 5000 }} # Port on the service to which the ingress routes traffic
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+   name: {{ .Values.name }}
+   namespace: {{ .Release.Namespace }}
+spec:
+   serviceName: {{ .Values.name }}
+   replicas: {{ default 1 .Values.replicas }}
+   selector:
+      matchLabels:
+         app: {{ .Values.name }}
+   template:
+      metadata:
+         labels:
+            app: {{ .Values.name }}
+      spec:
+         containers:
+         -  name: {{ .Values.name }}-backend-container
+            image: io2060/demo-chatbot-backend:{{ .Chart.Version }}
+            imagePullPolicy: Always
+            env:
+            # Base URL for the Agent Admin API
+            - name: VS_AGENT_ADMIN_BASE_URL
+              value: "{{ .Values.env.vsAgentAdminUrl }}/v1"
+            # Base URL for the Service API
+            - name: PUBLIC_BASE_URL
+              value: "https://{{ tpl .Values.ingress.host . }}"
+            # Base URL for the Vision Service
+            - name: VISION_SERVICE_BASE_URL
+              value: "{{ tpl .Values.env.visionUrl . }}"
+            # Base URL for the WebRTC server
+            - name: WEBRTC_SERVER_BASE_URL
+              value: "{{ tpl .Values.env.webrtcUrl . }}"
+            ports:
+            -  containerPort: {{ .Values.env.port | default 5000 }}
+
+

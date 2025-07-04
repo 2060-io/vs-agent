@@ -1,13 +1,13 @@
-import { ApiVersion } from '@2060.io/service-agent-client'
+import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
+import { ApiVersion } from '@2060.io/vs-agent-client'
 import {
   CredentialReceptionMessage,
   MessageReceived,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import { CredentialState } from '@credo-ts/core'
 import { Test, TestingModule } from '@nestjs/testing'
-import { MessageState } from 'credo-ts-receipts'
 
 import {
   ConnectionsEventService,
@@ -18,7 +18,7 @@ import {
 } from '../../src'
 
 const mockSend = jest.fn().mockResolvedValue({ id: 'mocked-id' })
-jest.mock('@2060.io/service-agent-client', () => ({
+jest.mock('@2060.io/vs-agent-client', () => ({
   ApiClient: jest.fn().mockImplementation(() => ({
     messages: {
       send: mockSend,

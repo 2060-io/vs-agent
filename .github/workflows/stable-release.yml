@@ -6,27 +6,32 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: '2060-service-agent'      
+  IMAGE_NAME: 'vs-agent'      
+  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 jobs:
   build-and-push:
     name: Build and push docker images
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup node v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
 
       - id: get_version
         uses: battila7/get-version-action@v2
           
       - name: Install dependencies
         run: |
-          yarn install
+          pnpm install
       - name: Log in to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
@@ -35,7 +40,7 @@ jobs:
       - name: Build Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
  
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
@@ -48,3 +53,44 @@ jobs:
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
             docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
             docker push $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}}
+
+      - name: Build and push Chatbot Demo Docker image
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}}
+
+      - name: Log in to Docker Hub Helm Registry
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/vs-agent/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/vs-agent
+          helm package ./charts/vs-agent -d ./charts
+          helm push ./charts/${CHART_NAME}-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/${CHART_NAME}-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+
+      - name: Publish NPM packages
+        if: steps.get_version.outputs.is-semver == 'true'
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
+          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
+          pnpm pnpm -r --topological version "${{steps.get_version.outputs.version}}"
+          pnpm -r publish --no-git-checks --access public

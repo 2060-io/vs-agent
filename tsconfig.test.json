@@ -4,10 +4,10 @@
     "lib": ["ES2021.Promise"],
     "baseUrl": ".",
     "paths": {
-      "@2060.io/service-agent-client": ["packages/client/src"],
-      "@2060.io/service-agent-main": ["packages/main/src"],
-      "@2060.io/service-agent-model": ["packages/model/src"],
-      "@2060.io/service-agent-nestjs-client": ["packages/nestjs-client/src"],
+      "@2060.io/vs-agent-client": ["packages/client/src"],
+      "@2060.io/vs-agent": ["apps/main/src"],
+      "@2060.io/vs-agent-model": ["packages/model/src"],
+      "@2060.io/vs-agent-nestjs-client": ["packages/nestjs-client/src"],
     },
     "types": ["jest", "node"]
   },

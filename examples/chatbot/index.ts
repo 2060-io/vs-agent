@@ -1,4 +1,4 @@
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/service-agent-client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
 import {
   CallOfferRequestMessage,
   ContextualMenuSelectMessage,
@@ -24,28 +24,29 @@ import {
   MediaMessage,
   MrtdSubmitState,
   CredentialReceptionMessage,
-} from '@2060.io/service-agent-model'
+} from '@2060.io/vs-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'
+import { existsSync } from 'fs'
+import { readFile, writeFile } from 'fs/promises'
 import fetch from 'node-fetch'
 import path from 'path'
 import { Logger } from 'tslog'
 
 import { helpMessage, rockyQuotes, rootContextMenu, rootMenuAsQA, welcomeMessage, worldCupPoll } from './data'
-import phoneCredDefData from './phone-cred-def-dev.json'
 
 const logger = new Logger()
 
 const PORT = Number(process.env.PORT || 5000)
-const SERVICE_AGENT_BASE_URL = process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
+const VS_AGENT_BASE_URL = process.env.VS_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
 const VISION_SERVICE_BASE_URL =
   process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
 const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
 const app = express()
 
-const [baseUrl, versionPath] = SERVICE_AGENT_BASE_URL.split('/v')
+const [baseUrl, versionPath] = VS_AGENT_BASE_URL.split('/v')
 const version = versionPath ? `v${versionPath}` : ApiVersion.V1
 const apiClient = new ApiClient(baseUrl, version as ApiVersion)
 
@@ -99,8 +100,34 @@ const server = app.listen(PORT, async () => {
      */
     phoneNumberCredentialDefinitionId = phoneNumberCredentialType?.id
     if (!phoneNumberCredentialDefinitionId) {
-      const credentialDefinition = await apiClient.credentialTypes.import(phoneCredDefData)
-      phoneNumberCredentialDefinitionId = credentialDefinition.id
+      const filePath = path.resolve(__dirname, 'phone-cred-def-dev.json')
+
+      try {
+        let cred
+        if (existsSync(filePath)) {
+          const data = await readFile(filePath, 'utf-8')
+          const phoneCredDefData = JSON.parse(data)
+          cred = await apiClient.credentialTypes.import(phoneCredDefData)
+          console.log(`Imported credential definition from file: ${filePath}`)
+        } else {
+          cred = await apiClient.credentialTypes.create({
+            id: randomUUID(),
+            name: 'phoneNumber',
+            version: '1.0',
+            attributes: ['phoneNumber'],
+            supportRevocation: true,
+          })
+          console.log(`Created new credential definition with ID: ${cred.id}`)
+
+          const exported = await apiClient.credentialTypes.export(cred.id)
+          await writeFile(filePath, JSON.stringify(exported, null, 2), 'utf-8')
+          console.log(`Exported credential definition to file: ${filePath}`)
+        }
+        phoneNumberCredentialDefinitionId = cred.id
+      } catch (err) {
+        console.error('Error managing credential definition:', err)
+        throw err
+      }
     }
     logger.info(`phoneNumberCredentialDefinitionId: ${phoneNumberCredentialDefinitionId}`)
 

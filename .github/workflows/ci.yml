@@ -10,29 +10,42 @@ on:
 
 jobs:
   validate:
+    name: Validate
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout service-agent
+      - name: Checkout vs-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v20
+      - name: Setup Node.js v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          
+          node-version: 22
+
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Install dependencies
-        run: |
-          yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: |
-          yarn build
+        run: pnpm build
 
       - name: Check Format
-        run: |
-          yarn check-format
+        run: pnpm check-format
 
       - name: Check Types
+        run: pnpm check-types
+
+      - name: Test
+        run: pnpm test
+
+      - name: Validate all Helm charts
         run: |
-          yarn check-types
+          for chart in ./charts/*; do
+            if [ -d "$chart" ] && [ -f "$chart/Chart.yaml" ]; then
+              echo "🔍 Validating chart: $chart"
+              helm lint "$chart"
+            fi
+          done      
+

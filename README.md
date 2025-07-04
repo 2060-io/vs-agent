@@ -1,100 +1,81 @@
-# 2060-service-agent
+# VS Agent
 
-2060 Agent running in a container, used as gateway for any service to access 2060 ecosystem.
+VS Agent is a web application that can be used as a framework for building conversational **Verifiable Services (VS)** that integrate seamlessly with the [Hologram Messaging App](https://hologram.chat) and other compatible [DIDCommm](https://didcomm.org) agents. It enables developers to create, deploy, and manage agents that provide trustworthy, verifiable information and actions in chat conversations.
 
-## Configuration
+---
 
-At the moment, all configuration is done by environment variables. All of them are optional for development
-but likely needed for production and test deployments.
+## Features
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_ENDPOINT             | Public endpoint where agent DIDComm endpoints will be accessible (including protocol and port)                    | ws://localhost:3001   |
-| AGENT_ENDPOINTS            | List of endpoints where agent DIDComm endpoints will be accessible (including protocol and port), comma separated | ws://localhost:3001   |
-| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
-| AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
-| REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | https://hologram.zone/     |
-| AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)                                                                            | none                  |
-| AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
-| AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
-| ENABLE_WS                  | Enable Web Socket transport for Agent                                                                             | true                  |
-| ENABLE_HTTP                | Enable HTTP transport for Agent                                                                                   | true                  |
-| AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test Service Agent    |
-| AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-service-agent    |
-| AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-service-agent    |
-| AGENT_WALLET_KEY_DERIVATION_METHOD | Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW | ARGON2I_MOD |
-| AGENT_NAME                 | Label to show to other DIDComm agents. Also used as Wallet ID and key. DEPRECATED: Use AGENT_LABEL, AGENT_WALLET_ID and AGENT_WALLET_KEY instead                                                                             | Test Service Agent    |
-| USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
-| ANONCREDS_SERVICE_BASE_URL | AnonCreds Service base URL                                                                                        | none                  |
-| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
-| ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
-| ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
-| EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
-| POSTGRES_HOST             | PosgreSQL database host                                                                                             | None (use SQLite)               |
-| POSTGRES_USER             | PosgreSQL database username                                                                                         | None                            |
-| POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
-| POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
-| POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
-| REDIS_HOST       | Redis database host user. This system will only function if this variable is defined. (Recommended for production mode)                                                                                       | None                            |
-| REDIS_PASSWORD   | Redis database password                                                                                   | None                            |
+- Simple REST API to send messages and receive events from connected users. No need to have knowledge on DIDComm: all the complexity is managed internally!
+- Issue and verify AnonCreds credentials, with revocation support
+- Built-in [Verifiable Trust](https://verana.foundation/page/learn-vt-demystified/) implementation
+- Hands-on client for easy integrations in existing backends using NestJS
 
+---
 
-> **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your Service Agent instance is accessable in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
->
-> Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
->
-> The Service Agent fetches capabilities from the `discovery.json` file at `/www/packages/main/discovery.json` to determine available features. To customize the capabilities, replace the volume at this path with your own `discovery.json` file. This allows flexibility for defining different capabilities.
+## Quick Start
 
-Possible log levels:
-
-- 0: test
-- 1: trace
-- 2: debug
-- 3: info
-- 4: warn
-- 5: error
-- 6: fatal
-- 7: off
-
-These variables might be set also in `.env` file in the form of KEY=VALUE (one per line).
-
-## Deploy and run
-
-2060-service-agent can be run both locally or containerized.
-
-### Locally
-
-2060-service-agent can be built and run on localhost by just setting the corresponding variables and executing:
+The easiest way to get started with VS Agent is by using Docker. Pull the image from Docker Hub:
 
 ```
-yarn build
-yarn dev
+docker pull io2060/vs-agent
 ```
 
-Upon a successful start, the following lines should be read in log:
+Or build it directly from this repo:
 
 ```
-Service Agent running in port xxxx. Admin interface at port yyyy
+docker build -t vs-agent:dev ./apps/vs-agent
 ```
 
-This means that Service Agent is up and running!
-
-### Using docker
-
-First of all, a docker image must be created by doing:
+Then, you can just run it. Don't forget to set the environment variables as required! See [VS Agent Configuration](./apps/vs-agent/README.md#configuration) for a detailed description:
 
 ```
-docker build -t 2060-service-agent:[tag] .
+docker run --env-file ./env-vars io2060/vs-agent
 ```
 
-Then, a container can be created and deployed:
+Once your VS Agent is up and running, you can manage it from your backend basically in three different ways
 
-```
-docker run -e AGENT_PUBLIC_DID=... -e AGENT_ENDPOINT=... -e AGENT_PORT=yyy -e USE_CORS=xxx -p yyy:xxx 2060-service-agent:[tag]
-```
+### Using NestJS Client (preferred way)
 
-where yyy is an publicly accesible port from the host machine.
+[NestJS client](./packages/nestjs-client/) can be imported as a module in your backend, and it will implement all endpoints required to handle event coming from VS Agent. It also provides some extra models to manage credential revocation, use statistics and handling user profile (including useful information such as preferred language). See [NestJS client documentation]((./packages/nestjs-client/README.md) for more details.
 
-## API
+### Using basic client
 
-For the moment, some details about Service Agent API can be found in this [Document](./doc/service-agent-api.md). There is some work in progress to make the API available within Swagger: when deployed, just go to [SERVICE_AGENT_ADMIN_BASE_URL]/api.
+[Base client](./packages/client) provides a basic model for every VS API message and event, and it is handy when you want to create a simple backend based on NodeJS, especially if you use Express. See [JS client documentation](./packages/client/README.md) for more details.
+
+### Using VS Agent REST API
+
+This can be used regardless the software stack you use in your backend. See [VS Agent API reference](./doc/vs-agent-api.md) for a detailed guide about all endpoints.
+
+
+---
+
+## Example implementations
+
+See [examples](./examples) for fully working demos that can be run locally using Docker.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/your-feature`)
+3. Commit your changes (`git commit -m 'Add feature'`)
+4. Push to the branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+Please follow the code style and write tests for new features.
+
+---
+
+## License
+
+This project is pulished under Apache license. See [LICENSE](LICENSE) for more information.
+
+---
+
+## Contact
+
+For questions or support, you are welcome to open an issue.

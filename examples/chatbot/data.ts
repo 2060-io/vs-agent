@@ -1,4 +1,5 @@
-export const welcomeMessage = 'Welcome to our service. Use context menu or write help to see available actions'
+export const welcomeMessage =
+  'Welcome to our service. Use context menu or write help to see available actions'
 
 export const helpMessage =
   'Available commands: \n/echo: repeat what you say \n/menu: display main menu \n/link [url] [title] [desc] [icon] [openingMode]: send link to URL\n/media [url]: retrieve image from URL \n/rocky: get an inspiring quote from Rocky \n/context: refresh context menu'

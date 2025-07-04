@@ -1,10 +1,12 @@
 version: '3'
 
 services:
-  service-agent:
-    build: ../..
-    image: 2060-service-agent
-    container_name: verifier-service-agent
+  vs-agent:
+    build: 
+      context: ../..
+      dockerfile: ./apps/vs-agent/Dockerfile
+    image: 2060-vs-agent
+    container_name: verifier-vs-agent
     restart: always
     networks:
       - verifier
@@ -25,9 +27,9 @@ services:
 
   verifier-backend:
     build: 
-      context: ../../
+      context: ../..
       dockerfile: ./examples/verifier/Dockerfile
-    image: 2060-service-agent-verifier
+    image: 2060-vs-agent-verifier
     container_name: verifier-backend
     restart: always
     networks:
@@ -36,7 +38,7 @@ services:
       - 5100:5100
     environment:
       - PORT=5100
-      - SERVICE_AGENT_ADMIN_BASE_URL=http://verifier-service-agent:3000
+      - VS_AGENT_ADMIN_BASE_URL=http://verifier-vs-agent:3000
       - PUBLIC_BASE_URL=http://10.82.14.12:5100
   redis:
     image: redis:alpine

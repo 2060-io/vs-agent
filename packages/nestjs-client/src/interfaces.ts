@@ -1,4 +1,4 @@
-import { BaseMessage } from '@2060.io/service-agent-model'
+import { BaseMessage } from '@2060.io/vs-agent-model'
 
 /**
  * The EventHandler interface defines the blueprint for handling events

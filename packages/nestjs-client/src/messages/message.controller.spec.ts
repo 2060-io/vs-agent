@@ -1,13 +1,13 @@
-import { HttpUtils } from '@2060.io/service-agent-client'
-import { MessageReceived, MessageStateUpdated, TextMessage } from '@2060.io/service-agent-model'
+import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
+import { HttpUtils } from '@2060.io/vs-agent-client'
+import { MessageReceived, MessageStateUpdated, TextMessage } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { MessageState } from 'credo-ts-receipts'
 
 import { MessageEventController } from './message.controller'
 import { MessageEventService } from './message.service'
 
-jest.mock('@2060.io/service-agent-client', () => ({
+jest.mock('@2060.io/vs-agent-client', () => ({
   HttpUtils: {
     handleException: jest.fn(),
   },

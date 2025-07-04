@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/service-agent-model",
+  "name": "@2060.io/vs-agent-model",
   "main": "build/index",
   "types": "build/index",
   "version": "0.0.1",
@@ -11,18 +11,19 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "build": "yarn run clean && yarn run compile",
+    "build": "pnpm run clean && pnpm run compile",
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn run build",
+    "prepublishOnly": "pnpm run build",
+    "version": "pnpm version",
     "test": "jest"
   },
   "dependencies": {
-    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.12",
-    "@credo-ts/core": "^0.5.11",
+    "@2060.io/credo-ts-didcomm-mrtd": "0.0.13",
+    "@2060.io/credo-ts-didcomm-receipts": "0.0.7",
+    "@credo-ts/core": "0.5.15",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
-    "credo-ts-receipts": "^0.0.1-alpha.5",
     "mrz": "^4.2.0"
   },
   "devDependencies": {
@@ -30,6 +31,6 @@
     "ts-node-dev": "^2.0.0"
   },
   "peerDependencies": {
-    "@credo-ts/core": "^0.5.11"
+    "@credo-ts/core": "0.5.15"
   }
 }

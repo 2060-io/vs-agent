@@ -1,0 +1,39 @@
+# Global configuration for the application
+global: 
+  domain: example.io # Domain for the application
+
+# General configuration
+name: vs-agent
+replicas: 1 # Number of replicas for the VS Agent service
+
+# Ports
+adminPort: 3000 # adminPort is the port for the Agent Admin API
+didcommPort: 3001 # Port for DIDComm
+
+# Agent configuration
+didcommLabel: "VS Agent"
+eventsBaseUrl: "https://events.example.io"
+didcommInvitationImageUrl: "https://image.{{ .Values.global.domain }}/invitation.png"
+
+# DB and Redis configuration
+database:
+  enabled: false
+  user: unicid
+  pwd: mypassword123
+redis: 
+  enabled: false
+
+# Enable cors for the VS Agent
+ingress:
+  host: "{{ .Values.name }}.{{ .Values.global.domain }}"
+  tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
+  public:
+    enableCors: true
+
+# Extra environment variables (extensible)
+extraEnv: []
+
+# Persistent volume configuration for app
+storage:
+  size: 1Gi
+  storageClassName: csi-cinder-high-speed
