@@ -15,6 +15,7 @@ import { VsAgentModule } from './app.module'
 import {
   ADMIN_LOG_LEVEL,
   ADMIN_PORT,
+  AGENT_ENDPOINT,
   AGENT_ENDPOINTS,
   AGENT_INVITATION_IMAGE_URL,
   AGENT_LABEL,
@@ -82,6 +83,12 @@ const run = async () => {
       'AGENT_NAME variable is defined and it is not supported anymore. Please use AGENT_WALLET_ID and AGENT_WALLET_KEY instead',
     )
     process.exit(1)
+  }
+
+  if (AGENT_ENDPOINT) {
+    serverLogger.warn(
+      'AGENT_ENDPOINT variable is defined and it is deprecated. Please use AGENT_ENDPOINTS instead.',
+    )
   }
 
   const { agent } = await setupAgent({
