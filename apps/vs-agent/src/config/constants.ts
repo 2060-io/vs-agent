@@ -16,7 +16,7 @@ export const AGENT_INVITATION_IMAGE_URL = process.env.AGENT_INVITATION_IMAGE_URL
 export const AGENT_ENDPOINT = process.env.AGENT_ENDPOINT
 export const AGENT_ENDPOINTS = process.env.AGENT_ENDPOINT
   ? [process.env.AGENT_ENDPOINT]
-  : (process.env.AGENT_ENDPOINTS?.replace(' ', '').split(',') ?? ['ws://localhost:3001'])
+  : (process.env.AGENT_ENDPOINTS?.replace(/\s+/g, '').split(',') ?? ['ws://localhost:3001'])
 
 export const AGENT_PUBLIC_DID = process.env.AGENT_PUBLIC_DID
 export const PUBLIC_API_BASE_URL = process.env.PUBLIC_API_BASE_URL || 'http://localhost:3001'
