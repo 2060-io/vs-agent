@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod, LogLevel } from '@credo-ts/core'
+import { KeyDerivationMethod } from '@credo-ts/core'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -12,20 +12,35 @@ import * as path from 'path'
 import packageJson from '../package.json'
 
 import { VsAgentModule } from './app.module'
+import {
+  ADMIN_LOG_LEVEL,
+  ADMIN_PORT,
+  AGENT_ENDPOINT,
+  AGENT_ENDPOINTS,
+  AGENT_INVITATION_IMAGE_URL,
+  AGENT_LABEL,
+  AGENT_LOG_LEVEL,
+  AGENT_NAME,
+  AGENT_PORT,
+  AGENT_PUBLIC_DID,
+  AGENT_WALLET_ID,
+  AGENT_WALLET_KEY,
+  AGENT_WALLET_KEY_DERIVATION_METHOD,
+  askarPostgresConfig,
+  EVENTS_BASE_URL,
+  keyDerivationMethodMap,
+  POSTGRES_HOST,
+  PUBLIC_API_BASE_URL,
+  SELF_VTR_ENABLED,
+  USE_CORS,
+  USER_PROFILE_AUTODISCLOSE,
+} from './config/constants'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { VsAgent } from './utils/VsAgent'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
-import {
-  AGENT_WALLET_ID,
-  AGENT_WALLET_KEY,
-  AGENT_WALLET_KEY_DERIVATION_METHOD,
-  askarPostgresConfig,
-  keyDerivationMethodMap,
-  POSTGRES_HOST,
-} from './utils/walletConfig'
 
 export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(VsAgentModule.register(agent))
@@ -61,41 +76,39 @@ export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfi
 }
 
 const run = async () => {
-  const endpoints = process.env.AGENT_ENDPOINT
-    ? [process.env.AGENT_ENDPOINT]
-    : (process.env.AGENT_ENDPOINTS?.replace(' ', '').split(',') ?? ['ws://localhost:3001'])
+  const serverLogger = new TsLogger(ADMIN_LOG_LEVEL, 'Server')
+
+  if (AGENT_NAME) {
+    serverLogger.error(
+      'AGENT_NAME variable is defined and it is not supported anymore. Please use AGENT_WALLET_ID and AGENT_WALLET_KEY instead',
+    )
+    process.exit(1)
+  }
+
+  if (AGENT_ENDPOINT) {
+    serverLogger.warn(
+      'AGENT_ENDPOINT variable is defined and it is deprecated. Please use AGENT_ENDPOINTS instead.',
+    )
+  }
+
   const { agent } = await setupAgent({
-    endpoints,
-    port: Number(process.env.AGENT_PORT) || 3001,
+    endpoints: AGENT_ENDPOINTS,
+    port: Number(AGENT_PORT) || 3001,
     walletConfig: {
-      id: AGENT_WALLET_ID || process.env.AGENT_NAME || 'test-vs-agent',
-      key: AGENT_WALLET_KEY || process.env.AGENT_NAME || 'test-vs-agent',
+      id: AGENT_WALLET_ID || 'test-vs-agent',
+      key: AGENT_WALLET_KEY || 'test-vs-agent',
       keyDerivationMethod:
         keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KeyDerivationMethod.Argon2IMod],
       storage: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
-    label: process.env.AGENT_LABEL || 'Test VS Agent',
-    displayPictureUrl: process.env.AGENT_INVITATION_IMAGE_URL,
-    publicDid: process.env.AGENT_PUBLIC_DID,
-    logLevel: process.env.AGENT_LOG_LEVEL ? Number(process.env.AGENT_LOG_LEVEL) : LogLevel.warn,
-    enableHttp:
-      'ENABLE_HTTP' in process.env
-        ? Boolean(process.env.ENABLE_HTTP === 'true' || process.env.ENABLE_HTTP === '1')
-        : true,
-    enableWs:
-      'ENABLE_WS' in process.env
-        ? Boolean(process.env.ENABLE_WS === 'true' || process.env.ENABLE_WS === '1')
-        : true,
-    anoncredsServiceBaseUrl: process.env.ANONCREDS_SERVICE_BASE_URL,
-    publicApiBaseUrl: process.env.PUBLIC_API_BASE_URL || 'http://localhost:3001',
-    selfVtrEnabled: process.env.SELF_VTR_ENABLED === 'true',
-    autoDiscloseUserProfile: Boolean(process.env.USER_PROFILE_AUTODISCLOSE === 'true'),
+    label: AGENT_LABEL || 'Test VS Agent',
+    displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
+    publicDid: AGENT_PUBLIC_DID,
+    logLevel: AGENT_LOG_LEVEL,
+    publicApiBaseUrl: PUBLIC_API_BASE_URL,
+    selfVtrEnabled: SELF_VTR_ENABLED,
+    autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
   })
-
-  const serverLogger = new TsLogger(
-    process.env.ADMIN_LOG_LEVEL ? Number(process.env.ADMIN_LOG_LEVEL) : LogLevel.debug,
-    'Server',
-  )
 
   const discoveryOptions = (() => {
     try {
@@ -106,10 +119,10 @@ const run = async () => {
     }
   })()
   const conf: ServerConfig = {
-    port: Number(process.env.ADMIN_PORT || 3000),
-    cors: Boolean(process.env.USE_CORS || false),
+    port: ADMIN_PORT,
+    cors: USE_CORS,
     logger: serverLogger,
-    webhookUrl: process.env.EVENTS_BASE_URL || 'http://localhost:5000',
+    webhookUrl: EVENTS_BASE_URL,
     discoveryOptions,
   }
 
@@ -123,7 +136,7 @@ const run = async () => {
   vcAuthnEvents(agent, conf)
 
   console.log(
-    `VS Agent v${packageJson['version']} running in port ${Number(process.env.AGENT_PORT || 3001)}. Admin interface at port ${conf.port}`,
+    `VS Agent v${packageJson['version']} running in port ${AGENT_PORT}. Admin interface at port ${conf.port}`,
   )
 }
 

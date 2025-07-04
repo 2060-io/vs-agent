@@ -69,7 +69,7 @@ const fileStorage = diskStorage({
   },
 })
 
-export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anoncredsBaseUrl?: string) => {
+export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anoncredsBaseUrl: string) => {
   // DidDocument
   app.get('/.well-known/did.json', async (req, res) => {
     agent.config.logger.info(`Public DidDocument requested`)
@@ -86,7 +86,8 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
     }
   })
 
-  if (anoncredsBaseUrl) {
+  // AnonCreds routes only make sense if we have a public DID (otherwise, we cannot be issuers)
+  if (agent.did) {
     // Schemas
     app.get('/anoncreds/v1/schema/:schemaId', async (req, res) => {
       const schemaId = req.params.schemaId

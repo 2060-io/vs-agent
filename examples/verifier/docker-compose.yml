@@ -14,13 +14,13 @@ services:
       - 3000:3000
       - 3001:3001
     environment:
-      - AGENT_PUBLIC_DID=did:web:10.82.14.12%3A3000
+      - AGENT_PUBLIC_DID=did:web:10.82.14.12%3A3001
+      - PUBLIC_API_BASE_URL=http://10.82.14.12:3001
       - AGENT_ENDPOINT=ws://10.82.14.12:3001
       - AGENT_INVITATION_IMAGE_URL=http://10.82.14.12:3001/avatar.png
       - AGENT_LABEL=Verifier Agent
       - USE_CORS=true
       - EVENTS_BASE_URL=http://verifier-backend:5100
-      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
     volumes:
       - ./afj:/root/.afj

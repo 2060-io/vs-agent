@@ -1,5 +1,7 @@
 import { AgentMessage, HandshakeProtocol } from '@credo-ts/core'
 
+import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../config/constants'
+
 import { VsAgent } from './VsAgent'
 
 /**
@@ -16,13 +18,13 @@ export async function createInvitation(agent: VsAgent, messages?: AgentMessage[]
       handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
       invitationDid: agent.did,
       multiUseInvitation: !messages,
-      imageUrl: process.env.AGENT_INVITATION_IMAGE_URL,
+      imageUrl: AGENT_INVITATION_IMAGE_URL,
       messages,
     })
   ).outOfBandInvitation
   return {
     url: outOfBandInvitation.toUrl({
-      domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/',
+      domain: AGENT_INVITATION_BASE_URL,
     }),
   }
 }

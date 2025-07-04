@@ -1,17 +1,19 @@
 import { BullModule, BullModuleOptions } from '@nestjs/bull'
 import { DynamicModule, Module } from '@nestjs/common'
 
+import { REDIS_HOST, REDIS_PASSWORD } from '../config/constants'
+
 @Module({})
 export class HandledRedisModule {
   static forRoot(): DynamicModule {
     const imports = []
 
-    if (process.env.REDIS_HOST) {
+    if (REDIS_HOST) {
       const bullOptions: BullModuleOptions = {
         redis: {
-          host: process.env.REDIS_HOST,
+          host: REDIS_HOST,
           port: 6379,
-          password: process.env.REDIS_PASSWORD,
+          password: REDIS_PASSWORD,
           maxRetriesPerRequest: 3,
           connectTimeout: 5000,
         },
@@ -28,7 +30,7 @@ export class HandledRedisModule {
     return {
       module: HandledRedisModule,
       imports,
-      exports: process.env.REDIS_HOST ? [BullModule] : [],
+      exports: REDIS_HOST ? [BullModule] : [],
     }
   }
 }

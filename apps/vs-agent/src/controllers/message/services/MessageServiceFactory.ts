@@ -4,6 +4,8 @@ import { InjectQueue } from '@nestjs/bull'
 import { Injectable, Optional } from '@nestjs/common'
 import { Queue } from 'bull'
 
+import { REDIS_HOST } from '../../../config/constants'
+
 import { CoreMessageService } from './CoreMessageService'
 
 @Injectable()
@@ -14,7 +16,7 @@ export class MessageServiceFactory {
   ) {}
 
   async processMessage(message: IBaseMessage, connection: ConnectionRecord) {
-    return process.env.REDIS_HOST !== undefined
+    return REDIS_HOST !== undefined
       ? await this.messageQueue.add({ message, connection })
       : await this.coreMessageService.processMessage(message, connection)
   }

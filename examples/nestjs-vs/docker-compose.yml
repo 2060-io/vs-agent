@@ -16,16 +16,14 @@ services:
     environment:
       - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
       - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
+      - PUBLIC_API_BASE_URL=https://p2801.ovpndev.2060.io
+      - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
       - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
       - AGENT_LABEL=NestJS Client Demo VS
-      - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
       - USE_CORS=true
-      - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
-      - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
-      - REDIRECT_DEFAULT_URL_TO_INVITATION_URL=true
       - REDIS_HOST=redis
     volumes:
       - ./afj:/root/.afj
