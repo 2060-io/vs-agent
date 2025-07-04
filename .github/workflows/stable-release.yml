@@ -45,20 +45,28 @@ jobs:
       - name: Add tags to Docker image and push to Docker Hub
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
-            docker tag $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.version-without-v}}
-            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}
-            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}
-            docker push $DH_USERNAME/$IMAGE_NAME:v${{steps.get_version.outputs.major}}.${{steps.get_version.outputs.minor}}.${{steps.get_version.outputs.patch}}
-            docker push $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}}
+          TAGS=(
+            "v${{ steps.get_version.outputs.major }}"
+            "v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}"
+            "v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.${{ steps.get_version.outputs.patch }}"
+            "v${{ steps.get_version.outputs.version-without-v }}"
+            "latest"
+          )
+
+          for tag in "${TAGS[@]}"; do
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{ steps.get_version.outputs.version }} $DH_USERNAME/$IMAGE_NAME:$tag
+            docker push $DH_USERNAME/$IMAGE_NAME:$tag
+          done        
 
       - name: Build and push Chatbot Demo Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}} .
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{steps.get_version.outputs.version}}
+          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.get_version.outputs.version }} .
+
+          for tag in "${{ steps.get_version.outputs.version }}" latest; do
+            docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.get_version.outputs.version }} $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$tag
+            docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$tag
+          done
 
       - name: Log in to Docker Hub Helm Registry
         if: steps.get_version.outputs.is-semver == 'true'
