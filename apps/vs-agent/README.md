@@ -4,8 +4,7 @@ Verifiable Service Agent is a web application that allows to create Verifiable S
 
 ## Configuration
 
-Most configuration of VS all configuration is done by environment variables. All of them are optional for development
-but likely needed for production and test deployments. These variables might be set also in `.env` file in the form of KEY=VALUE (one per line).
+Most configuration of VS Agent is done by environment variables. These variables might be set also in `.env` file in the form of KEY=VALUE (one per line).
 
 ### Environment variables
 
@@ -38,7 +37,7 @@ You'll also need to set up an `AGENT_LABEL` and (optionally) an `AGENT_INVITATIO
 
 Besides these parameters, you are likely to use your VS Agent alongside a **controller** app that will be sending messages and also receiving events from it (such as new messages arrived, new connections, etc.). For that purpose, you'll need to set up an `EVENTS_BASE_URL` for your VS Agent to be able to send WebHooks to it. See the [VS Agent API document](../../doc//vs-agent-api.md#events) for more information about the API your backend needs to implement (if you are not using the handy [JS](../../packages/client) or [NestJS](../../packages/nestjs-client) client packages).
 
-> **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your VS-A instance is accessible in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own creadential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
+> **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your VS-A instance pblic API is accessible in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own credential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
 >
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 
@@ -96,7 +95,7 @@ These are variables that are updated only on specific use cases.
 
 
 | AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
-| REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | false     |
+| REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | true     |
 | USER_PROFILE_AUTODISCLOSE | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message | false                  |
 
 
