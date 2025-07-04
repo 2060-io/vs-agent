@@ -69,7 +69,7 @@ const fileStorage = diskStorage({
   },
 })
 
-export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anoncredsBaseUrl?: string) => {
+export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anoncredsBaseUrl: string) => {
   // DidDocument
   app.get('/.well-known/did.json', async (req, res) => {
     agent.config.logger.info(`Public DidDocument requested`)

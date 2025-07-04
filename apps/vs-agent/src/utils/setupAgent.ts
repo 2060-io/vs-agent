@@ -113,7 +113,7 @@ export const setupAgent = async ({
   const httpServer = httpInboundTransport ? httpInboundTransport.server : app.listen(port)
 
   // Add did:web and AnonCreds Service routes
-  addDidWebRoutes(app, agent, anoncredsServiceBaseUrl)
+  addDidWebRoutes(app, agent, publicApiBaseUrl)
   if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
@@ -129,7 +129,7 @@ export const setupAgent = async ({
   }
 
   // Make sure default User Profile corresponds to settings in environment variables
-  const imageUrl = displayPictureUrl ?? process.env.AGENT_INVITATION_IMAGE_URL
+  const imageUrl = displayPictureUrl
   const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
   await agent.modules.userProfile.updateUserProfileData({
