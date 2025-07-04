@@ -44,8 +44,6 @@ export const setupAgent = async ({
   selfVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
-  enableWs,
-  enableHttp,
   useCors,
 }: {
   port: number
@@ -59,14 +57,12 @@ export const setupAgent = async ({
   selfVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
-  enableWs?: boolean
-  enableHttp?: boolean
   useCors?: boolean
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
-  if (!enableHttp && !enableWs) {
-    throw new Error('No transport has been enabled. Set at least one of HTTP and WS')
+  if (endpoints.length === 0) {
+    throw new Error('There are no DIDComm endpoints defined. Please set at least one (e.g. wss://myhost)')
   }
 
   const agent = createVsAgent({
@@ -94,19 +90,25 @@ export const setupAgent = async ({
 
   app.set('json spaces', 2)
 
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
   let webSocketServer: WebSocket.Server | undefined
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
+    logger.info('Inbound HTTP transport enabled')
     httpInboundTransport = new HttpInboundTransport({ app, port })
     agent.registerInboundTransport(httpInboundTransport)
-    agent.registerOutboundTransport(new HttpOutboundTransport())
   }
 
   if (enableWs) {
+    logger.info('Inbound WebSocket transport enabled')
     webSocketServer = new WebSocket.Server({ noServer: true })
     agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
-    agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
   }
+
+  agent.registerOutboundTransport(new HttpOutboundTransport())
+  agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
 
