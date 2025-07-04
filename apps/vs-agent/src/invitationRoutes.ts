@@ -8,7 +8,7 @@ import { VsAgent } from './utils/VsAgent'
 import { createInvitation } from './utils/agent'
 import { TsLogger } from './utils/logger'
 
-// Add invitation endpoints (TODO: remove as it should be part of an external API)
+// Add invitation endpoints
 export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) => {
   // Retrieve the URL that corresponds to a given short URL
   app.get('/s', async (req, res) => {
@@ -59,7 +59,7 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
   // Generate a regular invitation
   app.get('/invitation', async (req, res) => {
     const { url: invitationUrl } = await createInvitation(agent)
-    if (process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL === 'true') res.redirect(invitationUrl)
+    if (process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL !== 'false') res.redirect(invitationUrl)
     else res.send(invitationUrl)
   })
 
