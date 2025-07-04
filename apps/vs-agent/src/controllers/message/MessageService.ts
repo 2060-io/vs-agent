@@ -285,7 +285,7 @@ export class MessageService {
           // FIXME: This is a workaround due to an issue found in AFJ validator. Replace with class when fixed
           const json = {
             '@type': OutOfBandInvitation.type.messageTypeUri,
-            '@id': did,
+            '@id': utils.uuid(),
             label: label ?? '',
             imageUrl: imageUrl,
             services: [did],
@@ -294,12 +294,8 @@ export class MessageService {
 
           const invitation = OutOfBandInvitation.fromJson(json)
 
-          /*const invitation = new OutOfBandInvitation({ 
-            id: did,
-            label: label ?? '', imageUrl,
-            services: [did],
-            handshakeProtocols: [HandshakeProtocol.DidExchange],
-        })*/
+          // In this special case we use the public did as pthid to indicate recipient to treat as an implicit invitation
+          invitation.setThread({ parentThreadId: did })
 
           await messageSender.sendMessage(
             new OutboundMessageContext(invitation, {
@@ -390,14 +386,19 @@ export class MessageService {
         messageId = requestEMrtdData.messageId
       }
 
-      if (messageId)
-        await agent.genericRecords.save({
-          id: messageId,
-          content: {},
-          tags: { messageId: message.id, connectionId: message.connectionId },
-        })
-      this.logger.debug!(`messageId saved: ${messageId}`)
-      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and VS Agent flows. Support external message id setting
+      if (messageId) {
+        try {
+          await agent.genericRecords.save({
+            id: messageId,
+            content: {},
+            tags: { messageId: message.id, connectionId: message.connectionId },
+          })
+          this.logger.debug!(`messageId saved: ${messageId}`)
+        } catch (error) {
+          this.logger.warn(`Cannot save message with ${messageId}: ${error.stack}`)
+        }
+      }
+      return { id: messageId ?? utils.uuid() } // TODO: persistant mapping between AFJ records and Service Agent flows. Support external message id setting
     } catch (error) {
       this.logger.error(`Error: ${error.stack}`)
       throw new Error(`something went wrong: ${error}`)
