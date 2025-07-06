@@ -7,6 +7,7 @@ import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
+import { PUBLIC_API_BASE_URL } from '../../config/constants'
 import { UrlShorteningService } from '../../services/UrlShorteningService'
 import { VsAgentService } from '../../services/VsAgentService'
 import { createInvitation } from '../../utils/agent'
@@ -119,7 +120,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.proofRecord.id,
     })
-    const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
+    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
 
     return {
       proofExchangeId: request.proofRecord.id,
@@ -198,7 +199,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.credentialRecord.id,
     })
-    const shortUrl = `${process.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3001'}/s?id=${shortUrlId}`
+    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
 
     return {
       credentialExchangeId: request.credentialRecord.id,

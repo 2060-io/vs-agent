@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
+import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../../config/constants'
 import { VsAgentService } from '../../services/VsAgentService'
 
 import { OobInvitationDto, OutOfBandInvitationCreateResult } from './OobInvitationDto'
@@ -80,7 +81,7 @@ export class VCAuthNController {
         handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
         invitationDid: usePublicDid && agent.did ? agent.did : undefined,
         multiUseInvitation: false,
-        imageUrl: process.env.AGENT_INVITATION_IMAGE_URL,
+        imageUrl: AGENT_INVITATION_IMAGE_URL,
         messages: [requestMessage],
       })
 
@@ -89,7 +90,7 @@ export class VCAuthNController {
         invitation: invitation.outOfBandInvitation.toJSON(),
         invi_msg_id: invitation.outOfBandInvitation.id,
         invitation_url: invitation.outOfBandInvitation.toUrl({
-          domain: process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/',
+          domain: AGENT_INVITATION_BASE_URL,
         }),
         oob_id: invitation.id,
         state: invitation.state,

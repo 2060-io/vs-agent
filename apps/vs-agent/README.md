@@ -16,7 +16,6 @@ These variables are usually important for every deployment, since they define ho
 
 | Variable                   | Description                                                                                                       | Default value         |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-
 | AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
 | PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
@@ -46,6 +45,8 @@ Besides these parameters, you are likely to use your VS Agent alongside a **cont
 
 These are variables that you are likely to use when going into production, since you don't want to use dummy credentials and also you'll probably want to use external components to improve horizontal scalability.
 
+| Variable                   | Description                                                                                                       | Default value         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
 | AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-vs-agent    |
 | AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-vs-agent    |
 | POSTGRES_HOST             | PosgreSQL database host                                                                                             | None (use SQLite)               |
@@ -74,7 +75,9 @@ By offloading message handling and enabling asynchronous processing, Redis helps
 
 Here is a couple of variables that you may want to take care in case of troubles or working in development environments.
 
-| AGENT_LOG_LEVEL            | Aries Agent Log level                                                                                             | 4 (warn)              |
+| Variable                   | Description                                                                                                       | Default value         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
+| AGENT_LOG_LEVEL            | Credo Agent Log level                                                                                             | 4 (warn)              |
 | ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
 | USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
 
@@ -93,11 +96,14 @@ Possible log levels:
 
 These are variables that are updated only on specific use cases.
 
-
+| Variable                   | Description                                                                                                       | Default value         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
+| AGENT_WALLET_KEY_DERIVATION_METHOD |	Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW|	ARGON2I_MOD |
 | AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
 | REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | true     |
 | USER_PROFILE_AUTODISCLOSE | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message | false                  |
 
+> **Note about Key derivation method**: By default, we use the strongest ARGON2I_MOD, but since this is the slowest one as well, depending on the security infrastructure you have, you might want to not derive the key at all (use RAW). However, in versions of VS Agent we are going to deprecate this setting, so we recommend to keep the default setting to make migration process easier.
 
 ### Agent feature discovery
 

@@ -3,6 +3,7 @@ import 'reflect-metadata'
 import express from 'express'
 import QRCode from 'qrcode'
 
+import { REDIRECT_DEFAULT_URL_TO_INVITATION_URL } from './config/constants'
 import { PresentationStatus, sendPresentationCallbackEvent } from './events/CallbackEvent'
 import { VsAgent } from './utils/VsAgent'
 import { createInvitation } from './utils/agent'
@@ -41,7 +42,7 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
               proofExchangeId: proofRecord.id,
               callbackUrl: callbackParameters.callbackUrl,
               status: PresentationStatus.SCANNED,
-              logger: (await agent.config.logger) as TsLogger,
+              logger: agent.config.logger as TsLogger,
               ref: callbackParameters.ref,
             })
           }
@@ -59,7 +60,7 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
   // Generate a regular invitation
   app.get('/invitation', async (req, res) => {
     const { url: invitationUrl } = await createInvitation(agent)
-    if (process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL !== 'false') res.redirect(invitationUrl)
+    if (REDIRECT_DEFAULT_URL_TO_INVITATION_URL) res.redirect(invitationUrl)
     else res.send(invitationUrl)
   })
 
