@@ -37,6 +37,11 @@ jobs:
         run: |
           echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
 
+      - name: Set version for apps and packages
+        if: steps.get_version.outputs.is-semver == 'true'
+        run: |
+          pnpm -r --topological version "${{steps.get_version.outputs.version}}"
+
       - name: Build Docker image
         if: steps.get_version.outputs.is-semver == 'true'
         run: |
@@ -100,5 +105,4 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
           pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
-          pnpm pnpm -r --topological version "${{steps.get_version.outputs.version}}"
           pnpm -r publish --no-git-checks --access public
