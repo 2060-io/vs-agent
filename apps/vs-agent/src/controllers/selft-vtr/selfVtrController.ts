@@ -1,6 +1,7 @@
 import { Body, Controller, HttpException, HttpStatus, Logger, Param, Post } from '@nestjs/common'
 import { ApiBody, ApiParam, ApiTags, getSchemaPath } from '@nestjs/swagger'
-import { instanceToPlain } from 'class-transformer'
+import { instanceToPlain, plainToInstance } from 'class-transformer'
+import { validate } from 'class-validator'
 
 import { VsAgentService } from '../../services/VsAgentService'
 
@@ -77,73 +78,61 @@ export class SelfVtrController {
       'ecs-org': {
         summary: 'OrganizationCredential',
         value: {
-          credentialSubject: {
-            id: 'did:web:example.org',
-            name: 'Foundation',
-            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
-            registryId: 'ORG-123456',
-            registryUrl: 'https://registry.example.org/org-123456',
-            address: '123 AI Avenue, Silicon Valley, CA',
-            type: 'FOUNDATION',
-            countryCode: 'US',
-          },
+          id: 'did:web:example.org',
+          name: 'Foundation',
+          logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+          registryId: 'ORG-123456',
+          registryUrl: 'https://registry.example.org/org-123456',
+          address: '123 AI Avenue, Silicon Valley, CA',
+          type: 'FOUNDATION',
+          countryCode: 'US',
         },
       },
       'ecs-person': {
         summary: 'PersonCredential',
         value: {
-          credentialSubject: {
-            id: 'did:web:user.company.com',
-            firstName: 'Andres',
-            lastName: 'Vallecilla',
-            avatar: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
-            birthDate: '1993-10-12',
-            countryOfResidence: 'CO',
-          },
+          id: 'did:web:user.company.com',
+          firstName: 'Andres',
+          lastName: 'Vallecilla',
+          avatar: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+          birthDate: '1993-10-12',
+          countryOfResidence: 'CO',
         },
       },
       'ecs-service': {
         summary: 'ServiceCredential',
         value: {
-          credentialSubject: {
-            id: 'did:web:service.company.com',
-            name: 'ChatGPT',
-            type: 'AI Assistant',
-            description: 'A conversational AI assistant.',
-            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
-            minimumAgeRequired: 13,
-            termsAndConditions: 'https://company.com/terms',
-            termsAndConditionsHash: 'abc123terms',
-            privacyPolicy: 'https://company.com/privacy',
-            privacyPolicyHash: 'abc123privacy',
-          },
+          id: 'did:web:service.company.com',
+          name: 'ChatGPT',
+          type: 'AI Assistant',
+          description: 'A conversational AI assistant.',
+          logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+          minimumAgeRequired: 13,
+          termsAndConditions: 'https://company.com/terms',
+          termsAndConditionsHash: 'abc123terms',
+          privacyPolicy: 'https://company.com/privacy',
+          privacyPolicyHash: 'abc123privacy',
         },
       },
       'ecs-user-agent': {
         summary: 'UserAgentCredential',
         value: {
-          credentialSubject: {
-            id: 'did:web:useragent.company.com',
-            name: 'User Agent',
-            description: 'An autonomous user agent integrated with ChatGPT.',
-            category: 'AI Assistant',
-            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
-            wallet: true,
-            termsAndConditions: 'https://company.com/terms',
-            termsAndConditionsHash: 'ua123terms',
-            privacyPolicy: 'https://company.com/privacy',
-            privacyPolicyHash: 'ua123privacy',
-          },
+          id: 'did:web:useragent.company.com',
+          name: 'User Agent',
+          description: 'An autonomous user agent integrated with ChatGPT.',
+          category: 'AI Assistant',
+          logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+          wallet: true,
+          termsAndConditions: 'https://company.com/terms',
+          termsAndConditionsHash: 'ua123terms',
+          privacyPolicy: 'https://company.com/privacy',
+          privacyPolicyHash: 'ua123privacy',
         },
       },
     },
   })
   public async uploadSchemaData(@Param('schemaId') schemaId: string, @Body() body: CredentialVtrDto) {
-    const allowedSchemas = ['ecs-org', 'ecs-person', 'ecs-service', 'ecs-user-agent']
-
-    if (!allowedSchemas.includes(schemaId)) {
-      throw new HttpException('Unsupported schemaId', HttpStatus.BAD_REQUEST)
-    }
+    const validatedDto = await validateDtoBySchemaId(schemaId, body)
 
     try {
       const agent = await this.agentService.getAgent()
@@ -160,7 +149,7 @@ export class SelfVtrController {
 
       await agent.genericRecords.save({
         id: recordId,
-        content: instanceToPlain(body),
+        content: instanceToPlain(validatedDto),
       })
 
       return {
@@ -171,4 +160,37 @@ export class SelfVtrController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+}
+
+async function validateDtoBySchemaId(schemaId: string, body: any) {
+  let dtoClass: any
+
+  switch (schemaId) {
+    case 'ecs-org':
+      dtoClass = OrganizationCredentialDto
+      break
+    case 'ecs-person':
+      dtoClass = PersonCredentialDto
+      break
+    case 'ecs-service':
+      dtoClass = ServiceCredentialDto
+      break
+    case 'ecs-user-agent':
+      dtoClass = UserAgentCredentialDto
+      break
+    default:
+      throw new HttpException(`Invalid schemaId: ${schemaId}`, HttpStatus.BAD_REQUEST)
+  }
+
+  const dtoInstance = plainToInstance(dtoClass, body)
+  const errors = await validate(dtoInstance)
+
+  if (errors.length > 0) {
+    throw new HttpException(
+      `Validation failed for schemaId "${schemaId}": ${JSON.stringify(errors, null, 2)}`,
+      HttpStatus.BAD_REQUEST,
+    )
+  }
+
+  return dtoInstance
 }
