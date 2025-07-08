@@ -73,6 +73,70 @@ export class SelfVtrController {
         { $ref: getSchemaPath(UserAgentCredentialDto) },
       ],
     },
+    examples: {
+      'ecs-org': {
+        summary: 'OrganizationCredential',
+        value: {
+          credentialSubject: {
+            id: 'did:web:example.org',
+            name: 'Foundation',
+            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+            registryId: 'ORG-123456',
+            registryUrl: 'https://registry.example.org/org-123456',
+            address: '123 AI Avenue, Silicon Valley, CA',
+            type: 'FOUNDATION',
+            countryCode: 'US',
+          },
+        },
+      },
+      'ecs-person': {
+        summary: 'PersonCredential',
+        value: {
+          credentialSubject: {
+            id: 'did:web:user.company.com',
+            firstName: 'Andres',
+            lastName: 'Vallecilla',
+            avatar: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+            birthDate: '1993-10-12',
+            countryOfResidence: 'CO',
+          },
+        },
+      },
+      'ecs-service': {
+        summary: 'ServiceCredential',
+        value: {
+          credentialSubject: {
+            id: 'did:web:service.company.com',
+            name: 'ChatGPT',
+            type: 'AI Assistant',
+            description: 'A conversational AI assistant.',
+            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+            minimumAgeRequired: 13,
+            termsAndConditions: 'https://company.com/terms',
+            termsAndConditionsHash: 'abc123terms',
+            privacyPolicy: 'https://company.com/privacy',
+            privacyPolicyHash: 'abc123privacy',
+          },
+        },
+      },
+      'ecs-user-agent': {
+        summary: 'UserAgentCredential',
+        value: {
+          credentialSubject: {
+            id: 'did:web:useragent.company.com',
+            name: 'User Agent',
+            description: 'An autonomous user agent integrated with ChatGPT.',
+            category: 'AI Assistant',
+            logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
+            wallet: true,
+            termsAndConditions: 'https://company.com/terms',
+            termsAndConditionsHash: 'ua123terms',
+            privacyPolicy: 'https://company.com/privacy',
+            privacyPolicyHash: 'ua123privacy',
+          },
+        },
+      },
+    },
   })
   public async uploadSchemaData(@Param('schemaId') schemaId: string, @Body() body: CredentialVtrDto) {
     const allowedSchemas = ['ecs-org', 'ecs-person', 'ecs-service', 'ecs-user-agent']

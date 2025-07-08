@@ -21,26 +21,29 @@ export class BaseCredentialDto {
 }
 
 export class OrganizationCredentialDto extends BaseCredentialDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Example Organization' })
   @IsString()
   @MaxLength(256)
   name!: string
 
-  @ApiProperty({ description: 'PNG image as base64 string' })
+  @ApiProperty({
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+    description: 'PNG image as base64 string',
+  })
   @IsString()
   logo!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'test registry' })
   @IsString()
   @MaxLength(256)
   registryId!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'https://example.com/organization' })
   @IsString()
   @MaxLength(256)
   registryUrl!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: '123 Main St, Anytown, USA' })
   @IsString()
   @MaxLength(1024)
   address!: string
@@ -49,24 +52,27 @@ export class OrganizationCredentialDto extends BaseCredentialDto {
   @IsIn(['PUBLIC', 'PRIVATE', 'FOUNDATION'])
   type!: string
 
-  @ApiProperty({ maxLength: 2 })
+  @ApiProperty({ maxLength: 2, example: 'US' })
   @IsString()
   countryCode!: string
 }
 
 export class PersonCredentialDto extends BaseCredentialDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'John' })
   @IsString()
   @MaxLength(256)
   @IsOptional()
   firstName?: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Doe' })
   @IsString()
   @MaxLength(256)
   lastName!: string
 
-  @ApiPropertyOptional({ description: 'PNG image as base64 string' })
+  @ApiPropertyOptional({
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+    description: 'PNG image as base64 string',
+  })
   @IsString()
   @IsOptional()
   avatar?: string
@@ -75,98 +81,104 @@ export class PersonCredentialDto extends BaseCredentialDto {
   @IsDateString()
   birthDate!: string
 
-  @ApiProperty({ maxLength: 2 })
+  @ApiProperty({ maxLength: 2, example: 'US' })
   @IsString()
   countryOfResidence!: string
 }
 
 export class ServiceCredentialDto extends BaseCredentialDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Example Service' })
   @IsString()
   @MaxLength(512)
   name!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'service' })
   @IsString()
   @MaxLength(128)
   type!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'This is an example service description.' })
   @IsString()
   @MaxLength(4096)
   description!: string
 
-  @ApiProperty({ description: 'PNG image as base64 string' })
+  @ApiProperty({
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+    description: 'PNG image as base64 string',
+  })
   @IsString()
   logo!: string
 
-  @ApiProperty({ minimum: 0, maximum: 149 })
+  @ApiProperty({ minimum: 0, maximum: 149, example: 18 })
   @IsNumber()
   @Min(0)
   @Max(149)
   minimumAgeRequired!: number
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: 'uri', example: 'https://example.com/terms' })
   @IsUrl()
   @MaxLength(2048)
   termsAndConditions!: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'abc123' })
   @IsString()
   @IsOptional()
   termsAndConditionsHash?: string
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: 'uri', example: 'https://example.com/privacy' })
   @IsUrl()
   @MaxLength(2048)
   privacyPolicy!: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'def456' })
   @IsString()
   @IsOptional()
   privacyPolicyHash?: string
 }
 
 export class UserAgentCredentialDto extends BaseCredentialDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Example User Agent' })
   @IsString()
   @MaxLength(512)
   name!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'This is an example user agent description.' })
   @IsString()
   @MaxLength(4096)
   description!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: 'test category' })
   @IsString()
   @MaxLength(128)
   category!: string
 
-  @ApiProperty({ description: 'PNG image as base64 string' })
+  @ApiProperty({
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+    description: 'PNG image as base64 string',
+  })
   @IsString()
   logo!: string
 
-  @ApiProperty()
+  @ApiProperty({ example: true })
   @IsBoolean()
   wallet!: boolean
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: 'uri', example: 'https://example.com/user-agent' })
   @IsUrl()
   @MaxLength(2048)
   termsAndConditions!: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'abc123' })
   @IsString()
   @IsOptional()
   termsAndConditionsHash?: string
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: 'uri', example: 'https://example.com/terms' })
   @IsUrl()
   @MaxLength(2048)
   privacyPolicy!: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'def456' })
   @IsString()
   @IsOptional()
   privacyPolicyHash?: string
