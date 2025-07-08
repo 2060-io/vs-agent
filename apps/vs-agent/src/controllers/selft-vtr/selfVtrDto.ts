@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import {
   IsString,
-  IsNotEmpty,
   IsIn,
   MaxLength,
   IsUrl,
@@ -13,14 +12,7 @@ import {
   IsOptional,
 } from 'class-validator'
 
-export class BaseCredentialDto {
-  @ApiProperty({ format: 'uri', example: 'did:example:123' })
-  @IsString()
-  @IsNotEmpty()
-  id!: string
-}
-
-export class OrganizationCredentialDto extends BaseCredentialDto {
+export class OrganizationCredentialDto {
   @ApiProperty({ example: 'Example Organization' })
   @IsString()
   @MaxLength(256)
@@ -57,7 +49,7 @@ export class OrganizationCredentialDto extends BaseCredentialDto {
   countryCode!: string
 }
 
-export class PersonCredentialDto extends BaseCredentialDto {
+export class PersonCredentialDto {
   @ApiPropertyOptional({ example: 'John' })
   @IsString()
   @MaxLength(256)
@@ -86,7 +78,7 @@ export class PersonCredentialDto extends BaseCredentialDto {
   countryOfResidence!: string
 }
 
-export class ServiceCredentialDto extends BaseCredentialDto {
+export class ServiceCredentialDto {
   @ApiProperty({ example: 'Example Service' })
   @IsString()
   @MaxLength(512)
@@ -136,7 +128,7 @@ export class ServiceCredentialDto extends BaseCredentialDto {
   privacyPolicyHash?: string
 }
 
-export class UserAgentCredentialDto extends BaseCredentialDto {
+export class UserAgentCredentialDto {
   @ApiProperty({ example: 'Example User Agent' })
   @IsString()
   @MaxLength(512)

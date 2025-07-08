@@ -78,7 +78,6 @@ export class SelfVtrController {
       'ecs-org': {
         summary: 'OrganizationCredential',
         value: {
-          id: 'did:web:example.org',
           name: 'Foundation',
           logo: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
           registryId: 'ORG-123456',
@@ -91,7 +90,6 @@ export class SelfVtrController {
       'ecs-person': {
         summary: 'PersonCredential',
         value: {
-          id: 'did:web:user.company.com',
           firstName: 'Andres',
           lastName: 'Vallecilla',
           avatar: 'iVBORw0KGgoAAAANSUhEUgAA...', // base64 image string
@@ -102,7 +100,6 @@ export class SelfVtrController {
       'ecs-service': {
         summary: 'ServiceCredential',
         value: {
-          id: 'did:web:service.company.com',
           name: 'ChatGPT',
           type: 'AI Assistant',
           description: 'A conversational AI assistant.',
@@ -117,7 +114,6 @@ export class SelfVtrController {
       'ecs-user-agent': {
         summary: 'UserAgentCredential',
         value: {
-          id: 'did:web:useragent.company.com',
           name: 'User Agent',
           description: 'An autonomous user agent integrated with ChatGPT.',
           category: 'AI Assistant',
@@ -183,7 +179,10 @@ async function validateDtoBySchemaId(schemaId: string, body: any) {
   }
 
   const dtoInstance = plainToInstance(dtoClass, body)
-  const errors = await validate(dtoInstance)
+  const errors = await validate(dtoInstance, {
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  })
 
   if (errors.length > 0) {
     throw new HttpException(
