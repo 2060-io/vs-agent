@@ -13,6 +13,7 @@ import {
 } from './controllers/message'
 import { MessageController } from './controllers/message/MessageController'
 import { PresentationsController } from './controllers/presentations/PresentationsController'
+import { SelfVtrController } from './controllers/selft-vtr'
 import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
 import { HandledRedisModule } from './modules/redis.module'
 import { UrlShorteningService } from './services/UrlShorteningService'
@@ -34,6 +35,7 @@ export class VsAgentModule {
         InvitationController,
         QrController,
         VCAuthNController,
+        SelfVtrController,
       ],
       providers: [
         {

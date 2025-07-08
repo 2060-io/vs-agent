@@ -30,8 +30,6 @@ import {
   W3cJsonLdSignPresentationOptions,
   W3cPresentation,
 } from '@credo-ts/core'
-import Ajv from 'ajv/dist/2020'
-import addFormats from 'ajv-formats'
 import { createHash } from 'crypto'
 import express from 'express'
 import * as fs from 'fs'
@@ -41,8 +39,6 @@ import { VsAgent } from './utils/VsAgent'
 
 // Load schemas from data.json at startup (used for schema validation and mock responses)
 const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
-const ajv = new Ajv({ strict: false })
-addFormats(ajv)
 
 // Main function to add all test routes to the Express app
 export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
@@ -307,78 +303,6 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     } catch (error) {
       agent.config.logger.error(`Error loading schema file: ${error.message}`)
       res.status(500).json({ error: 'Failed to load schema' })
-    }
-  })
-
-  /**
-   * POST /upload/:schemaId
-   *
-   * Upload and validate credential data against the JSON schema defined in data.json.
-   *
-   * Usage:
-   *   - :schemaId must be either "ecs-service" or "ecs-org" (as defined in data.json).
-   *   - The request body should be a JSON object matching the schema at data.json > [schemaId] > properties > credentialSubject.
-   *   - The "id" field is automatically set to the agent's DID.
-   *
-   * Example using curl:
-   *
-   *   curl -X POST http://localhost:3001/upload/ecs-service \
-   *     -H "Content-Type: application/json" \
-   *     -d '{
-   *       "name": "Health Portal",
-   *       "type": "WEB_PORTAL",
-   *       "description": "Some description",
-   *       "logo": "base64string",
-   *       "minimumAgeRequired": 18,
-   *       "termsAndConditions": "https://example.com/terms",
-   *       "termsAndConditionsHash": "hash",
-   *       "privacyPolicy": "https://example.com/privacy",
-   *       "privacyPolicyHash": "hash"
-   *     }'
-   *
-   * Responses:
-   *   - 200 OK: Data is valid and accepted.
-   *   - 400 Bad Request: Data is invalid according to the schema.
-   *   - 404 Not Found: schemaId does not exist in data.json.
-   *   - 500 Internal Server Error: Unexpected error.
-   */
-  app.post('/self-vtr/upload/:schemaId', async (req, res) => {
-    const ecsSchema = ecsSchemas[req.params.schemaId]
-    try {
-      if (!ecsSchema) {
-        return res.status(404).json({ error: 'Schema not defined in data.json' })
-      }
-
-      const validate = ajv.compile(ecsSchema.properties.credentialSubject)
-      const isValid = validate({ ...req.body, id: agent.did })
-      if (!isValid) {
-        return res.status(400).json({
-          error: 'Invalid data',
-          details: validate.errors?.map(e => ({
-            message: e.message,
-            path: e.instancePath,
-            keyword: e.keyword,
-            params: e.params,
-          })),
-        })
-      }
-
-      const recordId = `${agent.did}-${req.params.schemaId}`
-      try {
-        const existing = await agent.genericRecords.findById(recordId)
-        if (existing) {
-          await agent.genericRecords.delete(existing)
-        }
-      } catch (err) {}
-
-      await agent.genericRecords.save({
-        id: recordId,
-        content: req.body,
-      })
-      return res.status(200).json({ message: 'Data is valid and accepted' })
-    } catch (error) {
-      console.error(`Error validating data: ${error.message}`)
-      return res.status(500).json({ error: 'Internal Server Error' })
     }
   })
 
