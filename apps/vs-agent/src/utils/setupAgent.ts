@@ -39,7 +39,6 @@ export const setupAgent = async ({
   displayPictureUrl,
   endpoints,
   logLevel,
-  anoncredsServiceBaseUrl,
   publicApiBaseUrl,
   selfVtrEnabled,
   publicDid,
@@ -52,7 +51,6 @@ export const setupAgent = async ({
   displayPictureUrl?: string
   endpoints: string[]
   logLevel?: LogLevel
-  anoncredsServiceBaseUrl?: string
   publicApiBaseUrl: string
   selfVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
@@ -77,7 +75,6 @@ export const setupAgent = async ({
     did: publicDid,
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
-    anoncredsServiceBaseUrl,
     publicApiBaseUrl,
   })
 
@@ -230,11 +227,11 @@ export const setupAgent = async ({
         )
       }
 
-      if (anoncredsServiceBaseUrl) {
+      if (publicApiBaseUrl) {
         builder.addService(
           new DidDocumentService({
             id: `${publicDid}#anoncreds`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
+            serviceEndpoint: `${publicApiBaseUrl}/anoncreds/v1`,
             type: 'AnonCredsRegistry',
           }),
         )
