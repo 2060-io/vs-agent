@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, HttpStatus, HttpException, Redirect } from '@nestjs/common'
+import { Controller, Get, Query, Res, HttpStatus, HttpException } from '@nestjs/common'
 import { Response } from 'express'
 import QRCode from 'qrcode'
 
@@ -46,7 +46,7 @@ export class InvitationRoutesController {
           }
         }
         const invitation = await agent.oob.parseInvitation(longUrl)
-        return res.send(invitation.toJSON()).end()
+        res.send(invitation.toJSON()).end()
       } else {
         res.status(302).location(longUrl).end()
       }
