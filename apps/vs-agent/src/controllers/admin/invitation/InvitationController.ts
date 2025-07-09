@@ -7,10 +7,10 @@ import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { PUBLIC_API_BASE_URL } from '../../config/constants'
-import { UrlShorteningService } from '../../services/UrlShorteningService'
-import { VsAgentService } from '../../services/VsAgentService'
-import { createInvitation } from '../../utils/agent'
+import { PUBLIC_API_BASE_URL } from '../../../config/constants'
+import { UrlShorteningService } from '../../../services/UrlShorteningService'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { createInvitation } from '../../../utils/agent'
 
 import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
 

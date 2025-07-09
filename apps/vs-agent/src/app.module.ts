@@ -1,19 +1,19 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import { VsAgentController } from './controllers/agent/VsAgentController'
-import { ConnectionController } from './controllers/connections/ConnectionController'
-import { CredentialTypesController } from './controllers/credentials/CredentialTypeController'
-import { InvitationController } from './controllers/invitation/InvitationController'
-import { QrController } from './controllers/invitation/QrController'
 import {
+  ConnectionController,
   CoreMessageService,
+  CredentialTypesController,
+  InvitationController,
+  MessageController,
   MessageService,
   MessageServiceFactory,
+  PresentationsController,
+  QrController,
   RedisMessageService,
-} from './controllers/message'
-import { MessageController } from './controllers/message/MessageController'
-import { PresentationsController } from './controllers/presentations/PresentationsController'
-import { VCAuthNController } from './controllers/vcauthn/VCAuthNController'
+  VCAuthNController,
+  VsAgentController,
+} from './controllers'
 import { HandledRedisModule } from './modules/redis.module'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { VsAgentService } from './services/VsAgentService'

@@ -3,8 +3,8 @@ import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { VsAgentService } from '../../services/VsAgentService'
-import { VsAgent } from '../../utils/VsAgent'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { VsAgent } from '../../../utils/VsAgent'
 
 import { MessageServiceFactory } from './services/MessageServiceFactory'
 
