@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, HttpStatus, HttpException } from '@nestjs/common'
+import { Controller, Get, Query, Res, HttpStatus, HttpException, Redirect } from '@nestjs/common'
 import { Response } from 'express'
 import QRCode from 'qrcode'
 
@@ -46,9 +46,9 @@ export class InvitationRoutesController {
           }
         }
         const invitation = await agent.oob.parseInvitation(longUrl)
-        return invitation.toJSON()
+        return res.send(invitation.toJSON()).end()
       } else {
-        return { url: longUrl, statusCode: 302 }
+        res.status(302).location(longUrl).end()
       }
     } catch (error) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -56,18 +56,17 @@ export class InvitationRoutesController {
   }
 
   @Get('/invitation')
-  async getInvitation() {
+  async getInvitation(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
     const { url: invitationUrl } = await createInvitation(agent)
-    if (REDIRECT_DEFAULT_URL_TO_INVITATION_URL) {
-      return { url: invitationUrl, statusCode: 302 }
-    } else {
-      return invitationUrl
-    }
+
+    if (REDIRECT_DEFAULT_URL_TO_INVITATION_URL) res.redirect(invitationUrl)
+    else res.send(invitationUrl)
   }
 
   @Get('/qr')
   async getQr(
+    @Res() res: Response,
     @Query('fcolor') fcolor?: string,
     @Query('bcolor') bcolor?: string,
     @Query('size') size?: number,
@@ -91,10 +90,11 @@ export class InvitationRoutesController {
           light: bcolor ? `#${bcolor}` : undefined,
         },
         errorCorrectionLevel,
-        width: size ? Number(size) : undefined,
-        margin: padding ? Number(padding) : undefined,
+        width: size,
+        margin: padding,
       })
-      return { image: qr, contentType: 'image/png; charset=utf-8' }
+      res.header('Content-Type', 'image/png; charset=utf-8')
+      res.send(qr)
     } catch (error) {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
