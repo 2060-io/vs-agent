@@ -151,12 +151,13 @@ By sending this message, a Verifiable Credential is effectively issued and sent 
 This message could be sent as a response to a Credential Request. In such case, `threadId` is used to identify credential details. But it can also start a new Credential Issuance flow, and specify
 
 Parameters:
+
 - (optional) Credential Definition ID
 - (optional) Revocation Definition ID
 - (optional) Revocation Index
 - (optional) Claims
 
-**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process. 
+**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process.
 
 ```json
 {
@@ -168,6 +169,7 @@ Parameters:
   "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
 }
 ```
+
 #### Credential Revocation
 
 By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
@@ -296,10 +298,11 @@ Shares media files to a destination. They might be previously encrypted and stor
 ```
 
 `mimeType` is mandatory and specifies the kind of media that is being shared. Some supported types are:
-  - `image/png` and `image/jpg` for images
-  - `video/*` for videos
-  - `audio/*` for voice notes
-  - `text/html` for links to websites
+
+- `image/png` and `image/jpg` for images
+- `video/*` for videos
+- `audio/*` for voice notes
+- `text/html` for links to websites
 
 `filename`, `description` and `byteCount` are optional but recommended to make it easier for the receiving end to know information about the file about to be downloaded.
 
@@ -310,6 +313,7 @@ Shares media files to a destination. They might be previously encrypted and stor
 - `duration` is used in videos and audio files to specify the number of seconds they last
 
 There are some parameters used in Links (`text/html` mimeType):
+
 - title
 - icon: URL or Data URI containing the icon to show as preview of the website
 - openingMode: `embedded` or `fullScreen`
@@ -567,7 +571,6 @@ More info about the meaning of each field (and validity) can be found in [MRZ](h
 
 #### eMRTD Data Request
 
-
 Request the other party to read and provide eMRTD (Electronic Machine Readable Travel Document) data from a compatible electronic document.
 
 ```json
@@ -582,7 +585,6 @@ Request the other party to read and provide eMRTD (Electronic Machine Readable T
 #### eMRTD Data Submit
 
 Submit data retrieved from an electronic Machine Readable Travel Document. This message may be sent either individually or as a response to an eMRTD Data Request.
-
 
 The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending on how the flow went. The latter is used for unspecified errors (e.g. User Agent not capable of handling the request).
 
@@ -738,10 +740,9 @@ VS Agent supports the creation of invitation codes that are used to start flows 
 
 ### Connection Invitation
 
-It's a GET request to `/invitation`. It does not receive any parameter. 
+It's a GET request to `/invitation`. It does not receive any parameter.
 
 Response from VS Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:
-
 
 ```json
 {
@@ -751,7 +752,7 @@ Response from VS Agent is a JSON object containing an URL-encoded invitation, re
 
 Note that the following VS Agent configuration environment variables are used when creating invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 
@@ -759,7 +760,7 @@ Note that the following VS Agent configuration environment variables are used wh
 
 Presentation Request invitation codes are created by specifying details of the credentials required.
 
-This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess. 
+This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess.
 At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified,
 then VS Agent will ask for all attributes in the credential.
 
@@ -794,10 +795,10 @@ Response will include the invitation code in both short and long form URL format
 
 Note that the following VS Agent configuration environment variables are used when creating presentation request invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like <<https://myHost.com/s?id=><uuid>)
 
 #### Presentation Callback API
 
@@ -820,7 +821,6 @@ Possible values for PresentationStatus are:
 - 'no-compatible-credentials'
 - 'verification-error'
 - 'unspecified-error'
-
 
 ### Credential Offer
 
@@ -847,10 +847,10 @@ Response will include the invitation code in both short and long form URL format
 
 Note that the following VS Agent configuration environment variables are used when creating credential offer invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like <https://myHost.com/s?id=><uuid>)
 
 ## Presentations
 
@@ -864,7 +864,6 @@ It is possible to query all presentation flows created by VS Agent through the e
 - updatedAt: last time activity was recorded for this flow
 
 It is possible to query for a single presentation by executing a GET to `/presentations/<proofExchangeId>`.
-
 
 ## Verifiable Data Registry Operations
 
@@ -893,4 +892,3 @@ Response from VS Agent will generally result in a 200 HTTP response code and inc
   "id": credential definition Id (as registered in VDR)
 }
 ```
-
