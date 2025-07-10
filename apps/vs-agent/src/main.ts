@@ -4,7 +4,7 @@ import type { ServerConfig } from './utils/ServerConfig'
 
 import { HttpOutboundTransport, KeyDerivationMethod, LogLevel, utils } from '@credo-ts/core'
 import { HttpInboundTransport } from '@credo-ts/node'
-import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
+import { DynamicModule, INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import express from 'express'
@@ -40,6 +40,7 @@ import {
   USE_CORS,
   USER_PROFILE_AUTODISCLOSE,
 } from './config/constants'
+import { DidCommModule } from './didcomm.module'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
@@ -94,8 +95,8 @@ export const enableHttpAndWs = async (
   }
 }
 
-export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent))
+export const startAdminServer = async (dynamicModule: DynamicModule, serverConfig: ServerConfig) => {
+  const app = await NestFactory.create(dynamicModule)
 
   // Version
   app.enableVersioning({
@@ -183,8 +184,17 @@ const run = async () => {
     discoveryOptions,
   }
 
-  const app = await startAdminServer(agent, conf)
-  enableHttpAndWs(app, agent, AGENT_ENDPOINTS, ADMIN_PORT, AGENT_LOG_LEVEL)
+  // Start admin server
+  const app = await startAdminServer(VsAgentModule.register(agent), conf)
+  await app.listen(conf.port)
+
+  // Start admin didcomm agent server
+  const didCommApp = await startAdminServer(DidCommModule.register(agent), {
+    port: AGENT_PORT,
+    cors: USE_CORS,
+    logger: serverLogger,
+  })
+  enableHttpAndWs(didCommApp, agent, AGENT_ENDPOINTS, AGENT_PORT, AGENT_LOG_LEVEL)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
