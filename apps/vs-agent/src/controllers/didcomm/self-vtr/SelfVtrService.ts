@@ -104,7 +104,7 @@ export class SelfVtrService {
       holder: agent.did,
       verifiableCredential: [],
     })
-    this.generateVerifiableCredential(logTag, type, { id: agent.did }, credentialSchema, presentation)
+    return this.generateVerifiableCredential(logTag, type, { id: agent.did }, credentialSchema, presentation)
   }
 
   private async getClaims(agent: VsAgent, { id: subjectId }: W3cCredentialSubject, logTag: string) {
