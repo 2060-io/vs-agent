@@ -101,12 +101,6 @@ const run = async () => {
   // Start admin server
   await startAdminServer(agent, conf)
 
-  // Start admin didcomm agent server
-  // const didCommApp = await startAdminServer(DidCommModule.register(agent), {
-  //   ...conf,
-  //   port: AGENT_PORT,
-  // })
-
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
   messageEvents(agent, conf)

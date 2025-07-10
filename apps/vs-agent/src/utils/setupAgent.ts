@@ -112,7 +112,7 @@ export const setupAgent = async ({
 
   // Add WebSocket support if required
   if (enableWs) {
-    httpServer.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
+    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
       webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
         const socketId = utils.uuid()
         webSocketServer?.emit('connection', socketParam, request, socketId)
