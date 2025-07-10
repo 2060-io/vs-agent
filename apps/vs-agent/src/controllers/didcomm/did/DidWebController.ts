@@ -64,19 +64,30 @@ export class DidWebController {
   @Get('/.well-known/did.json')
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
-    const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-    const didDocument = didRecord.didDocument
-    if (didDocument) {
-      return didDocument
+    agent.config.logger.info(`Public DidDocument requested`)
+    if (agent.did) {
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      const didDocument = didRecord.didDocument
+      if (didDocument) {
+        return didDocument
+      } else {
+        throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+      }
     } else {
-      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
     }
   }
 
+  // AnonCreds routes only make sense if we have a public DID (otherwise, we cannot be issuers)
+  // Schemas
   @Get('/anoncreds/v1/schema/:schemaId')
-  async getSchema(@Param('schemaId') schemaId: string) {
+  async getSchema(@Param('schemaId') schemaId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
-    agent.config.logger.debug(`schema requested: ${schemaId}`)
+    if (!agent.did) {
+      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+    }
+
+    agent.config.logger.debug(`Schema requested: ${schemaId}`)
     const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
     const schemaRecord = await schemaRepository.findBySchemaId(
       agent.context,
@@ -85,15 +96,16 @@ export class DidWebController {
 
     if (schemaRecord) {
       agent.config.logger.debug(`schema found: ${schemaId}`)
-      return { resource: schemaRecord.schema, resourceMetadata: {} }
+      res.send({ resource: schemaRecord.schema, resourceMetadata: {} })
     }
+
     agent.config.logger.debug(`schema not found: ${schemaId}`)
-    throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
+    throw new HttpException('', HttpStatus.NOT_FOUND)
   }
 
   // Credential Definitions
   @Get('/anoncreds/v1/credDef/:credentialDefinitionId')
-  async getCredDef(@Param('credentialDefinitionId') credentialDefinitionId: string) {
+  async getCredDef(@Param('credentialDefinitionId') credentialDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`credential definition requested: ${credentialDefinitionId}`)
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
@@ -106,7 +118,7 @@ export class DidWebController {
     )
 
     if (credentialDefinitionRecord) {
-      return { resource: credentialDefinitionRecord.credentialDefinition, resourceMetadata: {} }
+      res.send({ resource: credentialDefinitionRecord.credentialDefinition, resourceMetadata: {} })
     }
 
     throw new HttpException('Credential Definition not found', HttpStatus.NOT_FOUND)
@@ -114,7 +126,7 @@ export class DidWebController {
 
   // Endpoint to retrieve a revocation registry definition by its ID
   @Get('/anoncreds/v1/revRegDef/:revocationDefinitionId')
-  async getRevRegDef(@Param('revocationDefinitionId') revocationDefinitionId: string) {
+  async getRevRegDef(@Param('revocationDefinitionId') revocationDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
 
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
@@ -129,12 +141,12 @@ export class DidWebController {
       )
 
     if (revocationDefinitionRecord) {
-      return {
+      res.send({
         resource: revocationDefinitionRecord.revocationRegistryDefinition,
         resourceMetadata: {
           statusListEndpoint: `${PUBLIC_API_BASE_URL}/anoncreds/v1/revStatus/${revocationDefinitionId}`,
         },
-      }
+      })
     }
 
     throw new HttpException('Revocation Definition not found', HttpStatus.NOT_FOUND)
@@ -143,7 +155,7 @@ export class DidWebController {
   // Endpoint to retrieve the revocation status list for a specific revocation definition ID
   // Optional: Accepts a timestamp parameter (not currently used in the logic)
   @Get('/anoncreds/v1/revStatus/:revocationDefinitionId/:timestamp?')
-  async getRevStatus(@Param('revocationDefinitionId') revocationDefinitionId: string) {
+  async getRevStatus(@Param('revocationDefinitionId') revocationDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
 
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
@@ -159,13 +171,13 @@ export class DidWebController {
 
     if (revocationDefinitionRecord) {
       const revStatusList = revocationDefinitionRecord.metadata.get('revStatusList')
-      return {
+      res.send({
         resource: revStatusList,
         resourceMetadata: {
           previousVersionId: '',
           nextVersionId: '',
         },
-      }
+      })
     }
 
     throw new HttpException('Revocation Status not found', HttpStatus.NOT_FOUND)
