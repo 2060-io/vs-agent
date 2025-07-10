@@ -22,7 +22,7 @@ import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import express from 'express'
 import { IncomingMessage } from 'http'
-import * as net from 'net'
+import { Socket } from 'net'
 import WebSocket from 'ws'
 
 import { DidCommModule } from '../didcomm.module'
@@ -112,10 +112,10 @@ export const setupAgent = async ({
 
   // Add WebSocket support if required
   if (enableWs) {
-    httpServer.on('upgrade', (request: IncomingMessage, socket: net.Socket, head: Buffer) => {
-      webSocketServer?.handleUpgrade(request, socket, head, ws => {
+    httpServer.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
         const socketId = utils.uuid()
-        webSocketServer?.emit('connection', ws, request, socketId)
+        webSocketServer?.emit('connection', socketParam, request, socketId)
       })
     })
   }
@@ -249,7 +249,7 @@ export const setupAgent = async ({
     }
   }
 
-  return { agent, app }
+  return { agent, app, webSocketServer }
 }
 
 export function commonAppConfig(app: INestApplication, serverConfig: ServerConfig) {
