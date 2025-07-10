@@ -98,7 +98,6 @@ const run = async () => {
     discoveryOptions,
   }
 
-  // Start admin server
   await startAdminServer(agent, conf)
 
   // Listen to events emitted by the agent
