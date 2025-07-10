@@ -43,7 +43,8 @@ import { commonAppConfig, setupAgent } from './utils/setupAgent'
 export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(VsAgentModule.register(agent))
   // Port expose
-  return commonAppConfig(app, serverConfig)
+  commonAppConfig(app, serverConfig)
+  await app.listen(serverConfig.port)
 }
 
 const run = async () => {
@@ -98,8 +99,7 @@ const run = async () => {
   }
 
   // Start admin server
-  const app = await startAdminServer(agent, conf)
-  await app.listen(conf.port)
+  await startAdminServer(agent, conf)
 
   // Start admin didcomm agent server
   // const didCommApp = await startAdminServer(DidCommModule.register(agent), {
