@@ -16,7 +16,7 @@ import {
   utils,
   WalletConfig,
 } from '@credo-ts/core'
-import { agentDependencies, HttpInboundTransport } from '@credo-ts/node'
+import { agentDependencies } from '@credo-ts/node'
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -27,6 +27,7 @@ import WebSocket from 'ws'
 
 import { DidCommModule } from '../didcomm.module'
 
+import { HttpInboundTransport } from './HttpInboundTransport'
 import { ServerConfig } from './ServerConfig'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
@@ -92,8 +93,7 @@ export const setupAgent = async ({
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    const expressApp = app.getHttpAdapter().getInstance()
-    httpInboundTransport = new HttpInboundTransport({ app: expressApp, port })
+    httpInboundTransport = new HttpInboundTransport({ app: app.getHttpAdapter().getInstance(), port })
     agent.registerInboundTransport(httpInboundTransport)
   }
 
