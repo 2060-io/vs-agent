@@ -3,7 +3,7 @@ import type { VsAgentInfo } from '@2060.io/vs-agent-model'
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { VsAgentService } from '../../services/VsAgentService'
+import { VsAgentService } from '../../../services/VsAgentService'
 
 @ApiTags('agent')
 @Controller({

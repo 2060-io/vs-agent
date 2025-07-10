@@ -4,7 +4,7 @@ import { InjectQueue } from '@nestjs/bull'
 import { Injectable, Optional } from '@nestjs/common'
 import { Queue } from 'bull'
 
-import { REDIS_HOST } from '../../../config/constants'
+import { REDIS_HOST } from '../../../../config/constants'
 
 import { CoreMessageService } from './CoreMessageService'
 

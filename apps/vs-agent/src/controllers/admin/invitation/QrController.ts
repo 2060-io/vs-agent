@@ -3,8 +3,8 @@ import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 import QRCode from 'qrcode'
 
-import { VsAgentService } from '../../services/VsAgentService'
-import { createInvitation } from '../../utils/agent'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { createInvitation } from '../../../utils/agent'
 
 @ApiTags('qr')
 @Controller({

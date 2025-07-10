@@ -1,34 +1,32 @@
-import 'reflect-metadata'
-
-import express from 'express'
+import { Controller, Get, Query, Res, HttpStatus, HttpException } from '@nestjs/common'
+import { Response } from 'express'
 import QRCode from 'qrcode'
 
-import { REDIRECT_DEFAULT_URL_TO_INVITATION_URL } from './config/constants'
-import { PresentationStatus, sendPresentationCallbackEvent } from './events/CallbackEvent'
-import { VsAgent } from './utils/VsAgent'
-import { createInvitation } from './utils/agent'
-import { TsLogger } from './utils/logger'
+import { REDIRECT_DEFAULT_URL_TO_INVITATION_URL } from '../../../config/constants'
+import { PresentationStatus, sendPresentationCallbackEvent } from '../../../events/CallbackEvent'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { createInvitation } from '../../../utils/agent'
+import { TsLogger } from '../../../utils/logger'
 
-// Add invitation endpoints
-export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) => {
-  // Retrieve the URL that corresponds to a given short URL
-  app.get('/s', async (req, res) => {
+@Controller()
+export class InvitationRoutesController {
+  constructor(private readonly agentService: VsAgentService) {}
+
+  @Get('/s')
+  async getShortUrl(@Query('id') id: string, @Res() res: Response) {
+    const agent = await this.agentService.getAgent()
     try {
-      const id = req.query.id as string
-
       if (!id) {
-        res.status(404).end()
-        return
+        throw new HttpException('Id required', HttpStatus.NOT_FOUND)
       }
 
       const shortUrlRecord = await agent.genericRecords.findById(id)
       const longUrl = shortUrlRecord?.content.longUrl as string
-      if (!id) {
-        res.status(404).end()
-        return
+      if (!longUrl) {
+        throw new HttpException('Long URL not found', HttpStatus.NOT_FOUND)
       }
 
-      if (req.accepts('json')) {
+      if (res.req.accepts('json')) {
         const connRecord = shortUrlRecord?.getTag('relatedFlowId') as string
 
         // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
@@ -53,27 +51,29 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
         res.status(302).location(longUrl).end()
       }
     } catch (error) {
-      res.status(500).end()
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
-  })
+  }
 
-  // Generate a regular invitation
-  app.get('/invitation', async (req, res) => {
+  @Get('/invitation')
+  async getInvitation(@Res() res: Response) {
+    const agent = await this.agentService.getAgent()
     const { url: invitationUrl } = await createInvitation(agent)
+
     if (REDIRECT_DEFAULT_URL_TO_INVITATION_URL) res.redirect(invitationUrl)
     else res.send(invitationUrl)
-  })
+  }
 
-  // Generate a regular invitation and render it to a QR code
-  app.get('/qr', async (req, res) => {
-    const { fcolor, bcolor, size, padding, level } = req.query as {
-      fcolor?: string
-      bcolor?: string
-      size?: number
-      padding?: number
-      level?: string
-    }
-
+  @Get('/qr')
+  async getQr(
+    @Res() res: Response,
+    @Query('fcolor') fcolor?: string,
+    @Query('bcolor') bcolor?: string,
+    @Query('size') size?: number,
+    @Query('padding') padding?: number,
+    @Query('level') level?: string,
+  ) {
+    const agent = await this.agentService.getAgent()
     const { url: invitationUrl } = await createInvitation(agent)
 
     function isQRCodeErrorCorrectionLevel(input?: string): input is QRCode.QRCodeErrorCorrectionLevel {
@@ -96,8 +96,7 @@ export const addInvitationRoutes = async (app: express.Express, agent: VsAgent) 
       res.header('Content-Type', 'image/png; charset=utf-8')
       res.send(qr)
     } catch (error) {
-      res.status(500)
-      res.json({ error: error.message }).end()
+      throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
-  })
+  }
 }

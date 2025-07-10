@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 
-import { VsAgentService } from '../../services/VsAgentService'
+import { VsAgentService } from '../../../services/VsAgentService'
 
 @ApiTags('presentations')
 @Controller({
