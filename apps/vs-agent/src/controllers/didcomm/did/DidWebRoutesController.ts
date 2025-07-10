@@ -58,7 +58,7 @@ const fileStorage = diskStorage({
 })
 
 @Controller()
-export class DidWebController {
+export class DidWebRoutesController {
   constructor(private readonly agentService: VsAgentService) {}
 
   @Get('/.well-known/did.json')

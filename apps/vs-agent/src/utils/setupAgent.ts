@@ -9,31 +9,19 @@ import {
   DidExchangeState,
   DidRecord,
   DidRepository,
-  HttpOutboundTransport,
   KeyType,
   LogLevel,
   TypedArrayEncoder,
-  utils,
   WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import cors from 'cors'
 import express from 'express'
-import { Socket } from 'net'
-import WebSocket from 'ws'
 
-import { addDidWebRoutes } from '../didWebServer'
-import { addInvitationRoutes } from '../invitationRoutes'
-import { addSelfVtrRoutes } from '../selfVtrRoutes'
-
-import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
-import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
-import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
 
 export const setupAgent = async ({
-  port,
   walletConfig,
   label,
   displayPictureUrl,
@@ -87,45 +75,7 @@ export const setupAgent = async ({
 
   app.set('json spaces', 2)
 
-  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
-  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
-
-  let webSocketServer: WebSocket.Server | undefined
-  let httpInboundTransport: HttpInboundTransport | undefined
-  if (enableHttp) {
-    logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ app, port })
-    agent.registerInboundTransport(httpInboundTransport)
-  }
-
-  if (enableWs) {
-    logger.info('Inbound WebSocket transport enabled')
-    webSocketServer = new WebSocket.Server({ noServer: true })
-    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
-  }
-
-  agent.registerOutboundTransport(new HttpOutboundTransport())
-  agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
-
   await agent.initialize()
-
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : app.listen(port)
-
-  // Add did:web and AnonCreds Service routes
-  addDidWebRoutes(app, agent, publicApiBaseUrl)
-  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
-
-  addInvitationRoutes(app, agent)
-
-  // Add WebSocket support if required
-  if (enableWs) {
-    httpServer?.on('upgrade', (request, socket, head) => {
-      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
-        const socketId = utils.uuid()
-        webSocketServer?.emit('connection', socketParam, request, socketId)
-      })
-    })
-  }
 
   // Make sure default User Profile corresponds to settings in environment variables
   const imageUrl = displayPictureUrl
@@ -256,5 +206,5 @@ export const setupAgent = async ({
     }
   }
 
-  return { agent, app, webSocketServer }
+  return { agent, app }
 }

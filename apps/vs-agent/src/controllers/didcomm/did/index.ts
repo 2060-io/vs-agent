@@ -1,1 +1,1 @@
-export * from './DidWebController'
+export * from './DidWebRoutesController'

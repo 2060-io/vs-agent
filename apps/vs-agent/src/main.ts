@@ -2,12 +2,17 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod } from '@credo-ts/core'
-import { ValidationPipe, VersioningType } from '@nestjs/common'
+import { HttpOutboundTransport, KeyDerivationMethod, LogLevel, utils } from '@credo-ts/core'
+import { HttpInboundTransport } from '@credo-ts/node'
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import express from 'express'
 import * as fs from 'fs'
+import { IncomingMessage } from 'http'
+import * as net from 'net'
 import * as path from 'path'
+import WebSocket from 'ws'
 
 import packageJson from '../package.json'
 
@@ -39,8 +44,55 @@ import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { VsAgent } from './utils/VsAgent'
+import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
+import { VsAgentWsOutboundTransport } from './utils/VsAgentWsOutboundTransport'
 import { TsLogger } from './utils/logger'
 import { setupAgent } from './utils/setupAgent'
+
+export const enableHttpAndWs = async (
+  app: INestApplication,
+  agent: VsAgent,
+  endpoints: string[],
+  port: number,
+  logLevel?: LogLevel,
+) => {
+  const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
+
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
+  let webSocketServer: WebSocket.Server | undefined
+  let httpInboundTransport: HttpInboundTransport | undefined
+  if (enableHttp) {
+    logger.info('Inbound HTTP transport enabled')
+    const expressApp = app.getHttpAdapter().getInstance()
+    httpInboundTransport = new HttpInboundTransport({ app: expressApp, port })
+    agent.registerInboundTransport(httpInboundTransport)
+  }
+
+  if (enableWs) {
+    logger.info('Inbound WebSocket transport enabled')
+    webSocketServer = new WebSocket.Server({ noServer: true })
+    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
+  }
+
+  agent.registerOutboundTransport(new HttpOutboundTransport())
+  agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
+
+  // await agent.initialize()
+
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await app.listen(port)
+
+  // Add WebSocket support if required
+  if (enableWs) {
+    httpServer.on('upgrade', (request: IncomingMessage, socket: net.Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket, head, ws => {
+        const socketId = utils.uuid()
+        webSocketServer?.emit('connection', ws, request, socketId)
+      })
+    })
+  }
+}
 
 export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const app = await NestFactory.create(VsAgentModule.register(agent))
@@ -59,6 +111,11 @@ export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfi
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api', app, document)
 
+  // agent didcomm
+  app.use(express.json({ limit: '5mb' }))
+  app.use(express.urlencoded({ extended: true, limit: '5mb' }))
+  app.getHttpAdapter().getInstance().set('json spaces', 2)
+
   // Dto
   app.useGlobalPipes(new ValidationPipe())
 
@@ -72,7 +129,7 @@ export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfi
   }
 
   // Port expose
-  await app.listen(serverConfig.port)
+  return app
 }
 
 const run = async () => {
@@ -126,7 +183,8 @@ const run = async () => {
     discoveryOptions,
   }
 
-  await startAdminServer(agent, conf)
+  const app = await startAdminServer(agent, conf)
+  enableHttpAndWs(app, agent, AGENT_ENDPOINTS, ADMIN_PORT, AGENT_LOG_LEVEL)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

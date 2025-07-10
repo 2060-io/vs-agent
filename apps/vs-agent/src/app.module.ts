@@ -4,13 +4,17 @@ import {
   ConnectionController,
   CoreMessageService,
   CredentialTypesController,
+  DidWebRoutesController,
   InvitationController,
+  InvitationRoutesController,
   MessageController,
   MessageService,
   MessageServiceFactory,
   PresentationsController,
   QrController,
   RedisMessageService,
+  SelfVtrController,
+  SelfVtrService,
   VCAuthNController,
   VsAgentController,
 } from './controllers'
@@ -34,6 +38,9 @@ export class VsAgentModule {
         InvitationController,
         QrController,
         VCAuthNController,
+        InvitationRoutesController,
+        SelfVtrController,
+        DidWebRoutesController,
       ],
       providers: [
         {
@@ -46,6 +53,7 @@ export class VsAgentModule {
         RedisMessageService,
         CoreMessageService,
         MessageServiceFactory,
+        SelfVtrService,
       ],
       exports: [VsAgentService],
     }
