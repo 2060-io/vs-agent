@@ -9,19 +9,32 @@ import {
   DidExchangeState,
   DidRecord,
   DidRepository,
+  HttpOutboundTransport,
   KeyType,
   LogLevel,
   TypedArrayEncoder,
+  utils,
   WalletConfig,
 } from '@credo-ts/core'
-import { agentDependencies } from '@credo-ts/node'
-import cors from 'cors'
+import { agentDependencies, HttpInboundTransport } from '@credo-ts/node'
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import express from 'express'
+import { IncomingMessage } from 'http'
+import * as net from 'net'
+import WebSocket from 'ws'
 
+import { DidCommModule } from '../didcomm.module'
+
+import { ServerConfig } from './ServerConfig'
 import { createVsAgent } from './VsAgent'
+import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
+import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
 
 export const setupAgent = async ({
+  port,
   walletConfig,
   label,
   displayPictureUrl,
@@ -66,16 +79,46 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
-  const app = express()
-
-  if (useCors) app.use(cors())
-
+  const app = await NestFactory.create(DidCommModule.register(agent))
   app.use(express.json({ limit: '5mb' }))
   app.use(express.urlencoded({ extended: true, limit: '5mb' }))
+  app.getHttpAdapter().getInstance().set('json spaces', 2)
+  commonAppConfig(app, { port, cors: useCors, logger })
 
-  app.set('json spaces', 2)
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
+  let webSocketServer: WebSocket.Server | undefined
+  let httpInboundTransport: HttpInboundTransport | undefined
+  if (enableHttp) {
+    logger.info('Inbound HTTP transport enabled')
+    const expressApp = app.getHttpAdapter().getInstance()
+    httpInboundTransport = new HttpInboundTransport({ app: expressApp, port })
+    agent.registerInboundTransport(httpInboundTransport)
+  }
+
+  if (enableWs) {
+    logger.info('Inbound WebSocket transport enabled')
+    webSocketServer = new WebSocket.Server({ noServer: true })
+    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
+  }
+
+  agent.registerOutboundTransport(new HttpOutboundTransport())
+  agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
+
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await app.listen(port)
+
+  // Add WebSocket support if required
+  if (enableWs) {
+    httpServer.on('upgrade', (request: IncomingMessage, socket: net.Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket, head, ws => {
+        const socketId = utils.uuid()
+        webSocketServer?.emit('connection', ws, request, socketId)
+      })
+    })
+  }
 
   // Make sure default User Profile corresponds to settings in environment variables
   const imageUrl = displayPictureUrl
@@ -207,4 +250,33 @@ export const setupAgent = async ({
   }
 
   return { agent, app }
+}
+
+export function commonAppConfig(app: INestApplication, serverConfig: ServerConfig) {
+  // Versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+  })
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('API Documentation')
+    .setVersion('1.0')
+    .build()
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, document)
+
+  // Pipes
+  app.useGlobalPipes(new ValidationPipe())
+
+  // CORS
+  if (serverConfig.cors) {
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type,Authorization',
+    })
+  }
+  return app
 }

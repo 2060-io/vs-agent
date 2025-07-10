@@ -6,8 +6,8 @@ import {
   SelfVtrController,
   SelfVtrService,
 } from './controllers'
-import { VsAgent } from './utils/VsAgent'
 import { VsAgentService } from './services/VsAgentService'
+import { VsAgent } from './utils/VsAgent'
 
 @Module({})
 export class DidCommModule {
