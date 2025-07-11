@@ -30,6 +30,8 @@ COPY packages/model/tsconfig.build.json packages/model/tsconfig.build.json
 COPY apps/vs-agent/tsconfig.json apps/vs-agent/tsconfig.json
 COPY apps/vs-agent/tsconfig.build.json apps/vs-agent/tsconfig.build.json
 COPY apps/vs-agent/nest-cli.json apps/vs-agent/nest-cli.json
+# Copy the docs to support swagger module
+COPY ../../doc ./apps/vs-agent/doc
 
 RUN pnpm build
 CMD ["pnpm", "start"]
