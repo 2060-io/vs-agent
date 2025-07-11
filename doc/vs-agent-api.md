@@ -27,9 +27,9 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Receipts](#receipts)
       - [Contextual Menu Request](#contextual-menu-request)
       - [Contextual Menu Update](#contextual-menu-update)
-      - [Contextual Menu Selection](#contextual-menu-selection)
+      - [Contextual Menu Select](#contextual-menu-select)
       - [Display Menu](#display-menu)
-      - [Menu Selection](#menu-selection)
+      - [Menu Select](#menu-select)
       - [Invitation](#invitation)
       - [Profile](#profile)
       - [Terminate Connection](#terminate-connection)
@@ -37,7 +37,7 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Call Accept](#call-accept)
       - [Call Reject](#call-reject)
       - [Call End](#call-end)
-      - [MRZ Data Request](#mrz-data-request)
+      - [Mrz Data Request](#mrz-data-request)
       - [MRZ Data Submit](#mrz-data-submit)
       - [eMRTD Data Request](#emrtd-data-request)
       - [eMRTD Data Submit](#emrtd-data-submit)
@@ -105,7 +105,7 @@ Currently, the following messages can be submitted and received:
 - Menu Select (`menu-select`)
 - Contextual Menu Request (`contextual-menu-request`)
 - Contextual Menu Update (`contextual-menu-update`)
-- Contextual Menu Selection (`contextual-menu-select`)
+- Contextual Menu Select (`contextual-menu-select`)
 - Media (`media`)
 - Receipts (`receipts`)
 - Invitation (`invitation`)
@@ -132,10 +132,9 @@ Parameters:
 
 ```json
 {
-  ...
   "type": "credential-request",
   "credentialDefinitionId": "id",
-  "claims": [{ "name": "claim-name", mimeType: "mime-type", "value": 'claim-value' }, ...]
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }]
 }
 ```
 
@@ -161,12 +160,11 @@ Parameters:
 
 ```json
 {
-  ...
   "type": "credential-issuance",
   "credentialDefinitionId": "id",
   "revocationRegistryDefinitionId": "id",
   "revocationRegistryIndex": 1,
-  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }]
 }
 ```
 
@@ -178,8 +176,7 @@ In this context, `threadId` is used to identify the details of the credential
 
 ```json
 {
-  ...
-  "type": "credential-revocation",
+  "type": "credential-revocation"
 }
 ```
 
@@ -197,7 +194,6 @@ Parameters:
 
 ```json
 {
-  ...
   "type": "credential-reception",
   "state": "done"
 }
@@ -209,13 +205,14 @@ Starts an Identity Verification flow, requesting a certain number of identity pr
 
 ```json
 {
-  ...
   "type": "identity-proof-request",
-  "requestedProofItems": [{
-    "id": UUID,
-    "type": RequestedProofItemType,
-    "specific-field": SpecificFieldType
-  }]
+  "requestedProofItems": [
+    {
+      "id": "UUID",
+      "type": "RequestedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -227,13 +224,14 @@ This message is used to inform about the submission of a certain proof identity 
 
 ```json
 {
-   ...
-   "type": "identity-proof-submit",
-   "submittedProofItems": [{
-      "id": UUID,
-      "type": SubmittedProofItemType,
-      "specific-field": SpecificFieldType
-    }]
+  "type": "identity-proof-submit",
+  "submittedProofItems": [
+    {
+      "id": "UUID",
+      "type": "SubmittedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -245,13 +243,14 @@ This message is used to inform about the result of the processing of a certain i
 
 ```json
 {
-   ...
-   "type": "identity-proof-result",
-   "proofItemResults": [{
-      "id": UUID,
-      "type": SubmittedProofItemType,
-      "specific-field": SpecificFieldType
-   }]
+  "type": "identity-proof-result",
+  "proofItemResults": [
+    {
+      "id": "UUID",
+      "type": "SubmittedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -263,9 +262,8 @@ Sends a simple text to a destination
 
 ```json
 {
-   ...
-   "type": "text",
-   "content": string
+  "type": "text",
+  "content": "string"
 }
 ```
 
@@ -275,25 +273,26 @@ Shares media files to a destination. They might be previously encrypted and stor
 
 ```json
 {
-   ...
-   "type": "media",
-   "description": string,
-   "items": [{
-    "mimeType": string,
-    "filename": string,
-    "description": string,
-    "byteCount": number,
-    "uri": string,
-    "ciphering": { "algorithm": string, ... },
-    "preview": string,
-    "width": number,
-    "height": number,
-    "duration": number,
-    "title": string,
-    "icon": string,
-    "openingMode": string,
-    "screenOrientaton": string
-   }]
+  "type": "media",
+  "description": "string",
+  "items": [
+    {
+      "mimeType": "string",
+      "filename": "string",
+      "description": "string",
+      "byteCount": "number",
+      "uri": "string",
+      "ciphering": { "algorithm": "string" },
+      "preview": "string",
+      "width": "number",
+      "height": "number",
+      "duration": "number",
+      "title": "string",
+      "icon": "string",
+      "openingMode": "string",
+      "screenOrientaton": "string"
+    }
+  ]
 }
 ```
 
@@ -329,13 +328,14 @@ Sends message updates for a number of messages.
 
 ```json
 {
-   ...
-   "type": "receipts",
-   "receipts" : [{
-      "messageId": string,
-      "state": MessageState,
-      "timestamp": Date,
-   }]
+  "type": "receipts",
+  "receipts": [
+    {
+      "messageId": "string",
+      "state": "MessageState",
+      "timestamp": "Date"
+    }
+  ]
 }
 ```
 
@@ -345,8 +345,7 @@ Requests a destination agent context menu root (if any). The other side should a
 
 ```json
 {
-   ...
-   "type": "contextual-menu-request",
+  "type": "contextual-menu-request"
 }
 ```
 
@@ -358,33 +357,32 @@ Sends or updates the contents for the contextual menu to destination agent.
 
 ```json
 {
-   ...
-   "type": "contextual-menu-update",
-   "payload": {
-    "title": string,
-    "description": string,
-    "options" : [
+  "type": "contextual-menu-update",
+  "payload": {
+    "title": "string",
+    "description": "string",
+    "options": [
       {
-        "id": string,
-        "title": string,
-        "description": string
-      }],
+        "id": "string",
+        "title": "string",
+        "description": "string"
+      }
+    ]
+  }
 }
 ```
 
 Description fields are optional and used as a prompt to give more details about each option (and the contextual menu itself). ID fields are used to identify the selection when an agent interacts with the contextual menu.
 
-#### Contextual Menu Selection
+#### Contextual Menu Select
 
 Submits the selected item of context menu.
 
 ```json
 {
-   ...
-   "type": "contextual-menu-select",
-   "selectionId" : string
+  "type": "contextual-menu-select",
+  "selectionId": "string"
 }
-
 ```
 
 _selectionId_ field matches the id from the option that user has selected.
@@ -395,33 +393,33 @@ Sends a menu to display different actions in destination agent
 
 ```json
 {
-   ...
+
    "type": "menu-display",
-   "prompt": string
+   "prompt": "string"
    "menuItems" : [
    {
-     id: string,
-     text: string,
-     action: Action
+     "id": "string",
+     "text": "string",
+     "action": "Action"
    }],
 }
 ```
 
 For each item, `action` is an optional field used in case that an external action is required when the user chooses it. For instance, open a browsing session or connecting with another contact. Currently, `Action` items are not yet defined.
 
-#### Menu Selection
+#### Menu Select
 
 Submits the selected item of a presented menu, defined in `threadId` field.
 
 ```json
 {
-   ...
-   "type": "menu-select",
-   "menuItems" : [
+  "type": "menu-select",
+  "menuItems": [
     {
-      id: string
-    }],
-  "content": string
+      "id": "string"
+    }
+  ],
+  "content": "string"
 }
 ```
 
@@ -437,11 +435,10 @@ The generated message Id will be used as invitationId un subsequent Connection S
 
 ```json
 {
-   ...
-   "type": "invitation",
-   "label": string,
-   "imageUrl": string,
-   "did": string,
+  "type": "invitation",
+  "label": "string",
+  "imageUrl": "string",
+  "did": "string"
 }
 ```
 
@@ -456,11 +453,10 @@ Sends User Profile to a particular connection. An Agent may have its default pro
 
 ```json
 {
-   ...
-   "type": "profile",
-   "displayName": string,
-   "displayImageUrl": string,
-   "displayIconUrl": string
+  "type": "profile",
+  "displayName": "string",
+  "displayImageUrl": "string",
+  "displayIconUrl": "string"
 }
 ```
 
@@ -470,8 +466,7 @@ Terminates a particular connection, notifying the other party through a 'Hangup'
 
 ```json
 {
-   ...
-   "type": "terminate-connection",
+  "type": "terminate-connection"
 }
 ```
 
@@ -481,11 +476,10 @@ Create a call offer from a service to initiate a WebRTC call and notify the othe
 
 ```json
 {
-   ...
-   "type": "call-offer",
-   "parameters": {
-      key: value
-   },
+  "type": "call-offer",
+  "parameters": {
+    "key": "value"
+  }
 }
 ```
 
@@ -495,11 +489,10 @@ Accept a call offer from a third party to initiate a WebRTC call. This message w
 
 ```json
 {
-   ...
-   "type": "call-accept",
-   "parameters": {
-      key: value
-   },
+  "type": "call-accept",
+  "parameters": {
+    "key": "value"
+  }
 }
 ```
 
@@ -509,8 +502,7 @@ Reject a call offer from a third party to initiate a WebRTC call. This message w
 
 ```json
 {
-   ...
-   "type": "call-reject",
+  "type": "call-reject"
 }
 ```
 
@@ -520,23 +512,21 @@ End a call offer from a third party to initiate a WebRTC call. This message will
 
 ```json
 {
-   ...
-   "type": "call-end",
+  "type": "call-end"
 }
 ```
 
-#### MRZ Data Request
+#### Mrz Data Request
 
 Request the other party to provide the Machine Readable Zone string from a valid ID document.
 
 ```json
 {
-   ...
-   "type": "mrz-data-request",
+  "type": "mrz-data-request"
 }
 ```
 
-#### MRZ Data Submit
+#### Mrz Data Submit
 
 Submit Machine Readable Zone data. This message may be sent either individually or as a response to a MRZ Data Request.
 
@@ -544,10 +534,9 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 
 ```json
 {
-   ...
-   "type": "mrz-data-submit",
-   "state": MrtdSubmitState,
-   "mrzData": MrzData
+  "type": "mrz-data-submit",
+  "state": "MrtdSubmitState",
+  "mrzData": "MrzData"
 }
 ```
 
@@ -558,31 +547,51 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 - `parsed` interprets the contents and classify the document in a format from ICAO 9303 document (TD1, TD2, TD3, etc.). Example:
 
 ```json
-{"raw":["I<UTOD23145890<1233<<<<<<<<<<<","7408122F1204159UTO<<<<<<<<<<<6","ERIKSSON<<ANNA<MARIA<<<<<<<<<<"],
-"parsed":{
-    "valid":false,
-    "fields":
-      {"documentCode":"I","issuingState":null,"documentNumber":"D23145890123","documentNumberCheckDigit":"3","optional1":"1233","birthDate":"740812","birthDateCheckDigit":"2","sex":"female","expirationDate":"120415","expirationDateCheckDigit":"9","nationality":null,"optional2":"","compositeCheckDigit":null,"lastName":"ERIKSSON","firstName":"ANNA MARIA"},
-    "format":"TD1"}
+{
+  "raw": [
+    "I<UTOD23145890<1233<<<<<<<<<<<",
+    "7408122F1204159UTO<<<<<<<<<<<6",
+    "ERIKSSON<<ANNA<MARIA<<<<<<<<<<"
+  ],
+  "parsed": {
+    "valid": false,
+    "fields": {
+      "documentCode": "I",
+      "issuingState": null,
+      "documentNumber": "D23145890123",
+      "documentNumberCheckDigit": "3",
+      "optional1": "1233",
+      "birthDate": "740812",
+      "birthDateCheckDigit": "2",
+      "sex": "female",
+      "expirationDate": "120415",
+      "expirationDateCheckDigit": "9",
+      "nationality": null,
+      "optional2": "",
+      "compositeCheckDigit": null,
+      "lastName": "ERIKSSON",
+      "firstName": "ANNA MARIA"
+    },
+    "format": "TD1"
   }
+}
 ```
 
 More info about the meaning of each field (and validity) can be found in [MRZ](https://github.com/cheminfo/mrz), the underlying library we are using for MRZ parsing.
 
-#### eMRTD Data Request
+#### Emrtd Data Request
 
 Request the other party to read and provide eMRTD (Electronic Machine Readable Travel Document) data from a compatible electronic document.
 
 ```json
 {
-   ...
-   "type": "emrtd-data-request",
+  "type": "emrtd-data-request"
 }
 ```
 
 > TODO: Add parameters once supported by @2060.io/credo-ts-didcomm-mrtd module
 
-#### eMRTD Data Submit
+#### Emrtd Data Submit
 
 Submit data retrieved from an electronic Machine Readable Travel Document. This message may be sent either individually or as a response to an eMRTD Data Request.
 
@@ -590,10 +599,9 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 
 ```json
 {
-   ...
-   "type": "emrtd-data-submit",
-   "state": MrtdSubmitState,
-   "dataGroups": EMrtdData
+  "type": "emrtd-data-submit",
+  "state": "MrtdSubmitState",
+  "dataGroups": "EMrtdData"
 }
 ```
 
@@ -662,9 +670,9 @@ Events are JSON-encoded and include their underlying data in their payload field
 
 ```json
 {
-    "timestamp": NumericDate,
-    "type": EventType,
-    "event-specific-field": EventSpecificFieldType,
+  "timestamp": "NumericDate",
+  "type": "EventType",
+  "event-specific-field": "EventSpecificFieldType"
 }
 ```
 
@@ -678,11 +686,10 @@ Sent whenever a connection has been created or updated. Event format is as follo
 
 ```json
 {
-  ...
   "type": "connection-state-updated",
-  "connectionId": UUID,
-  "invitationId": UUID,
-  "state": ConnectionState
+  "connectionId": "UUID",
+  "invitationId": "UUID",
+  "state": "ConnectionState"
 }
 ```
 
@@ -694,12 +701,11 @@ Sent when a message delivery status has been changed. Event format is as follows
 
 ```json
 {
-  ...
   "type": "message-state-updated",
-  "messageId": UUID,
-  "timestamp": NumericDate,
-  "connectionId": UUID,
-  "state": MessageState
+  "messageId": "UUID",
+  "timestamp": "NumericDate",
+  "connectionId": "UUID",
+  "state": "MessageState"
 }
 ```
 
@@ -711,9 +717,8 @@ Sent when a message is received. Event format is as follows:
 
 ```json
 {
-  ...
   "type": "message-received",
-  "message": Message,
+  "message": "Message"
 }
 ```
 
@@ -771,9 +776,9 @@ It's a POST to `/invitation/presentation-request` which receives a JSON object i
   "callbackUrl": "https://myhost.com/presentation_callback ",
   "ref": "1234-5678",
   "requestedCredentials": [
-    { 
+    {
       "credentialDefinitionId": "full credential definition identifier",
-      "attributes": [ "attribute-1", "attribute-2"]
+      "attributes": ["attribute-1", "attribute-2"]
     }
   ]
 }
@@ -787,9 +792,9 @@ Response will include the invitation code in both short and long form URL format
 
 ```json
 {
-    "url": "string containing long form URL-encoded invitation",
-    "shortUrl": "string containing a shortened URL for the invitation",
-    "proofExchangeId": "unique identifier for the flow",
+  "url": "string containing long form URL-encoded invitation",
+  "shortUrl": "string containing a shortened URL for the invitation",
+  "proofExchangeId": "unique identifier for the flow"
 }
 ```
 
@@ -831,7 +836,10 @@ It's a POST to `/invitation/credential-offer` which receives a JSON object in th
 ```json
 {
   "credentialDefinitionId": "full credential definition identifier",
-  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+  "claims": [
+    { "name": "attribute-1", "value": "value-1" },
+    { "name": "attribute-2", "value": "value-2" }
+  ]
 }
 ```
 
@@ -839,9 +847,9 @@ Response will include the invitation code in both short and long form URL format
 
 ```json
 {
-    "url": "string containing long form URL-encoded invitation",
-    "shortUrl": "string containing a shortened URL for the invitation",
-    "credentialOfferId": "unique identifier for the flow",
+  "url": "string containing long form URL-encoded invitation",
+  "shortUrl": "string containing a shortened URL for the invitation",
+  "credentialOfferId": "unique identifier for the flow"
 }
 ```
 
@@ -879,7 +887,7 @@ It's a POST request to `/credential-types` which receives a JSON object in the b
 {
   "name": string,
   "version": string,
-  "attributes": ["attribute-1", "attribute-2", ... ]
+  "attributes": ["attribute-1", "attribute-2",  ]
 
 }
 ```
