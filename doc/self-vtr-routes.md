@@ -31,6 +31,7 @@ Upload and validate credential data against a JSON schema.
 - The agent's DID is automatically set as the `id` field.
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:3001/self-vtr/upload/ecs-service \
   -H "Content-Type: application/json" \
@@ -38,6 +39,7 @@ curl -X POST http://localhost:3001/self-vtr/upload/ecs-service \
 ```
 
 **Responses:**
+
 - `200 OK`: Data is valid and accepted.
 - `400 Bad Request`: Data is invalid.
 - `404 Not Found`: Schema ID does not exist.
@@ -47,23 +49,27 @@ curl -X POST http://localhost:3001/self-vtr/upload/ecs-service \
 ### GET `/self-vtr/cs/v1/js/:schemaId`
 
 Retrieve the JSON schema for a given credential type.
+
 > **Note:** Only currently supported ecs credential types (such as `ecs-service` or `ecs-org`) are available at this time.
 
 **Example:**
+
 ```bash
 curl http://localhost:3001/self-vtr/cs/v1/js/ecs-service
 ```
 
 ---
 
-### GET `/self-vtr/ecs-service-c-vp.json`  
+### GET `/self-vtr/ecs-service-c-vp.json`
+
 ### GET `/self-vtr/ecs-org-c-vp.json`
 
 Retrieve a signed Verifiable Presentation for ECS Service or Organization.
 
 ---
 
-### GET `/self-vtr/schemas-example-service.json`  
+### GET `/self-vtr/schemas-example-service.json`
+
 ### GET `/self-vtr/schemas-example-org.json`
 
 Retrieve a signed Verifiable Credential for ECS Service or Organization.
@@ -75,6 +81,7 @@ Retrieve a signed Verifiable Credential for ECS Service or Organization.
 Retrieve issuer permission type for a given DID (for testing).
 
 **Example:**
+
 ```bash
 curl "http://localhost:3001/self-vtr/perm/v1/find_with_did?did=did:example:123"
 ```
@@ -86,4 +93,4 @@ curl "http://localhost:3001/self-vtr/perm/v1/find_with_did?did=did:example:123"
 - All schemas are loaded from `data.json` at startup.
 - Uploaded data is validated against the corresponding JSON schema.
 - Credentials and presentations are **self-issued** and **self-validated** by the agent.
-- This is an approach for self-issued verifiable credentials and
+- This is an approach for self-issued verifiable credentials.
