@@ -5,7 +5,7 @@ import {
 } from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { ApiBadRequestResponse, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 
 import { PUBLIC_API_BASE_URL } from '../../config/constants'
 import { UrlShorteningService } from '../../services/UrlShorteningService'
@@ -13,6 +13,8 @@ import { VsAgentService } from '../../services/VsAgentService'
 import { createInvitation } from '../../utils/agent'
 
 import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
+import { createDocLoader } from '../../utils/swagger-docs'
+const docs = createDocLoader('doc/vs-agent-api.md')
 
 @ApiTags('invitation')
 @Controller({
@@ -26,11 +28,30 @@ export class InvitationController {
   ) {}
 
   @Get('/')
+  @ApiOperation({
+    summary: 'Connection Invitation',
+    description: docs.getSection('### Connection Invitation', { includeFences: true }),
+  })
+  @ApiOkResponse({
+    description: 'Out-of-band invitation payload',
+    schema: {
+      example: {
+        url: 'https://hologram.zone/?oob=eyJ0eXAiOiJKV1QiLCJhbGci...',
+      },
+    },
+  })
   public async getInvitation(): Promise<CreateInvitationResult> {
     return await createInvitation(await this.agentService.getAgent())
   }
 
   @Post('/presentation-request')
+  @ApiOperation({
+    summary: 'Presentation Request',
+    description: [
+      docs.getSection('### Presentation Request', { includeFences: true }),
+      docs.getSection('#### Presentation Callback API', { includeFences: true }),
+    ].join('\n\n'),
+  })
   @ApiBody({
     type: CreatePresentationRequestDto,
     examples: {
@@ -47,6 +68,16 @@ export class InvitationController {
             },
           ],
         },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Presentation request invitation',
+    schema: {
+      example: {
+        proofExchangeId: '123e4567-e89b-12d3-a456-426614174000',
+        url: 'didcomm://example.com/...',
+        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=abcd1234`,
       },
     },
   })
@@ -130,6 +161,35 @@ export class InvitationController {
   }
 
   @Post('/credential-offer')
+  @ApiOperation({
+    summary: 'Credential Offer',
+    description: docs.getSection('### Credential Offer'),
+  })
+  @ApiBody({
+    description: docs.getSection('### Credential Offer'),
+    type: CreateCredentialOfferDto,
+    examples: {
+      example: {
+        summary: 'Phone Number VC Offer',
+        value: {
+          credentialDefinitionId:
+            'did:web:chatbot-demo.dev.2060.io?service=anoncreds&relativeRef=/credDef/8TsGLaSPVKPVMXK8APzBRcXZryxutvQuZnnTcDmbqd9p',
+          claims: [{ name: 'phoneNumber', value: '+57128348520' }],
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Credential offer invitation',
+    schema: {
+      example: {
+        credentialExchangeId: 'abcd1234-5678efgh-9012ijkl-3456mnop',
+        url: 'didcomm://example.com/offer/...',
+        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=wxyz7890`,
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Invalid offer payload' })
   @ApiBody({
     type: CreateCredentialOfferDto,
     examples: {
