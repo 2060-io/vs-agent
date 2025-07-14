@@ -30,7 +30,16 @@ import {
   Post,
   Query,
 } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  getSchemaPath,
+  ApiParam,
+} from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { DidWebVhAnonCredsRegistry } from '../../../utils/DidWebVhAnonCredsRegistry'
@@ -55,6 +64,11 @@ export class CredentialTypesController {
    * @returns
    */
   @Get('/')
+  @ApiOkResponse({
+    description: 'An array of credential type results',
+    type: CreateCredentialTypeDto,
+    isArray: true,
+  })
   public async getAllCredentialTypes(): Promise<CredentialTypeResult[]> {
     const agent = await this.agentService.getAgent()
 
@@ -85,19 +99,27 @@ export class CredentialTypesController {
    * @returns CredentialTypeInfo
    */
   @Post('/')
+  @ApiOperation({ summary: 'Create a new credential type' })
   @ApiBody({
+    description: 'Payload to create a new AnonCreds credential definition',
     type: CreateCredentialTypeDto,
     examples: {
-      example: {
-        summary: 'Phone Number',
+      phoneNumber: {
+        summary: 'Phone Number VC',
         value: {
           name: 'phoneNumber',
           version: '1.0',
           attributes: ['phoneNumber'],
+          supportRevocation: true,
         },
       },
     },
   })
+  @ApiOkResponse({
+    description: 'Created credential type info',
+    type: CreateCredentialTypeDto,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid request payload' })
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
       const agent = await this.agentService.getAgent()
@@ -204,6 +226,14 @@ export class CredentialTypesController {
    * @returns ConnectionRecord
    */
   @Delete('/:credentialTypeId')
+  @ApiOperation({ summary: 'Delete a credential type and all its crypto data' })
+  @ApiParam({
+    name: 'credentialTypeId',
+    description: 'Identifier of the credential definition to delete',
+    example: 'VcDef:issuer:1234:TAG:1',
+  })
+  @ApiOkResponse({ description: 'Credential type deleted successfully (204 No Content)' })
+  @ApiBadRequestResponse({ description: 'Invalid credentialTypeId' })
   public async deleteCredentialTypeById(@Param('credentialTypeId') credentialTypeId: string) {
     const agent = await this.agentService.getAgent()
 
@@ -250,6 +280,22 @@ export class CredentialTypesController {
    * @returns ConnectionRecord
    */
   @Get('/export/:credentialTypeId')
+  @ApiOperation({ summary: 'Export a credential type for import elsewhere' })
+  @ApiParam({
+    name: 'credentialTypeId',
+    description: 'Identifier of the credential definition to export',
+    example: 'VcDef:issuer:1234:TAG:1',
+  })
+  @ApiOkResponse({
+    description: 'Exported credential type package',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        data: { type: 'object' },
+      },
+    },
+  })
   public async exportCredentialTypeById(@Param('credentialTypeId') credentialTypeId: string) {
     const agent = await this.agentService.getAgent()
 
@@ -304,6 +350,16 @@ export class CredentialTypesController {
    * @returns CredentialExchangeRecord
    */
   @Post('/import')
+  @ApiOperation({ summary: 'Import a credential type package' })
+  @ApiBody({
+    description: 'Credential definition package for import',
+    schema: { $ref: getSchemaPath(CreateCredentialTypeDto) },
+  })
+  @ApiOkResponse({
+    description: 'Imported credential type info',
+    type: CreateCredentialTypeDto,
+  })
+  @ApiBadRequestResponse({ description: 'Invalid import package' })
   public async importCredentialType(
     @Body() options: ImportCredentialTypeOptions,
   ): Promise<CredentialTypeInfo> {
@@ -432,6 +488,15 @@ export class CredentialTypesController {
    * @returns RevocationTypeInfo
    */
   @Post('/revocationRegistry')
+  @ApiOperation({ summary: 'Create a new revocation registry definition' })
+  @ApiBody({
+    description: 'Options to create a revocation registry',
+    type: CreateRevocationRegistryDto,
+  })
+  @ApiOkResponse({
+    description: 'Revocation registry definition identifier',
+    schema: { example: 'RevRegDef:issuer:1234:TAG:default' },
+  })
   public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
@@ -540,6 +605,21 @@ export class CredentialTypesController {
    * @returns string[] with revocationRegistryDefinitionIds
    */
   @Get('/revocationRegistry')
+  @ApiOperation({ summary: 'List revocation registry definitions' })
+  @ApiQuery({
+    name: 'credentialDefinitionId',
+    required: false,
+    description: 'Filter registries for a specific credential definition',
+    example: 'VcDef:issuer:1234:TAG:1',
+  })
+  @ApiOkResponse({
+    description: 'Array of revocation registry definition IDs',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+      example: ['RevRegDef:issuer:1234:TAG:default'],
+    },
+  })
   public async getRevocationDefinitions(
     @Query('credentialDefinitionId') credentialDefinitionId?: string,
   ): Promise<string[]> {
