@@ -813,8 +813,11 @@ When the presentation flow is completed (either successfully or not), VS Agent c
 {
   "ref": "1234-5678",
   "presentationRequestId": "unique identifier for the flow",
-  "status": PresentationStatus,
-  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+  "status": "PresentationStatus",
+  "claims": [
+    { "name": "attribute-1", "value": "value-1" },
+    { "name": "attribute-2", "value": "value-2" }
+  ]
 }
 ```
 
