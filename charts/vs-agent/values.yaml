@@ -12,7 +12,7 @@ didcommPort: 3001 # Port for DIDComm
 
 # Agent configuration
 didcommLabel: "VS Agent"
-eventsBaseUrl: "https://events.example.io"
+eventsBaseUrl: "https://events.{{ .Values.global.domain }}"
 didcommInvitationImageUrl: "https://image.{{ .Values.global.domain }}/invitation.png"
 
 # DB and Redis configuration
