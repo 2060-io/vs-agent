@@ -1,0 +1,30 @@
+{
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "separate-pull-requests": false,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    "apps/vs-agent": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
+    },
+    "packages/model": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
+    },
+    "packages/client": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
+    },
+    "packages/nestjs-client": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
+    },
+    "examples/chatbot": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "node"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

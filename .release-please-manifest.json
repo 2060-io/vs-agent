@@ -1,0 +1,12 @@
+{
+  "apps/vs-agent": {
+  },
+  "packages/model": {
+  },
+  "packages/client": {
+  },
+  "packages/nestjs-client": {
+  },
+  "examples/chatbot": {
+  }
+}
