@@ -5,7 +5,6 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "release-type": "node",
-  "pull-request-title-pattern": "chore: release monorepo libraries ${version}",
   "packages": {
     "apps/vs-agent": { "component": "vs-agent" },
     "packages/model": { "component": "model" },
@@ -21,6 +20,8 @@
     },
     {
       "type": "node-workspace",
+      "updateAllPackages": true,
+      "updatePeerDependencies": true,
       "merge": false
     }
   ],
