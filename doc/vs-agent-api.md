@@ -888,10 +888,9 @@ It's a POST request to `/credential-types` which receives a JSON object in the b
 
 ```json
 {
-  "name": string,
-  "version": string,
-  "attributes": ["attribute-1", "attribute-2",  ]
-
+  "name": "string",
+  "version": "string",
+  "attributes": ["attribute-1", "attribute-2"]
 }
 ```
 
@@ -899,7 +898,7 @@ Response from VS Agent will generally result in a 200 HTTP response code and inc
 
 ```json
 {
-  "message": string (optional, only in case of error)
-  "id": credential definition Id (as registered in VDR)
+  "message": "string (optional, only in case of error)",
+  "id": "credential definition Id (as registered in VDR)"
 }
 ```
