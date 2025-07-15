@@ -1,7 +1,7 @@
 {
   "name": "2060-demo-chatbot",
   "private": true,
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "",
   "main": "build/index.js",
   "scripts": {
