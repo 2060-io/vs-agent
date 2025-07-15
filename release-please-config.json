@@ -1,0 +1,25 @@
+{
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "separate-pull-requests": false,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    "apps/vs-agent": {
+      "release-type": "node"
+    },
+    "packages/model": {
+      "release-type": "node"
+    },
+    "packages/client": {
+      "release-type": "node"
+    },
+    "packages/nestjs-client": {
+      "release-type": "node"
+    },
+    "examples/chatbot": {
+      "release-type": "node"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
