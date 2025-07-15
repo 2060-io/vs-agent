@@ -32,7 +32,7 @@ In order to make your agent reachable by other VS agents and user agents like Ho
 >
 > Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
 >
-> If you don't specify a public DID, you might set up `AGENT_PUBLIC_API_BASE_URL` and `AGENT_ENDPOINTS` manually.
+> If you don't specify a public DID, you might set up `PUBLIC_API_BASE_URL` and `AGENT_ENDPOINTS` manually.
 
 You'll also need to set up an `AGENT_LABEL` and (optionally) an `AGENT_INVITATION_IMAGE_URL` so when DIDComm agents scan an invitation to your service they can identify it easily.
 
