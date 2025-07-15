@@ -1,8 +1,13 @@
 name: Stable release
 on:
   push:
-    tags:
-      - "*"
+    branches: [ main ]
+
+permissions:
+  issues: write
+  contents: write
+  pull-requests: write
+
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
@@ -17,89 +22,101 @@ jobs:
       - name: Checkout vs-agent
         uses: actions/checkout@v4
 
+      - name: Process Release Please
+        uses: googleapis/release-please-action@v4
+        id: release-please
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print release outputs for debugging
+        continue-on-error: true
+        run: |
+          echo "Release outputs:"
+          echo "${{ toJson(steps.release-please.outputs) }}"
+
       - name: Setup node v22
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Corepack pnpm
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           corepack enable
-
-      - id: get_version
-        uses: battila7/get-version-action@v2
           
       - name: Install dependencies
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           pnpm install
+
       - name: Log in to Docker Hub
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
 
       - name: Set version for apps and packages
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
-          pnpm -r --topological version "${{steps.get_version.outputs.version}}"
+          pnpm -r --topological version "${{steps.release-please.outputs.tag_name}}"
 
       - name: Build Docker image
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
-          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.get_version.outputs.version}} .
+          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:${{steps.release-please.outputs.tag_name}} .
  
       - name: Add tags to Docker image and push to Docker Hub
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           TAGS=(
-            "v${{ steps.get_version.outputs.major }}"
-            "v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}"
-            "v${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor }}.${{ steps.get_version.outputs.patch }}"
-            "v${{ steps.get_version.outputs.version-without-v }}"
+            "v${{ steps.release-please.outputs.tag_name-without-v }}"
             "latest"
           )
 
           for tag in "${TAGS[@]}"; do
-            docker tag $DH_USERNAME/$IMAGE_NAME:${{ steps.get_version.outputs.version }} $DH_USERNAME/$IMAGE_NAME:$tag
+            docker tag $DH_USERNAME/$IMAGE_NAME:${{ steps.release-please.outputs.tag_name }} $DH_USERNAME/$IMAGE_NAME:$tag
             docker push $DH_USERNAME/$IMAGE_NAME:$tag
           done        
 
       - name: Build and push Chatbot Demo Docker image
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.get_version.outputs.version }} .
+          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.release-please.outputs.tag_name }} .
 
-          for tag in "${{ steps.get_version.outputs.version }}" latest; do
-            docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.get_version.outputs.version }} $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$tag
+          for tag in "${{ steps.release-please.outputs.tag_name }}" latest; do
+            docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:${{ steps.release-please.outputs.tag_name }} $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$tag
             docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$tag
           done
 
       - name: Log in to Docker Hub Helm Registry
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
 
       - name: Push Helm chart to Docker Hub OCI repo
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
-          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/vs-agent/Chart.yaml
+          sed -i "s/^version:.*/version: "${{steps.release-please.outputs.tag_name}}"/" ./charts/vs-agent/Chart.yaml
           CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
           helm dependency update ./charts/vs-agent
           helm package ./charts/vs-agent -d ./charts
-          helm push ./charts/${CHART_NAME}-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/${CHART_NAME}-"${{steps.release-please.outputs.tag_name}}".tgz oci://docker.io/$DH_USERNAME
 
       - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
-          sed -i "s/^version:.*/version: "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          sed -i "s/^version:.*/version: "${{steps.release-please.outputs.tag_name}}"/" ./charts/chatbot/Chart.yaml
           # update the dependencies version in the Chart.yaml
-          sed -i "s/^\([[:space:]]*version:\).*/\1 "${{steps.get_version.outputs.version}}"/" ./charts/chatbot/Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 "${{steps.release-please.outputs.tag_name}}"/" ./charts/chatbot/Chart.yaml
           CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
           helm dependency update ./charts/chatbot
           helm package ./charts/chatbot -d ./charts
-          helm push ./charts/${CHART_NAME}-"${{steps.get_version.outputs.version}}".tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/${CHART_NAME}-"${{steps.release-please.outputs.tag_name}}".tgz oci://docker.io/$DH_USERNAME
 
       - name: Publish NPM packages
-        if: steps.get_version.outputs.is-semver == 'true'
+        if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
