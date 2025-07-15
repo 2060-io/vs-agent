@@ -5,17 +5,17 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "packages": {
-    "apps/vs-agent": { "release-type": "node", "component": "vs-agent" },
-    "packages/model": { "release-type": "node", "component": "model" },
-    "packages/client": { "release-type": "node", "component": "client" },
-    "packages/nestjs-client": { "release-type": "node", "component": "nestjs-client" },
-    "examples/chatbot": { "release-type": "node", "component": "chatbot" }
+    "apps/vs-agent": { "release-type": "node" },
+    "packages/model": { "release-type": "node"},
+    "packages/client": { "release-type": "node"},
+    "packages/nestjs-client": { "release-type": "node" },
+    "examples/chatbot": { "release-type": "node"}
   },
   "plugins": [
     {
       "type": "linked-versions",
       "groupName": "monorepo",
-      "components": ["vs-agent","model","client","nestjs-client", "chatbot"]
+      "components": ["apps/vs-agent","packages/model","packages/client","packages/nestjs-client", "examples/chatbot"]
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
