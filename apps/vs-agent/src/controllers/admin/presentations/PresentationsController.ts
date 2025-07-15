@@ -14,6 +14,19 @@ import { ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 
+import {
+  ApiOperation,
+  ApiOkResponse,
+  ApiNoContentResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger'
+import { createDocLoader } from '../../utils/swagger-docs'
+import { PresentationDataDto } from './dto/presentation-data.dto'
+
+const docs = createDocLoader('doc/vs-agent-api.md')
+
 @ApiTags('presentations')
 @Controller({
   path: 'presentations',
@@ -30,6 +43,15 @@ export class PresentationsController {
    * @returns
    */
   @Get('/')
+  @ApiOperation({
+    summary: 'List all presentations',
+    description: docs.getSection('## Presentations'),
+  })
+  @ApiOkResponse({
+    description: 'Array of presentation data',
+    type: PresentationDataDto,
+    isArray: true,
+  })
   public async getAllPresentations(): Promise<PresentationData[]> {
     const agent = await this.agentService.getAgent()
 
@@ -48,6 +70,12 @@ export class PresentationsController {
    * @param proofExchangeId Proof Exchange Id
    */
   @Delete('/:proofExchangeId')
+  @ApiOperation({
+    summary: 'Delete a presentation exchange record',
+  })
+  @ApiNoContentResponse({ description: 'Presentation exchange deleted' })
+  @ApiBadRequestResponse({ description: 'Invalid proofExchangeId' })
+  @ApiNotFoundResponse({ description: 'Presentation exchange not found' })
   public async deleteProofExchangeById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
     await agent.proofs.deleteById(proofExchangeId, { deleteAssociatedDidCommMessages: true })
@@ -60,6 +88,10 @@ export class PresentationsController {
    * @returns ConnectionRecord
    */
   @Get('/:proofExchangeId')
+  @ApiOperation({
+    summary: 'Get presentation by proofExchangeId',
+  })
+  @ApiOkResponse({ description: 'Presentation data', type: PresentationDataDto })
   public async getPresentationById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
 
