@@ -76,7 +76,6 @@ export interface VsAgentOptions {
   did?: string
   autoDiscloseUserProfile?: boolean
   dependencies: AgentDependencies
-  anoncredsServiceBaseUrl?: string
   publicApiBaseUrl: string
 }
 
@@ -89,7 +88,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       anoncreds: new AnonCredsModule({
         anoncreds,
         tailsFileService: new FullTailsFileService({
-          tailsServerBaseUrl: `${options.anoncredsServiceBaseUrl}/anoncreds/v1/tails`,
+          tailsServerBaseUrl: `${options.publicApiBaseUrl}/anoncreds/v1/tails`,
         }),
         registries: [
           new DidWebAnonCredsRegistry({
