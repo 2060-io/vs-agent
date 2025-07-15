@@ -30,6 +30,8 @@ services:
       context: ../..
       dockerfile: ./examples/chatbot/Dockerfile
     image: vs-agent-chatbot
+    depends_on:
+      - vs-agent
     container_name: chatbot-backend
     restart: always
     networks:
