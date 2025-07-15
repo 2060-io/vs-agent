@@ -18,8 +18,6 @@ These variables are usually important for every deployment, since they define ho
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
 | AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
 | ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
-| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs)                                                            | http://localhost:3001 |
-| AGENT_ENDPOINTS            | List of endpoints where agent DIDComm endpoints will be accessible (including protocol and port), comma separated | ws://localhost:3001   |
 | AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)                                                                            | none                  |
 | AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
 | AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test VS Agent    |
@@ -28,18 +26,17 @@ These variables are usually important for every deployment, since they define ho
 
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
-In order to make your agent reachable by other VS agents and user agents like Hologram, you need to expose your `AGENT_PORT` to the internet. The agent must be aware of its public base URL, since it will need to use it to generate invitations for other agents to connect to it. So make sure to properly set at least:
--  `PUBLIC_API_BASE_URL` with the base URL
--  `AGENT_ENDPOINTS` with the base URL using WebSocket protocol (recommended) or HTTP, or both (separating by comma) for maximum flexibility
+In order to make your agent reachable by other VS agents and user agents like Hologram, you need to expose your `AGENT_PORT` to the internet. You must define an `AGENT_PUBLIC_DID` matching external hostname (e.g. if your VS-A instance public interface is accessible in `https://myagent.com:3001` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3001`)
+
+> **Note**: Although it is possible to run VS Agent without any public DID, it is mandatory to do so in order to make possible for the agent to create its own credential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
+>
+> Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
+>
+> If you don't specify a public DID, you might set up `AGENT_PUBLIC_API_BASE_URL` and `AGENT_ENDPOINTS` manually.
 
 You'll also need to set up an `AGENT_LABEL` and (optionally) an `AGENT_INVITATION_IMAGE_URL` so when DIDComm agents scan an invitation to your service they can identify it easily.
 
 Besides these parameters, you are likely to use your VS Agent alongside a **controller** app that will be sending messages and also receiving events from it (such as new messages arrived, new connections, etc.). For that purpose, you'll need to set up an `EVENTS_BASE_URL` for your VS Agent to be able to send WebHooks to it. See the [VS Agent API document](../../doc//vs-agent-api.md#events) for more information about the API your backend needs to implement (if you are not using the handy [JS](../../packages/client) or [NestJS](../../packages/nestjs-client) client packages).
-
-> **Note**: While not mandatory, it is recommended to set an agent public DID matching external hostname (e.g. if your VS-A instance pblic API is accessible in `https://myagent.com:3000` you must set AGENT_PUBLIC_DID to `did:web:myagent.com%3A3000`), which will make possible for the agent to create its own credential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
->
-> Public DID will be used also for agents to easily connect to it using DIDComm without the need of creating an explicit invitation by doing a GET request to `/invitation` endpoint.
-
 
 #### Database access settings
 
@@ -98,6 +95,8 @@ These are variables that are updated only on specific use cases.
 
 | Variable                   | Description                                                                                                       | Default value         |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
+| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs). Used when no public DID is defined or you want to override it                                                            | http://localhost:3001 |
+| AGENT_ENDPOINTS            | Comma-separeated list of endpoints where agent DIDComm endpoints will be accessible (including protocol and port). Used when no public DID is defined or you want to override it | ws://localhost:3001   |
 | AGENT_WALLET_KEY_DERIVATION_METHOD |	Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW|	ARGON2I_MOD |
 | AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
 | REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | true     |

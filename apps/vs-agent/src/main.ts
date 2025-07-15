@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod } from '@credo-ts/core'
+import { KeyDerivationMethod, parseDid } from '@credo-ts/core'
 import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -27,6 +27,8 @@ import {
   AGENT_WALLET_KEY,
   AGENT_WALLET_KEY_DERIVATION_METHOD,
   askarPostgresConfig,
+  DEFAULT_AGENT_ENDPOINTS,
+  DEFAULT_PUBLIC_API_BASE_URL,
   EVENTS_BASE_URL,
   keyDerivationMethodMap,
   POSTGRES_HOST,
@@ -91,8 +93,25 @@ const run = async () => {
     )
   }
 
+  const publicDid = AGENT_PUBLIC_DID ? parseDid(AGENT_PUBLIC_DID) : null
+
+  // Check it is a supported DID method
+  if (publicDid && publicDid.method !== 'web') {
+    serverLogger.error('Only did:web method is supported')
+    process.exit(1)
+  }
+
+  let endpoints = AGENT_ENDPOINTS
+  if (!endpoints && publicDid) endpoints = [`wss://${decodeURIComponent(publicDid.id)}`]
+  if (!endpoints) endpoints = DEFAULT_AGENT_ENDPOINTS
+
+  let publicApiBaseUrl = PUBLIC_API_BASE_URL
+  if (!publicApiBaseUrl && publicDid) publicApiBaseUrl = `https://${decodeURIComponent(publicDid.id)}`
+  if (!publicApiBaseUrl) publicApiBaseUrl = DEFAULT_PUBLIC_API_BASE_URL
+
+  serverLogger.info(`endpoints: ${endpoints} publicApiBaseUrl ${publicApiBaseUrl}`)
   const { agent } = await setupAgent({
-    endpoints: AGENT_ENDPOINTS,
+    endpoints,
     port: Number(AGENT_PORT) || 3001,
     walletConfig: {
       id: AGENT_WALLET_ID || 'test-vs-agent',
@@ -103,9 +122,9 @@ const run = async () => {
     },
     label: AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
-    publicDid: AGENT_PUBLIC_DID,
+    publicDid: publicDid?.did,
     logLevel: AGENT_LOG_LEVEL,
-    publicApiBaseUrl: PUBLIC_API_BASE_URL,
+    publicApiBaseUrl,
     selfVtrEnabled: SELF_VTR_ENABLED,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
   })
