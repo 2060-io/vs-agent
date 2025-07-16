@@ -95,7 +95,7 @@ const run = async () => {
 
   const publicDid = AGENT_PUBLIC_DID ? parseDid(AGENT_PUBLIC_DID) : null
 
-  if (AGENT_PUBLIC_DID) {
+  if (!AGENT_PUBLIC_DID) {
     serverLogger.warn('AGENT_PUBLIC_DID is not defined. You must set it in production releases')
   }
 
