@@ -24,7 +24,7 @@ export class FullTailsFileService extends BasicTailsFileService {
 
     const tailsFileId = utils.uuid()
     try {
-      await processTailsFile(localTailsFilePath, tailsFileId, agentContext.config.logger)
+      await saveTailsFile(localTailsFilePath, tailsFileId, agentContext.config.logger)
       console.log('Tails file processed successfully!')
     } catch (error) {
       console.error(`Failed to process tails file: ${error.message}`)
@@ -62,7 +62,7 @@ function fileHash(filePath: string, algorithm = 'sha256') {
   })
 }
 
-async function processTailsFile(localFilePath: string, tailsFileId: string, logger: Logger) {
+async function saveTailsFile(localFilePath: string, tailsFileId: string, logger: Logger) {
   logger.info(`Processing tails file: ${tailsFileId}`)
 
   if (!localFilePath) throw new Error('No file path was provided.')
