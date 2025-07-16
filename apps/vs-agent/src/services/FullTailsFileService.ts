@@ -7,10 +7,10 @@ import { createHash } from 'crypto'
 import fs from 'fs'
 
 export class FullTailsFileService extends BasicTailsFileService {
-  private tailsServerBaseUrl?: string
-  public constructor(options?: { tailsDirectoryPath?: string; tailsServerBaseUrl?: string }) {
+  private tailsServerBaseUrl: string
+  public constructor(options: { tailsDirectoryPath?: string; tailsServerBaseUrl: string }) {
     super(options)
-    this.tailsServerBaseUrl = options?.tailsServerBaseUrl
+    this.tailsServerBaseUrl = options.tailsServerBaseUrl
   }
 
   public async uploadTailsFile(
