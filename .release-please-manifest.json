@@ -1,7 +1,3 @@
 {
-  "apps/vs-agent": "1.3.2",
-  "packages/model": "1.3.2",
-  "packages/client": "1.3.2",
-  "packages/nestjs-client": "1.3.2",
-  "examples/chatbot": "1.3.2"
+  ".": "1.3.2"
 }
