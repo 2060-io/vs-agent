@@ -8,11 +8,10 @@ import {
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
 import cors from 'cors'
-import { createHash } from 'crypto'
 import express from 'express'
 import fs from 'fs'
-import multer, { diskStorage } from 'multer'
 
+import { baseFilePath, tailsIndex } from './services'
 import { VsAgent } from './utils/VsAgent'
 
 export const startDidWebServer = async (agent: VsAgent, config: DidWebServerConfig) => {
@@ -33,41 +32,6 @@ export const startDidWebServer = async (agent: VsAgent, config: DidWebServerConf
 
   return server
 }
-
-const baseFilePath = './tails'
-const indexFilePath = `./${baseFilePath}/index.json`
-
-if (!fs.existsSync(baseFilePath)) {
-  fs.mkdirSync(baseFilePath, { recursive: true })
-}
-const tailsIndex = (
-  fs.existsSync(indexFilePath) ? JSON.parse(fs.readFileSync(indexFilePath, { encoding: 'utf-8' })) : {}
-) as Record<string, string>
-
-function fileHash(filePath: string, algorithm = 'sha256') {
-  return new Promise<string>((resolve, reject) => {
-    const shasum = createHash(algorithm)
-    try {
-      const s = fs.createReadStream(filePath)
-      s.on('data', function (data) {
-        shasum.update(data)
-      })
-      // making digest
-      s.on('end', function () {
-        const hash = shasum.digest('hex')
-        return resolve(hash)
-      })
-    } catch (error) {
-      return reject('error in calculation')
-    }
-  })
-}
-
-const fileStorage = diskStorage({
-  filename: (req: any, file: { originalname: string }, cb: (arg0: null, arg1: string) => void) => {
-    cb(null, file.originalname + '-' + new Date().toISOString())
-  },
-})
 
 export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anoncredsBaseUrl: string) => {
   // DidDocument
@@ -223,52 +187,5 @@ export const addDidWebRoutes = async (app: express.Express, agent: VsAgent, anon
         res.status(500).end()
       }
     })
-
-    // Endpoint to upload a tails file for a specific tailsFileId
-    app.put(
-      '/anoncreds/v1/tails/:tailsFileId',
-      multer({ storage: fileStorage }).single('file'),
-      async (req, res) => {
-        agent.config.logger.info(`tails file upload: ${req.params.tailsFileId}`)
-
-        const file = req.file
-
-        if (!file) {
-          agent.config.logger.info(`No file found: ${JSON.stringify(req.headers)}`)
-          return res.status(400).send('No files were uploaded.')
-        }
-
-        const tailsFileId = req.params.tailsFileId
-        if (!tailsFileId) {
-          // Clean up temporary file
-          fs.rmSync(file.path)
-          return res.status(409).send('Missing tailsFileId')
-        }
-
-        const item = tailsIndex[tailsFileId]
-
-        if (item) {
-          agent.config.logger.debug(`there is already an entry for: ${tailsFileId}`)
-          res.status(409).end()
-          return
-        }
-
-        const hash = await fileHash(file.path)
-        const destinationPath = `${baseFilePath}/${hash}`
-
-        if (fs.existsSync(destinationPath)) {
-          agent.config.logger.warn('tails file already exists')
-        } else {
-          fs.copyFileSync(file.path, destinationPath)
-          fs.rmSync(file.path)
-        }
-
-        // Store filename in index
-        tailsIndex[tailsFileId] = hash
-        fs.writeFileSync(indexFilePath, JSON.stringify(tailsIndex))
-
-        res.status(200).end()
-      },
-    )
   }
 }
