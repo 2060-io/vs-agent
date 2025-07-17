@@ -241,7 +241,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   async function getClaims(
     agent: VsAgent,
     { id: subjectId }: W3cCredentialSubject,
-    logTag: string
+    logTag: 'ecs-service' | 'ecs-org'
   ): Promise<Record<string, unknown>> {
     const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
     if (record?.content) return record.content
