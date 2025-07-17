@@ -82,7 +82,7 @@ export const TESTVTR_ORG_REGISTRYID = process.env.TESTVTR_ORG_REGISTRYID ?? 'ID-
 export const TESTVTR_ORG_REGISTRYURL = process.env.TESTVTR_ORG_REGISTRYURL ?? 'https://example.com/registry'
 export const TESTVTR_ORG_ADDRESS = process.env.TESTVTR_ORG_ADDRESS ?? 'Some address'
 
-// Values for Service credential:
+// Values for Service credential
 export const TESTVTR_SERVICE_TYPE = process.env.TESTVTR_SERVICE_TYPE ?? 'WEB_PORTAL'
 export const TESTVTR_SERVICE_DESCRIPTION = process.env.TESTVTR_SERVICE_DESCRIPTION ?? 'Some description'
 export const TESTVTR_SERVICE_MINIMUMAGEREQUIRED = Number(process.env.TESTVTR_SERVICE_MINIMUMAGEREQUIRED ?? 18)
