@@ -32,31 +32,48 @@ import {
 } from '@credo-ts/core'
 import Ajv from 'ajv/dist/2020'
 import addFormats from 'ajv-formats'
+import axios from 'axios'
 import { createHash } from 'crypto'
 import express from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
 
+import {
+  AGENT_INVITATION_IMAGE_URL,
+  AGENT_LABEL,
+  TESTVTR_ORG_ADDRESS,
+  TESTVTR_ORG_COUNTRYCODE,
+  TESTVTR_ORG_REGISTRYID,
+  TESTVTR_ORG_REGISTRYURL,
+  TESTVTR_ORG_TYPE,
+  TESTVTR_SERVICE_DESCRIPTION,
+  TESTVTR_SERVICE_MINIMUMAGEREQUIRED,
+  TESTVTR_SERVICE_PRIVACYPOLICY,
+  TESTVTR_SERVICE_TERMSANDCONDITIONS,
+  TESTVTR_SERVICE_TYPE,
+} from './config'
 import { VsAgent } from './utils/VsAgent'
 
 // Load schemas from data.json at startup (used for schema validation and mock responses)
 const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
+const allowedLogTags = ['ecs-service', 'ecs-org'] as const
+type AllowedLogTag = (typeof allowedLogTags)[number]
 
 // Main function to add all test routes to the Express app
-export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
+export const addTestVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/self-vtr/ecs-service-c-vp.json',
+    '/test-vtr/ecs-service-c-vp.json',
     'ecs-service',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/self-vtr/schemas-example-service.json`,
+      id: `${publicApiBaseUrl}/test-vtr/schemas-example-service.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -64,13 +81,13 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/self-vtr/ecs-org-c-vp.json',
+    '/test-vtr/ecs-org-c-vp.json',
     'ecs-org',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/self-vtr/schemas-example-org.json`,
+      id: `${publicApiBaseUrl}/test-vtr/schemas-example-org.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -78,15 +95,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/self-vtr/schemas-example-service.json',
+    '/test-vtr/schemas-example-service.json',
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
+      id: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
+          $ref: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-service`,
         },
       },
     },
@@ -101,15 +118,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/self-vtr/schemas-example-org.json',
+    '/test-vtr/schemas-example-org.json',
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
+      id: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
+          $ref: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-org`,
         },
       },
     },
@@ -157,7 +174,8 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
-      if (!claims) claims = await getClaims(agent, { id: subjectId }, logTag)
+      if (!claims && !allowedLogTags.includes(logTag as AllowedLogTag))
+        claims = await getClaims(agent, { id: subjectId }, logTag as AllowedLogTag)
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
@@ -214,40 +232,66 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
    * Retrieves claims (attributes) for a verifiable credential based on a `subjectId` and a `logTag`.
    *
    * - If a corresponding generic record exists, its content is returned.
-   * - If not, default claims are returned depending on the value of `logTag`.
+   * - If not, default claims are constructed and validated against the schema.
    *
    * @param agent - An instance of `VsAgent` used to query generic records.
    * @param subject - A `W3cCredentialSubject` object containing the subject `id`.
    * @param logTag - A string tag used to identify the type of credential (e.g., 'ecs-service').
    *
-   * @returns An object containing the credential claims, to be used as the `credentialSubject` in a verifiable credential.
+   * @returns The validated credential subject to be used in a verifiable credential.
+   * @throws Error if schema is not found or claims are invalid.
    */
-  async function getClaims(agent: VsAgent, { id: subjectId }: W3cCredentialSubject, logTag: string) {
+  async function getClaims(
+    agent: VsAgent,
+    { id: subjectId }: W3cCredentialSubject,
+    logTag: 'ecs-service' | 'ecs-org',
+  ): Promise<Record<string, unknown>> {
     const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
     if (record?.content) return record.content
 
-    if (logTag === 'ecs-service') {
-      return {
-        name: 'Health Portal',
-        type: 'WEB_PORTAL',
-        description: 'Some description',
-        logo: 'base64string',
-        minimumAgeRequired: 18,
-        termsAndConditions: 'https://example.com/terms',
-        termsAndConditionsHash: 'hash',
-        privacyPolicy: 'https://example.com/privacy',
-        privacyPolicyHash: 'hash',
-      }
+    // Default claims fallback
+    const claims =
+      logTag === 'ecs-service'
+        ? {
+            name: AGENT_LABEL,
+            type: TESTVTR_SERVICE_TYPE,
+            description: TESTVTR_SERVICE_DESCRIPTION,
+            logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
+            minimumAgeRequired: TESTVTR_SERVICE_MINIMUMAGEREQUIRED,
+            termsAndConditions: TESTVTR_SERVICE_TERMSANDCONDITIONS,
+            privacyPolicy: TESTVTR_SERVICE_PRIVACYPOLICY,
+          }
+        : {
+            name: AGENT_LABEL,
+            logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
+            registryId: TESTVTR_ORG_REGISTRYID,
+            registryUrl: TESTVTR_ORG_REGISTRYURL,
+            address: TESTVTR_ORG_ADDRESS,
+            type: TESTVTR_ORG_TYPE,
+            countryCode: TESTVTR_ORG_COUNTRYCODE,
+          }
+
+    const ecsSchema = ecsSchemas[logTag]
+    if (!ecsSchema) {
+      throw new Error(`Schema not defined in data.json for logTag: ${logTag}`)
     }
-    return {
-      name: 'University Name',
-      logo: 'base64string',
-      registryId: 'ID-123',
-      registryUrl: 'https://example.com/registry',
-      address: 'Some address',
-      type: 'PUBLIC',
-      countryCode: 'CO',
+
+    const validate = ajv.compile(ecsSchema.properties?.credentialSubject)
+    const credentialSubject = { id: subjectId, ...claims }
+    const isValid = validate(credentialSubject)
+
+    if (!isValid) {
+      const errorDetails = validate.errors?.map(e => ({
+        message: e.message,
+        path: e.instancePath,
+        keyword: e.keyword,
+        params: e.params,
+      }))
+      console.error(`Validation failed for ${logTag}`, errorDetails)
+      throw new Error(`Invalid claims for ${logTag}: ${JSON.stringify(errorDetails, null, 2)}`)
     }
+
+    return claims
   }
 
   // Function to Create a Presentation
@@ -280,7 +324,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   }
 
   // GET Function to Retrieve JSON Schemas
-  app.get('/self-vtr/cs/v1/js/:schemaId', async (req, res) => {
+  app.get('/test-vtr/cs/v1/js/:schemaId', async (req, res) => {
     try {
       const { schemaId } = req.params
       if (!schemaId) {
@@ -310,80 +354,8 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     }
   })
 
-  /**
-   * POST /upload/:schemaId
-   *
-   * Upload and validate credential data against the JSON schema defined in data.json.
-   *
-   * Usage:
-   *   - :schemaId must be either "ecs-service" or "ecs-org" (as defined in data.json).
-   *   - The request body should be a JSON object matching the schema at data.json > [schemaId] > properties > credentialSubject.
-   *   - The "id" field is automatically set to the agent's DID.
-   *
-   * Example using curl:
-   *
-   *   curl -X POST http://localhost:3001/upload/ecs-service \
-   *     -H "Content-Type: application/json" \
-   *     -d '{
-   *       "name": "Health Portal",
-   *       "type": "WEB_PORTAL",
-   *       "description": "Some description",
-   *       "logo": "base64string",
-   *       "minimumAgeRequired": 18,
-   *       "termsAndConditions": "https://example.com/terms",
-   *       "termsAndConditionsHash": "hash",
-   *       "privacyPolicy": "https://example.com/privacy",
-   *       "privacyPolicyHash": "hash"
-   *     }'
-   *
-   * Responses:
-   *   - 200 OK: Data is valid and accepted.
-   *   - 400 Bad Request: Data is invalid according to the schema.
-   *   - 404 Not Found: schemaId does not exist in data.json.
-   *   - 500 Internal Server Error: Unexpected error.
-   */
-  app.post('/self-vtr/upload/:schemaId', async (req, res) => {
-    const ecsSchema = ecsSchemas[req.params.schemaId]
-    try {
-      if (!ecsSchema) {
-        return res.status(404).json({ error: 'Schema not defined in data.json' })
-      }
-
-      const validate = ajv.compile(ecsSchema.properties.credentialSubject)
-      const isValid = validate({ ...req.body, id: agent.did })
-      if (!isValid) {
-        return res.status(400).json({
-          error: 'Invalid data',
-          details: validate.errors?.map(e => ({
-            message: e.message,
-            path: e.instancePath,
-            keyword: e.keyword,
-            params: e.params,
-          })),
-        })
-      }
-
-      const recordId = `${agent.did}-${req.params.schemaId}`
-      try {
-        const existing = await agent.genericRecords.findById(recordId)
-        if (existing) {
-          await agent.genericRecords.delete(existing)
-        }
-      } catch (err) {}
-
-      await agent.genericRecords.save({
-        id: recordId,
-        content: req.body,
-      })
-      return res.status(200).json({ message: 'Data is valid and accepted' })
-    } catch (error) {
-      console.error(`Error validating data: ${error.message}`)
-      return res.status(500).json({ error: 'Internal Server Error' })
-    }
-  })
-
   // This function retrieve issuer permission for testing
-  app.get('/self-vtr/perm/v1/find_with_did', (req, res) => {
+  app.get('/test-vtr/perm/v1/find_with_did', (req, res) => {
     const did = req.query.did as string
     if (!did) {
       return res.status(400).json({ error: 'Missing required "did" query parameter.' })
@@ -396,4 +368,34 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
       res.status(500).json({ error: 'Internal server error.' })
     }
   })
+}
+
+/**
+ * Converts an image URL to a Base64-encoded data URI string.
+ *
+ * @param url - The image URL to convert.
+ * @returns A Base64 data URI string, or a fallback placeholder if the image cannot be fetched or is invalid.
+ */
+export async function urlToBase64(url?: string): Promise<string> {
+  const FALLBACK_BASE64 = 'https://hologram.zone/images/ico-hologram.png'
+
+  if (!url) {
+    console.warn('No URL provided for image conversion.')
+  }
+
+  try {
+    const response = await axios.get(url ?? FALLBACK_BASE64, { responseType: 'arraybuffer' })
+
+    const contentType = response.headers['content-type']
+    if (!contentType || !contentType.startsWith('image/')) {
+      console.warn(`The fetched resource is not an image. Content-Type: ${contentType}`)
+      return FALLBACK_BASE64
+    }
+
+    const base64 = Buffer.from(response.data).toString('base64')
+    return `data:${contentType};base64,${base64}`
+  } catch (error) {
+    console.error(`Failed to convert URL to Base64. URL: ${url}`, error)
+    return FALLBACK_BASE64
+  }
 }
