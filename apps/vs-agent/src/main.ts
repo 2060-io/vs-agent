@@ -129,7 +129,7 @@ const run = async () => {
     publicDid: publicDid?.did,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
-    selfVtrEnabled: TESTVTR_ENABLE,
+    testVtrEnabled: TESTVTR_ENABLE,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
   })
 

@@ -86,5 +86,7 @@ export const TESTVTR_ORG_ADDRESS = process.env.TESTVTR_ORG_ADDRESS ?? 'Some addr
 export const TESTVTR_SERVICE_TYPE = process.env.TESTVTR_SERVICE_TYPE ?? 'WEB_PORTAL'
 export const TESTVTR_SERVICE_DESCRIPTION = process.env.TESTVTR_SERVICE_DESCRIPTION ?? 'Some description'
 export const TESTVTR_SERVICE_MINIMUMAGEREQUIRED = Number(process.env.TESTVTR_SERVICE_MINIMUMAGEREQUIRED ?? 18)
-export const TESTVTR_SERVICE_TERMSANDCONDITIONS = process.env.TESTVTR_SERVICE_TERMSANDCONDITIONS ?? 'https://example.com/terms'
-export const TESTVTR_SERVICE_PRIVACYPOLICY = process.env.TESTVTR_SERVICE_PRIVACYPOLICY ?? 'https://example.com/privacy'
+export const TESTVTR_SERVICE_TERMSANDCONDITIONS =
+  process.env.TESTVTR_SERVICE_TERMSANDCONDITIONS ?? 'https://example.com/terms'
+export const TESTVTR_SERVICE_PRIVACYPOLICY =
+  process.env.TESTVTR_SERVICE_PRIVACYPOLICY ?? 'https://example.com/privacy'

@@ -58,6 +58,8 @@ import { VsAgent } from './utils/VsAgent'
 const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
+const allowedLogTags = ['ecs-service', 'ecs-org'] as const
+type AllowedLogTag = (typeof allowedLogTags)[number]
 
 // Main function to add all test routes to the Express app
 export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
@@ -172,7 +174,8 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
-      if (!claims) claims = await getClaims(agent, { id: subjectId }, logTag)
+      if (!claims && !allowedLogTags.includes(logTag as AllowedLogTag))
+        claims = await getClaims(agent, { id: subjectId }, logTag as AllowedLogTag)
       const unsignedCredential = new W3cCredential({
         context: [
           'https://www.w3.org/2018/credentials/v1',
@@ -241,7 +244,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   async function getClaims(
     agent: VsAgent,
     { id: subjectId }: W3cCredentialSubject,
-    logTag: 'ecs-service' | 'ecs-org'
+    logTag: 'ecs-service' | 'ecs-org',
   ): Promise<Record<string, unknown>> {
     const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
     if (record?.content) return record.content
@@ -350,7 +353,6 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
       res.status(500).json({ error: 'Failed to load schema' })
     }
   })
-
 
   // This function retrieve issuer permission for testing
   app.get('/self-vtr/perm/v1/find_with_did', (req, res) => {

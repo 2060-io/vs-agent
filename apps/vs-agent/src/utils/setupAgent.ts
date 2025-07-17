@@ -24,7 +24,7 @@ import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
-import { addSelfVtrRoutes } from '../selfVtrRoutes'
+import { addSelfVtrRoutes } from '../testVtrRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -40,7 +40,7 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   publicApiBaseUrl,
-  selfVtrEnabled,
+  testVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
   useCors,
@@ -52,7 +52,7 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   publicApiBaseUrl: string
-  selfVtrEnabled: boolean
+  testVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
   useCors?: boolean
@@ -113,7 +113,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, publicApiBaseUrl)
-  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
+  if (testVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -215,7 +215,7 @@ export const setupAgent = async ({
     }
 
     // Create a set of keys suitable for did communication
-    if (selfVtrEnabled) {
+    if (testVtrEnabled) {
       builder
         .addService(
           new DidDocumentService({
