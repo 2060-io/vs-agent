@@ -75,7 +75,7 @@ export const REDIRECT_DEFAULT_URL_TO_INVITATION_URL =
 export const TESTVTR_ENABLE = process.env.TESTVTR_ENABLE === 'true'
 export const USER_PROFILE_AUTODISCLOSE = process.env.USER_PROFILE_AUTODISCLOSE === 'true'
 
-// Values for Organization credential:
+// Values for Organization credential
 export const TESTVTR_ORG_TYPE = process.env.TESTVTR_ORG_TYPE ?? 'PUBLIC'
 export const TESTVTR_ORG_COUNTRYCODE = process.env.TESTVTR_ORG_COUNTRYCODE ?? 'CO'
 export const TESTVTR_ORG_REGISTRYID = process.env.TESTVTR_ORG_REGISTRYID ?? 'ID-123'
