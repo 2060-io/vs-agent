@@ -62,18 +62,18 @@ const allowedLogTags = ['ecs-service', 'ecs-org'] as const
 type AllowedLogTag = (typeof allowedLogTags)[number]
 
 // Main function to add all test routes to the Express app
-export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
+export const addTestVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/self-vtr/ecs-service-c-vp.json',
+    '/test-vtr/ecs-service-c-vp.json',
     'ecs-service',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/self-vtr/schemas-example-service.json`,
+      id: `${publicApiBaseUrl}/test-vtr/schemas-example-service.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -81,13 +81,13 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
   await registerVerifiablePresentationEndpoint(
-    '/self-vtr/ecs-org-c-vp.json',
+    '/test-vtr/ecs-org-c-vp.json',
     'ecs-org',
     ['VerifiableCredential', 'VerifiableTrustCredential'],
     app,
     agent,
     {
-      id: `${publicApiBaseUrl}/self-vtr/schemas-example-org.json`,
+      id: `${publicApiBaseUrl}/test-vtr/schemas-example-org.json`,
       type: 'JsonSchemaCredential',
     },
   )
@@ -95,15 +95,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/self-vtr/schemas-example-service.json',
+    '/test-vtr/schemas-example-service.json',
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
+      id: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-service`,
+          $ref: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-service`,
         },
       },
     },
@@ -118,15 +118,15 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   // Verifiable JsonSchema
   // Register endpoints for example Verifiable Credential
   registerVerifiableCredentialEndpoint(
-    '/self-vtr/schemas-example-org.json',
+    '/test-vtr/schemas-example-org.json',
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
+      id: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-vtr/cs/v1/js/ecs-org`,
+          $ref: `${publicApiBaseUrl}/test-vtr/cs/v1/js/ecs-org`,
         },
       },
     },
@@ -324,7 +324,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   }
 
   // GET Function to Retrieve JSON Schemas
-  app.get('/self-vtr/cs/v1/js/:schemaId', async (req, res) => {
+  app.get('/test-vtr/cs/v1/js/:schemaId', async (req, res) => {
     try {
       const { schemaId } = req.params
       if (!schemaId) {
@@ -355,7 +355,7 @@ export const addSelfVtrRoutes = async (app: express.Express, agent: VsAgent, pub
   })
 
   // This function retrieve issuer permission for testing
-  app.get('/self-vtr/perm/v1/find_with_did', (req, res) => {
+  app.get('/test-vtr/perm/v1/find_with_did', (req, res) => {
     const did = req.query.did as string
     if (!did) {
       return res.status(400).json({ error: 'Missing required "did" query parameter.' })

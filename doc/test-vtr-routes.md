@@ -1,17 +1,17 @@
 # Self-Verifiable Trust Registry API (Self-Issued)
 
-The `addSelfVtrRoutes` function provides a set of HTTP endpoints for working with **self-issued verifiable credentials and presentations** using JSON Schema. This approach simulates a trust registry where credentials are issued and validated by the same agent, without relying on an external registry.
+The `addTestVtrRoutes` function provides a set of HTTP endpoints for working with **self-issued verifiable credentials and presentations** using JSON Schema. This approach simulates a trust registry where credentials are issued and validated by the same agent, without relying on an external registry.
 
 ---
 
 ## Usage
 
-To enable these routes, call `addSelfVtrRoutes(app, agent, publicApiBaseUrl)` in your Express server setup:
+To enable these routes, call `addTestVtrRoutes(app, agent, publicApiBaseUrl)` in your Express server setup:
 
 ```typescript
-import { addSelfVtrRoutes } from './selfVtrRoutes'
+import { addTestVtrRoutes } from './testVtrRoutes'
 // ...
-addSelfVtrRoutes(app, agent, publicApiBaseUrl)
+addTestVtrRoutes(app, agent, publicApiBaseUrl)
 ```
 
 - `app`: Express application instance.
@@ -22,7 +22,7 @@ addSelfVtrRoutes(app, agent, publicApiBaseUrl)
 
 ## Endpoints
 
-### POST `/self-vtr/upload/:schemaId`
+### POST `/test-vtr/upload/:schemaId`
 
 Upload and validate credential data against a JSON schema.
 
@@ -32,7 +32,7 @@ Upload and validate credential data against a JSON schema.
 
 **Example:**
 ```bash
-curl -X POST http://localhost:3001/self-vtr/upload/ecs-service \
+curl -X POST http://localhost:3001/test-vtr/upload/ecs-service \
   -H "Content-Type: application/json" \
   -d '{ "name": "Health Portal", ... }'
 ```
@@ -44,39 +44,39 @@ curl -X POST http://localhost:3001/self-vtr/upload/ecs-service \
 
 ---
 
-### GET `/self-vtr/cs/v1/js/:schemaId`
+### GET `/test-vtr/cs/v1/js/:schemaId`
 
 Retrieve the JSON schema for a given credential type.
 > **Note:** Only currently supported ecs credential types (such as `ecs-service` or `ecs-org`) are available at this time.
 
 **Example:**
 ```bash
-curl http://localhost:3001/self-vtr/cs/v1/js/ecs-service
+curl http://localhost:3001/test-vtr/cs/v1/js/ecs-service
 ```
 
 ---
 
-### GET `/self-vtr/ecs-service-c-vp.json`  
-### GET `/self-vtr/ecs-org-c-vp.json`
+### GET `/test-vtr/ecs-service-c-vp.json`  
+### GET `/test-vtr/ecs-org-c-vp.json`
 
 Retrieve a signed Verifiable Presentation for ECS Service or Organization.
 
 ---
 
-### GET `/self-vtr/schemas-example-service.json`  
-### GET `/self-vtr/schemas-example-org.json`
+### GET `/test-vtr/schemas-example-service.json`  
+### GET `/test-vtr/schemas-example-org.json`
 
 Retrieve a signed Verifiable Credential for ECS Service or Organization.
 
 ---
 
-### GET `/self-vtr/perm/v1/find_with_did?did=<did>`
+### GET `/test-vtr/perm/v1/find_with_did?did=<did>`
 
 Retrieve issuer permission type for a given DID (for testing).
 
 **Example:**
 ```bash
-curl "http://localhost:3001/self-vtr/perm/v1/find_with_did?did=did:example:123"
+curl "http://localhost:3001/test-vtr/perm/v1/find_with_did?did=did:example:123"
 ```
 
 ---

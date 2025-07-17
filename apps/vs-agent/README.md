@@ -110,9 +110,9 @@ When connecting to other agents, VS-A tries to get information from them in orde
 
 VS-A fetches capabilities from the `discovery.json` file (which is located at at `/www/apps/vs-agent/discovery.json` in the deployed container) to determine available features. If you want to customize the capabilities to look for, replace the volume at this path with your own `discovery.json` file.
 
-### Self VTR
+### Test VTR
 
-If the `TESTVTR_ENABLE` environment variable is set to `true`, VS-A will enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](./doc/self-vtr-routes.md)).
+If the `TESTVTR_ENABLE` environment variable is set to `true`, VS-A will enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](../../doc/test-vtr-routes.md)).
 
 ## Deploy and run
 
