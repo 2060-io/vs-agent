@@ -20,29 +20,43 @@ addTestVtrRoutes(app, agent, publicApiBaseUrl)
 
 ---
 
-## Endpoints
+## Configuration
 
-### POST `/test-vtr/upload/:schemaId`
+To enable the Self-Verifiable Trust Registry API endpoints, you must set the following environment variables in your `.env` file or system environment. These variables control the agent's identity, endpoints, and the data used for example credentials:
 
-Upload and validate credential data against a JSON schema.
+| Variable                        | Description                                                      | Example Value                                  |
+|----------------------------------|------------------------------------------------------------------|------------------------------------------------|
+| `TESTVTR_ENABLE`                 | Enable Self Verifiable Trust Registry Service (test only)        | `true`                                         |
+| `TESTVTR_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
+| `TESTVTR_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
+| `TESTVTR_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
+| `TESTVTR_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
+| `TESTVTR_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
+| `TESTVTR_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
+| `TESTVTR_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
+| `TESTVTR_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
+| `TESTVTR_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
+| `TESTVTR_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
 
-- `:schemaId` must match an essential schema currently supported (e.g., `ecs-service`, `ecs-org`). Support for additional schemas is not available yet.
-- The request body should match the schema's `credentialSubject` properties.
-- The agent's DID is automatically set as the `id` field.
+Set these variables in your `.env` file or as environment variables before starting the agent. For example:
 
-**Example:**
-```bash
-curl -X POST http://localhost:3001/test-vtr/upload/ecs-service \
-  -H "Content-Type: application/json" \
-  -d '{ "name": "Health Portal", ... }'
+```properties
+TESTVTR_ENABLE=true
+AGENT_PUBLIC_DID=did:web:example.com
+AGENT_ENDPOINT=wss://example.com
+AGENT_LABEL=chatbot
+PUBLIC_API_BASE_URL=https://example.com
+...
 ```
 
-**Responses:**
-- `200 OK`: Data is valid and accepted.
-- `400 Bad Request`: Data is invalid.
-- `404 Not Found`: Schema ID does not exist.
+> **Note:**  
+> This Self-Verifiable Trust Registry API and its configuration are **provisional** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
+>
+> The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
 
 ---
+
+## Endpoints
 
 ### GET `/test-vtr/cs/v1/js/:schemaId`
 
