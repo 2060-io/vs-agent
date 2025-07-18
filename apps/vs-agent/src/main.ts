@@ -3,7 +3,6 @@ import 'reflect-metadata'
 import type { ServerConfig } from './utils/ServerConfig'
 
 import { KeyDerivationMethod, parseDid } from '@credo-ts/core'
-import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import * as fs from 'fs'
 import * as path from 'path'
