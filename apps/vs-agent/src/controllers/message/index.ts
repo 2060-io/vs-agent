@@ -1,5 +1,0 @@
-export * from './MessageController'
-export * from './MessageService'
-export * from './services/CoreMessageService'
-export * from './services/MessageServiceFactory'
-export * from './services/RedisMessageService'

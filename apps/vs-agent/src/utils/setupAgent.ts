@@ -17,16 +17,18 @@ import {
   WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
-import cors from 'cors'
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import express from 'express'
+import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import WebSocket from 'ws'
 
-import { addDidWebRoutes } from '../didWebServer'
-import { addInvitationRoutes } from '../invitationRoutes'
-import { addSelfVtrRoutes } from '../selfVtrRoutes'
+import { DidCommModule } from '../didcomm.module'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
+import { ServerConfig } from './ServerConfig'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
@@ -78,14 +80,11 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
-  const app = express()
-
-  if (useCors) app.use(cors())
-
+  const app = await NestFactory.create(DidCommModule.register(agent))
   app.use(express.json({ limit: '5mb' }))
   app.use(express.urlencoded({ extended: true, limit: '5mb' }))
-
-  app.set('json spaces', 2)
+  app.getHttpAdapter().getInstance().set('json spaces', 2)
+  commonAppConfig(app, { port, cors: useCors, logger })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
@@ -94,7 +93,7 @@ export const setupAgent = async ({
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ app, port })
+    httpInboundTransport = new HttpInboundTransport({ app: app.getHttpAdapter().getInstance(), port })
     agent.registerInboundTransport(httpInboundTransport)
   }
 
@@ -109,17 +108,11 @@ export const setupAgent = async ({
 
   await agent.initialize()
 
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : app.listen(port)
-
-  // Add did:web and AnonCreds Service routes
-  addDidWebRoutes(app, agent, publicApiBaseUrl)
-  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
-
-  addInvitationRoutes(app, agent)
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await app.listen(port)
 
   // Add WebSocket support if required
   if (enableWs) {
-    httpServer?.on('upgrade', (request, socket, head) => {
+    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
       webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
         const socketId = utils.uuid()
         webSocketServer?.emit('connection', socketParam, request, socketId)
@@ -281,4 +274,33 @@ export const setupAgent = async ({
   }
 
   return { agent, app, webSocketServer }
+}
+
+export function commonAppConfig(app: INestApplication, serverConfig: ServerConfig) {
+  // Versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+  })
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('API Documentation')
+    .setVersion('1.0')
+    .build()
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, document)
+
+  // Pipes
+  app.useGlobalPipes(new ValidationPipe())
+
+  // CORS
+  if (serverConfig.cors) {
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type,Authorization',
+    })
+  }
+  return app
 }
