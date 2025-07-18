@@ -152,12 +152,35 @@ export const setupAgent = async ({
     )
 
     const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
+
     const builder = new DidDocumentBuilder(publicDid)
 
-    // Create a set of keys suitable for did communication
-    if (endpoints && endpoints.length > 0) {
-      const keyAgreementId = `${publicDid}#key-agreement-1`
+    builder
+      .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
+      .addContext('https://w3id.org/security/suites/x25519-2019/v1')
 
+    // If the document already exists (i.e. DID record previously created), take base keys from it
+    // and just populate those services that can vary according to the configuration
+    const keyAgreementId = `${publicDid}#key-agreement-1`
+    if (existingRecord?.didDocument) {
+      logger?.debug('Public did record already stored. DidDocument keys will be restored from it')
+      const verificationMethods = existingRecord.didDocument.verificationMethod ?? []
+      for (const method of verificationMethods) {
+        builder.addVerificationMethod(method)
+      }
+
+      const authentications = existingRecord.didDocument.authentication ?? []
+      for (const auth of authentications) {
+        builder.addAuthentication(auth)
+      }
+
+      const keyAgreements = existingRecord.didDocument.keyAgreement ?? []
+      for (const key of keyAgreements) {
+        builder.addKeyAgreement(key)
+      }
+    } else {
+      logger?.debug('Public did record not found. Creating key pair and DidDocument')
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
       const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
@@ -182,58 +205,59 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
-      if (selfVtrEnabled) {
-        builder
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr`,
-              type: 'VerifiablePublicRegistry',
-            }),
-          )
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-service-c-vp`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
-              type: 'LinkedVerifiablePresentation',
-            }),
-          )
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-org-c-vp`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
-              type: 'LinkedVerifiablePresentation',
-            }),
-          )
-      }
-
-      for (let i = 0; i < agent.config.endpoints.length; i++) {
-        builder.addService(
-          new DidCommV1Service({
-            id: `${publicDid}#did-communication`,
-            serviceEndpoint: agent.config.endpoints[i],
-            priority: i,
-            routingKeys: [], // TODO: Support mediation
-            recipientKeys: [keyAgreementId],
-            accept: ['didcomm/aip2;env=rfc19'],
-          }),
-        )
-      }
-
-      if (publicApiBaseUrl) {
-        builder.addService(
-          new DidDocumentService({
-            id: `${publicDid}#anoncreds`,
-            serviceEndpoint: `${publicApiBaseUrl}/anoncreds/v1`,
-            type: 'AnonCredsRegistry',
-          }),
-        )
-      }
     }
 
-    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
+    // Create a set of keys suitable for did communication
+    if (selfVtrEnabled) {
+      builder
+        .addService(
+          new DidDocumentService({
+            id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+            serviceEndpoint: `${publicApiBaseUrl}/self-vtr`,
+            type: 'VerifiablePublicRegistry',
+          }),
+        )
+        .addService(
+          new DidDocumentService({
+            id: `${publicDid}#vpr-ecs-service-c-vp`,
+            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
+            type: 'LinkedVerifiablePresentation',
+          }),
+        )
+        .addService(
+          new DidDocumentService({
+            id: `${publicDid}#vpr-ecs-org-c-vp`,
+            serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
+            type: 'LinkedVerifiablePresentation',
+          }),
+        )
+    }
+
+    for (let i = 0; i < agent.config.endpoints.length; i++) {
+      builder.addService(
+        new DidCommV1Service({
+          id: `${publicDid}#did-communication`,
+          serviceEndpoint: agent.config.endpoints[i],
+          priority: i,
+          routingKeys: [], // TODO: Support mediation
+          recipientKeys: [keyAgreementId],
+          accept: ['didcomm/aip2;env=rfc19'],
+        }),
+      )
+    }
+
+    if (publicApiBaseUrl) {
+      builder.addService(
+        new DidDocumentService({
+          id: `${publicDid}#anoncreds`,
+          serviceEndpoint: `${publicApiBaseUrl}/anoncreds/v1`,
+          type: 'AnonCredsRegistry',
+        }),
+      )
+    }
+
     if (existingRecord) {
-      logger?.debug('Public did record already stored. DidDocument updated')
+      logger?.debug('Public did record updated')
       existingRecord.didDocument = builder.build()
       await didRepository.update(agent.context, existingRecord)
     } else {
