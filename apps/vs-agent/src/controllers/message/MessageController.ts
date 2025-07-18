@@ -1,18 +1,27 @@
-import { BaseMessage } from '@2060.io/vs-agent-model'
+import { BaseMessage, MessageType } from '@2060.io/vs-agent-model'
 import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBody,
+  ApiTags,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
+  getSchemaPath,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger'
 
 import { VsAgentService } from '../../services/VsAgentService'
 import { VsAgent } from '../../utils/VsAgent'
-
 import { MessageServiceFactory } from './services/MessageServiceFactory'
+import { BaseMessageDto } from './dto/base-message.dto'
+import { createDocLoader } from '../../utils/swagger-docs'
+
+const docs = createDocLoader('doc/vs-agent-api.md')
 
 @ApiTags('message')
-@Controller({
-  path: 'message',
-  version: '1',
-})
+@Controller({ path: 'message', version: '1' })
 export class MessageController {
   private readonly logger = new Logger(MessageController.name)
 
@@ -23,27 +32,24 @@ export class MessageController {
 
   @Post('/')
   @ApiBody({
-    type: BaseMessage,
-    examples: {
-      text: {
-        summary: 'Text message',
-        value: {
-          connectionId: '2ab2e45e-d896-40bb-9d03-1f79e6083c33',
-          type: 'text',
-          timestamp: '2024-03-11T14:03:50.607Z',
-          content: 'Hello',
-        },
-      },
-      invitation: {
-        summary: 'Invitation message',
-        value: {
-          connectionId: '2ab2e45e-d896-40bb-9d03-1f79e6083c33',
-          type: 'invitation',
-          timestamp: '2024-03-11T14:03:50.607Z',
-          label: 'A service',
-          imageUrl: 'https://aservice.com/avatar.png',
-          did: 'did:web:aservice.com',
-        },
+    type: BaseMessageDto,
+    description: [
+      docs.getSection('## Messaging', { includeFences: true }),
+      docs.getSection('### Messaging to/from other agents', { includeFences: true }),
+    ].join('\n\n'),
+    schema: { allOf: [{ $ref: getSchemaPath(BaseMessageDto) }] },
+    examples: docs.getExamples(Object.values(MessageType)),
+  })
+  @ApiOkResponse({
+    description: 'Message sent successfully',
+    schema: { example: { id: '550e8400-e29b-41d4-a716-446655440000' } },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+    schema: {
+      example: {
+        statusCode: 500,
+        error: 'something went wrong: Error message here',
       },
     },
   })
@@ -54,10 +60,10 @@ export class MessageController {
       const connection = await agent.connections.findById(message.connectionId)
 
       if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
-
       if (connection.state === DidExchangeState.Completed && (!connection.did || !connection.theirDid)) {
         throw new Error(`This connection has been terminated. No further messages are possible`)
       }
+
       const messageId = message.id ?? utils.uuid()
       message.id = messageId
 

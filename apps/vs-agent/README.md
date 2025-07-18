@@ -42,17 +42,17 @@ Besides these parameters, you are likely to use your VS Agent alongside a **cont
 
 These are variables that you are likely to use when going into production, since you don't want to use dummy credentials and also you'll probably want to use external components to improve horizontal scalability.
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-vs-agent    |
-| AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-vs-agent    |
-| POSTGRES_HOST             | PosgreSQL database host                                                                                             | None (use SQLite)               |
-| POSTGRES_USER             | PosgreSQL database username                                                                                         | None                            |
-| POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
-| POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
-| POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
-| REDIS_HOST       | Redis host used for message caching and asynchronous processing. The system requires this for production-ready performance.                                                                                       | None                            |
-| REDIS_PASSWORD   | Password for connecting to the Redis instance.                                                                                   | None                            |
+| Variable                | Description                                                                                                                 | Default value     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| AGENT_WALLET_ID         | ID for agent wallet                                                                                                         | test-vs-agent     |
+| AGENT_WALLET_KEY        | Key for agent wallet                                                                                                        | test-vs-agent     |
+| POSTGRES_HOST           | PosgreSQL database host                                                                                                     | None (use SQLite) |
+| POSTGRES_USER           | PosgreSQL database username                                                                                                 | None              |
+| POSTGRES_PASSWORD       | PosgreSQL database password                                                                                                 | None              |
+| POSTGRES_ADMIN_USER     | PosgreSQL database admin user                                                                                               | None              |
+| POSTGRES_ADMIN_PASSWORD | PosgreSQL database admin password                                                                                           | None              |
+| REDIS_HOST              | Redis host used for message caching and asynchronous processing. The system requires this for production-ready performance. | None              |
+| REDIS_PASSWORD          | Password for connecting to the Redis instance.                                                                              | None              |
 
 VS Agent supports two database backends:
 
@@ -62,6 +62,7 @@ VS Agent supports two database backends:
 If you want to use SQLite, you won't need to care about any of these variables: VS Agent will create a local database using `AGENT_WALLET_ID` name and ciphering it using `AGENT_WALLET_KEY`. Usually it is safe to keep the default values, unless you'll want to set up multiple VS Agents in the same computer (in such case, just use different `AGENT_WALLET_ID` for each).
 
 On the other hand, if you go to production, you'll likely want to use a PostgreSQL DB, which will be used as soon as you set `POSTGRES_HOST` environment variable. Make sure to:
+
 - define AGENT_WALLET_ID and AGENT_WALLET_KEY, since the ID will be used as the name of the database that will be used to store VS Agent wallet
 - define the other `POSTGRES_*` parameters, including the ones for administration in case VS Agent wallet's database is not yet created in your Postgres host. You might skip using these parameters if your DBA creates this database beforehand and gives permissions to `POSTGRES_USER`.
 
@@ -72,11 +73,11 @@ By offloading message handling and enabling asynchronous processing, Redis helps
 
 Here is a couple of variables that you may want to take care in case of troubles or working in development environments.
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_LOG_LEVEL            | Credo Agent Log level                                                                                             | 4 (warn)              |
-| ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
-| USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
+| Variable        | Description                                                          | Default value |
+| --------------- | -------------------------------------------------------------------- | ------------- |
+| AGENT_LOG_LEVEL | Credo Agent Log level                                                | 4 (warn)      |
+| ADMIN_LOG_LEVEL | Admin interface Log level                                            | 2 (debug)     |
+| USE_CORS        | Enable Cross-Origin Resource Sharing (only for development purposes) | false         |
 
 Possible log levels:
 
@@ -122,14 +123,14 @@ vs-agent can be run both locally or containerized.
 
 vs-agent can be built and run on localhost by just setting the corresponding variables and executing:
 
-```
+```bash
 pnpm build
 pnpm dev
 ```
 
 Upon a successful start, the following lines should be read in log:
 
-```
+```bash
 VS Agent running in port xxxx. Admin interface at port yyyy
 ```
 
@@ -139,14 +140,22 @@ This means that VS-A is up and running!
 
 First of all, a docker image must be created by doing:
 
-```
-docker build -t vs-agent:[tag] .
+```bash
+docker build \
+  -f apps/vs-agent/Dockerfile \
+  -t vs-agent:test \
+  .
 ```
 
 Then, a container can be created and deployed:
 
-```
-docker run -e AGENT_PUBLIC_DID=... -e AGENT_ENDPOINT=... -e AGENT_PORT=yyy -e USE_CORS=xxx -p yyy:xxx vs-agent:[tag]
+```bash
+docker run -d --rm \
+  --name vs-agent \
+  -p 3001:3001 -p 3000:3000 \
+  -e PUBLIC_API_BASE_URL=https://myhost.ngrok-free.app \
+  -e AGENT_ENDPOINTS=wss://myhost.ngrok-free.app \
+  vs-agent:test
 ```
 
 where yyy is an publicly accesible port from the host machine.

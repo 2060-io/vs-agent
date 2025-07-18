@@ -74,7 +74,7 @@
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/swagger": "^7.3.0",
+    "@nestjs/swagger": "^8.0.7",
     "@types/qrcode": "^1.5.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
