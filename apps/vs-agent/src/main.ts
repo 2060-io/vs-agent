@@ -9,7 +9,7 @@ import * as path from 'path'
 
 import packageJson from '../package.json'
 
-import { VsAgentModule } from './app.module'
+import { VsAgentModule } from './admin.module'
 import {
   ADMIN_LOG_LEVEL,
   ADMIN_PORT,
