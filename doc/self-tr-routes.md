@@ -20,30 +20,6 @@ addSelfTrRoutes(app, agent, publicApiBaseUrl)
 
 ---
 
-## Configuration
-
-To enable the Self-Verifiable Trust Registry API endpoints, you must set the following environment variables in your `.env` file or system environment. These variables control the agent's identity, endpoints, and the data used for example credentials:
-
-| Variable                        | Description                                                      | Example Value                                  |
-|----------------------------------|------------------------------------------------------------------|------------------------------------------------|
-| `SELF_ISSUED_VTC_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
-| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
-| `SELF_ISSUED_VTC_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
-| `SELF_ISSUED_VTC_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
-| `SELF_ISSUED_VTC_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
-| `SELF_ISSUED_VTC_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
-| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
-| `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
-| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
-| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
-
-> **Note:**  
-> This Self-Verifiable Trust Registry API and its configuration are **unstable** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
->
-> The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
-
----
-
 ## Endpoints
 
 ### GET `/self-tr/v1/cs/js/:schemaId`
