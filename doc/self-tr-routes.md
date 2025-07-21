@@ -38,7 +38,7 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 | `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
 
 > **Note:**  
-> This Self-Verifiable Trust Registry API and its configuration are **provisional** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
+> This Self-Verifiable Trust Registry API and its configuration are **unstable** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
 >
 > The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
 
