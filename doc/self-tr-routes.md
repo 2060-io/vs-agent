@@ -46,39 +46,39 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 
 ## Endpoints
 
-### GET `/test-vtr/cs/v1/js/:schemaId`
+### GET `/self-tr/cs/v1/js/:schemaId`
 
 Retrieve the JSON schema for a given credential type.
 > **Note:** Only currently supported ecs credential types (such as `ecs-service` or `ecs-org`) are available at this time.
 
 **Example:**
 ```bash
-curl http://localhost:3001/test-vtr/cs/v1/js/ecs-service
+curl http://localhost:3001/self-tr/cs/v1/js/ecs-service
 ```
 
 ---
 
-### GET `/test-vtr/ecs-service-c-vp.json`  
-### GET `/test-vtr/ecs-org-c-vp.json`
+### GET `/self-tr/ecs-service-c-vp.json`  
+### GET `/self-tr/ecs-org-c-vp.json`
 
 Retrieve a signed Verifiable Presentation for ECS Service or Organization.
 
 ---
 
-### GET `/test-vtr/schemas-example-service.json`  
-### GET `/test-vtr/schemas-example-org.json`
+### GET `/self-tr/schemas-example-service.json`  
+### GET `/self-tr/schemas-example-org.json`
 
 Retrieve a signed Verifiable Credential for ECS Service or Organization.
 
 ---
 
-### GET `/test-vtr/perm/v1/find_with_did?did=<did>`
+### GET `/self-tr/perm/v1/find_with_did?did=<did>`
 
 Retrieve issuer permission type for a given DID (for testing).
 
 **Example:**
 ```bash
-curl "http://localhost:3001/test-vtr/perm/v1/find_with_did?did=did:example:123"
+curl "http://localhost:3001/self-tr/perm/v1/find_with_did?did=did:example:123"
 ```
 
 ---

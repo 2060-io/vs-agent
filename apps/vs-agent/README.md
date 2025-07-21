@@ -111,7 +111,7 @@ VS-A fetches capabilities from the `discovery.json` file (which is located at at
 
 ### Test VTR
 
-VS-A enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](../../doc/test-vtr-routes.md)).
+VS-A enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](../../doc/self-tr-routes.md)).
 
 ## Deploy and run
 

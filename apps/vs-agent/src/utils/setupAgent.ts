@@ -217,21 +217,21 @@ export const setupAgent = async ({
       .addService(
         new DidDocumentService({
           id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-          serviceEndpoint: `${publicApiBaseUrl}/test-vtr`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr`,
           type: 'VerifiablePublicRegistry',
         }),
       )
       .addService(
         new DidDocumentService({
           id: `${publicDid}#vpr-ecs-service-c-vp`,
-          serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-service-c-vp.json`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
       )
       .addService(
         new DidDocumentService({
           id: `${publicDid}#vpr-ecs-org-c-vp`,
-          serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-org-c-vp.json`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
       )
