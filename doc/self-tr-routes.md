@@ -1,17 +1,17 @@
 # Self-Verifiable Trust Registry API (Self-Issued)
 
-The `addTestVtrRoutes` function provides a set of HTTP endpoints for working with **self-issued verifiable credentials and presentations** using JSON Schema. This approach simulates a trust registry where credentials are issued and validated by the same agent, without relying on an external registry.
+The `addSelfTrRoutes` function provides a set of HTTP endpoints for working with **self-issued verifiable credentials and presentations** using JSON Schema. This approach simulates a trust registry where credentials are issued and validated by the same agent, without relying on an external registry.
 
 ---
 
 ## Usage
 
-To enable these routes, call `addTestVtrRoutes(app, agent, publicApiBaseUrl)` in your Express server setup:
+To enable these routes, call `addSelfTrRoutes(app, agent, publicApiBaseUrl)` in your Express server setup:
 
 ```typescript
-import { addTestVtrRoutes } from './testVtrRoutes'
+import { addSelfTrRoutes } from './selfTrRoutes'
 // ...
-addTestVtrRoutes(app, agent, publicApiBaseUrl)
+addSelfTrRoutes(app, agent, publicApiBaseUrl)
 ```
 
 - `app`: Express application instance.

@@ -62,7 +62,7 @@ const allowedLogTags = ['ecs-service', 'ecs-org'] as const
 type AllowedLogTag = (typeof allowedLogTags)[number]
 
 // Main function to add all test routes to the Express app
-export const addTestVtrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
+export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations

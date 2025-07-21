@@ -24,7 +24,7 @@ import WebSocket from 'ws'
 
 import { addDidWebRoutes } from '../didWebServer'
 import { addInvitationRoutes } from '../invitationRoutes'
-import { addTestVtrRoutes } from '../testVtrRoutes'
+import { addSelfTrRoutes } from '../selfTrRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -111,7 +111,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, publicApiBaseUrl)
-  addTestVtrRoutes(app, agent, publicApiBaseUrl)
+  addSelfTrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
