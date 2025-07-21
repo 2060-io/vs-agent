@@ -46,14 +46,14 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 
 ## Endpoints
 
-### GET `/self-tr/cs/v1/js/:schemaId`
+### GET `/self-tr/v1/cs/js/:schemaId`
 
 Retrieve the JSON schema for a given credential type.
 > **Note:** Only currently supported ecs credential types (such as `ecs-service` or `ecs-org`) are available at this time.
 
 **Example:**
 ```bash
-curl http://localhost:3001/self-tr/cs/v1/js/ecs-service
+curl http://localhost:3001/self-tr/v1/cs/js/ecs-service
 ```
 
 ---
@@ -85,7 +85,7 @@ curl "http://localhost:3001/self-tr/perm/v1/find_with_did?did=did:example:123"
 
 ## Notes
 
-- All schemas are loaded from `data.json` at startup.
+- All schemas are loaded from `data.ts` at startup.
 - Uploaded data is validated against the corresponding JSON schema.
 - Credentials and presentations are **self-issued** and **self-validated** by the agent.
 - This is an approach for self-issued verifiable credentials and

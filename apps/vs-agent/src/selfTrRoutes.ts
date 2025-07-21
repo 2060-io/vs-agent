@@ -35,8 +35,6 @@ import addFormats from 'ajv-formats'
 import axios from 'axios'
 import { createHash } from 'crypto'
 import express from 'express'
-import * as fs from 'fs'
-import * as path from 'path'
 
 import {
   AGENT_INVITATION_IMAGE_URL,
@@ -53,9 +51,8 @@ import {
   SELF_ISSUED_VTC_SERVICE_TYPE,
 } from './config'
 import { VsAgent } from './utils/VsAgent'
+import { ecsSchemas } from './utils/data'
 
-// Load schemas from data.json at startup (used for schema validation and mock responses)
-const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 const allowedLogTags = ['ecs-service', 'ecs-org'] as const
@@ -99,11 +96,11 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
     'ECS SERVICE',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
+      id: `${publicApiBaseUrl}/self-tr/v1/cs/js/ecs-service`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
+          $ref: `${publicApiBaseUrl}/self-tr/v1/cs/js/ecs-service`,
         },
       },
     },
@@ -122,11 +119,11 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
     'ECS ORG C',
     ['VerifiableCredential', 'JsonSchemaCredential'],
     {
-      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
+      id: `${publicApiBaseUrl}/self-tr/v1/cs/js/ecs-org`,
       claims: {
         type: 'JsonSchema',
         jsonSchema: {
-          $ref: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
+          $ref: `${publicApiBaseUrl}/self-tr/v1/cs/js/ecs-org`,
         },
       },
     },
@@ -324,13 +321,13 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
   }
 
   // GET Function to Retrieve JSON Schemas
-  app.get('/self-tr/cs/v1/js/:schemaId', async (req, res) => {
+  app.get('/self-tr/v1/cs/js/:schemaId', async (req, res) => {
     try {
       const { schemaId } = req.params
       if (!schemaId) {
         return res.status(404).json({ error: 'Schema not found' })
       }
-      const ecsSchema = ecsSchemas[schemaId]
+      const ecsSchema = ecsSchemas[schemaId as 'ecs-service' | 'ecs-org']
 
       res.json({
         id: 101,
