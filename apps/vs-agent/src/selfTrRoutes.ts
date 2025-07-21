@@ -51,7 +51,7 @@ import {
   SELF_ISSUED_VTC_SERVICE_TYPE,
 } from './config'
 import { VsAgent } from './utils/VsAgent'
-import { ecsSchemas } from './utils/data'
+import { getEcsSchemas } from './utils/data'
 
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
@@ -60,6 +60,8 @@ type AllowedLogTag = (typeof allowedLogTags)[number]
 
 // Main function to add all test routes to the Express app
 export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publicApiBaseUrl: string) => {
+  const ecsSchemas = getEcsSchemas(publicApiBaseUrl)
+
   // Create a Verifiable Presentation for ECS Service
   // Verifiable JsonSchemaCredential
   // Register endpoints for example Verifiable Presentations
