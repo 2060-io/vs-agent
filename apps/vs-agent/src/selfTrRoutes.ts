@@ -241,7 +241,7 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
   async function getClaims(
     agent: VsAgent,
     { id: subjectId }: W3cCredentialSubject,
-    logTag: 'ecs-service' | 'ecs-org',
+    logTag: AllowedLogTag,
   ): Promise<Record<string, unknown>> {
     const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
     if (record?.content) return record.content
@@ -327,7 +327,7 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
       if (!schemaId) {
         return res.status(404).json({ error: 'Schema not found' })
       }
-      const ecsSchema = ecsSchemas[schemaId as 'ecs-service' | 'ecs-org']
+      const ecsSchema = ecsSchemas[schemaId as AllowedLogTag]
 
       res.json({
         id: 101,
