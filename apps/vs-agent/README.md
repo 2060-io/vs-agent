@@ -22,7 +22,6 @@ These variables are usually important for every deployment, since they define ho
 | AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
 | AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test VS Agent    |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
-| SELF_VTR_ENABLED | Enable Self Verifiable Trust Registry Service (test only)                              | false                  |
 
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
@@ -110,9 +109,29 @@ When connecting to other agents, VS-A tries to get information from them in orde
 
 VS-A fetches capabilities from the `discovery.json` file (which is located at at `/www/apps/vs-agent/discovery.json` in the deployed container) to determine available features. If you want to customize the capabilities to look for, replace the volume at this path with your own `discovery.json` file.
 
-### Self VTR
+### Self VR
 
-If the `SELF_VTR_ENABLED` environment variable is set to `true`, VS-A will enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](./doc/self-vtr-routes.md)).
+To enable the Self-Verifiable Trust Registry API endpoints, you must set the following environment variables in your `.env` file or system environment. These variables control the agent's identity, endpoints, and the data used for example credentials:
+
+| Variable                        | Description                                                      | Example Value                                  |
+|----------------------------------|------------------------------------------------------------------|------------------------------------------------|
+| `SELF_ISSUED_VTC_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
+| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
+| `SELF_ISSUED_VTC_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
+| `SELF_ISSUED_VTC_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
+| `SELF_ISSUED_VTC_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
+| `SELF_ISSUED_VTC_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
+| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
+| `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
+| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
+| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
+
+> **Note:**  
+> This Self-Verifiable Trust Registry API and its configuration are **unstable** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
+>
+> The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
+
+For **more examples of how to configure these variables and use the API**, see the additional README [here](../../doc/self-tr-routes.md).
 
 ## Deploy and run
 

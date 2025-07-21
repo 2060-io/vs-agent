@@ -72,5 +72,24 @@ export const USE_CORS = Boolean(process.env.USE_CORS || false)
 export const AGENT_INVITATION_BASE_URL = process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/'
 export const REDIRECT_DEFAULT_URL_TO_INVITATION_URL =
   process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL !== 'false'
-export const SELF_VTR_ENABLED = process.env.SELF_VTR_ENABLED === 'true'
 export const USER_PROFILE_AUTODISCLOSE = process.env.USER_PROFILE_AUTODISCLOSE === 'true'
+
+// Values for Organization credential
+export const SELF_ISSUED_VTC_ORG_TYPE = process.env.SELF_ISSUED_VTC_ORG_TYPE ?? 'PUBLIC'
+export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'CO'
+export const SELF_ISSUED_VTC_ORG_REGISTRYID = process.env.SELF_ISSUED_VTC_ORG_REGISTRYID ?? 'ID-123'
+export const SELF_ISSUED_VTC_ORG_REGISTRYURL =
+  process.env.SELF_ISSUED_VTC_ORG_REGISTRYURL ?? 'https://example.com/registry'
+export const SELF_ISSUED_VTC_ORG_ADDRESS = process.env.SELF_ISSUED_VTC_ORG_ADDRESS ?? 'Some address'
+
+// Values for Service credential
+export const SELF_ISSUED_VTC_SERVICE_TYPE = process.env.SELF_ISSUED_VTC_SERVICE_TYPE ?? 'WEB_PORTAL'
+export const SELF_ISSUED_VTC_SERVICE_DESCRIPTION =
+  process.env.SELF_ISSUED_VTC_SERVICE_DESCRIPTION ?? 'Some description'
+export const SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED = Number(
+  process.env.SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED ?? 18,
+)
+export const SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS =
+  process.env.SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS ?? 'https://example.com/terms'
+export const SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY =
+  process.env.SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY ?? 'https://example.com/privacy'

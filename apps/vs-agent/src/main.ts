@@ -31,7 +31,6 @@ import {
   keyDerivationMethodMap,
   POSTGRES_HOST,
   PUBLIC_API_BASE_URL,
-  SELF_VTR_ENABLED,
   USE_CORS,
   USER_PROFILE_AUTODISCLOSE,
 } from './config/constants'
@@ -101,7 +100,6 @@ const run = async () => {
     publicDid: publicDid?.did,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
-    selfVtrEnabled: SELF_VTR_ENABLED,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
   })
 
