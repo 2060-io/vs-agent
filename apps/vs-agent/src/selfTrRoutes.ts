@@ -171,7 +171,7 @@ export const addSelfTrRoutes = async (app: express.Express, agent: VsAgent, publ
     app.get(path, async (req, res) => {
       agent.config.logger.info(`${logTag} VP requested`)
 
-      if (!claims && !allowedLogTags.includes(logTag as AllowedLogTag))
+      if (!claims && allowedLogTags.includes(logTag as AllowedLogTag))
         claims = await getClaims(agent, { id: subjectId }, logTag as AllowedLogTag)
       const unsignedCredential = new W3cCredential({
         context: [
