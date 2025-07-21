@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
 import {
-  DidWebRoutesController,
+  DidWebController,
   InvitationRoutesController,
   SelfVtrController,
   SelfVtrService,
@@ -15,7 +15,7 @@ export class DidCommModule {
     return {
       module: DidCommModule,
       imports: [],
-      controllers: [InvitationRoutesController, SelfVtrController, DidWebRoutesController],
+      controllers: [InvitationRoutesController, SelfVtrController, DidWebController],
       providers: [
         {
           provide: 'VSAGENT',
