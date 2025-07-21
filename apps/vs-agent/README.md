@@ -22,7 +22,6 @@ These variables are usually important for every deployment, since they define ho
 | AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
 | AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test VS Agent    |
 | EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
-| TESTVTR_ENABLE | Enable Self Verifiable Trust Registry Service (test only)                              | false                  |
 
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
@@ -112,7 +111,7 @@ VS-A fetches capabilities from the `discovery.json` file (which is located at at
 
 ### Test VTR
 
-If the `TESTVTR_ENABLE` environment variable is set to `true`, VS-A will enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](../../doc/test-vtr-routes.md)).
+VS-A enable features related to the Verifiable Trust Registry ([Self VTR Configuration Guide](../../doc/test-vtr-routes.md)).
 
 ## Deploy and run
 

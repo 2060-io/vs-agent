@@ -26,28 +26,16 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 
 | Variable                        | Description                                                      | Example Value                                  |
 |----------------------------------|------------------------------------------------------------------|------------------------------------------------|
-| `TESTVTR_ENABLE`                 | Enable Self Verifiable Trust Registry Service (test only)        | `true`                                         |
-| `TESTVTR_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
-| `TESTVTR_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
-| `TESTVTR_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
-| `TESTVTR_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
-| `TESTVTR_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
-| `TESTVTR_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
-| `TESTVTR_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
-| `TESTVTR_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
-| `TESTVTR_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
-| `TESTVTR_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
-
-Set these variables in your `.env` file or as environment variables before starting the agent. For example:
-
-```properties
-TESTVTR_ENABLE=true
-AGENT_PUBLIC_DID=did:web:example.com
-AGENT_ENDPOINT=wss://example.com
-AGENT_LABEL=chatbot
-PUBLIC_API_BASE_URL=https://example.com
-...
-```
+| `SELF_ISSUED_VTC_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
+| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
+| `SELF_ISSUED_VTC_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
+| `SELF_ISSUED_VTC_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
+| `SELF_ISSUED_VTC_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
+| `SELF_ISSUED_VTC_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
+| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
+| `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
+| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
+| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
 
 > **Note:**  
 > This Self-Verifiable Trust Registry API and its configuration are **provisional** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.

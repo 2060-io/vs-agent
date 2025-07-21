@@ -72,21 +72,24 @@ export const USE_CORS = Boolean(process.env.USE_CORS || false)
 export const AGENT_INVITATION_BASE_URL = process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/'
 export const REDIRECT_DEFAULT_URL_TO_INVITATION_URL =
   process.env.REDIRECT_DEFAULT_URL_TO_INVITATION_URL !== 'false'
-export const TESTVTR_ENABLE = process.env.TESTVTR_ENABLE === 'true'
 export const USER_PROFILE_AUTODISCLOSE = process.env.USER_PROFILE_AUTODISCLOSE === 'true'
 
 // Values for Organization credential
-export const TESTVTR_ORG_TYPE = process.env.TESTVTR_ORG_TYPE ?? 'PUBLIC'
-export const TESTVTR_ORG_COUNTRYCODE = process.env.TESTVTR_ORG_COUNTRYCODE ?? 'CO'
-export const TESTVTR_ORG_REGISTRYID = process.env.TESTVTR_ORG_REGISTRYID ?? 'ID-123'
-export const TESTVTR_ORG_REGISTRYURL = process.env.TESTVTR_ORG_REGISTRYURL ?? 'https://example.com/registry'
-export const TESTVTR_ORG_ADDRESS = process.env.TESTVTR_ORG_ADDRESS ?? 'Some address'
+export const SELF_ISSUED_VTC_ORG_TYPE = process.env.SELF_ISSUED_VTC_ORG_TYPE ?? 'PUBLIC'
+export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'CO'
+export const SELF_ISSUED_VTC_ORG_REGISTRYID = process.env.SELF_ISSUED_VTC_ORG_REGISTRYID ?? 'ID-123'
+export const SELF_ISSUED_VTC_ORG_REGISTRYURL =
+  process.env.SELF_ISSUED_VTC_ORG_REGISTRYURL ?? 'https://example.com/registry'
+export const SELF_ISSUED_VTC_ORG_ADDRESS = process.env.SELF_ISSUED_VTC_ORG_ADDRESS ?? 'Some address'
 
 // Values for Service credential
-export const TESTVTR_SERVICE_TYPE = process.env.TESTVTR_SERVICE_TYPE ?? 'WEB_PORTAL'
-export const TESTVTR_SERVICE_DESCRIPTION = process.env.TESTVTR_SERVICE_DESCRIPTION ?? 'Some description'
-export const TESTVTR_SERVICE_MINIMUMAGEREQUIRED = Number(process.env.TESTVTR_SERVICE_MINIMUMAGEREQUIRED ?? 18)
-export const TESTVTR_SERVICE_TERMSANDCONDITIONS =
-  process.env.TESTVTR_SERVICE_TERMSANDCONDITIONS ?? 'https://example.com/terms'
-export const TESTVTR_SERVICE_PRIVACYPOLICY =
-  process.env.TESTVTR_SERVICE_PRIVACYPOLICY ?? 'https://example.com/privacy'
+export const SELF_ISSUED_VTC_SERVICE_TYPE = process.env.SELF_ISSUED_VTC_SERVICE_TYPE ?? 'WEB_PORTAL'
+export const SELF_ISSUED_VTC_SERVICE_DESCRIPTION =
+  process.env.SELF_ISSUED_VTC_SERVICE_DESCRIPTION ?? 'Some description'
+export const SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED = Number(
+  process.env.SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED ?? 18,
+)
+export const SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS =
+  process.env.SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS ?? 'https://example.com/terms'
+export const SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY =
+  process.env.SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY ?? 'https://example.com/privacy'

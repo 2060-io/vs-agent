@@ -40,7 +40,6 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   publicApiBaseUrl,
-  testVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
   useCors,
@@ -52,7 +51,6 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   publicApiBaseUrl: string
-  testVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
   useCors?: boolean
@@ -113,7 +111,7 @@ export const setupAgent = async ({
 
   // Add did:web and AnonCreds Service routes
   addDidWebRoutes(app, agent, publicApiBaseUrl)
-  if (testVtrEnabled) addTestVtrRoutes(app, agent, publicApiBaseUrl)
+  addTestVtrRoutes(app, agent, publicApiBaseUrl)
 
   addInvitationRoutes(app, agent)
 
@@ -214,32 +212,31 @@ export const setupAgent = async ({
         .addKeyAgreement(keyAgreementId)
     }
 
-    // Create a set of keys suitable for did communication
-    if (testVtrEnabled) {
-      builder
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-            serviceEndpoint: `${publicApiBaseUrl}/test-vtr`,
-            type: 'VerifiablePublicRegistry',
-          }),
-        )
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-service-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-service-c-vp.json`,
-            type: 'LinkedVerifiablePresentation',
-          }),
-        )
-        .addService(
-          new DidDocumentService({
-            id: `${publicDid}#vpr-ecs-org-c-vp`,
-            serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-org-c-vp.json`,
-            type: 'LinkedVerifiablePresentation',
-          }),
-        )
-    }
+    // Create a set of keys suitable for did self issued
+    builder
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+          serviceEndpoint: `${publicApiBaseUrl}/test-vtr`,
+          type: 'VerifiablePublicRegistry',
+        }),
+      )
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-service-c-vp`,
+          serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-service-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+      )
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-org-c-vp`,
+          serviceEndpoint: `${publicApiBaseUrl}/test-vtr/ecs-org-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+      )
 
+    // Create a set of keys suitable for did communication
     for (let i = 0; i < agent.config.endpoints.length; i++) {
       builder.addService(
         new DidCommV1Service({

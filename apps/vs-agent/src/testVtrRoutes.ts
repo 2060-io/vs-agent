@@ -41,16 +41,16 @@ import * as path from 'path'
 import {
   AGENT_INVITATION_IMAGE_URL,
   AGENT_LABEL,
-  TESTVTR_ORG_ADDRESS,
-  TESTVTR_ORG_COUNTRYCODE,
-  TESTVTR_ORG_REGISTRYID,
-  TESTVTR_ORG_REGISTRYURL,
-  TESTVTR_ORG_TYPE,
-  TESTVTR_SERVICE_DESCRIPTION,
-  TESTVTR_SERVICE_MINIMUMAGEREQUIRED,
-  TESTVTR_SERVICE_PRIVACYPOLICY,
-  TESTVTR_SERVICE_TERMSANDCONDITIONS,
-  TESTVTR_SERVICE_TYPE,
+  SELF_ISSUED_VTC_ORG_ADDRESS,
+  SELF_ISSUED_VTC_ORG_COUNTRYCODE,
+  SELF_ISSUED_VTC_ORG_REGISTRYID,
+  SELF_ISSUED_VTC_ORG_REGISTRYURL,
+  SELF_ISSUED_VTC_ORG_TYPE,
+  SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
+  SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
+  SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
+  SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
+  SELF_ISSUED_VTC_SERVICE_TYPE,
 } from './config'
 import { VsAgent } from './utils/VsAgent'
 
@@ -254,21 +254,21 @@ export const addTestVtrRoutes = async (app: express.Express, agent: VsAgent, pub
       logTag === 'ecs-service'
         ? {
             name: AGENT_LABEL,
-            type: TESTVTR_SERVICE_TYPE,
-            description: TESTVTR_SERVICE_DESCRIPTION,
+            type: SELF_ISSUED_VTC_SERVICE_TYPE,
+            description: SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
             logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
-            minimumAgeRequired: TESTVTR_SERVICE_MINIMUMAGEREQUIRED,
-            termsAndConditions: TESTVTR_SERVICE_TERMSANDCONDITIONS,
-            privacyPolicy: TESTVTR_SERVICE_PRIVACYPOLICY,
+            minimumAgeRequired: SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
+            termsAndConditions: SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
+            privacyPolicy: SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
           }
         : {
             name: AGENT_LABEL,
             logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
-            registryId: TESTVTR_ORG_REGISTRYID,
-            registryUrl: TESTVTR_ORG_REGISTRYURL,
-            address: TESTVTR_ORG_ADDRESS,
-            type: TESTVTR_ORG_TYPE,
-            countryCode: TESTVTR_ORG_COUNTRYCODE,
+            registryId: SELF_ISSUED_VTC_ORG_REGISTRYID,
+            registryUrl: SELF_ISSUED_VTC_ORG_REGISTRYURL,
+            address: SELF_ISSUED_VTC_ORG_ADDRESS,
+            type: SELF_ISSUED_VTC_ORG_TYPE,
+            countryCode: SELF_ISSUED_VTC_ORG_COUNTRYCODE,
           }
 
     const ecsSchema = ecsSchemas[logTag]
