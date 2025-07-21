@@ -10,10 +10,10 @@ import { VsAgentService } from './services/VsAgentService'
 import { VsAgent } from './utils/VsAgent'
 
 @Module({})
-export class DidCommModule {
+export class PublicModule {
   static register(agent: VsAgent): DynamicModule {
     return {
-      module: DidCommModule,
+      module: PublicModule,
       imports: [],
       controllers: [InvitationRoutesController, SelfVtrController, DidWebController],
       providers: [

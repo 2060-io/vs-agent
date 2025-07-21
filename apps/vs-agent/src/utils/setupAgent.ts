@@ -25,7 +25,7 @@ import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import WebSocket from 'ws'
 
-import { DidCommModule } from '../didcomm.module'
+import { PublicModule } from '../public.module'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { ServerConfig } from './ServerConfig'
@@ -80,7 +80,7 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
-  const app = await NestFactory.create(DidCommModule.register(agent))
+  const app = await NestFactory.create(PublicModule.register(agent))
   app.use(express.json({ limit: '5mb' }))
   app.use(express.urlencoded({ extended: true, limit: '5mb' }))
   app.getHttpAdapter().getInstance().set('json spaces', 2)

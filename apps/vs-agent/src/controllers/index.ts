@@ -1,2 +1,2 @@
 export * from './admin'
-export * from './didcomm'
+export * from './public'
