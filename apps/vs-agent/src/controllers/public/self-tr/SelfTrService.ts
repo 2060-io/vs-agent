@@ -49,6 +49,15 @@ export class SelfVtrService {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
+  /**
+   * Generates a verifiable credential or presentation, signing it with the agent's DID.
+   * @param logTag - Identifier for the credential type.
+   * @param type - Array of credential types.
+   * @param subject - Subject information and claims.
+   * @param credentialSchema - Schema for the credential.
+   * @param presentation - Optional presentation to include the credential.
+   * @returns The signed verifiable credential or presentation.
+   */
   public async generateVerifiableCredential(
     logTag: string,
     type: string[],
@@ -117,6 +126,13 @@ export class SelfVtrService {
     }
   }
 
+  /**
+   * Generates a verifiable presentation containing a verifiable credential.
+   * @param logTag - Identifier for the credential type.
+   * @param type - Array of credential types.
+   * @param credentialSchema - Schema for the credential.
+   * @returns The signed verifiable presentation.
+   */
   public async generateVerifiablePresentation(
     logTag: string,
     type: string[],
@@ -134,6 +150,14 @@ export class SelfVtrService {
     return this.generateVerifiableCredential(logTag, type, { id: agent.did }, credentialSchema, presentation)
   }
 
+  /**
+   * Retrieves claims for a subject from storage or builds default claims if not found.
+   * Validates claims against the schema for the given logTag.
+   * @param agent - The VsAgent instance.
+   * @param subject - Credential subject.
+   * @param logTag - Identifier for the credential type.
+   * @returns The claims object.
+   */
   private async getClaims(agent: VsAgent, { id: subjectId }: W3cCredentialSubject, logTag: string) {
     const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
     if (record?.content) return record.content
@@ -183,6 +207,12 @@ export class SelfVtrService {
     return claims
   }
 
+  /**
+   * Adds a Subresource Integrity (SRI) digest to the provided data using the content fetched from the given id (URL).
+   * @param id - The URL to fetch the schema content from.
+   * @param data - The data object to which the digest will be added.
+   * @returns The data object with an added digestSRI property.
+   */
   private async addDigestSRI<T extends object>(id?: string, data?: T): Promise<T & { digestSRI: string }> {
     if (!id || !data) {
       throw new Error(`id and data has requiered`)
@@ -198,12 +228,24 @@ export class SelfVtrService {
     }
   }
 
+  /**
+   * Generates a SRI digest string for the given content using the specified algorithm.
+   * @param content - The content to hash.
+   * @param algorithm - The hash algorithm to use (default: sha256).
+   * @returns The SRI digest string.
+   */
   private generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
     const hash = createHash(algorithm)
       .update(JSON.stringify(JSON.parse(content)), 'utf8')
       .digest('base64')
     return `${algorithm}-${hash}`
   }
+
+  /**
+   * Retrieves the ECS schema object for the given schemaId.
+   * @param schemaId - The schema identifier.
+   * @returns The schema object.
+   */
   public getSchemas(schemaId: string) {
     return this.ecsSchemas[schemaId]
   }

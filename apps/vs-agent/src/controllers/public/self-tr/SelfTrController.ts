@@ -1,7 +1,9 @@
 import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common'
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { SelfVtrService } from './SelfTrService'
 
+@ApiTags('Self Trust Registry')
 @Controller('self-tr')
 export class SelfVtrController {
   private readonly logger = new Logger(SelfVtrController.name)
@@ -12,6 +14,8 @@ export class SelfVtrController {
   ) {}
 
   @Get('ecs-service-c-vp.json')
+  @ApiOperation({ summary: 'Get verifiable presentation for service' })
+  @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getServiceVerifiablePresentation() {
     try {
       return await this.service.generateVerifiablePresentation(
@@ -29,6 +33,8 @@ export class SelfVtrController {
   }
 
   @Get('ecs-org-c-vp.json')
+  @ApiOperation({ summary: 'Get verifiable presentation for organization' })
+  @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getOrgVerifiablePresentation() {
     try {
       return await this.service.generateVerifiablePresentation(
@@ -46,6 +52,8 @@ export class SelfVtrController {
   }
 
   @Get('schemas-example-service.json')
+  @ApiOperation({ summary: 'Get verifiable credential for service' })
+  @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getServiceVerifiableCredential() {
     try {
       return await this.service.generateVerifiableCredential(
@@ -72,6 +80,8 @@ export class SelfVtrController {
   }
 
   @Get('schemas-example-org.json')
+  @ApiOperation({ summary: 'Get verifiable credential for organization' })
+  @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getOrgVerifiableCredential() {
     try {
       return await this.service.generateVerifiableCredential(
@@ -99,6 +109,9 @@ export class SelfVtrController {
 
   // GET Function to Retrieve JSON Schemas
   @Get('cs/v1/js/:schemaId')
+  @ApiOperation({ summary: 'Get JSON schema by schemaId' })
+  @ApiParam({ name: 'schemaId', required: true, description: 'Schema identifier', example: 'ecs-org' })
+  @ApiResponse({ status: 200, description: 'JSON schema returned' })
   async getSchema(@Param('schemaId') schemaId: string) {
     try {
       if (!schemaId) {
@@ -128,6 +141,9 @@ export class SelfVtrController {
   }
 
   @Get('perm/v1/find_with_did')
+  @ApiOperation({ summary: 'Get type by DID' })
+  @ApiQuery({ name: 'did', required: true, description: 'DID to query' })
+  @ApiResponse({ status: 200, description: 'Type returned' })
   findWithDid(@Query('did') did: string) {
     if (!did) {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
