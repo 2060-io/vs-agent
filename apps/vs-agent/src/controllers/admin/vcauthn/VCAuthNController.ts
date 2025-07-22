@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../../config/constants'
-import { VsAgentService } from '../../services/VsAgentService'
+import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../../../config/constants'
+import { VsAgentService } from '../../../services/VsAgentService'
 
 import { OobInvitationDto, OutOfBandInvitationCreateResult } from './OobInvitationDto'
 import { PresentProofCreateDto, PresentProofCreateResult } from './PresentProofCreateDto'

@@ -3,15 +3,13 @@ import 'reflect-metadata'
 import type { ServerConfig } from './utils/ServerConfig'
 
 import { KeyDerivationMethod, parseDid } from '@credo-ts/core'
-import { ValidationPipe, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as fs from 'fs'
 import * as path from 'path'
 
 import packageJson from '../package.json'
 
-import { VsAgentModule } from './app.module'
+import { VsAgentModule } from './admin.module'
 import {
   ADMIN_LOG_LEVEL,
   ADMIN_PORT,
@@ -41,38 +39,12 @@ import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { VsAgent } from './utils/VsAgent'
 import { TsLogger } from './utils/logger'
-import { setupAgent } from './utils/setupAgent'
+import { commonAppConfig, setupAgent } from './utils/setupAgent'
 
 export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent))
-
-  // Version
-  app.enableVersioning({
-    type: VersioningType.URI,
-  })
-
-  // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('API Documentation')
-    .setVersion('1.0')
-    .build()
-  const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, document)
-
-  // Dto
-  app.useGlobalPipes(new ValidationPipe())
-
-  // Cors
-  if (serverConfig.cors) {
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      allowedHeaders: 'Content-Type,Authorization',
-    })
-  }
-
+  const app = await NestFactory.create(VsAgentModule.register(agent, serverConfig.publicApiBaseUrl))
   // Port expose
+  commonAppConfig(app, serverConfig)
   await app.listen(serverConfig.port)
 }
 
@@ -144,6 +116,7 @@ const run = async () => {
     cors: USE_CORS,
     logger: serverLogger,
     webhookUrl: EVENTS_BASE_URL,
+    publicApiBaseUrl,
     discoveryOptions,
   }
 

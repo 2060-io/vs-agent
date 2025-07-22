@@ -13,7 +13,7 @@ import {
 import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 
-import { VsAgentService } from '../../services/VsAgentService'
+import { VsAgentService } from '../../../services/VsAgentService'
 
 @ApiTags('connections')
 @Controller({

@@ -32,7 +32,7 @@ import {
 } from '@nestjs/common'
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
-import { VsAgentService } from '../../services/VsAgentService'
+import { VsAgentService } from '../../../services/VsAgentService'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'

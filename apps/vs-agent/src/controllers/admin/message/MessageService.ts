@@ -35,8 +35,8 @@ import {
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Injectable, Logger } from '@nestjs/common'
 
-import { VsAgentService } from '../../services/VsAgentService'
-import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../utils/parsers'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils/parsers'
 
 @Injectable()
 export class MessageService {
