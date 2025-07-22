@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   HttpStatus,
   HttpException,
+  Inject,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { createHash } from 'crypto'
@@ -20,7 +21,6 @@ import { Response } from 'express'
 import * as fs from 'fs'
 import { diskStorage } from 'multer'
 
-import { PUBLIC_API_BASE_URL } from '../../../config/constants'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 const baseFilePath = './tails'
@@ -59,7 +59,10 @@ const fileStorage = diskStorage({
 
 @Controller()
 export class DidWebController {
-  constructor(private readonly agentService: VsAgentService) {}
+  constructor(
+    private readonly agentService: VsAgentService,
+    @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
+  ) {}
 
   @Get('/.well-known/did.json')
   async getDidDocument() {
@@ -144,7 +147,7 @@ export class DidWebController {
       res.send({
         resource: revocationDefinitionRecord.revocationRegistryDefinition,
         resourceMetadata: {
-          statusListEndpoint: `${PUBLIC_API_BASE_URL}/anoncreds/v1/revStatus/${revocationDefinitionId}`,
+          statusListEndpoint: `${this.publicApiBaseUrl}/anoncreds/v1/revStatus/${revocationDefinitionId}`,
         },
       })
     }
