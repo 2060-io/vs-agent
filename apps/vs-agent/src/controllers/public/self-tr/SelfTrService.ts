@@ -38,8 +38,8 @@ const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
 @Injectable()
-export class SelfVtrService {
-  private readonly logger = new Logger(SelfVtrService.name)
+export class SelfTrService {
+  private readonly logger = new Logger(SelfTrService.name)
   private ecsSchemas
 
   constructor(

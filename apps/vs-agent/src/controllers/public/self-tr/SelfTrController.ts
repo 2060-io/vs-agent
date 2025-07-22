@@ -1,15 +1,15 @@
 import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 
-import { SelfVtrService } from './SelfTrService'
+import { SelfTrService } from './SelfTrService'
 
 @ApiTags('Self Trust Registry')
 @Controller('self-tr')
 export class SelfTrController {
-  private readonly logger = new Logger(SelfVtrController.name)
+  private readonly logger = new Logger(SelfTrController.name)
 
   constructor(
-    private readonly service: SelfVtrService,
+    private readonly service: SelfTrService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {}
 

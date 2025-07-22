@@ -42,7 +42,7 @@ import { TsLogger } from './utils/logger'
 import { commonAppConfig, setupAgent } from './utils/setupAgent'
 
 export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent))
+  const app = await NestFactory.create(VsAgentModule.register(agent, serverConfig.publicApiBaseUrl))
   // Port expose
   commonAppConfig(app, serverConfig)
   await app.listen(serverConfig.port)
@@ -116,6 +116,7 @@ const run = async () => {
     cors: USE_CORS,
     logger: serverLogger,
     webhookUrl: EVENTS_BASE_URL,
+    publicApiBaseUrl,
     discoveryOptions,
   }
 

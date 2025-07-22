@@ -1,11 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import {
-  DidWebController,
-  InvitationRoutesController,
-  SelfVtrController,
-  SelfVtrService,
-} from './controllers'
+import { DidWebController, InvitationRoutesController, SelfTrController, SelfTrService } from './controllers'
 import { VsAgentService } from './services/VsAgentService'
 import { VsAgent } from './utils/VsAgent'
 
@@ -15,7 +10,7 @@ export class PublicModule {
     return {
       module: PublicModule,
       imports: [],
-      controllers: [InvitationRoutesController, SelfVtrController, DidWebController],
+      controllers: [InvitationRoutesController, SelfTrController, DidWebController],
       providers: [
         {
           provide: 'VSAGENT',
@@ -25,7 +20,7 @@ export class PublicModule {
           provide: 'PUBLIC_API_BASE_URL',
           useValue: publicApiBaseUrl,
         },
-        SelfVtrService,
+        SelfTrService,
         VsAgentService,
       ],
       exports: [],

@@ -6,6 +6,7 @@ import { TsLogger } from './logger'
 
 export interface ServerConfig {
   port: number
+  publicApiBaseUrl: string
   cors?: boolean
   app?: Express
   logger: TsLogger

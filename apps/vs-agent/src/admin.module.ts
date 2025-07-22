@@ -21,7 +21,7 @@ import { VsAgent } from './utils/VsAgent'
 
 @Module({})
 export class VsAgentModule {
-  static register(agent: VsAgent): DynamicModule {
+  static register(agent: VsAgent, publicApiBaseUrl: string): DynamicModule {
     return {
       module: VsAgentModule,
       imports: [HandledRedisModule.forRoot()],
@@ -39,6 +39,10 @@ export class VsAgentModule {
         {
           provide: 'VSAGENT',
           useValue: agent,
+        },
+        {
+          provide: 'PUBLIC_API_BASE_URL',
+          useValue: publicApiBaseUrl,
         },
         VsAgentService,
         UrlShorteningService,
