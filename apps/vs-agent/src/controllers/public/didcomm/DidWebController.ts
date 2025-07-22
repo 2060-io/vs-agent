@@ -3,59 +3,12 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import {
-  Controller,
-  Get,
-  Param,
-  Res,
-  Put,
-  UploadedFile,
-  UseInterceptors,
-  HttpStatus,
-  HttpException,
-  Inject,
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { createHash } from 'crypto'
+import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
 import { Response } from 'express'
 import * as fs from 'fs'
-import { diskStorage } from 'multer'
 
+import { baseFilePath, tailsIndex } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'
-
-const baseFilePath = './tails'
-const indexFilePath = `./${baseFilePath}/index.json`
-
-if (!fs.existsSync(baseFilePath)) {
-  fs.mkdirSync(baseFilePath, { recursive: true })
-}
-const tailsIndex = (
-  fs.existsSync(indexFilePath) ? JSON.parse(fs.readFileSync(indexFilePath, { encoding: 'utf-8' })) : {}
-) as Record<string, string>
-
-function fileHash(filePath: string, algorithm = 'sha256') {
-  return new Promise<string>((resolve, reject) => {
-    const shasum = createHash(algorithm)
-    try {
-      const s = fs.createReadStream(filePath)
-      s.on('data', function (data) {
-        shasum.update(data)
-      })
-      s.on('end', function () {
-        const hash = shasum.digest('hex')
-        return resolve(hash)
-      })
-    } catch (error) {
-      return reject('error in calculation')
-    }
-  })
-}
-
-const fileStorage = diskStorage({
-  filename: (req: any, file: { originalname: string }, cb: (arg0: null, arg1: string) => void) => {
-    cb(null, file.originalname + '-' + new Date().toISOString())
-  },
-})
 
 @Controller()
 export class DidWebController {
