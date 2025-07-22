@@ -5,7 +5,7 @@ import { SelfVtrService } from './SelfTrService'
 
 @ApiTags('Self Trust Registry')
 @Controller('self-tr')
-export class SelfVtrController {
+export class SelfTrController {
   private readonly logger = new Logger(SelfVtrController.name)
 
   constructor(
