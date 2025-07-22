@@ -82,7 +82,7 @@ export const setupAgent = async ({
   app.use(express.json({ limit: '5mb' }))
   app.use(express.urlencoded({ extended: true, limit: '5mb' }))
   app.getHttpAdapter().getInstance().set('json spaces', 2)
-  commonAppConfig(app, { port, cors: useCors, logger })
+  commonAppConfig(app, { port, cors: useCors, logger, publicApiBaseUrl })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
