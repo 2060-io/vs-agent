@@ -1,22 +1,15 @@
-import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger } from '@nestjs/common'
-import Ajv from 'ajv/dist/2020'
-import addFormats from 'ajv-formats'
-import * as fs from 'fs'
-import * as path from 'path'
+import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common'
 
-import { PUBLIC_API_BASE_URL } from '../../../config/constants'
+import { SelfVtrService } from './SelfTrService'
 
-import { SelfVtrService } from './SelfVtrService'
-
-const ecsSchemas = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'data.json'), 'utf-8'))
-const ajv = new Ajv({ strict: false })
-addFormats(ajv)
-
-@Controller('self-vtr')
+@Controller('self-tr')
 export class SelfVtrController {
   private readonly logger = new Logger(SelfVtrController.name)
 
-  constructor(private readonly service: SelfVtrService) {}
+  constructor(
+    private readonly service: SelfVtrService,
+    @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
+  ) {}
 
   @Get('ecs-service-c-vp.json')
   async getServiceVerifiablePresentation() {
@@ -25,7 +18,7 @@ export class SelfVtrController {
         'ecs-service',
         ['VerifiableCredential', 'VerifiableTrustCredential'],
         {
-          id: `${PUBLIC_API_BASE_URL}/self-vtr/schemas-example-service.json`,
+          id: `${this.publicApiBaseUrl}/self-tr/schemas-example-service.json`,
           type: 'JsonSchemaCredential',
         },
       )
@@ -42,7 +35,7 @@ export class SelfVtrController {
         'ecs-org',
         ['VerifiableCredential', 'VerifiableTrustCredential'],
         {
-          id: `${PUBLIC_API_BASE_URL}/self-vtr/schemas-example-org.json`,
+          id: `${this.publicApiBaseUrl}/self-tr/schemas-example-org.json`,
           type: 'JsonSchemaCredential',
         },
       )
@@ -59,11 +52,11 @@ export class SelfVtrController {
         'ECS SERVICE',
         ['VerifiableCredential', 'JsonSchemaCredential'],
         {
-          id: `${PUBLIC_API_BASE_URL}/self-vtr/cs/v1/js/ecs-service`,
+          id: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
           claims: {
             type: 'JsonSchema',
             jsonSchema: {
-              $ref: `${PUBLIC_API_BASE_URL}/self-vtr/cs/v1/js/ecs-service`,
+              $ref: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
             },
           },
         },
@@ -85,11 +78,11 @@ export class SelfVtrController {
         'ECS ORG',
         ['VerifiableCredential', 'VerifiableTrustCredential'],
         {
-          id: `${PUBLIC_API_BASE_URL}/self-vtr/cs/v1/js/ecs-org`,
+          id: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
           claims: {
             type: 'JsonSchema',
             jsonSchema: {
-              $ref: `${PUBLIC_API_BASE_URL}/self-vtr/cs/v1/js/ecs-org`,
+              $ref: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
             },
           },
         },
@@ -111,7 +104,7 @@ export class SelfVtrController {
       if (!schemaId) {
         throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
       }
-      const ecsSchema = ecsSchemas[schemaId]
+      const ecsSchema = this.service.getSchemas(schemaId)
       return {
         id: 101,
         tr_id: 1002,

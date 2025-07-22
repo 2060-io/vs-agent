@@ -78,7 +78,7 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
-  const app = await NestFactory.create(PublicModule.register(agent))
+  const app = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
   app.use(express.json({ limit: '5mb' }))
   app.use(express.urlencoded({ extended: true, limit: '5mb' }))
   app.getHttpAdapter().getInstance().set('json spaces', 2)

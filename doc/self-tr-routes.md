@@ -22,14 +22,14 @@ addSelfTrRoutes(app, agent, publicApiBaseUrl)
 
 ## Endpoints
 
-### GET `/self-tr/v1/cs/js/:schemaId`
+### GET `/self-tr/cs/v1/js/:schemaId`
 
 Retrieve the JSON schema for a given credential type.
 > **Note:** Only currently supported ecs credential types (such as `ecs-service` or `ecs-org`) are available at this time.
 
 **Example:**
 ```bash
-curl http://localhost:3001/self-tr/v1/cs/js/ecs-service
+curl http://localhost:3001/self-tr/cs/v1/js/ecs-service
 ```
 
 ---

@@ -11,7 +11,7 @@ import { VsAgent } from './utils/VsAgent'
 
 @Module({})
 export class PublicModule {
-  static register(agent: VsAgent): DynamicModule {
+  static register(agent: VsAgent, publicApiBaseUrl: string): DynamicModule {
     return {
       module: PublicModule,
       imports: [],
@@ -20,6 +20,10 @@ export class PublicModule {
         {
           provide: 'VSAGENT',
           useValue: agent,
+        },
+        {
+          provide: 'PUBLIC_API_BASE_URL',
+          useValue: publicApiBaseUrl,
         },
         SelfVtrService,
         VsAgentService,
