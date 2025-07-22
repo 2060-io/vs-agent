@@ -219,47 +219,4 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
-  // Endpoint to upload a tails file for a specific tailsFileId
-  @Put('/anoncreds/v1/tails/:tailsFileId')
-  @UseInterceptors(FileInterceptor('file', { storage: fileStorage }))
-  async uploadTailsFile(
-    @Param('tailsFileId') tailsFileId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const agent = await this.agentService.getAgent()
-    agent.config.logger.info(`tails file upload: ${tailsFileId}`)
-
-    if (!file) {
-      agent.config.logger.info(`No file found with id: ${tailsFileId}`)
-      throw new HttpException(`No files were uploaded`, HttpStatus.NOT_FOUND)
-    }
-
-    if (!tailsFileId) {
-      // Clean up temporary file
-      fs.rmSync(file.path)
-      throw new HttpException('Missing tailsFileId', HttpStatus.CONFLICT)
-    }
-
-    const item = tailsIndex[tailsFileId]
-
-    if (item) {
-      agent.config.logger.debug(`there is already an entry for: ${tailsFileId}`)
-      throw new HttpException(`there is already an entry for: ${tailsFileId}`, HttpStatus.CONFLICT)
-    }
-
-    const hash = await fileHash(file.path)
-    const destinationPath = `${baseFilePath}/${hash}`
-
-    if (fs.existsSync(destinationPath)) {
-      agent.config.logger.warn('tails file already exists')
-    } else {
-      fs.copyFileSync(file.path, destinationPath)
-      fs.rmSync(file.path)
-    }
-
-    // Store filename in index
-    tailsIndex[tailsFileId] = hash
-    fs.writeFileSync(indexFilePath, JSON.stringify(tailsIndex))
-  }
 }
