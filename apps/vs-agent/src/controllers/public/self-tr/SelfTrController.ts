@@ -86,7 +86,7 @@ export class SelfTrController {
     try {
       return await this.service.generateVerifiableCredential(
         'ECS ORG',
-        ['VerifiableCredential', 'VerifiableTrustCredential'],
+        ['VerifiableCredential', 'JsonSchemaCredential'],
         {
           id: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
           claims: {
