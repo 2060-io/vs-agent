@@ -173,6 +173,11 @@ export const setupAgent = async ({
         builder.addAuthentication(auth)
       }
 
+      const assertionMethods = existingRecord.didDocument.assertionMethod ?? []
+      for (const assert of assertionMethods) {
+        builder.addAssertionMethod(assert)
+      }
+
       const keyAgreements = existingRecord.didDocument.keyAgreement ?? []
       for (const key of keyAgreements) {
         builder.addKeyAgreement(key)
