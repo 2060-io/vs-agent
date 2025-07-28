@@ -119,20 +119,7 @@ export class SelfTrController {
       }
       const ecsSchema = this.service.getSchemas(schemaId)
       return {
-        id: 101,
-        tr_id: 1002,
-        created: '2024-03-12T12:00:00Z',
-        modified: '2024-03-12T12:30:00Z',
-        archived: '',
-        deposit: 5000,
-        json_schema: JSON.stringify(ecsSchema),
-        issuer_grantor_validation_validity_period: 365,
-        verifier_grantor_validation_validity_period: 180,
-        issuer_validation_validity_period: 730,
-        verifier_validation_validity_period: 90,
-        holder_validation_validity_period: 60,
-        issuer_perm_management_mode: 'STRICT',
-        verifier_perm_management_mode: 'FLEXIBLE',
+        schema: JSON.stringify(ecsSchema),
       }
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
