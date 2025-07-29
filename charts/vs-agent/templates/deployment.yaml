@@ -167,6 +167,22 @@ spec:
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.didcommPort }}
+            livenessProbe:
+              httpGet:
+                path: /health
+                port: {{ .Values.containerPort }}
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 5
+              failureThreshold: 2
+            readinessProbe:
+              httpGet:
+                path: /health
+                port: {{ .Values.containerPort }}
+              initialDelaySeconds: 15
+              periodSeconds: 60
+              timeoutSeconds: 5
+              failureThreshold: 2
             volumeMounts:
             - name: {{ .Values.name }}-vsa-pv
               mountPath: /root/.afj
