@@ -74,13 +74,13 @@ export const setupAgent = async ({
   let webSocketServer: WebSocket.Server | undefined
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
-    agent.config.logger.info('Inbound HTTP transport enabled')
+    logger.info('Inbound HTTP transport enabled')
     httpInboundTransport = new HttpInboundTransport({ port })
     agent.registerInboundTransport(httpInboundTransport)
   }
 
   if (enableWs) {
-    agent.config.logger.info('Inbound WebSocket transport enabled')
+    logger.info('Inbound WebSocket transport enabled')
     webSocketServer = new WebSocket.Server({ noServer: true })
     agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
   }

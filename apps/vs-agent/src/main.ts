@@ -56,12 +56,11 @@ export const startServer = async (
 
   const adminApp = await NestFactory.create(VsAgentModule.register(agent, publicApiBaseUrl))
   commonAppConfig(adminApp, cors)
-  const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
-  commonAppConfig(publicApp, cors)
-
   await adminApp.listen(port)
 
   // PublicModule-specific config
+  const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(publicApp, cors)
   publicApp.use(express.json({ limit: '5mb' }))
   publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
   publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
