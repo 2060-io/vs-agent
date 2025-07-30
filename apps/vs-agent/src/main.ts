@@ -3,7 +3,6 @@ import 'reflect-metadata'
 import type { ServerConfig } from './utils/ServerConfig'
 
 import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
-import { HttpInboundTransport } from '@credo-ts/node'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
@@ -42,6 +41,7 @@ import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { PublicModule } from './public.module'
+import { HttpInboundTransport } from './utils/HttpInboundTransport'
 import { VsAgent } from './utils/VsAgent'
 import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
@@ -61,6 +61,7 @@ export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) =
   publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
   publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
 
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
 
   const webSocketServer = agent.inboundTransports
@@ -68,7 +69,11 @@ export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) =
     ?.getServer()
   const httpInboundTransport = agent.inboundTransports.find(x => x instanceof HttpInboundTransport)
 
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : await publicApp.listen(port)
+  if (enableHttp) {
+    httpInboundTransport?.setApp(publicApp.getHttpAdapter().getInstance())
+  }
+
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await publicApp.listen(AGENT_PORT)
 
   // Add WebSocket support if required
   if (enableWs) {

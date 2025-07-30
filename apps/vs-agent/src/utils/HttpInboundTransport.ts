@@ -14,7 +14,7 @@ import express, { text } from 'express'
 const supportedContentTypes: string[] = [DidCommMimeType.V0, DidCommMimeType.V1]
 
 export class HttpInboundTransport implements InboundTransport {
-  public readonly app: Express
+  public app: Express
   private port: number
   private path: string
   private _server?: Server
@@ -30,6 +30,15 @@ export class HttpInboundTransport implements InboundTransport {
     this.app = app ?? express()
     this.path = path ?? '/'
 
+    this.setupMiddleware()
+  }
+
+  public setApp(app: Express) {
+    this.app = app
+    this.setupMiddleware()
+  }
+
+  private setupMiddleware() {
     this.app.use(text({ type: supportedContentTypes, limit: '5mb' }))
   }
 
