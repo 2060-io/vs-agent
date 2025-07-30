@@ -4,14 +4,12 @@ import type { ServerConfig } from './utils/ServerConfig'
 
 import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { HttpInboundTransport } from '@credo-ts/node'
-import { DynamicModule } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
 import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import * as path from 'path'
-import WebSocket from 'ws'
 
 import packageJson from '../package.json'
 
@@ -47,7 +45,46 @@ import { PublicModule } from './public.module'
 import { VsAgent } from './utils/VsAgent'
 import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
-import { commonAppConfig, setupAgent, startServer } from './utils/setupAgent'
+import { commonAppConfig, setupAgent } from './utils/setupAgent'
+
+export const startServer = async (
+  module: typeof PublicModule | typeof VsAgentModule,
+  agent: VsAgent,
+  serverConfig: ServerConfig,
+) => {
+  const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
+
+  const adminApp = await NestFactory.create(VsAgentModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(adminApp, cors)
+  const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(publicApp, cors)
+
+  await adminApp.listen(port)
+
+  // PublicModule-specific config
+  publicApp.use(express.json({ limit: '5mb' }))
+  publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
+  publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
+
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
+  const webSocketServer = agent.inboundTransports
+    .find(x => x instanceof VsAgentWsInboundTransport)
+    ?.getServer()
+  const httpInboundTransport = agent.inboundTransports.find(x => x instanceof HttpInboundTransport)
+
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await publicApp.listen(port)
+
+  // Add WebSocket support if required
+  if (enableWs) {
+    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
+        const socketId = utils.uuid()
+        webSocketServer?.emit('connection', socketParam, request, socketId)
+      })
+    })
+  }
+}
 
 const run = async () => {
   const serverLogger = new TsLogger(ADMIN_LOG_LEVEL, 'Server')
@@ -121,9 +158,6 @@ const run = async () => {
     discoveryOptions,
     endpoints,
   }
-
-
-  await startServer(VsAgentModule, agent, conf)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

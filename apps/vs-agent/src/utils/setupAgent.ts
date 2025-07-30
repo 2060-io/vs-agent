@@ -13,28 +13,18 @@ import {
   KeyType,
   LogLevel,
   TypedArrayEncoder,
-  utils,
   WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
-import { DynamicModule, INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import express from 'express'
-import { IncomingMessage } from 'http'
-import { Socket } from 'net'
 import WebSocket from 'ws'
 
-import { PublicModule } from '../public.module'
-
 import { HttpInboundTransport } from './HttpInboundTransport'
-import { ServerConfig } from './ServerConfig'
-import { createVsAgent, VsAgent } from './VsAgent'
+import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
-import { VsAgentModule } from '../admin.module'
-import { AGENT_PORT } from '../config'
 
 export const setupAgent = async ({
   port,
@@ -46,7 +36,6 @@ export const setupAgent = async ({
   publicApiBaseUrl,
   publicDid,
   autoDiscloseUserProfile,
-  useCors,
 }: {
   port: number
   walletConfig: WalletConfig
@@ -57,7 +46,6 @@ export const setupAgent = async ({
   publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
   publicDid?: string
-  useCors?: boolean
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
@@ -80,10 +68,26 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
+  let webSocketServer: WebSocket.Server | undefined
+  let httpInboundTransport: HttpInboundTransport | undefined
+  if (enableHttp) {
+    agent.config.logger.info('Inbound HTTP transport enabled')
+    httpInboundTransport = new HttpInboundTransport({ port })
+    agent.registerInboundTransport(httpInboundTransport)
+  }
+
+  if (enableWs) {
+    agent.config.logger.info('Inbound WebSocket transport enabled')
+    webSocketServer = new WebSocket.Server({ noServer: true })
+    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
+  }
+
   agent.registerOutboundTransport(new HttpOutboundTransport())
   agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
-  await startServer(PublicModule, agent, { cors: useCors, publicApiBaseUrl, endpoints, logger, port: AGENT_PORT })
   await agent.initialize()
 
   // Make sure default User Profile corresponds to settings in environment variables
@@ -273,50 +277,4 @@ export function commonAppConfig(app: INestApplication, cors?: boolean) {
     })
   }
   return app
-}
-
-export const startServer = async (module: typeof PublicModule | typeof VsAgentModule, agent: VsAgent, serverConfig: ServerConfig) => {
-  const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
-
-  const app = await NestFactory.create(module.register(agent, publicApiBaseUrl))
-  commonAppConfig(app, cors)
-
-  if (module === VsAgentModule) {
-    await app.listen(port)
-    return
-  }
-
-  // PublicModule-specific config
-  app.use(express.json({ limit: '5mb' }))
-  app.use(express.urlencoded({ extended: true, limit: '5mb' }))
-  app.getHttpAdapter().getInstance().set('json spaces', 2)
-
-  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
-  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
-
-  let webSocketServer: WebSocket.Server | undefined
-  let httpInboundTransport: HttpInboundTransport | undefined
-  if (enableHttp) {
-    agent.config.logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ app: app.getHttpAdapter().getInstance(), port })
-    agent.registerInboundTransport(httpInboundTransport)
-  }
-
-  if (enableWs) {
-    agent.config.logger.info('Inbound WebSocket transport enabled')
-    webSocketServer = new WebSocket.Server({ noServer: true })
-    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
-  }
-
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : await app.listen(port)
-
-  // Add WebSocket support if required
-  if (enableWs) {
-    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
-      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
-        const socketId = utils.uuid()
-        webSocketServer?.emit('connection', socketParam, request, socketId)
-      })
-    })
-  }  
 }
