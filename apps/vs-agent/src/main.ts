@@ -47,7 +47,7 @@ import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
 import { commonAppConfig, setupAgent } from './utils/setupAgent'
 
-export const startServer = async (
+export const startServers = async (
   module: typeof PublicModule | typeof VsAgentModule,
   agent: VsAgent,
   serverConfig: ServerConfig,
@@ -157,6 +157,8 @@ const run = async () => {
     discoveryOptions,
     endpoints,
   }
+
+  await startServers(agent, conf)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
