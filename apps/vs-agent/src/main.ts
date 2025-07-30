@@ -2,10 +2,16 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod, parseDid } from '@credo-ts/core'
+import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
+import { HttpInboundTransport } from '@credo-ts/node'
+import { DynamicModule } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import express from 'express'
 import * as fs from 'fs'
+import { IncomingMessage } from 'http'
+import { Socket } from 'net'
 import * as path from 'path'
+import WebSocket from 'ws'
 
 import packageJson from '../package.json'
 
@@ -37,16 +43,11 @@ import {
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
+import { PublicModule } from './public.module'
 import { VsAgent } from './utils/VsAgent'
+import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
-import { commonAppConfig, setupAgent } from './utils/setupAgent'
-
-export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent, serverConfig.publicApiBaseUrl))
-  // Port expose
-  commonAppConfig(app, serverConfig)
-  await app.listen(serverConfig.port)
-}
+import { commonAppConfig, setupAgent, startServer } from './utils/setupAgent'
 
 const run = async () => {
   const serverLogger = new TsLogger(ADMIN_LOG_LEVEL, 'Server')
@@ -87,7 +88,7 @@ const run = async () => {
   serverLogger.info(`endpoints: ${endpoints} publicApiBaseUrl ${publicApiBaseUrl}`)
   const { agent } = await setupAgent({
     endpoints,
-    port: Number(AGENT_PORT) || 3001,
+    port: AGENT_PORT,
     walletConfig: {
       id: AGENT_WALLET_ID || 'test-vs-agent',
       key: AGENT_WALLET_KEY || 'test-vs-agent',
@@ -118,9 +119,11 @@ const run = async () => {
     webhookUrl: EVENTS_BASE_URL,
     publicApiBaseUrl,
     discoveryOptions,
+    endpoints,
   }
 
-  await startAdminServer(agent, conf)
+
+  await startServer(VsAgentModule, agent, conf)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
