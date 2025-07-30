@@ -47,11 +47,7 @@ import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
 import { commonAppConfig, setupAgent } from './utils/setupAgent'
 
-export const startServers = async (
-  module: typeof PublicModule | typeof VsAgentModule,
-  agent: VsAgent,
-  serverConfig: ServerConfig,
-) => {
+export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
 
   const adminApp = await NestFactory.create(VsAgentModule.register(agent, publicApiBaseUrl))
