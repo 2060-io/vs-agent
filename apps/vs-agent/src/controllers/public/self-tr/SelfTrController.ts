@@ -22,10 +22,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getServiceVerifiablePresentation() {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      if (didRecord.getTag(`ecs-service`)) return JSON.parse(didRecord.getTag(`ecs-service`) as string)
-      else throw new HttpException('Verifiable Presentation not found', HttpStatus.NOT_FOUND)
+      return this.getSchemaData('ecs-service', 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -37,10 +34,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getOrgVerifiablePresentation() {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      if (didRecord.getTag(`ecs-org`)) return JSON.parse(didRecord.getTag(`ecs-org`) as string)
-      else throw new HttpException('Verifiable Presentation not found', HttpStatus.NOT_FOUND)
+      return this.getSchemaData('ecs-org', 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -52,11 +46,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getServiceVerifiableCredential() {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      if (didRecord.getTag(`example-service`))
-        return JSON.parse(didRecord.getTag(`example-service`) as string)
-      else throw new HttpException('Verifiable Credential not found', HttpStatus.NOT_FOUND)
+      return this.getSchemaData('example-service', 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -68,10 +58,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getOrgVerifiableCredential() {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      if (didRecord.getTag(`example-org`)) return JSON.parse(didRecord.getTag(`example-org`) as string)
-      else throw new HttpException('Verifiable Credential not found', HttpStatus.NOT_FOUND)
+      return this.getSchemaData('example-org', 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -107,5 +94,21 @@ export class SelfTrController {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
     }
     return { type: 'ISSUER' }
+  }
+
+  // Helper function to retrieve schema data based on tag name
+  private async getSchemaData(tagName: string, notFoundMessage: string): Promise<string> {
+    try {
+      const agent = await this.agentService.getAgent()
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+
+      const tag = didRecord.getTag(tagName)
+      if (tag) return JSON.parse(tag as string)
+
+      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
+    } catch (error) {
+      this.logger.error(`Error loading tag "${tagName}": ${error.message}`)
+      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 }
