@@ -66,6 +66,10 @@ export class SelfTrService {
     presentation?: W3cPresentation,
   ): Promise<any> {
     const agent = await this.agentService.getAgent()
+    const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+    if (didRecord.getTag(`VerifiableCredential-${logTag}`))
+      return JSON.parse(didRecord.getTag(`VerifiableCredential-${logTag}`) as string)
+
     const { id: subjectId } = subject
     let claims = subject.claims
 
@@ -81,7 +85,7 @@ export class SelfTrService {
       type,
       issuer: agent.did!,
       issuanceDate: new Date().toISOString(),
-      expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      expirationDate: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
       credentialSubject: {
         id: subjectId,
         claims: presentation ? claims : await this.addDigestSRI(subjectId, claims),
@@ -122,6 +126,8 @@ export class SelfTrService {
       } as W3cJsonLdSignPresentationOptions)
       return signedPresentation
     } else {
+      didRecord.setTag(`VerifiableCredential-${logTag}`, JSON.stringify(signedCredential.jsonCredential))
+      await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
       return signedCredential.jsonCredential
     }
   }
@@ -140,6 +146,10 @@ export class SelfTrService {
   ) {
     const agent = await this.agentService.getAgent()
     if (!agent.did) throw Error('The DID must be set up')
+    const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+    if (didRecord.getTag(`VerifiablePresentation-${logTag}`))
+      return JSON.parse(didRecord.getTag(`VerifiablePresentation-${logTag}`) as string)
+
     const presentation = new W3cPresentation({
       context: ['https://www.w3.org/2018/credentials/v1'],
       id: agent.did,
@@ -147,7 +157,16 @@ export class SelfTrService {
       holder: agent.did,
       verifiableCredential: [],
     })
-    return this.generateVerifiableCredential(logTag, type, { id: agent.did }, credentialSchema, presentation)
+    const result = await this.generateVerifiableCredential(
+      logTag,
+      type,
+      { id: agent.did },
+      credentialSchema,
+      presentation,
+    )
+    didRecord.setTag(`VerifiablePresentation-${logTag}`, JSON.stringify(result))
+    await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
+    return result
   }
 
   /**
