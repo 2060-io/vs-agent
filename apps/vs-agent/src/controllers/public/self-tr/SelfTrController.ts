@@ -1,31 +1,31 @@
 import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger, Inject } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 
-import { SelfTrService } from './SelfTrService'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { getEcsSchemas } from '../../../utils/data'
 
 @ApiTags('Self Trust Registry')
 @Controller('self-tr')
 export class SelfTrController {
   private readonly logger = new Logger(SelfTrController.name)
+  private ecsSchemas
 
   constructor(
-    private readonly service: SelfTrService,
+    private readonly agentService: VsAgentService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
-  ) {}
+  ) {
+    this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
+  }
 
   @Get('ecs-service-c-vp.json')
   @ApiOperation({ summary: 'Get verifiable presentation for service' })
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getServiceVerifiablePresentation() {
     try {
-      return await this.service.generateVerifiablePresentation(
-        'ecs-service',
-        ['VerifiableCredential', 'VerifiableTrustCredential'],
-        {
-          id: `${this.publicApiBaseUrl}/self-tr/schemas-example-service.json`,
-          type: 'JsonSchemaCredential',
-        },
-      )
+      const agent = await this.agentService.getAgent()
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      console.log(didRecord.getTags())
+      if (didRecord.getTag(`ecs-service`)) return JSON.parse(didRecord.getTag(`ecs-service`) as string)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -37,14 +37,9 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getOrgVerifiablePresentation() {
     try {
-      return await this.service.generateVerifiablePresentation(
-        'ecs-org',
-        ['VerifiableCredential', 'VerifiableTrustCredential'],
-        {
-          id: `${this.publicApiBaseUrl}/self-tr/schemas-example-org.json`,
-          type: 'JsonSchemaCredential',
-        },
-      )
+      const agent = await this.agentService.getAgent()
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      if (didRecord.getTag(`ecs-org`)) return JSON.parse(didRecord.getTag(`ecs-org`) as string)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -56,23 +51,10 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getServiceVerifiableCredential() {
     try {
-      return await this.service.generateVerifiableCredential(
-        'ECS SERVICE',
-        ['VerifiableCredential', 'JsonSchemaCredential'],
-        {
-          id: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
-          claims: {
-            type: 'JsonSchema',
-            jsonSchema: {
-              $ref: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
-            },
-          },
-        },
-        {
-          id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
-          type: 'JsonSchema',
-        },
-      )
+      const agent = await this.agentService.getAgent()
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      if (didRecord.getTag(`example-service`))
+        return JSON.parse(didRecord.getTag(`example-service`) as string)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -84,23 +66,9 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getOrgVerifiableCredential() {
     try {
-      return await this.service.generateVerifiableCredential(
-        'ECS ORG',
-        ['VerifiableCredential', 'JsonSchemaCredential'],
-        {
-          id: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
-          claims: {
-            type: 'JsonSchema',
-            jsonSchema: {
-              $ref: `${this.publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
-            },
-          },
-        },
-        {
-          id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
-          type: 'JsonSchema',
-        },
-      )
+      const agent = await this.agentService.getAgent()
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      if (didRecord.getTag(`example-org`)) return JSON.parse(didRecord.getTag(`example-org`) as string)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -117,7 +85,7 @@ export class SelfTrController {
       if (!schemaId) {
         throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
       }
-      const ecsSchema = this.service.getSchemas(schemaId)
+      const ecsSchema = this.ecsSchemas[schemaId]
       return {
         schema: JSON.stringify(ecsSchema),
       }

@@ -33,6 +33,7 @@ import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
+import { setupSelfTr } from './setupSelfTr'
 
 export const setupAgent = async ({
   port,
@@ -274,6 +275,9 @@ export const setupAgent = async ({
       logger?.debug('Public did record saved')
     }
   }
+
+  // Initialize Self-Trust Registry
+  await setupSelfTr({ agent, publicApiBaseUrl })
 
   return { agent, app, webSocketServer }
 }
