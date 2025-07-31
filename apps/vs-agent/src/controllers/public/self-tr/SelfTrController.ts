@@ -24,7 +24,6 @@ export class SelfTrController {
     try {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      console.log(didRecord.getTags())
       if (didRecord.getTag(`ecs-service`)) return JSON.parse(didRecord.getTag(`ecs-service`) as string)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
