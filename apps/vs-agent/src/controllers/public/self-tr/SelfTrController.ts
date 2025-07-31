@@ -25,6 +25,7 @@ export class SelfTrController {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
       if (didRecord.getTag(`ecs-service`)) return JSON.parse(didRecord.getTag(`ecs-service`) as string)
+      else throw new HttpException('Verifiable Presentation not found', HttpStatus.NOT_FOUND)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -39,6 +40,7 @@ export class SelfTrController {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
       if (didRecord.getTag(`ecs-org`)) return JSON.parse(didRecord.getTag(`ecs-org`) as string)
+      else throw new HttpException('Verifiable Presentation not found', HttpStatus.NOT_FOUND)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -54,6 +56,7 @@ export class SelfTrController {
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
       if (didRecord.getTag(`example-service`))
         return JSON.parse(didRecord.getTag(`example-service`) as string)
+      else throw new HttpException('Verifiable Credential not found', HttpStatus.NOT_FOUND)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -68,6 +71,7 @@ export class SelfTrController {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
       if (didRecord.getTag(`example-org`)) return JSON.parse(didRecord.getTag(`example-org`) as string)
+      else throw new HttpException('Verifiable Credential not found', HttpStatus.NOT_FOUND)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
