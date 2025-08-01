@@ -13,22 +13,14 @@ import {
   KeyType,
   LogLevel,
   TypedArrayEncoder,
-  utils,
   WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import express from 'express'
-import { IncomingMessage } from 'http'
-import { Socket } from 'net'
 import WebSocket from 'ws'
 
-import { PublicModule } from '../public.module'
-
 import { HttpInboundTransport } from './HttpInboundTransport'
-import { ServerConfig } from './ServerConfig'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
@@ -44,7 +36,6 @@ export const setupAgent = async ({
   publicApiBaseUrl,
   publicDid,
   autoDiscloseUserProfile,
-  useCors,
 }: {
   port: number
   walletConfig: WalletConfig
@@ -55,7 +46,6 @@ export const setupAgent = async ({
   publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
   publicDid?: string
-  useCors?: boolean
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
@@ -78,12 +68,6 @@ export const setupAgent = async ({
     publicApiBaseUrl,
   })
 
-  const app = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
-  app.use(express.json({ limit: '5mb' }))
-  app.use(express.urlencoded({ extended: true, limit: '5mb' }))
-  app.getHttpAdapter().getInstance().set('json spaces', 2)
-  commonAppConfig(app, { port, cors: useCors, logger, publicApiBaseUrl })
-
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
 
@@ -91,7 +75,7 @@ export const setupAgent = async ({
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ app: app.getHttpAdapter().getInstance(), port })
+    httpInboundTransport = new HttpInboundTransport({ port })
     agent.registerInboundTransport(httpInboundTransport)
   }
 
@@ -105,18 +89,6 @@ export const setupAgent = async ({
   agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
-
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : await app.listen(port)
-
-  // Add WebSocket support if required
-  if (enableWs) {
-    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
-      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
-        const socketId = utils.uuid()
-        webSocketServer?.emit('connection', socketParam, request, socketId)
-      })
-    })
-  }
 
   // Make sure default User Profile corresponds to settings in environment variables
   const imageUrl = displayPictureUrl
@@ -275,10 +247,10 @@ export const setupAgent = async ({
     }
   }
 
-  return { agent, app, webSocketServer }
+  return { agent }
 }
 
-export function commonAppConfig(app: INestApplication, serverConfig: ServerConfig) {
+export function commonAppConfig(app: INestApplication, cors?: boolean) {
   // Versioning
   app.enableVersioning({
     type: VersioningType.URI,
@@ -297,7 +269,7 @@ export function commonAppConfig(app: INestApplication, serverConfig: ServerConfi
   app.useGlobalPipes(new ValidationPipe())
 
   // CORS
-  if (serverConfig.cors) {
+  if (cors) {
     app.enableCors({
       origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

@@ -57,5 +57,3 @@ export class VsAgentModule {
     }
   }
 }
-
-export class AppModule {}

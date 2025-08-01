@@ -81,6 +81,12 @@ export class VsAgentWsInboundTransport implements InboundTransport {
     })
   }
 
+  public getServer() {
+    this.logger.debug('Get WebSocket Server')
+
+    return this.socketServer
+  }
+
   private startIdleSocketTimer(interval: number) {
     setInterval(() => {
       const currentDate = new Date()

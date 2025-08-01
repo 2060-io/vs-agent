@@ -2,9 +2,12 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod, parseDid } from '@credo-ts/core'
+import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
+import express from 'express'
 import * as fs from 'fs'
+import { IncomingMessage } from 'http'
+import { Socket } from 'net'
 import * as path from 'path'
 
 import packageJson from '../package.json'
@@ -37,15 +40,50 @@ import {
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
+import { PublicModule } from './public.module'
+import { HttpInboundTransport } from './utils/HttpInboundTransport'
 import { VsAgent } from './utils/VsAgent'
+import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
 import { commonAppConfig, setupAgent } from './utils/setupAgent'
 
-export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent, serverConfig.publicApiBaseUrl))
-  // Port expose
-  commonAppConfig(app, serverConfig)
-  await app.listen(serverConfig.port)
+export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
+  const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
+
+  const adminApp = await NestFactory.create(VsAgentModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(adminApp, cors)
+  await adminApp.listen(port)
+
+  // PublicModule-specific config
+  const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(publicApp, cors)
+  publicApp.use(express.json({ limit: '5mb' }))
+  publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
+  publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
+
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
+
+  const webSocketServer = agent.inboundTransports
+    .find(x => x instanceof VsAgentWsInboundTransport)
+    ?.getServer()
+  const httpInboundTransport = agent.inboundTransports.find(x => x instanceof HttpInboundTransport)
+
+  if (enableHttp) {
+    httpInboundTransport?.setApp(publicApp.getHttpAdapter().getInstance())
+  }
+
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await publicApp.listen(AGENT_PORT)
+
+  // Add WebSocket support if required
+  if (enableWs) {
+    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
+        const socketId = utils.uuid()
+        webSocketServer?.emit('connection', socketParam, request, socketId)
+      })
+    })
+  }
 }
 
 const run = async () => {
@@ -87,7 +125,7 @@ const run = async () => {
   serverLogger.info(`endpoints: ${endpoints} publicApiBaseUrl ${publicApiBaseUrl}`)
   const { agent } = await setupAgent({
     endpoints,
-    port: Number(AGENT_PORT) || 3001,
+    port: AGENT_PORT,
     walletConfig: {
       id: AGENT_WALLET_ID || 'test-vs-agent',
       key: AGENT_WALLET_KEY || 'test-vs-agent',
@@ -118,9 +156,10 @@ const run = async () => {
     webhookUrl: EVENTS_BASE_URL,
     publicApiBaseUrl,
     discoveryOptions,
+    endpoints,
   }
 
-  await startAdminServer(agent, conf)
+  await startServers(agent, conf)
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
