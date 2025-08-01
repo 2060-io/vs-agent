@@ -14,7 +14,7 @@ import express, { text } from 'express'
 const supportedContentTypes: string[] = [DidCommMimeType.V0, DidCommMimeType.V1]
 
 export class HttpInboundTransport implements InboundTransport {
-  public app: Express
+  public app?: Express
   private port: number
   private path: string
   private _server?: Server
@@ -23,14 +23,9 @@ export class HttpInboundTransport implements InboundTransport {
     return this._server
   }
 
-  public constructor({ app, path, port }: { app?: Express; path?: string; port: number }) {
+  public constructor({ path, port }: { path?: string; port: number }) {
     this.port = port
-
-    // Create Express App
-    this.app = app ?? express()
     this.path = path ?? '/'
-
-    this.setupMiddleware()
   }
 
   public setApp(app: Express) {
@@ -39,10 +34,14 @@ export class HttpInboundTransport implements InboundTransport {
   }
 
   private setupMiddleware() {
-    this.app.use(text({ type: supportedContentTypes, limit: '5mb' }))
+    this.app?.use(text({ type: supportedContentTypes, limit: '5mb' }))
   }
 
-  public async start(agent: Agent) {
+  public async start(agent: Agent, app?: Express) {
+    if (!this.app) {
+      this.app = app ?? express()
+      this.setupMiddleware()
+    }
     const transportService = agent.dependencyManager.resolve(TransportService)
     const messageReceiver = agent.dependencyManager.resolve(MessageReceiver)
 
