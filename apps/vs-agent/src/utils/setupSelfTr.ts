@@ -183,7 +183,7 @@ async function generateVerifiableCredential(
     } as W3cJsonLdSignPresentationOptions)
     return signedPresentation
   } else {
-    didRecord.setTag(logTag, JSON.stringify(signedCredential.jsonCredential))
+    didRecord.metadata.set(logTag, signedCredential.jsonCredential)
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
     return signedCredential.jsonCredential
   }
@@ -224,7 +224,7 @@ async function generateVerifiablePresentation(
     credentialSchema,
     presentation,
   )
-  didRecord.setTag(logTag, JSON.stringify(result))
+  didRecord.metadata.set(logTag, result)
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
   return result
 }

@@ -97,17 +97,17 @@ export class SelfTrController {
   }
 
   // Helper function to retrieve schema data based on tag name
-  private async getSchemaData(tagName: string, notFoundMessage: string): Promise<string> {
+  private async getSchemaData(tagName: string, notFoundMessage: string) {
     try {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
-      const tag = didRecord.getTag(tagName)
-      if (tag) return JSON.parse(tag as string)
+      const metadata = didRecord.metadata.get(tagName)
+      if (metadata) return metadata
 
       throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
     } catch (error) {
-      this.logger.error(`Error loading tag "${tagName}": ${error.message}`)
+      this.logger.error(`Error loading data "${tagName}": ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
