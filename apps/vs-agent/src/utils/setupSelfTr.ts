@@ -133,7 +133,11 @@ async function generateVerifiableCredential(
   let claims = subject.claims
 
   if (!claims) {
-    claims = await getClaims(agent, ecsSchemas, { id: subjectId }, logTag)
+    claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
+  }
+  const integrityData = generateDigestSRI(JSON.stringify(claims))
+  if (didRecord.metadata.get(logTag)?.integrityData === integrityData) {
+    return didRecord.metadata.get(logTag)
   }
 
   const unsignedCredential = new W3cCredential({
@@ -183,7 +187,7 @@ async function generateVerifiableCredential(
     } as W3cJsonLdSignPresentationOptions)
     return signedPresentation
   } else {
-    didRecord.metadata.set(logTag, signedCredential.jsonCredential)
+    didRecord.metadata.set(logTag, { ...signedCredential.jsonCredential, integrityData })
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
     return signedCredential.jsonCredential
   }
@@ -206,6 +210,9 @@ async function generateVerifiablePresentation(
 ) {
   if (!agent.did) throw Error('The DID must be set up')
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+  const integrityData = generateDigestSRI(JSON.stringify(getClaims(ecsSchemas, { id: agent.did }, logTag)))
+  const metadata = didRecord.metadata.get(logTag)
+  if (metadata?.integrityData === integrityData) return metadata
 
   const presentation = new W3cPresentation({
     context: ['https://www.w3.org/2018/credentials/v1'],
@@ -224,7 +231,7 @@ async function generateVerifiablePresentation(
     credentialSchema,
     presentation,
   )
-  didRecord.metadata.set(logTag, result)
+  didRecord.metadata.set(logTag, { ...result, integrityData })
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
   return result
 }
@@ -238,14 +245,10 @@ async function generateVerifiablePresentation(
  * @returns The claims object.
  */
 async function getClaims(
-  agent: VsAgent,
   ecsSchemas: Record<string, AnySchemaObject>,
   { id: subjectId }: W3cCredentialSubject,
   logTag: string,
 ) {
-  const record = await agent.genericRecords.findById(`${subjectId}-${logTag}`)
-  if (record?.content) return record.content
-
   // Default claims fallback
   const claims =
     logTag === 'ecs-service'
@@ -270,7 +273,7 @@ async function getClaims(
 
   const ecsSchema = ecsSchemas[logTag]
   if (!ecsSchema) {
-    throw new Error(`Schema not defined in data.json for logTag: ${logTag}`)
+    throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
   }
 
   const validate = ajv.compile(ecsSchema.properties?.credentialSubject)

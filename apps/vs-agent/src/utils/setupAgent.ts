@@ -247,7 +247,7 @@ export const setupAgent = async ({
       logger?.debug('Public did record saved')
     }
   }
-  
+
   // Initialize Self-Trust Registry
   await setupSelfTr({ agent, publicApiBaseUrl })
 

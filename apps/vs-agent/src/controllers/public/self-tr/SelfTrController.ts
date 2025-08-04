@@ -103,7 +103,11 @@ export class SelfTrController {
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
       const metadata = didRecord.metadata.get(tagName)
-      if (metadata) return metadata
+      if (metadata) {
+        const { integrityData, ...rest } = metadata
+        void integrityData
+        return rest
+      }
 
       throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
     } catch (error) {
