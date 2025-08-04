@@ -26,5 +26,3 @@ export class PublicModule {
     }
   }
 }
-
-export class AppModule {}

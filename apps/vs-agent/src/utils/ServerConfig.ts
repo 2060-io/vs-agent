@@ -12,6 +12,7 @@ export interface ServerConfig {
   logger: TsLogger
   webhookUrl?: string
   discoveryOptions?: FeatureQueryOptions[]
+  endpoints: string[]
 }
 
 export interface DidWebServerConfig extends ServerConfig {

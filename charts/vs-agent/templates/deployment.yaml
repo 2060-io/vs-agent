@@ -169,7 +169,7 @@ spec:
             -  containerPort: {{ .Values.didcommPort }}
             livenessProbe:
               httpGet:
-                path: /health
+                path: /v1/health
                 port: {{ .Values.adminPort }}
               initialDelaySeconds: 30
               periodSeconds: 60
@@ -177,7 +177,7 @@ spec:
               failureThreshold: 2
             readinessProbe:
               httpGet:
-                path: /health
+                path: /v1/health
                 port: {{ .Values.adminPort }}
               initialDelaySeconds: 15
               periodSeconds: 60
