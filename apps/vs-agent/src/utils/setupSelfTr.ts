@@ -136,9 +136,8 @@ async function generateVerifiableCredential(
     claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
   }
   const integrityData = generateDigestSRI(JSON.stringify(claims))
-  if (didRecord.metadata.get(logTag)?.integrityData === integrityData) {
-    return didRecord.metadata.get(logTag)
-  }
+  const metadata = didRecord.metadata.get(logTag)
+  if (metadata?.integrityData === integrityData) return metadata
 
   const unsignedCredential = new W3cCredential({
     context: ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
@@ -210,7 +209,9 @@ async function generateVerifiablePresentation(
 ) {
   if (!agent.did) throw Error('The DID must be set up')
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-  const integrityData = generateDigestSRI(JSON.stringify(getClaims(ecsSchemas, { id: agent.did }, logTag)))
+  const integrityData = generateDigestSRI(
+    JSON.stringify(await getClaims(ecsSchemas, { id: agent.did }, logTag)),
+  )
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
