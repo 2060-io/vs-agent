@@ -160,13 +160,13 @@ async function generateVerifiableCredential(
     expirationDate: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
     credentialSubject: {
       id: subjectId,
-      claims: presentation ? claims : await addDigestSRI(subjectId, claims),
+      claims: presentation ? claims : await addDigestSRI(subjectId, claims, ecsSchemas),
     },
   })
 
   unsignedCredential.credentialSchema = presentation
     ? credentialSchema
-    : await addDigestSRI(credentialSchema.id, credentialSchema)
+    : await addDigestSRI(credentialSchema.id, credentialSchema, ecsSchemas)
 
   const didRepository = agent.context.dependencyManager.resolve(DidRepository)
   const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
@@ -326,15 +326,22 @@ async function getClaims(
  * @param data - The data object to which the digest will be added.
  * @returns The data object with an added digestSRI property.
  */
-async function addDigestSRI<T extends object>(id?: string, data?: T): Promise<T & { digestSRI: string }> {
+async function addDigestSRI<T extends object>(
+  id?: string,
+  data?: T,
+  ecsSchemas?: Record<string, AnySchemaObject>,
+): Promise<T & { digestSRI: string }> {
   if (!id || !data) {
     throw new Error(`id and data has requiered`)
   }
   const response = await fetch(id)
-  if (!response.ok) {
+  if (!response.ok && !ecsSchemas) {
     throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}`)
   }
-  const schemaContent = await response.text()
+
+  // If url is a local schema, use the ecsSchemas map
+  const key = id.split('/').pop()
+  const schemaContent = response.ok ? await response.text() : JSON.stringify(ecsSchemas?.[key!])
   return {
     ...data,
     digestSRI: generateDigestSRI(schemaContent),
