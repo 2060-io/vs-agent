@@ -29,6 +29,7 @@ import {
   SELF_ISSUED_VTC_ORG_ADDRESS,
   SELF_ISSUED_VTC_ORG_TYPE,
   SELF_ISSUED_VTC_ORG_COUNTRYCODE,
+  FALLBACK_BASE64,
 } from '../config'
 
 import { VsAgent } from './VsAgent'
@@ -360,14 +361,13 @@ function generateDigestSRI(content: string, algorithm: string = 'sha256'): strin
  * @returns A Base64 data URI string, or a fallback placeholder if the image cannot be fetched or is invalid.
  */
 export async function urlToBase64(url?: string): Promise<string> {
-  const FALLBACK_BASE64 = 'https://hologram.zone/images/ico-hologram.png'
-
   if (!url) {
     console.warn('No URL provided for image conversion.')
+    return FALLBACK_BASE64
   }
 
   try {
-    const response = await axios.get(url ?? FALLBACK_BASE64, { responseType: 'arraybuffer' })
+    const response = await axios.get(url, { responseType: 'arraybuffer' })
 
     const contentType = response.headers['content-type']
     if (!contentType || !contentType.startsWith('image/')) {
