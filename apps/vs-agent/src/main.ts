@@ -46,6 +46,7 @@ import { VsAgent } from './utils/VsAgent'
 import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
 import { commonAppConfig, setupAgent } from './utils/setupAgent'
+import { setupSelfTr } from './utils/setupSelfTr'
 
 export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
@@ -160,6 +161,9 @@ const run = async () => {
   }
 
   await startServers(agent, conf)
+
+  // Initialize Self-Trust Registry
+  await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
