@@ -321,10 +321,15 @@ async function getClaims(
 }
 
 /**
- * Adds a Subresource Integrity (SRI) digest to the provided data using the content fetched from the given id (URL).
- * @param id - The URL to fetch the schema content from.
- * @param data - The data object to which the digest will be added.
- * @returns The data object with an added digestSRI property.
+ * Adds a Subresource Integrity (SRI) digest to the provided data using the schema content
+ * fetched from the provided URL or from a local schema map as fallback.
+ *
+ * @template T - The type of the data object.
+ * @param id - The URL of the schema to fetch.
+ * @param data - The object to which the digest will be added.
+ * @param ecsSchemas - Optional map of local schemas to use as fallback if the fetch fails.
+ * @returns A new object combining the original data and a `digestSRI` property.
+ * @throws Error if both the fetch and local fallback fail.
  */
 async function addDigestSRI<T extends object>(
   id?: string,
@@ -335,13 +340,21 @@ async function addDigestSRI<T extends object>(
     throw new Error(`id and data has requiered`)
   }
   const response = await fetch(id)
-  if (!response.ok && !ecsSchemas) {
-    throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}`)
+  const key = id.split('/').pop()
+  const fallbackSchema = key && ecsSchemas?.[key]
+
+  if (!response.ok && !fallbackSchema) {
+    throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}, and no local fallback found.`)
   }
 
-  // If url is a local schema, use the ecsSchemas map
-  const key = id.split('/').pop()
-  const schemaContent = response.ok ? await response.text() : JSON.stringify(ecsSchemas?.[key!])
+  let schemaContent: string
+
+  if (response.ok) {
+    schemaContent = await response.text()
+  } else {
+    schemaContent = JSON.stringify({ schema: JSON.stringify(fallbackSchema) })
+  }
+
   return {
     ...data,
     digestSRI: generateDigestSRI(schemaContent),
