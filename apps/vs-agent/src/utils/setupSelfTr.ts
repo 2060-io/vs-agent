@@ -109,13 +109,24 @@ export const setupSelfTr = async ({
 }
 
 /**
- * Generates a verifiable credential or presentation, signing it with the agent's DID.
- * @param logTag - Identifier for the credential type.
- * @param type - Array of credential types.
- * @param subject - Subject information and claims.
- * @param credentialSchema - Schema for the credential.
+ * Generates and signs a verifiable credential using the agent's DID.
+ * Stores the signed credential and its integrity metadata in the DID record.
+ *
+ * - If the claims for the subject are not provided, they are retrieved (default claims) and validated against the schema.
+ * - The integrity of the claims is tracked using a Subresource Integrity (SRI) digest.
+ * - If a credential with the same integrity already exists in the DID metadata, it is returned directly.
+ * - Otherwise, a new credential is created, signed, and stored in the DID metadata.
+ * - If a presentation is provided, the signed credential is embedded and a signed presentation is returned.
+ *
+ * @param agent - The VsAgent instance used for signing and DID management.
+ * @param logger - Logger instance for logging operations.
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param logTag - Unique identifier for the credential type and metadata key.
+ * @param type - Array of credential types (e.g., ['VerifiableCredential']).
+ * @param subject - Subject information, including ID and optional claims.
+ * @param credentialSchema - Schema definition for the credential.
  * @param presentation - Optional presentation to include the credential.
- * @returns The signed verifiable credential or presentation.
+ * @returns The signed verifiable credential or presentation, with integrity metadata.
  */
 async function generateVerifiableCredential(
   agent: VsAgent,
@@ -193,11 +204,21 @@ async function generateVerifiableCredential(
 }
 
 /**
- * Generates a verifiable presentation containing a verifiable credential.
- * @param logTag - Identifier for the credential type.
- * @param type - Array of credential types.
- * @param credentialSchema - Schema for the credential.
- * @returns The signed verifiable presentation.
+ * Generates and signs a verifiable presentation containing a verifiable credential.
+ * Stores the signed presentation and its integrity metadata in the DID record.
+ *
+ * - Retrieves and validates claims for the agent's DID.
+ * - Computes an integrity digest for the claims.
+ * - If a presentation with the same integrity already exists in the DID metadata, it is returned.
+ * - Otherwise, a new presentation is created, signed, and stored in the DID metadata.
+ *
+ * @param agent - The VsAgent instance used for signing and DID management.
+ * @param logger - Logger instance for logging operations.
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param logTag - Unique identifier for the presentation type and metadata key.
+ * @param type - Array of credential types to include.
+ * @param credentialSchema - Schema definition for the credential.
+ * @returns The signed verifiable presentation, with integrity metadata.
  */
 async function generateVerifiablePresentation(
   agent: VsAgent,
@@ -238,12 +259,15 @@ async function generateVerifiablePresentation(
 }
 
 /**
- * Retrieves claims for a subject from storage or builds default claims if not found.
- * Validates claims against the schema for the given logTag.
- * @param agent - The VsAgent instance.
- * @param subject - Credential subject.
- * @param logTag - Identifier for the credential type.
- * @returns The claims object.
+ * Retrieves and validates claims for a credential subject.
+ * If claims are not found, builds default claims based on the logTag.
+ * Validates claims against the ECS schema for the given logTag.
+ *
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param subject - Credential subject, including ID.
+ * @param logTag - Unique identifier for the credential type.
+ * @returns The validated claims object.
+ * @throws If claims are invalid or schema is missing.
  */
 async function getClaims(
   ecsSchemas: Record<string, AnySchemaObject>,
