@@ -31,10 +31,8 @@ import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
-import { CachedWebvhDidResolver } from './CachedWebvhDidResolver'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
-import { WebVhDidRegistrar } from './WebVhDidRegistrar'
 
 type VsAgentModules = {
   askar: AskarModule
