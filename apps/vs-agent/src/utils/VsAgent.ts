@@ -32,7 +32,9 @@ import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { CachedWebvhDidResolver } from './CachedWebvhDidResolver'
-import { DidWebvhAnonCredsRegistry } from './DidWebAnonCredsRegistry'
+import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
+import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { WebVhDidRegistrar } from './WebVhDidRegistrar'
 
 type VsAgentModules = {
   askar: AskarModule
@@ -91,9 +93,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           tailsServerBaseUrl: `${options.publicApiBaseUrl}/anoncreds/v1/tails`,
         }),
         registries: [
-          new DidWebvhAnonCredsRegistry({
-            cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },
-          }),
+          new WebVhAnonCredsRegistry(),
         ],
       }),
       actionMenu: new ActionMenuModule(),
@@ -110,7 +110,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           }),
         ],
       }),
-      dids: new DidsModule({ resolvers: [new CachedWebvhDidResolver()] }),
+      dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
       mrtd: new DidCommMrtdModule(),
       proofs: new ProofsModule({
         autoAcceptProofs: AutoAcceptProof.ContentApproved,
