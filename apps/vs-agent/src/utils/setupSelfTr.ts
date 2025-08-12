@@ -344,7 +344,9 @@ async function addDigestSRI<T extends object>(
   const fallbackSchema = key && ecsSchemas?.[key]
 
   if (!response.ok && !fallbackSchema) {
-    throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}, and no local fallback found.`)
+    throw new Error(
+      `Failed to fetch schema from ${id}: ${response.status} ${response.statusText}, and no local fallback found.`,
+    )
   }
 
   let schemaContent: string

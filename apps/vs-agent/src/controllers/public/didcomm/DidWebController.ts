@@ -34,6 +34,23 @@ export class DidWebController {
     }
   }
 
+  @Get('/.well-known/did.jsonl')
+  async getDidDocumentLD() {
+    const agent = await this.agentService.getAgent()
+    agent.config.logger.info(`Public DidDocument requested`)
+    if (agent.did) {
+      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      const didDocument = didRecord.didDocument
+      if (didDocument) {
+        return didDocument
+      } else {
+        throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+      }
+    } else {
+      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+    }
+  }
+
   // AnonCreds routes only make sense if we have a public DID (otherwise, we cannot be issuers)
   // Schemas
   @Get('/anoncreds/v1/schema/:schemaId')

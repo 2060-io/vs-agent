@@ -28,11 +28,11 @@ import {
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
-import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
-import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { CachedWebvhDidResolver } from './CachedWebvhDidResolver'
+import { DidWebvhAnonCredsRegistry } from './DidWebAnonCredsRegistry'
 
 type VsAgentModules = {
   askar: AskarModule
@@ -91,7 +91,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           tailsServerBaseUrl: `${options.publicApiBaseUrl}/anoncreds/v1/tails`,
         }),
         registries: [
-          new DidWebAnonCredsRegistry({
+          new DidWebvhAnonCredsRegistry({
             cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },
           }),
         ],
@@ -110,7 +110,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           }),
         ],
       }),
-      dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
+      dids: new DidsModule({ resolvers: [new CachedWebvhDidResolver()] }),
       mrtd: new DidCommMrtdModule(),
       proofs: new ProofsModule({
         autoAcceptProofs: AutoAcceptProof.ContentApproved,
