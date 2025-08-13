@@ -243,7 +243,6 @@ export const setupAgent = async ({
           didDocument: builder.build(),
         }),
       )
-      await agent.dids.create({ did: agent.did, method: 'webvh' })
       logger?.debug('Public did record saved')
     }
   }

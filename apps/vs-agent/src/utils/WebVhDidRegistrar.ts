@@ -32,7 +32,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const method = await this.generateVerificationMethod(domain)
       const crypto = new WebvhDidCryptoExt(agentContext, method)
 
-      console.log(crypto)
       const didResult = await createDID({
         domain,
         signer: crypto,
@@ -81,7 +80,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       MultibaseEncoding.BASE58_BTC,
     )
     return {
-      id: `did:webvh:${publicKey}:${domain}#key-1`,
+      id: `did:webvh:${publicKey}:${domain}`,
       controller: `did:webvh:${publicKey}`,
       type: 'Ed25519VerificationKey2018',
       publicKeyMultibase: publicKey,

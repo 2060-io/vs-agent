@@ -42,7 +42,8 @@ export class DidWebController {
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
       const crypto = new WebvhDidCrypto(agent.context)
-      const { doc: didDocument } = await resolveDID(agent.did, { verifier: crypto })
+      const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
+      const { doc: didDocument } = await resolveDID(didRecord.did, { verifier: crypto })
       if (didDocument) {
         return didDocument
       } else {

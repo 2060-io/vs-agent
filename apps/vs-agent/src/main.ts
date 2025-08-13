@@ -165,6 +165,10 @@ const run = async () => {
   // Initialize Self-Trust Registry
   await setupSelfTr({ agent, publicApiBaseUrl })
 
+  // Create did:webvh
+  const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
+  if (!didRecord) await agent.dids.create({ method: 'webvh' })
+
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
   messageEvents(agent, conf)
