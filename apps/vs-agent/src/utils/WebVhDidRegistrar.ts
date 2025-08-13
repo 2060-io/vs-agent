@@ -3,7 +3,11 @@ import {
   DidCreateResult,
   DidDeactivateOptions,
   DidDeactivateResult,
+  DidDocumentBuilder,
+  DidDocumentRole,
+  DidRecord,
   DidRegistrar,
+  DidRepository,
   DidUpdateOptions,
   DidUpdateResult,
 } from '@credo-ts/core'
@@ -31,6 +35,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const domain = endpoints[0].split('//')[1]
       const method = await this.generateVerificationMethod(domain)
       const crypto = new WebvhDidCryptoExt(agentContext, method)
+      await this.registerDidDocument(agentContext, crypto.getVerificationMethodId(), method)
 
       const didResult = await createDID({
         domain,
@@ -87,5 +92,31 @@ export class WebVhDidRegistrar implements DidRegistrar {
       secretKeyMultibase: secretKey,
       purpose,
     }
+  }
+
+  private async registerDidDocument(
+    agentContext: AgentContext,
+    did: string,
+    verificationMethod: VerificationMethod,
+  ): Promise<void> {
+    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+    const builder = new DidDocumentBuilder(did)
+    builder
+      .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
+      .addContext('https://w3id.org/security/suites/x25519-2019/v1')
+      .addVerificationMethod({
+        ...verificationMethod,
+        id: verificationMethod.id!,
+        controller: verificationMethod.controller!,
+      })
+      .addAssertionMethod(verificationMethod.id!)
+    await didRepository.save(
+      agentContext,
+      new DidRecord({
+        did,
+        role: DidDocumentRole.Created,
+        didDocument: builder.build(),
+      }),
+    )
   }
 }

@@ -3,11 +3,14 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
+import { DidDocument } from '@credo-ts/core'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
-import { resolveDID } from 'didwebvh-ts'
+import canonicalize from 'canonicalize'
+import { createProof } from 'didwebvh-ts'
 import { Response } from 'express'
 import * as fs from 'fs'
+import { base58btc } from 'multiformats/bases/base58'
+import { sha256 } from 'multiformats/hashes/sha2'
 
 import { baseFilePath, tailsIndex } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'
@@ -37,15 +40,19 @@ export class DidWebController {
   }
 
   @Get('/.well-known/did.jsonl')
-  async getDidDocumentLD() {
+  async getDidDocumentLD(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const crypto = new WebvhDidCrypto(agent.context)
       const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
-      const { doc: didDocument } = await resolveDID(didRecord.did, { verifier: crypto })
-      if (didDocument) {
-        return didDocument
+      const didDocument = didRecord.didDocument
+      if (didDocument?.verificationMethod) {
+        const entry = await createInitialEntry(didDocument)
+
+        const jsonl = JSON.stringify(entry)
+        res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
+        res.setHeader('Cache-Control', 'no-cache')
+        res.send(jsonl)
       } else {
         throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
       }
@@ -192,4 +199,48 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+}
+
+function nowIsoUtc(): string {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+async function generateBase58Hash(obj: any) {
+  const jcs = canonicalize(obj)!
+  const mh = await sha256.digest(new TextEncoder().encode(jcs))
+  return base58btc.baseEncode(mh.bytes)
+}
+
+export async function createInitialEntry(didDocument: DidDocument) {
+  const preLog = {
+    versionId: '{SCID}',
+    versionTime: nowIsoUtc(),
+    parameters: {
+      updateKeys: ['z6MksClaveUpdate'],
+      method: 'did:webvh:1.0',
+      scid: '{SCID}',
+      portable: false,
+      nextKeyHashes: [],
+      witnesses: [],
+      witnessThreshold: 0,
+      deactivated: false,
+    },
+    state: didDocument,
+  }
+
+  const scid = await generateBase58Hash(preLog)
+  const entryForHash = {
+    ...preLog,
+    versionId: scid,
+    parameters: { ...preLog.parameters, scid },
+  }
+  const entryHash = await generateBase58Hash(entryForHash)
+
+  const entry = {
+    ...entryForHash,
+    versionId: `1-${entryHash}`,
+    proof: createProof(didDocument.verificationMethod![0].id),
+  }
+
+  return entry
 }
