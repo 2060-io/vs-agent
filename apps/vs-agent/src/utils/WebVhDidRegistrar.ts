@@ -21,8 +21,9 @@ import {
   VerificationMethod,
 } from 'didwebvh-ts'
 
-export class WebVhDidRegistrar implements Signer, DidRegistrar {
-  private verificationMethod: VerificationMethod = {} as VerificationMethod
+import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
+
+export class WebVhDidRegistrar implements DidRegistrar {
   supportedMethods: string[] = ['webvh']
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,37 +36,18 @@ export class WebVhDidRegistrar implements Signer, DidRegistrar {
     throw new Error('Method not implemented.')
   }
 
-  getVerificationMethodId(): string {
-    return this.verificationMethod?.id ?? ''
-  }
-
-  async sign(input: SigningInput): Promise<SigningOutput> {
-    try {
-      if (!this.verificationMethod?.secretKeyMultibase) {
-        throw new Error('Secret key not found')
-      }
-      const { bytes: secretKey } = multibaseDecode(this.verificationMethod?.secretKeyMultibase)
-      const proof = crypto.sign(secretKey.slice(2), await prepareDataForSigning(input.document, input.proof))
-      return {
-        proofValue: multibaseEncode(proof, MultibaseEncoding.BASE58_BTC),
-      }
-    } catch (error) {
-      console.error('Ed25519 signing error:', error)
-      throw error
-    }
-  }
-
   public async create(agentContext: AgentContext): Promise<DidCreateResult> {
     try {
       const endpoints = agentContext.config.endpoints
       const method = await this.generateVerificationMethod()
+      const crypto = new WebvhDidCryptoExt(agentContext, method)
 
       const didResult = await createDID({
         domain: endpoints[0].split('//')[1],
-        signer: this,
+        signer: crypto,
         updateKeys: [method.publicKeyMultibase],
         verificationMethods: [method],
-        verifier: new WebvhDidCrypto(agentContext),
+        verifier: crypto,
       })
 
       return {
@@ -107,6 +89,8 @@ export class WebVhDidRegistrar implements Signer, DidRegistrar {
       MultibaseEncoding.BASE58_BTC,
     )
     return {
+      id: `did:webvh:${publicKey}`,
+      controller: `did:webvh:${publicKey}`,
       type: 'Multikey',
       publicKeyMultibase: publicKey,
       secretKeyMultibase: secretKey,
