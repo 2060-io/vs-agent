@@ -7,19 +7,8 @@ import {
   DidUpdateOptions,
   DidUpdateResult,
 } from '@credo-ts/core'
-import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
-import {
-  createDID,
-  multibaseDecode,
-  multibaseEncode,
-  MultibaseEncoding,
-  prepareDataForSigning,
-  Signer,
-  SigningInput,
-  SigningOutput,
-  VerificationMethod,
-} from 'didwebvh-ts'
+import { createDID, multibaseEncode, MultibaseEncoding, VerificationMethod } from 'didwebvh-ts'
 
 import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
@@ -39,11 +28,13 @@ export class WebVhDidRegistrar implements DidRegistrar {
   public async create(agentContext: AgentContext): Promise<DidCreateResult> {
     try {
       const endpoints = agentContext.config.endpoints
-      const method = await this.generateVerificationMethod()
+      const domain = endpoints[0].split('//')[1]
+      const method = await this.generateVerificationMethod(domain)
       const crypto = new WebvhDidCryptoExt(agentContext, method)
 
+      console.log(crypto)
       const didResult = await createDID({
-        domain: endpoints[0].split('//')[1],
+        domain,
         signer: crypto,
         updateKeys: [method.publicKeyMultibase],
         verificationMethods: [method],
@@ -72,6 +63,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
   }
 
   private async generateVerificationMethod(
+    domain: string,
     purpose:
       | 'authentication'
       | 'assertionMethod'
@@ -89,9 +81,9 @@ export class WebVhDidRegistrar implements DidRegistrar {
       MultibaseEncoding.BASE58_BTC,
     )
     return {
-      id: `did:webvh:${publicKey}`,
+      id: `did:webvh:${publicKey}:${domain}#key-1`,
       controller: `did:webvh:${publicKey}`,
-      type: 'Multikey',
+      type: 'Ed25519VerificationKey2018',
       publicKeyMultibase: publicKey,
       secretKeyMultibase: secretKey,
       purpose,

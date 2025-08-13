@@ -3,7 +3,9 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
+import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
+import { resolveDID } from 'didwebvh-ts'
 import { Response } from 'express'
 import * as fs from 'fs'
 
@@ -39,8 +41,8 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did, method: 'webvh' })
-      const didDocument = didRecord.didDocument
+      const crypto = new WebvhDidCrypto(agent.context)
+      const { doc: didDocument } = await resolveDID(agent.did, { verifier: crypto })
       if (didDocument) {
         return didDocument
       } else {

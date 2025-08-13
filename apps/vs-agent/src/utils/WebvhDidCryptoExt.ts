@@ -1,16 +1,7 @@
-import {
-  AgentContext,
-  DidCreateResult,
-  DidDeactivateOptions,
-  DidDeactivateResult,
-  DidRegistrar,
-  DidUpdateOptions,
-  DidUpdateResult,
-} from '@credo-ts/core'
+import { AgentContext } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
 import {
-  createDID,
   multibaseDecode,
   multibaseEncode,
   MultibaseEncoding,
