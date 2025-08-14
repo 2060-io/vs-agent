@@ -33,6 +33,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
     throw new Error('Method not implemented.')
   }
 
+  /**
+   * Creates a new DID document and saves it in the repository.
+   * @param agentContext The agent context.
+   * @returns The result of the DID creation.
+   */
   public async create(agentContext: AgentContext): Promise<DidCreateResult> {
     try {
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
@@ -42,20 +47,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const baseDocument = await this.registerDidDocument(agentContext, baseMethod.id!, baseMethod)
       const entry = await createInitialEntry(baseDocument)
       const didDocument = new DidDocument(entry.state)
-      const metadata = {
-        versionId: entry.versionId,
-        versionTime: entry.versionTime,
-        parameters: entry.parameters,
-        state: entry.state,
-      }
-
-      const didRecord = new DidRecord({
-        did: entry.state.id,
-        role: DidDocumentRole.Created,
-        didDocument,
-      })
-      Object.entries(metadata).forEach(([key, value]) => didRecord.metadata.set(key, value))
-      await didRepository.save(agentContext, didRecord)
 
       const methods = didDocument.verificationMethod
       if (!methods || methods.length === 0) {
@@ -74,7 +65,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
         publicKeyMultibase: baseMethod.publicKeyMultibase,
         secretKeyMultibase: baseMethod.secretKeyMultibase,
       }
+
+      // Create crypto instance
       const crypto = new WebvhDidCryptoExt(agentContext, method)
+
+      // Create DID
       const didResult = await createDID({
         domain,
         signer: crypto,
@@ -82,6 +77,15 @@ export class WebVhDidRegistrar implements DidRegistrar {
         verificationMethods: [method],
         verifier: crypto,
       })
+
+      // Save didRegistry
+      const didRecord = new DidRecord({
+        did: entry.state.id,
+        role: DidDocumentRole.Created,
+        didDocument,
+      })
+      didRecord.metadata.set('log', didResult.log)
+      await didRepository.save(agentContext, didRecord)
 
       return {
         didDocumentMetadata: {},
@@ -104,6 +108,12 @@ export class WebVhDidRegistrar implements DidRegistrar {
     }
   }
 
+  /**
+   * Generates a new verification method for the DID document.
+   * @param domain The domain for the DID.
+   * @param purpose The purpose of the verification method.
+   * @returns The generated verification method.
+   */
   private async generateVerificationMethod(
     domain: string,
     purpose:
@@ -132,6 +142,13 @@ export class WebVhDidRegistrar implements DidRegistrar {
     }
   }
 
+  /**
+   * Registers a DID document with the provided verification method.
+   * @param agentContext The agent context.
+   * @param did The DID identifier.
+   * @param verificationMethod The verification method to add.
+   * @returns The built DID document.
+   */
   private async registerDidDocument(
     agentContext: AgentContext,
     did: string,
@@ -156,12 +173,22 @@ function nowIsoUtc(): string {
   return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
 }
 
+/**
+ * Generates a base58-encoded SHA-256 hash of the canonicalized object.
+ * @param obj The object to hash.
+ * @returns The base58-encoded hash.
+ */
 async function generateBase58Hash(obj: any) {
   const jcs = canonicalize(obj)
   const mh = await sha256.digest(new TextEncoder().encode(jcs))
   return base58btc.baseEncode(mh.bytes)
 }
 
+/**
+ * Creates the initial entry for the DID document, including versioning and hashing.
+ * @param didDocument The DID document.
+ * @returns The initial entry object.
+ */
 export async function createInitialEntry(didDocument: DidDocument) {
   const preLog = {
     versionId: '{SCID}',
@@ -191,6 +218,12 @@ export async function createInitialEntry(didDocument: DidDocument) {
   return entry
 }
 
+/**
+ * Replaces all occurrences of '{SCID}' in the object with the provided SCID value.
+ * @param obj The object to process.
+ * @param scid The SCID value to insert.
+ * @returns The processed object with SCID replaced.
+ */
 function replaceSCID(obj: any, scid: string): any {
   const jsonStr = JSON.stringify(obj)
   const replacedStr = jsonStr.replace(/\{SCID\}/g, scid)
