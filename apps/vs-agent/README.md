@@ -14,14 +14,14 @@ In this section we will divide them depending on how likely different users will
 
 These variables are usually important for every deployment, since they define how VS Agent will be accessed from the outside world (User Agents, other Verifiable Services and your controller, who will be managing its Admin API and receiving events from it):
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_PORT                 | Port where DIDComm agent will be running                                                                          | 3001                  |
-| ADMIN_PORT                 | Administration interface port                                                                                     | 3000                  |
-| AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)                                                                            | none                  |
-| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations                                                                   | none                  |
-| AGENT_LABEL                 | Label to show to other DIDComm agents                                                                             | Test VS Agent    |
-| EVENTS_BASE_URL            | Base URL for sending events                                                                                       | http://localhost:5000 |
+| Variable                   | Description                                     | Default value           |
+| -------------------------- | ----------------------------------------------- | ----------------------- |
+| AGENT_PORT                 | Port where DIDComm agent will be running        | 3001                    |
+| ADMIN_PORT                 | Administration interface port                   | 3000                    |
+| AGENT_PUBLIC_DID           | Agent's public DID (in did:web format)          | none                    |
+| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations | none                    |
+| AGENT_LABEL                | Label to show to other DIDComm agents           | Test VS Agent           |
+| EVENTS_BASE_URL            | Base URL for sending events                     | <http://localhost:5000> |
 
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
@@ -41,17 +41,17 @@ Besides these parameters, you are likely to use your VS Agent alongside a **cont
 
 These are variables that you are likely to use when going into production, since you don't want to use dummy credentials and also you'll probably want to use external components to improve horizontal scalability.
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_WALLET_ID                 | ID for agent wallet                                                                             | test-vs-agent    |
-| AGENT_WALLET_KEY                 | Key for agent wallet                                                                             | test-vs-agent    |
-| POSTGRES_HOST             | PosgreSQL database host                                                                                             | None (use SQLite)               |
-| POSTGRES_USER             | PosgreSQL database username                                                                                         | None                            |
-| POSTGRES_PASSWORD         | PosgreSQL database password                                                                                         | None                            |
-| POSTGRES_ADMIN_USER       | PosgreSQL database admin user                                                                                       | None                            |
-| POSTGRES_ADMIN_PASSWORD   | PosgreSQL database admin password                                                                                   | None                            |
-| REDIS_HOST       | Redis host used for message caching and asynchronous processing. The system requires this for production-ready performance.                                                                                       | None                            |
-| REDIS_PASSWORD   | Password for connecting to the Redis instance.                                                                                   | None                            |
+| Variable                | Description                                                                                                                 | Default value     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| AGENT_WALLET_ID         | ID for agent wallet                                                                                                         | test-vs-agent     |
+| AGENT_WALLET_KEY        | Key for agent wallet                                                                                                        | test-vs-agent     |
+| POSTGRES_HOST           | PosgreSQL database host                                                                                                     | None (use SQLite) |
+| POSTGRES_USER           | PosgreSQL database username                                                                                                 | None              |
+| POSTGRES_PASSWORD       | PosgreSQL database password                                                                                                 | None              |
+| POSTGRES_ADMIN_USER     | PosgreSQL database admin user                                                                                               | None              |
+| POSTGRES_ADMIN_PASSWORD | PosgreSQL database admin password                                                                                           | None              |
+| REDIS_HOST              | Redis host used for message caching and asynchronous processing. The system requires this for production-ready performance. | None              |
+| REDIS_PASSWORD          | Password for connecting to the Redis instance.                                                                              | None              |
 
 VS Agent supports two database backends:
 
@@ -61,6 +61,7 @@ VS Agent supports two database backends:
 If you want to use SQLite, you won't need to care about any of these variables: VS Agent will create a local database using `AGENT_WALLET_ID` name and ciphering it using `AGENT_WALLET_KEY`. Usually it is safe to keep the default values, unless you'll want to set up multiple VS Agents in the same computer (in such case, just use different `AGENT_WALLET_ID` for each).
 
 On the other hand, if you go to production, you'll likely want to use a PostgreSQL DB, which will be used as soon as you set `POSTGRES_HOST` environment variable. Make sure to:
+
 - define AGENT_WALLET_ID and AGENT_WALLET_KEY, since the ID will be used as the name of the database that will be used to store VS Agent wallet
 - define the other `POSTGRES_*` parameters, including the ones for administration in case VS Agent wallet's database is not yet created in your Postgres host. You might skip using these parameters if your DBA creates this database beforehand and gives permissions to `POSTGRES_USER`.
 
@@ -71,11 +72,11 @@ By offloading message handling and enabling asynchronous processing, Redis helps
 
 Here is a couple of variables that you may want to take care in case of troubles or working in development environments.
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| AGENT_LOG_LEVEL            | Credo Agent Log level                                                                                             | 4 (warn)              |
-| ADMIN_LOG_LEVEL            | Admin interface Log level                                                                                         | 2 (debug)             |
-| USE_CORS                   | Enable Cross-Origin Resource Sharing (only for development purposes)                                              | false                 |
+| Variable        | Description                                                          | Default value |
+| --------------- | -------------------------------------------------------------------- | ------------- |
+| AGENT_LOG_LEVEL | Credo Agent Log level                                                | 4 (warn)      |
+| ADMIN_LOG_LEVEL | Admin interface Log level                                            | 2 (debug)     |
+| USE_CORS        | Enable Cross-Origin Resource Sharing (only for development purposes) | false         |
 
 Possible log levels:
 
@@ -92,14 +93,15 @@ Possible log levels:
 
 These are variables that are updated only on specific use cases.
 
-| Variable                   | Description                                                                                                       | Default value         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------- |
-| PUBLIC_API_BASE_URL            | Base URL for public API (e.g. invitations, short URLs). Used when no public DID is defined or you want to override it                                                            | http://localhost:3001 |
-| AGENT_ENDPOINTS            | Comma-separeated list of endpoints where agent DIDComm endpoints will be accessible (including protocol and port). Used when no public DID is defined or you want to override it | ws://localhost:3001   |
-| AGENT_WALLET_KEY_DERIVATION_METHOD |	Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW|	ARGON2I_MOD |
-| AGENT_INVITATION_BASE_URL  | Public URL for fallback when no DIDComm agent is found                                                            | https://hologram.zone/     |
-| REDIRECT_DEFAULT_URL_TO_INVITATION_URL  | Default redirect to AGENT_INVITATION_BASE_URL                                                             | true     |
-| USER_PROFILE_AUTODISCLOSE | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message | false                  |
+| Variable                               | Description                                                                                                                                                                                                                | Default value            |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| PUBLIC_API_BASE_URL                    | Base URL for public API (e.g. invitations, short URLs). Used when no public DID is defined or you want to override it                                                                                                      | <http://localhost:3001>  |
+| AGENT_ENDPOINTS                        | Comma-separeated list of endpoints where agent DIDComm endpoints will be accessible (including protocol and port). Used when no public DID is defined or you want to override it                                           | ws://localhost:3001      |
+| AGENT_WALLET_KEY_DERIVATION_METHOD     | Wallet key derivation method: ARGON2I_INT, ARGON2_MOD or RAW                                                                                                                                                               | ARGON2I_MOD              |
+| AGENT_INVITATION_BASE_URL              | Public URL for fallback when no DIDComm agent is found                                                                                                                                                                     | <https://hologram.zone/> |
+| REDIRECT_DEFAULT_URL_TO_INVITATION_URL | Default redirect to AGENT_INVITATION_BASE_URL                                                                                                                                                                              | true                     |
+| USER_PROFILE_AUTODISCLOSE              | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message                                                                                 | false                    |
+| MASTER_LIST_CSCA_LOCATION              | **Enables the eMRTD verification module**. Location (URL or absolute path) of the CSCA Master List in **LDIF** format When set, VS Agent loads trust anchors at startup and activates ePassport verification capabilities. | none                     |
 
 > **Note about Key derivation method**: By default, we use the strongest ARGON2I_MOD, but since this is the slowest one as well, depending on the security infrastructure you have, you might want to not derive the key at all (use RAW). However, in versions of VS Agent we are going to deprecate this setting, so we recommend to keep the default setting to make migration process easier.
 
@@ -113,18 +115,18 @@ VS-A fetches capabilities from the `discovery.json` file (which is located at at
 
 To enable the Self-Verifiable Trust Registry API endpoints, you must set the following environment variables in your `.env` file or system environment. These variables control the agent's identity, endpoints, and the data used for example credentials:
 
-| Variable                        | Description                                                      | Example Value                                  |
-|----------------------------------|------------------------------------------------------------------|------------------------------------------------|
-| `SELF_ISSUED_VTC_ORG_TYPE`               | Organization type for example credential                         | `PRIVATE`                                      |
-| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`        | Organization country code                                        | `CO`                                           |
-| `SELF_ISSUED_VTC_ORG_REGISTRYID`         | Organization registry ID                                         | `1234567890`                                   |
-| `SELF_ISSUED_VTC_ORG_REGISTRYURL`        | Organization registry URL                                        | `https://registro-empresas.ejemplo.com`        |
-| `SELF_ISSUED_VTC_ORG_ADDRESS`            | Organization address                                             | `Calle Falsa 123, Bogotá, Colombia`            |
-| `SELF_ISSUED_VTC_SERVICE_TYPE`           | Service type for example credential                             | `HealthCheckService`                           |
-| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`    | Service description                                              | `Servicio de verificación de salud digital`     |
-| `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service                              | `18`                                           |
-| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                                     | `https://servicio.ejemplo.com/terminos`        |
-| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`  | Privacy policy URL                                               | `https://servicio.ejemplo.com/privacidad`      |
+| Variable                                     | Description                              | Example Value                               |
+| -------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
+| `SELF_ISSUED_VTC_ORG_TYPE`                   | Organization type for example credential | `PRIVATE`                                   |
+| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`            | Organization country code                | `CO`                                        |
+| `SELF_ISSUED_VTC_ORG_REGISTRYID`             | Organization registry ID                 | `1234567890`                                |
+| `SELF_ISSUED_VTC_ORG_REGISTRYURL`            | Organization registry URL                | `https://registro-empresas.ejemplo.com`     |
+| `SELF_ISSUED_VTC_ORG_ADDRESS`                | Organization address                     | `Calle Falsa 123, Bogotá, Colombia`         |
+| `SELF_ISSUED_VTC_SERVICE_TYPE`               | Service type for example credential      | `HealthCheckService`                        |
+| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`        | Service description                      | `Servicio de verificación de salud digital` |
+| `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service         | `18`                                        |
+| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                 | `https://servicio.ejemplo.com/terminos`     |
+| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`      | Privacy policy URL                       | `https://servicio.ejemplo.com/privacidad`   |
 
 > **Note:**  
 > This Self-Verifiable Trust Registry API and its configuration are **unstable** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.
@@ -132,6 +134,29 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 > The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
 
 For **more examples of how to configure these variables and use the API**, see the additional README [here](../../doc/self-tr-routes.md).
+
+### eMRTD (ePassport) verification
+
+The **eMRTD verification module** allows VS Agent to verify the authenticity and integrity of electronic Machine Readable Travel Documents (ePassports). When enabled, the agent will load CSCA (Country Signing Certification Authority) trust anchors from a **Master List** and verify the `EF.SOD` digital signature and data group hashes (for example, `DG1`, `DG2`).
+
+#### How it works (high level)
+
+1. On startup, VS Agent checks the environment variable `MASTER_LIST_CSCA_LOCATION`.
+2. If present, the agent parses the Master List and loads the CSCA certificates as trust anchors.
+3. During verification, the agent validates the `EF.SOD` signature against the DS certificate chain anchored in the CSCA and verifies the integrity of the referenced Data Groups by recomputing and comparing the digests.
+4. Verification results are made available to the internal flows of VS Agent (exact endpoints and payloads depend on your integration).
+
+> **Important:** The Master List must be a valid `.ldif` file containing CSCA certificates. Make sure the file is present inside the running container or host environment and readable by the process user.
+
+#### Enabling the module
+
+Set the environment variable pointing to the Master List file:
+
+```bash
+# .env example
+MASTER_LIST_CSCA_LOCATION=/opt/vs-agent/icao/ML_ICAO_2025-07-10.ldif
+MASTER_LIST_CSCA_LOCATION=https://pkddownloadsg.icao.int/file?id=f6e328050fd481060e787569dd8e998c43f14230
+```
 
 ## Deploy and run
 
@@ -141,14 +166,14 @@ vs-agent can be run both locally or containerized.
 
 vs-agent can be built and run on localhost by just setting the corresponding variables and executing:
 
-```
+```bash
 pnpm build
 pnpm dev
 ```
 
 Upon a successful start, the following lines should be read in log:
 
-```
+```bash
 VS Agent running in port xxxx. Admin interface at port yyyy
 ```
 
@@ -158,13 +183,13 @@ This means that VS-A is up and running!
 
 First of all, a docker image must be created by doing:
 
-```
+```bash
 docker build -t vs-agent:[tag] .
 ```
 
 Then, a container can be created and deployed:
 
-```
+```bash
 docker run -e AGENT_PUBLIC_DID=... -e AGENT_ENDPOINT=... -e AGENT_PORT=yyy -e USE_CORS=xxx -p yyy:xxx vs-agent:[tag]
 ```
 

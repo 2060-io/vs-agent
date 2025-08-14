@@ -36,6 +36,7 @@ export const setupAgent = async ({
   publicApiBaseUrl,
   publicDid,
   autoDiscloseUserProfile,
+  masterListCscaLocation,
 }: {
   port: number
   walletConfig: WalletConfig
@@ -46,6 +47,7 @@ export const setupAgent = async ({
   publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
   publicDid?: string
+  masterListCscaLocation?: string
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
@@ -66,6 +68,7 @@ export const setupAgent = async ({
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
     publicApiBaseUrl,
+    masterListCscaLocation,
   })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
