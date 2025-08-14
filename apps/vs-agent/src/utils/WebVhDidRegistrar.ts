@@ -1,5 +1,6 @@
 import {
   AgentContext,
+  DidCreateOptions,
   DidCreateResult,
   DidDeactivateOptions,
   DidDeactivateResult,
@@ -20,6 +21,10 @@ import { sha256 } from 'multiformats/hashes/sha2'
 
 import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
+interface WebVhDidCreateOptions extends DidCreateOptions {
+  domain: string
+}
+
 export class WebVhDidRegistrar implements DidRegistrar {
   supportedMethods: string[] = ['webvh']
 
@@ -38,11 +43,10 @@ export class WebVhDidRegistrar implements DidRegistrar {
    * @param agentContext The agent context.
    * @returns The result of the DID creation.
    */
-  public async create(agentContext: AgentContext): Promise<DidCreateResult> {
+  public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
+      const { domain } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const endpoints = agentContext.config.endpoints
-      const domain = endpoints[0].split('//')[1]
       const baseMethod = await this.generateVerificationMethod(domain)
       const baseDocument = await this.registerDidDocument(baseMethod.id!, baseMethod)
       const entry = await createInitialEntry(baseDocument)

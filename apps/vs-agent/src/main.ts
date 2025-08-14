@@ -167,7 +167,7 @@ const run = async () => {
 
   // Create did:webvh
   const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
-  if (!didRecord) await agent.dids.create({ method: 'webvh' })
+  if (!didRecord) await agent.dids.create({ method: 'webvh', domain: endpoints[0].split('//')[1] })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
