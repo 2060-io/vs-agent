@@ -4,8 +4,6 @@ import {
   DidCreateResult,
   DidDeactivateOptions,
   DidDeactivateResult,
-  DidDocument,
-  DidDocumentBuilder,
   DidDocumentRole,
   DidRecord,
   DidRegistrar,
@@ -15,9 +13,6 @@ import {
 } from '@credo-ts/core'
 import * as crypto from '@stablelib/ed25519'
 import { createDID, multibaseEncode, MultibaseEncoding, VerificationMethod } from 'didwebvh-ts'
-import { canonicalize } from 'json-canonicalize'
-import { base58btc } from 'multiformats/bases/base58'
-import { sha256 } from 'multiformats/hashes/sha2'
 
 import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
@@ -48,47 +43,29 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const { domain } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const baseMethod = await this.generateVerificationMethod(domain)
-      const baseDocument = await this.registerDidDocument(baseMethod.id!, baseMethod)
-      const entry = await createInitialEntry(baseDocument)
-      const didDocument = new DidDocument(entry.state)
-
-      const methods = didDocument.verificationMethod
-      if (!methods || methods.length === 0) {
-        return {
-          didDocumentMetadata: {},
-          didRegistrationMetadata: {},
-          didState: {
-            state: 'failed',
-            reason: 'No verification method found in the DID document.',
-          },
-        }
-      }
-
-      const method = {
-        ...methods[0],
-        publicKeyMultibase: baseMethod.publicKeyMultibase,
-        secretKeyMultibase: baseMethod.secretKeyMultibase,
-      }
 
       // Create crypto instance
-      const crypto = new WebvhDidCryptoExt(agentContext, method)
-
+      const crypto = new WebvhDidCryptoExt(agentContext, baseMethod)
       // Create DID
-      const didResult = await createDID({
+      const {
+        did,
+        doc: didDocument,
+        log,
+      } = await createDID({
         domain,
         signer: crypto,
-        updateKeys: [method.publicKeyMultibase],
-        verificationMethods: [method],
+        updateKeys: [baseMethod.publicKeyMultibase],
+        verificationMethods: [baseMethod],
         verifier: crypto,
       })
 
       // Save didRegistry
       const didRecord = new DidRecord({
-        did: entry.state.id,
+        did,
         role: DidDocumentRole.Created,
         didDocument,
       })
-      didRecord.metadata.set('log', didResult.log)
+      didRecord.metadata.set('log', log)
       await didRepository.save(agentContext, didRecord)
 
       return {
@@ -96,8 +73,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
         didRegistrationMetadata: {},
         didState: {
           state: 'finished',
-          did: didResult.did,
-          didDocument: didResult.doc,
+          did,
+          didDocument,
         },
       }
     } catch (error) {
@@ -145,95 +122,4 @@ export class WebVhDidRegistrar implements DidRegistrar {
       purpose,
     }
   }
-
-  /**
-   * Registers a DID document with the provided verification method.
-   * @param agentContext The agent context.
-   * @param did The DID identifier.
-   * @param verificationMethod The verification method to add.
-   * @returns The built DID document.
-   */
-  private async registerDidDocument(
-    did: string,
-    verificationMethod: VerificationMethod,
-  ): Promise<DidDocument> {
-    const builder = new DidDocumentBuilder(did)
-    builder
-      .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
-      .addContext('https://w3id.org/security/suites/x25519-2019/v1')
-      .addVerificationMethod({
-        ...verificationMethod,
-        id: verificationMethod.id!,
-        controller: verificationMethod.controller!,
-      })
-      .addAssertionMethod(verificationMethod.id!)
-      .addAuthentication(verificationMethod.id!)
-    return builder.build()
-  }
-}
-
-// Returns the current UTC timestamp in ISO 8601 format without milliseconds.
-// Example: "2025-08-14T09:30:00Z"
-function nowIsoUtc(): string {
-  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
-}
-
-/**
- * Generates a base58-encoded SHA-256 hash of the canonicalized object.
- * @param obj The object to hash.
- * @returns The base58-encoded hash.
- */
-async function generateBase58Hash(obj: any) {
-  const jcs = canonicalize(obj)
-  const mh = await sha256.digest(new TextEncoder().encode(jcs))
-  return base58btc.baseEncode(mh.bytes)
-}
-
-/**
- * Creates the initial entry for the DID document, including versioning and hashing.
- * @param didDocument The DID document.
- * @returns The initial entry object.
- */
-export async function createInitialEntry(didDocument: DidDocument) {
-  // Base preLog object for did:webvh update transactions
-  // This structure represents the initial state to be logged
-  // whenever a DID document is created or updated
-  const preLog = {
-    versionId: '{SCID}',
-    versionTime: nowIsoUtc(),
-    parameters: {
-      updateKeys: [didDocument.verificationMethod![0].publicKeyMultibase],
-      method: 'did:webvh:1.0',
-      scid: '{SCID}',
-      portable: false,
-      nextKeyHashes: [],
-      witnesses: [],
-      witnessThreshold: 0,
-      deactivated: false,
-    },
-    state: didDocument.toJSON(),
-  }
-
-  const scid = await generateBase58Hash(preLog)
-  const entryForHash = replaceSCID(preLog, scid)
-  const entryHash = await generateBase58Hash(entryForHash)
-
-  const entry = {
-    ...entryForHash,
-    versionId: `1-${entryHash}`,
-  }
-
-  return entry
-}
-
-/**
- * Replaces all occurrences of '{SCID}' in the object with the provided SCID value.
- * @param obj The object to process.
- * @param scid The SCID value to insert.
- * @returns The processed object with SCID replaced.
- */
-function replaceSCID(obj: any, scid: string): any {
-  const jsonStr = JSON.stringify(obj)
-  const replacedStr = jsonStr.replace(/\{SCID\}/g, scid)
-  return JSON.parse(replacedStr)
 }
