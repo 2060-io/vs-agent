@@ -3,6 +3,7 @@ import {
   DidCreateResult,
   DidDeactivateOptions,
   DidDeactivateResult,
+  DidDocument,
   DidDocumentBuilder,
   DidDocumentRole,
   DidRecord,
@@ -13,6 +14,9 @@ import {
 } from '@credo-ts/core'
 import * as crypto from '@stablelib/ed25519'
 import { createDID, multibaseEncode, MultibaseEncoding, VerificationMethod } from 'didwebvh-ts'
+import { canonicalize } from 'json-canonicalize'
+import { base58btc } from 'multiformats/bases/base58'
+import { sha256 } from 'multiformats/hashes/sha2'
 
 import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
@@ -31,12 +35,46 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
   public async create(agentContext: AgentContext): Promise<DidCreateResult> {
     try {
+      const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const endpoints = agentContext.config.endpoints
       const domain = endpoints[0].split('//')[1]
-      const method = await this.generateVerificationMethod(domain)
-      const crypto = new WebvhDidCryptoExt(agentContext, method)
-      await this.registerDidDocument(agentContext, crypto.getVerificationMethodId(), method)
+      const baseMethod = await this.generateVerificationMethod(domain)
+      const baseDocument = await this.registerDidDocument(agentContext, baseMethod.id!, baseMethod)
+      const entry = await createInitialEntry(baseDocument)
+      const didDocument = new DidDocument(entry.state)
+      const metadata = {
+        versionId: entry.versionId,
+        versionTime: entry.versionTime,
+        parameters: entry.parameters,
+        state: entry.state,
+      }
 
+      const didRecord = new DidRecord({
+        did: entry.state.id,
+        role: DidDocumentRole.Created,
+        didDocument,
+      })
+      Object.entries(metadata).forEach(([key, value]) => didRecord.metadata.set(key, value))
+      await didRepository.save(agentContext, didRecord)
+
+      const methods = didDocument.verificationMethod
+      if (!methods || methods.length === 0) {
+        return {
+          didDocumentMetadata: {},
+          didRegistrationMetadata: {},
+          didState: {
+            state: 'failed',
+            reason: 'No verification method found in the DID document.',
+          },
+        }
+      }
+
+      const method = {
+        ...methods[0],
+        publicKeyMultibase: baseMethod.publicKeyMultibase,
+        secretKeyMultibase: baseMethod.secretKeyMultibase,
+      }
+      const crypto = new WebvhDidCryptoExt(agentContext, method)
       const didResult = await createDID({
         domain,
         signer: crypto,
@@ -76,20 +114,20 @@ export class WebVhDidRegistrar implements DidRegistrar {
       | 'capabilityDelegation' = 'authentication',
   ): Promise<VerificationMethod> {
     const keyPair = crypto.generateKeyPair()
-    const secretKey = multibaseEncode(
+    const secretKeyMultibase = multibaseEncode(
       new Uint8Array([0x80, 0x26, ...keyPair.secretKey]),
       MultibaseEncoding.BASE58_BTC,
     )
-    const publicKey = multibaseEncode(
+    const publicKeyMultibase = multibaseEncode(
       new Uint8Array([0xed, 0x01, ...keyPair.publicKey]),
       MultibaseEncoding.BASE58_BTC,
     )
     return {
-      id: `did:webvh:${publicKey}:${domain}`,
-      controller: `did:webvh:${publicKey}`,
+      id: `did:webvh:{SCID}:${domain}`,
+      controller: `did:webvh:{SCID}:${domain}`,
       type: 'Ed25519VerificationKey2018',
-      publicKeyMultibase: publicKey,
-      secretKeyMultibase: secretKey,
+      publicKeyMultibase,
+      secretKeyMultibase,
       purpose,
     }
   }
@@ -98,8 +136,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
     agentContext: AgentContext,
     did: string,
     verificationMethod: VerificationMethod,
-  ): Promise<void> {
-    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+  ): Promise<DidDocument> {
     const builder = new DidDocumentBuilder(did)
     builder
       .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
@@ -110,13 +147,52 @@ export class WebVhDidRegistrar implements DidRegistrar {
         controller: verificationMethod.controller!,
       })
       .addAssertionMethod(verificationMethod.id!)
-    await didRepository.save(
-      agentContext,
-      new DidRecord({
-        did,
-        role: DidDocumentRole.Created,
-        didDocument: builder.build(),
-      }),
-    )
+      .addAuthentication(verificationMethod.id!)
+    return builder.build()
   }
+}
+
+function nowIsoUtc(): string {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+async function generateBase58Hash(obj: any) {
+  const jcs = canonicalize(obj)
+  const mh = await sha256.digest(new TextEncoder().encode(jcs))
+  return base58btc.baseEncode(mh.bytes)
+}
+
+export async function createInitialEntry(didDocument: DidDocument) {
+  const preLog = {
+    versionId: '{SCID}',
+    versionTime: nowIsoUtc(),
+    parameters: {
+      updateKeys: [didDocument.verificationMethod![0].publicKeyMultibase],
+      method: 'did:webvh:1.0',
+      scid: '{SCID}',
+      portable: false,
+      nextKeyHashes: [],
+      witnesses: [],
+      witnessThreshold: 0,
+      deactivated: false,
+    },
+    state: didDocument.toJSON(),
+  }
+
+  const scid = await generateBase58Hash(preLog)
+  const entryForHash = replaceSCID(preLog, scid)
+  const entryHash = await generateBase58Hash(entryForHash)
+
+  const entry = {
+    ...entryForHash,
+    versionId: `1-${entryHash}`,
+  }
+
+  return entry
+}
+
+function replaceSCID(obj: any, scid: string): any {
+  const jsonStr = JSON.stringify(obj)
+  const replacedStr = jsonStr.replace(/\{SCID\}/g, scid)
+  return JSON.parse(replacedStr)
 }

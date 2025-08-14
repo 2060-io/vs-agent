@@ -22,7 +22,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
   }
 
   getVerificationMethodId(): string {
-    return this.verificationMethod?.id ?? ''
+    return `did:key:${this.verificationMethod.publicKeyMultibase}`
   }
 
   async sign(input: SigningInput): Promise<SigningOutput> {
