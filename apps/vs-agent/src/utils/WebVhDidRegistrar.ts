@@ -44,7 +44,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const endpoints = agentContext.config.endpoints
       const domain = endpoints[0].split('//')[1]
       const baseMethod = await this.generateVerificationMethod(domain)
-      const baseDocument = await this.registerDidDocument(agentContext, baseMethod.id!, baseMethod)
+      const baseDocument = await this.registerDidDocument(baseMethod.id!, baseMethod)
       const entry = await createInitialEntry(baseDocument)
       const didDocument = new DidDocument(entry.state)
 
@@ -150,7 +150,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
    * @returns The built DID document.
    */
   private async registerDidDocument(
-    agentContext: AgentContext,
     did: string,
     verificationMethod: VerificationMethod,
   ): Promise<DidDocument> {
@@ -190,6 +189,9 @@ async function generateBase58Hash(obj: any) {
  * @returns The initial entry object.
  */
 export async function createInitialEntry(didDocument: DidDocument) {
+  // Base preLog object for did:webvh update transactions
+  // This structure represents the initial state to be logged
+  // whenever a DID document is created or updated
   const preLog = {
     versionId: '{SCID}',
     versionTime: nowIsoUtc(),
