@@ -168,6 +168,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
   }
 }
 
+// Returns the current UTC timestamp in ISO 8601 format without milliseconds.
+// Example: "2025-08-14T09:30:00Z"
 function nowIsoUtc(): string {
   return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
 }
