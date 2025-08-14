@@ -133,20 +133,35 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 >
 > The variables `AGENT_LABEL` and `AGENT_INVITATION_IMAGE_URL` will be used as the name and logo for services and credentials issued by the Self-Verifiable Trust Registry.
 
-For **more examples of how to configure these variables and use the API**, see the additional README [here](../../doc/self-tr-routes.md).
+For **more examples of how to configure these variables and use the API**, see the additional file [Self-Verifiable Trust Registry routes](../../doc/self-tr-routes.md).
 
 ### eMRTD (ePassport) verification
 
 The **eMRTD verification module** allows VS Agent to verify the authenticity and integrity of electronic Machine Readable Travel Documents (ePassports). When enabled, the agent will load CSCA (Country Signing Certification Authority) trust anchors from a **Master List** and verify the `EF.SOD` digital signature and data group hashes (for example, `DG1`, `DG2`).
 
-#### How it works (high level)
+#### Master List format and location
+
+- **Format:** The Master List **must be in LDIF** format (`.ldif`). Other formats are not supported.
+- **Location:** Provide the location via `MASTER_LIST_CSCA_LOCATION` using one of the following:
+  - `https://...` — fetch over HTTPS on startup.
+  - `file:///...` — local file through a file URL.
+  - Absolute path — e.g., `/opt/icao/csca.ldif` inside the container/host.
+- **Where to get it:** The official ICAO Master List can be downloaded from [https://pkddownloadsg.icao.int/](https://pkddownloadsg.icao.int/)
+
+#### How it works
 
 1. On startup, VS Agent checks the environment variable `MASTER_LIST_CSCA_LOCATION`.
 2. If present, the agent parses the Master List and loads the CSCA certificates as trust anchors.
 3. During verification, the agent validates the `EF.SOD` signature against the DS certificate chain anchored in the CSCA and verifies the integrity of the referenced Data Groups by recomputing and comparing the digests.
 4. Verification results are made available to the internal flows of VS Agent (exact endpoints and payloads depend on your integration).
 
-> **Important:** The Master List must be a valid `.ldif` file containing CSCA certificates. Make sure the file is present inside the running container or host environment and readable by the process user.
+> **Important:**
+
+- The Master List must be a valid `.ldif` file containing CSCA certificates. Make sure the file is present inside the running container or host environment and readable by the process user.
+
+- If MASTER_LIST_CSCA_LOCATION is not set, the eMRTD Authenticity & Integrity Verification remains disabled and the agent only send EMrtd data parsed.
+
+- For more information about authenticity & integrity verification, see: [credo-ts-didcomm-mrtd Authenticity & Integrity Verification](https://github.com/2060-io/credo-ts-didcomm-ext/blob/main/packages/mrtd/docs/mrtd-authenticity-integrity.md).
 
 #### Enabling the module
 
