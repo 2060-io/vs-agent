@@ -41,9 +41,6 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
    */
   async sign(input: SigningInput): Promise<SigningOutput> {
     try {
-      if (!this.verificationMethod?.publicKeyMultibase) {
-        throw new Error('Public key not found')
-      }
       const key = Key.fromPublicKey(
         Buffer.from(this.verificationMethod.publicKeyMultibase, 'base64'),
         KeyType.Ed25519,
