@@ -37,7 +37,7 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Call Accept](#call-accept)
       - [Call Reject](#call-reject)
       - [Call End](#call-end)
-      - [Mrz Data Request](#mrz-data-request)
+      - [MRZ Data Request](#mrz-data-request)
       - [MRZ Data Submit](#mrz-data-submit)
       - [eMRTD Data Request](#emrtd-data-request)
       - [eMRTD Data Submit](#emrtd-data-submit)
@@ -516,7 +516,7 @@ End a call offer from a third party to initiate a WebRTC call. This message will
 }
 ```
 
-#### Mrz Data Request
+#### MRZ Data Request
 
 Request the other party to provide the Machine Readable Zone string from a valid ID document.
 
@@ -526,7 +526,7 @@ Request the other party to provide the Machine Readable Zone string from a valid
 }
 ```
 
-#### Mrz Data Submit
+#### MRZ Data Submit
 
 Submit Machine Readable Zone data. This message may be sent either individually or as a response to a MRZ Data Request.
 
@@ -579,7 +579,7 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 
 More info about the meaning of each field (and validity) can be found in [MRZ](https://github.com/cheminfo/mrz), the underlying library we are using for MRZ parsing.
 
-#### Emrtd Data Request
+#### eMRTD Data Request
 
 Request the other party to read and provide eMRTD (Electronic Machine Readable Travel Document) data from a compatible electronic document.
 
@@ -591,7 +591,7 @@ Request the other party to read and provide eMRTD (Electronic Machine Readable T
 
 > TODO: Add parameters once supported by @2060.io/credo-ts-didcomm-mrtd module
 
-#### Emrtd Data Submit
+#### eMRTD Data Submit
 
 Submit data retrieved from an electronic Machine Readable Travel Document. This message may be sent either individually or as a response to an eMRTD Data Request.
 
@@ -803,7 +803,7 @@ Note that the following VS Agent configuration environment variables are used wh
 - AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like <<https://myHost.com/s?id=><uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like `https://myHost.com/s?id=<uuid>`)
 
 #### Presentation Callback API
 
@@ -861,7 +861,7 @@ Note that the following VS Agent configuration environment variables are used wh
 - AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like <https://myHost.com/s?id=><uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like `https://myHost.com/s?id=<uuid>`)
 
 ## Presentations
 
