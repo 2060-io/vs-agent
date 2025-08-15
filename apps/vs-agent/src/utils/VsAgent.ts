@@ -112,7 +112,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
         ],
       }),
       dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
-      mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation })
+      mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
       proofs: new ProofsModule({
         autoAcceptProofs: AutoAcceptProof.ContentApproved,
         proofProtocols: [
