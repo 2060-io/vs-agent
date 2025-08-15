@@ -10,9 +10,17 @@ import {
   DidRepository,
   DidUpdateOptions,
   DidUpdateResult,
+  KeyType,
+  Buffer,
 } from '@credo-ts/core'
 import * as crypto from '@stablelib/ed25519'
-import { createDID, multibaseEncode, MultibaseEncoding, VerificationMethod } from 'didwebvh-ts'
+import {
+  createDID,
+  multibaseDecode,
+  multibaseEncode,
+  MultibaseEncoding,
+  VerificationMethod,
+} from 'didwebvh-ts'
 
 import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
@@ -42,7 +50,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { domain } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const baseMethod = await this.generateVerificationMethod(domain)
+      const baseMethod = await this.generateVerificationMethod(agentContext, domain)
 
       // Create crypto instance
       const crypto = new WebvhDidCryptoExt(agentContext, baseMethod)
@@ -96,6 +104,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
    * @returns The generated verification method.
    */
   private async generateVerificationMethod(
+    agentContext: AgentContext,
     domain: string,
     purpose:
       | 'authentication'
@@ -105,20 +114,17 @@ export class WebVhDidRegistrar implements DidRegistrar {
       | 'capabilityDelegation' = 'authentication',
   ): Promise<VerificationMethod> {
     const keyPair = crypto.generateKeyPair()
-    const secretKeyMultibase = multibaseEncode(
-      new Uint8Array([0x80, 0x26, ...keyPair.secretKey]),
-      MultibaseEncoding.BASE58_BTC,
-    )
-    const publicKeyMultibase = multibaseEncode(
-      new Uint8Array([0xed, 0x01, ...keyPair.publicKey]),
-      MultibaseEncoding.BASE58_BTC,
-    )
+    const secret = multibaseEncode(new Uint8Array(keyPair.secretKey), MultibaseEncoding.BASE58_BTC)
+    const key = await agentContext.wallet.createKey({
+      privateKey: Buffer.from(multibaseDecode(secret).bytes.slice(0, 32)),
+      keyType: KeyType.Ed25519,
+    })
+
     return {
       id: `did:webvh:{SCID}:${domain}`,
       controller: `did:webvh:{SCID}:${domain}`,
       type: 'Ed25519VerificationKey2018',
-      publicKeyMultibase,
-      secretKeyMultibase,
+      publicKeyMultibase: key.publicKey.toString('base64'),
       purpose,
     }
   }

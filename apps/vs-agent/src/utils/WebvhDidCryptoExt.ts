@@ -1,8 +1,6 @@
-import { AgentContext } from '@credo-ts/core'
+import { AgentContext, Key, KeyType, Buffer } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
-import * as crypto from '@stablelib/ed25519'
 import {
-  multibaseDecode,
   multibaseEncode,
   MultibaseEncoding,
   prepareDataForSigning,
@@ -18,10 +16,12 @@ import {
  */
 export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
   private verificationMethod: VerificationMethod
+  private context: AgentContext
   public readonly supportedMethods: string[] = ['webvh']
 
   constructor(context: AgentContext, verificationMethod: VerificationMethod) {
     super(context)
+    this.context = context
     this.verificationMethod = verificationMethod
   }
 
@@ -41,13 +41,20 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
    */
   async sign(input: SigningInput): Promise<SigningOutput> {
     try {
-      if (!this.verificationMethod?.secretKeyMultibase) {
-        throw new Error('Secret key not found')
+      if (!this.verificationMethod?.publicKeyMultibase) {
+        throw new Error('Public key not found')
       }
-      const { bytes: secretKey } = multibaseDecode(this.verificationMethod?.secretKeyMultibase)
-      const proof = crypto.sign(secretKey.slice(2), await prepareDataForSigning(input.document, input.proof))
+      const key = Key.fromPublicKey(
+        Buffer.from(this.verificationMethod.publicKeyMultibase, 'base64'),
+        KeyType.Ed25519,
+      )
+      const data = await prepareDataForSigning(input.document, input.proof)
+      const signature = await this.context.wallet.sign({
+        key,
+        data: Buffer.from(data),
+      })
       return {
-        proofValue: multibaseEncode(proof, MultibaseEncoding.BASE58_BTC),
+        proofValue: multibaseEncode(signature, MultibaseEncoding.BASE58_BTC),
       }
     } catch (error) {
       console.error('Ed25519 signing error:', error)
