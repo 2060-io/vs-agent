@@ -116,7 +116,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
     const keyPair = crypto.generateKeyPair()
     const secret = multibaseEncode(new Uint8Array(keyPair.secretKey), MultibaseEncoding.BASE58_BTC)
     const key = await agentContext.wallet.createKey({
-      privateKey: Buffer.from(multibaseDecode(secret).bytes.slice(0, 32)),
+      privateKey: Buffer.from(multibaseDecode(secret).bytes.slice(2).slice(0, 32)),
       keyType: KeyType.Ed25519,
     })
 
@@ -124,7 +124,10 @@ export class WebVhDidRegistrar implements DidRegistrar {
       id: `did:webvh:{SCID}:${domain}`,
       controller: `did:webvh:{SCID}:${domain}`,
       type: 'Ed25519VerificationKey2018',
-      publicKeyMultibase: key.publicKey.toString('base64'),
+      publicKeyMultibase: multibaseEncode(
+        new Uint8Array([0xed, 0x01, ...key.publicKey]),
+        MultibaseEncoding.BASE58_BTC,
+      ),
       purpose,
     }
   }

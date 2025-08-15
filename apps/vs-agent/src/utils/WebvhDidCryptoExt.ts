@@ -1,6 +1,7 @@
 import { AgentContext, Key, KeyType, Buffer } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import {
+  multibaseDecode,
   multibaseEncode,
   MultibaseEncoding,
   prepareDataForSigning,
@@ -41,10 +42,8 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
    */
   async sign(input: SigningInput): Promise<SigningOutput> {
     try {
-      const key = Key.fromPublicKey(
-        Buffer.from(this.verificationMethod.publicKeyMultibase, 'base64'),
-        KeyType.Ed25519,
-      )
+      const decoded = multibaseDecode(this.verificationMethod.publicKeyMultibase).bytes
+      const key = Key.fromPublicKey(Buffer.from(decoded.slice(2).slice(0, 32)), KeyType.Ed25519)
       const data = await prepareDataForSigning(input.document, input.proof)
       const signature = await this.context.wallet.sign({
         key,
