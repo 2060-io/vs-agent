@@ -93,7 +93,7 @@ export class SelfTrController {
     if (!did) {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
     }
-    return { type: 'ISSUER' }
+    return { type: 'PERMISSION_TYPE_ISSUER', did }
   }
 
   // Helper function to retrieve schema data based on tag name
