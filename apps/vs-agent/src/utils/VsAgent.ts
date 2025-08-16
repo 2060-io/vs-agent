@@ -78,6 +78,7 @@ export interface VsAgentOptions {
   autoDiscloseUserProfile?: boolean
   dependencies: AgentDependencies
   publicApiBaseUrl: string
+  masterListCscaLocation?: string
 }
 
 export const createVsAgent = (options: VsAgentOptions): VsAgent => {
@@ -111,7 +112,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
         resolvers: [new CachedWebDidResolver()],
         registrars: [new WebVhDidRegistrar()],
       }),
-      mrtd: new DidCommMrtdModule(),
+      mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
       proofs: new ProofsModule({
         autoAcceptProofs: AutoAcceptProof.ContentApproved,
         proofProtocols: [

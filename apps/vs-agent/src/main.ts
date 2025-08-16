@@ -36,6 +36,7 @@ import {
   PUBLIC_API_BASE_URL,
   USE_CORS,
   USER_PROFILE_AUTODISCLOSE,
+  MASTER_LIST_CSCA_LOCATION,
 } from './config/constants'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -140,6 +141,7 @@ const run = async () => {
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
+    masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
   })
 
   const discoveryOptions = (() => {
