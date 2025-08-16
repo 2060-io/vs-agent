@@ -111,8 +111,8 @@ const run = async () => {
   }
 
   // Check it is a supported DID method
-  if (publicDid && publicDid.method !== 'web') {
-    serverLogger.error('Only did:web method is supported')
+  if (publicDid && !['web', 'webvh'].includes(publicDid.method)) {
+    serverLogger.error('Only did:web or did:webvh method is supported')
     process.exit(1)
   }
 
@@ -166,6 +166,10 @@ const run = async () => {
 
   // Initialize Self-Trust Registry
   await setupSelfTr({ agent, publicApiBaseUrl })
+
+  // Create did:webvh
+  const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
+  if (!didRecord) await agent.dids.create({ method: 'webvh', domain: endpoints[0].split('//')[1] })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
