@@ -53,7 +53,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
         proofValue: multibaseEncode(signature, MultibaseEncoding.BASE58_BTC),
       }
     } catch (error) {
-      console.error('Ed25519 signing error:', error)
+      this.context.config.logger.error('Ed25519 signing error:', error)
       throw error
     }
   }
