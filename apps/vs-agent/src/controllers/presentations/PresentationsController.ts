@@ -22,10 +22,8 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
-import { createDocLoader } from '../../utils/swagger-docs'
-import { PresentationDataDto } from './dto/presentation-data.dto'
 
-const docs = createDocLoader('doc/vs-agent-api.md')
+import { PresentationDataDto } from './dto/presentation-data.dto'
 
 @ApiTags('presentations')
 @Controller({
@@ -45,7 +43,8 @@ export class PresentationsController {
   @Get('/')
   @ApiOperation({
     summary: 'List all presentations',
-    description: docs.getSection('## Presentations'),
+    description:
+      '## Presentations\n\nIt is possible to query all presentation flows created by VS Agent through the endpoint `/presentations`, which will respond with records using the following format:\n\n- proofExchangeId: flow identifier (the same as the one used in events and other responses)\n- state: current state of the presentation flow (e.g. `request-sent` when it was just started, `done` when finished)\n- claims: array containing the claims received within the presentation\n- verified: boolean stating if the presentation is valid (only meaningful when state is `done`)\n- threadId: DIDComm thread id (shared with the other party)\n- updatedAt: last time activity was recorded for this flow\n\nIt is possible to query for a single presentation by executing a GET to `/presentations/<proofExchangeId>`.',
   })
   @ApiOkResponse({
     description: 'Array of presentation data',
