@@ -470,7 +470,7 @@ Create a `.env` file in the root of the `nestjs-vs` directory or export variable
 
 | Variable             | Description                      | Default/Example         |
 | -------------------- | -------------------------------- | ----------------------- |
-| `VS_AGENT_ADMIN_URL` | VS Agent Admin API URL           | `http://agent:3001`     |
+| `VS_AGENT_ADMIN_URL` | VS Agent Admin API URL           | `http://agent:3000`     |
 | `EVENTS_BASE_URL`    | Public callback URL for webhooks | `http://nestjs-vs:3000` |
 | `DATABASE_HOST`      | PostgreSQL database host         | `localhost`             |
 | `DATABASE_PORT`      | PostgreSQL database port         | `5432`                  |
