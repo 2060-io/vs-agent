@@ -35,6 +35,7 @@ import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
+  endpoints: string[]
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
@@ -118,7 +119,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain } = options
+      const { domain, endpoints } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const baseMethod = await this.generateVerificationMethod(agentContext, domain)
 
@@ -145,25 +146,37 @@ export class WebVhDidRegistrar implements DidRegistrar {
       agentContext.config.logger.info('Public didWebVh record saved')
 
       // Add default services
-      return await this.update(agentContext, {
-        did,
-        didDocument,
-        log,
-        signer: crypto,
-        verifier: crypto,
-        domain,
-        services: agentContext.config.endpoints.map(
-          (endpoint, i) =>
-            new DidCommV1Service({
-              id: `${did}#did-communication`,
-              serviceEndpoint: endpoint,
-              priority: i,
-              routingKeys: [], // TODO: Support mediation
-              recipientKeys: [`${did}#key-agreement-1`],
-              accept: ['didcomm/aip2;env=rfc19'],
-            }),
-        ),
-      })
+      if (endpoints && endpoints.length > 0) {
+        return await this.update(agentContext, {
+          did,
+          didDocument,
+          log,
+          signer: crypto,
+          verifier: crypto,
+          domain,
+          services: endpoints.map(
+            (endpoint, i) =>
+              new DidCommV1Service({
+                id: `${did}#did-communication`,
+                serviceEndpoint: endpoint,
+                priority: i,
+                routingKeys: [], // TODO: Support mediation
+                recipientKeys: [`${did}#key-agreement-1`],
+                accept: ['didcomm/aip2;env=rfc19'],
+              }),
+          ),
+        })
+      }
+
+      return {
+        didDocumentMetadata: {},
+        didRegistrationMetadata: {},
+        didState: {
+          state: 'finished',
+          did,
+          didDocument,
+        },
+      }
     } catch (error) {
       return {
         didDocumentMetadata: {},
