@@ -81,7 +81,6 @@ interface WebVhDidUpdateOptions extends DidUpdateOptions {
  * Handles creation, update, and (future) deactivation of DIDs using the webvh method.
  */
 export class WebVhDidRegistrar implements DidRegistrar {
-  private cryptoInstancesCache = new Map<string, { signer: Signer; verifier: Verifier }>()
   supportedMethods: string[] = ['webvh']
 
   /**
@@ -113,8 +112,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
         agentContext,
         verificationMethods[0].publicKeyMultibase,
         {
-          signer: options.signer ?? this.getCachedCryptoInstances(did).signer,
-          verifier: options.verifier ?? this.getCachedCryptoInstances(did).verifier,
+          signer: options.signer,
+          verifier: options.verifier,
         },
       )
 
@@ -196,9 +195,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
         ],
         verifier,
       })
-
-      // Cache crypto instances for future use
-      this.cryptoInstancesCache.set(did, { signer, verifier })
 
       // Save didRegistry
       const didDocument = new DidDocument(doc)
@@ -290,15 +286,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
       signer: crypto,
       verifier: crypto,
     }
-  }
-
-  /**
-   * Retrieves cached crypto instances (signer and verifier) for a given DID.
-   * @param did The DID string.
-   * @returns An object containing signer and verifier, if available.
-   */
-  private getCachedCryptoInstances(did: string): { signer?: Signer; verifier?: Verifier } {
-    return this.cryptoInstancesCache.get(did) ?? {}
   }
 
   /**
