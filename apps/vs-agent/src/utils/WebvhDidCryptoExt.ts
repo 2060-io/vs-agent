@@ -1,5 +1,5 @@
 import { AgentContext, Key, KeyType, Buffer } from '@credo-ts/core'
-import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
+import * as crypto from '@stablelib/ed25519'
 import {
   multibaseDecode,
   multibaseEncode,
@@ -8,25 +8,25 @@ import {
   Signer,
   SigningInput,
   SigningOutput,
+  Verifier,
 } from 'didwebvh-ts'
 
 /**
- * Extension of the WebvhDidCrypto class implementing the Signer interface.
+ * Extension of the WebvhDidCrypto class implementing the Signer and Verifier interfaces.
  * Provides cryptographic operations for DID documents using Ed25519 keys.
  */
-export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
+export class WebvhDidCryptoExt implements Signer, Verifier {
   private publicKeyMultibase: string
-  private context: AgentContext
+  private agentContext: AgentContext
   public readonly supportedMethods: string[] = ['webvh']
 
   /**
-   * Creates a new instance of WebvhDidCryptoExt.
-   * @param context - The agent context containing wallet and configuration.
+   * Constructs a new instance of WebvhDidCryptoExt.
+   * @param agentContext - The agent context containing wallet and configuration.
    * @param publicKeyMultibase - The public key encoded in multibase format.
    */
-  constructor(context: AgentContext, publicKeyMultibase: string) {
-    super(context)
-    this.context = context
+  constructor(agentContext: AgentContext, publicKeyMultibase: string) {
+    this.agentContext = agentContext
     this.publicKeyMultibase = publicKeyMultibase
   }
 
@@ -49,7 +49,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
       const decoded = multibaseDecode(this.publicKeyMultibase).bytes
       const key = Key.fromPublicKey(Buffer.from(decoded.slice(2).slice(0, 32)), KeyType.Ed25519)
       const data = await prepareDataForSigning(input.document, input.proof)
-      const signature = await this.context.wallet.sign({
+      const signature = await this.agentContext.wallet.sign({
         key,
         data: Buffer.from(data),
       })
@@ -57,8 +57,24 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
         proofValue: multibaseEncode(signature, MultibaseEncoding.BASE58_BTC),
       }
     } catch (error) {
-      this.context.config.logger.error('Ed25519 signing error:', error)
+      this.agentContext.config.logger.error('Ed25519 signing error:', error)
       throw error
+    }
+  }
+
+  /**
+   * Verifies a default signature for a given message and public key using Ed25519.
+   * @param signature - The signature to verify.
+   * @param message - The message that was signed.
+   * @param publicKey - The public key to verify against.
+   * @returns A promise that resolves to true if the signature is valid, false otherwise.
+   */
+  async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+    try {
+      return crypto.verify(publicKey, message, signature)
+    } catch (error) {
+      this.agentContext.config.logger.error('Error verifying signature:', error)
+      return false
     }
   }
 }
