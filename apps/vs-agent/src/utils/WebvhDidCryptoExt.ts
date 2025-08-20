@@ -8,7 +8,6 @@ import {
   Signer,
   SigningInput,
   SigningOutput,
-  VerificationMethod,
 } from 'didwebvh-ts'
 
 /**
@@ -16,14 +15,14 @@ import {
  * Provides cryptographic operations for DID documents using Ed25519.
  */
 export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
-  private verificationMethod: VerificationMethod
+  private publicKeyMultibase: string
   private context: AgentContext
   public readonly supportedMethods: string[] = ['webvh']
 
-  constructor(context: AgentContext, verificationMethod: VerificationMethod) {
+  constructor(context: AgentContext, publicKeyMultibase: string) {
     super(context)
     this.context = context
-    this.verificationMethod = verificationMethod
+    this.publicKeyMultibase = publicKeyMultibase
   }
 
   /**
@@ -31,7 +30,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
    * @returns The DID:key identifier string.
    */
   getVerificationMethodId(): string {
-    return `did:key:${this.verificationMethod.publicKeyMultibase}`
+    return `did:key:${this.publicKeyMultibase}`
   }
 
   /**
@@ -42,7 +41,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
    */
   async sign(input: SigningInput): Promise<SigningOutput> {
     try {
-      const decoded = multibaseDecode(this.verificationMethod.publicKeyMultibase).bytes
+      const decoded = multibaseDecode(this.publicKeyMultibase).bytes
       const key = Key.fromPublicKey(Buffer.from(decoded.slice(2).slice(0, 32)), KeyType.Ed25519)
       const data = await prepareDataForSigning(input.document, input.proof)
       const signature = await this.context.wallet.sign({

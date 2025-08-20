@@ -77,14 +77,40 @@ interface WebVhDidUpdateOptions extends DidUpdateOptions {
 }
 
 export class WebVhDidRegistrar implements DidRegistrar {
+  private cryptoInstancesCache = new Map<string, { signer: Signer; verifier: Verifier }>()
   supportedMethods: string[] = ['webvh']
 
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     try {
-      const { did, domain, log, services, signer, verifier } = options
+      const { did, domain, log, services } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const [didRecord] = await didRepository.getCreatedDids(agentContext, { did, method: 'webvh' })
       const { controller, verificationMethod: verificationMethods } = log[0].state
+
+      if (!verificationMethods || verificationMethods.length === 0) {
+        return {
+          didDocumentMetadata: {},
+          didRegistrationMetadata: {},
+          didState: {
+            state: 'failed',
+            reason: 'At least one verification method must be provided.',
+          },
+        }
+      }
+
+      // Get cached crypto instances
+      let { signer, verifier } = this.getCachedCryptoInstances(did)
+
+      // Allow override with provided instances
+      if (options.signer) signer = options.signer
+      if (options.verifier) verifier = options.verifier
+
+      if (!signer || !verifier) {
+        throw new Error(
+          `No crypto instances available for DID: ${did}. Provide signer and verifier in options.`,
+        )
+      }
+
       const { log: logResult, doc } = await updateDID({
         log,
         signer,
@@ -135,24 +161,30 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain, endpoints } = options
+      const { domain, endpoints, controller } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const baseMethod =
-        options.verificationMethods?.[0] ?? (await this.generateVerificationMethod(agentContext, domain))
 
       // Create crypto instance
-      const crypto = new WebvhDidCryptoExt(agentContext, baseMethod)
-      const signer = options.signer ?? crypto
-      const verifier = options.verifier ?? crypto
+      const publicKeyMultibase = await this.generatePublicKey(agentContext)
+      const { signer, verifier } = await this.parseCryptoInstance(agentContext, publicKeyMultibase, options)
 
       // Create DID
       const { did, doc, log } = await createDID({
         domain,
         signer,
-        updateKeys: [baseMethod.publicKeyMultibase],
-        verificationMethods: [baseMethod],
+        updateKeys: [publicKeyMultibase],
+        verificationMethods: [
+          {
+            controller: typeof controller === 'string' ? controller : controller?.[0],
+            type: 'Ed25519VerificationKey2018',
+            publicKeyMultibase,
+          },
+        ],
         verifier,
       })
+
+      // Cache crypto instances for future use
+      this.cryptoInstancesCache.set(did, { signer, verifier })
 
       // Save didRegistry
       const didDocument = new DidDocument(doc)
@@ -210,37 +242,49 @@ export class WebVhDidRegistrar implements DidRegistrar {
   }
 
   /**
-   * Generates a new verification method for the DID document.
-   * @param domain The domain for the DID.
-   * @param purpose The purpose of the verification method.
-   * @returns The generated verification method.
+   * Sets up crypto instances (signer/verifier) based on options or creates new ones
    */
-  private async generateVerificationMethod(
+  private async parseCryptoInstance(
     agentContext: AgentContext,
-    domain: string,
-    purpose:
-      | 'authentication'
-      | 'assertionMethod'
-      | 'keyAgreement'
-      | 'capabilityInvocation'
-      | 'capabilityDelegation' = 'authentication',
-  ): Promise<VerificationMethod> {
+    publicKeyMultibase: string,
+    options: { verifier?: Verifier; signer?: Signer },
+  ): Promise<{
+    signer: Signer
+    verifier: Verifier
+  }> {
+    if (options.signer && options.verifier) {
+      return {
+        signer: options.signer,
+        verifier: options.verifier,
+      }
+    }
+
+    if (options.signer || options.verifier) {
+      const crypto = new WebvhDidCryptoExt(agentContext, publicKeyMultibase)
+      return {
+        signer: options.signer ?? crypto,
+        verifier: options.verifier ?? crypto,
+      }
+    }
+
+    const crypto = new WebvhDidCryptoExt(agentContext, publicKeyMultibase)
+    return {
+      signer: crypto,
+      verifier: crypto,
+    }
+  }
+
+  private getCachedCryptoInstances(did: string): { signer?: Signer; verifier?: Verifier } {
+    return this.cryptoInstancesCache.get(did) ?? {}
+  }
+
+  private async generatePublicKey(agentContext: AgentContext): Promise<string> {
     const keyPair = crypto.generateKeyPair()
     const secret = multibaseEncode(new Uint8Array(keyPair.secretKey), MultibaseEncoding.BASE58_BTC)
     const key = await agentContext.wallet.createKey({
       privateKey: Buffer.from(multibaseDecode(secret).bytes.slice(2).slice(0, 32)),
       keyType: KeyType.Ed25519,
     })
-
-    return {
-      id: `did:webvh:{SCID}:${domain}`,
-      controller: `did:webvh:{SCID}:${domain}`,
-      type: 'Ed25519VerificationKey2018',
-      publicKeyMultibase: multibaseEncode(
-        new Uint8Array([0xed, 0x01, ...key.publicKey]),
-        MultibaseEncoding.BASE58_BTC,
-      ),
-      purpose,
-    }
+    return multibaseEncode(new Uint8Array([0xed, 0x01, ...key.publicKey]), MultibaseEncoding.BASE58_BTC)
   }
 }
