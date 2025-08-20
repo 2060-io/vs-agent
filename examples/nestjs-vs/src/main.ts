@@ -6,6 +6,7 @@ import { getLogLevels } from '@/config'
 import { Logger } from '@nestjs/common'
 import * as fs from 'fs'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { NestExpressApplication } from '@nestjs/platform-express'
 
 /**
  * Bootstraps the NestJS application, setting up configurations, middleware, and documentation.
@@ -16,7 +17,7 @@ async function bootstrap() {
   const logLevels = getLogLevels()
 
   // Create the NestJS application with custom logger levels
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: logLevels,
   })
 
@@ -31,6 +32,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService)
   const logger = new Logger(bootstrap.name)
+
+  app.useBodyParser('json', { limit: '5mb' })
 
   app.useGlobalPipes(new I18nValidationPipe())
 

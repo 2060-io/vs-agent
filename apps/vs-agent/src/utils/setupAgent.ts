@@ -13,18 +13,12 @@ import {
   KeyType,
   LogLevel,
   TypedArrayEncoder,
-  utils,
   WalletConfig,
 } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
-import cors from 'cors'
-import express from 'express'
-import { Socket } from 'net'
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import WebSocket from 'ws'
-
-import { addDidWebRoutes } from '../didWebServer'
-import { addInvitationRoutes } from '../invitationRoutes'
-import { addSelfVtrRoutes } from '../selfVtrRoutes'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -39,12 +33,10 @@ export const setupAgent = async ({
   displayPictureUrl,
   endpoints,
   logLevel,
-  anoncredsServiceBaseUrl,
   publicApiBaseUrl,
-  selfVtrEnabled,
   publicDid,
   autoDiscloseUserProfile,
-  useCors,
+  masterListCscaLocation,
 }: {
   port: number
   walletConfig: WalletConfig
@@ -52,12 +44,10 @@ export const setupAgent = async ({
   displayPictureUrl?: string
   endpoints: string[]
   logLevel?: LogLevel
-  anoncredsServiceBaseUrl?: string
   publicApiBaseUrl: string
-  selfVtrEnabled: boolean
   autoDiscloseUserProfile?: boolean
   publicDid?: string
-  useCors?: boolean
+  masterListCscaLocation?: string
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
 
@@ -77,18 +67,9 @@ export const setupAgent = async ({
     did: publicDid,
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
-    anoncredsServiceBaseUrl,
     publicApiBaseUrl,
+    masterListCscaLocation,
   })
-
-  const app = express()
-
-  if (useCors) app.use(cors())
-
-  app.use(express.json({ limit: '5mb' }))
-  app.use(express.urlencoded({ extended: true, limit: '5mb' }))
-
-  app.set('json spaces', 2)
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
@@ -97,7 +78,7 @@ export const setupAgent = async ({
   let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ app, port })
+    httpInboundTransport = new HttpInboundTransport({ port })
     agent.registerInboundTransport(httpInboundTransport)
   }
 
@@ -111,24 +92,6 @@ export const setupAgent = async ({
   agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
-
-  const httpServer = httpInboundTransport ? httpInboundTransport.server : app.listen(port)
-
-  // Add did:web and AnonCreds Service routes
-  addDidWebRoutes(app, agent, publicApiBaseUrl)
-  if (selfVtrEnabled) addSelfVtrRoutes(app, agent, publicApiBaseUrl)
-
-  addInvitationRoutes(app, agent)
-
-  // Add WebSocket support if required
-  if (enableWs) {
-    httpServer?.on('upgrade', (request, socket, head) => {
-      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
-        const socketId = utils.uuid()
-        webSocketServer?.emit('connection', socketParam, request, socketId)
-      })
-    })
-  }
 
   // Make sure default User Profile corresponds to settings in environment variables
   const imageUrl = displayPictureUrl
@@ -162,12 +125,40 @@ export const setupAgent = async ({
     )
 
     const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
+
     const builder = new DidDocumentBuilder(publicDid)
 
-    // Create a set of keys suitable for did communication
-    if (endpoints && endpoints.length > 0) {
-      const keyAgreementId = `${publicDid}#key-agreement-1`
+    builder
+      .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
+      .addContext('https://w3id.org/security/suites/x25519-2019/v1')
 
+    // If the document already exists (i.e. DID record previously created), take base keys from it
+    // and just populate those services that can vary according to the configuration
+    const keyAgreementId = `${publicDid}#key-agreement-1`
+    if (existingRecord?.didDocument) {
+      logger?.debug('Public did record already stored. DidDocument keys will be restored from it')
+      const verificationMethods = existingRecord.didDocument.verificationMethod ?? []
+      for (const method of verificationMethods) {
+        builder.addVerificationMethod(method)
+      }
+
+      const authentications = existingRecord.didDocument.authentication ?? []
+      for (const auth of authentications) {
+        builder.addAuthentication(auth)
+      }
+
+      const assertionMethods = existingRecord.didDocument.assertionMethod ?? []
+      for (const assert of assertionMethods) {
+        builder.addAssertionMethod(assert)
+      }
+
+      const keyAgreements = existingRecord.didDocument.keyAgreement ?? []
+      for (const key of keyAgreements) {
+        builder.addKeyAgreement(key)
+      }
+    } else {
+      logger?.debug('Public did record not found. Creating key pair and DidDocument')
       const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
       const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
       const publicKeyX25519 = TypedArrayEncoder.toBase58(
@@ -192,58 +183,58 @@ export const setupAgent = async ({
         .addAuthentication(verificationMethodId)
         .addAssertionMethod(verificationMethodId)
         .addKeyAgreement(keyAgreementId)
-      if (selfVtrEnabled) {
-        builder
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr`,
-              type: 'VerifiablePublicRegistry',
-            }),
-          )
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-service-c-vp`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-service-c-vp.json`,
-              type: 'LinkedVerifiablePresentation',
-            }),
-          )
-          .addService(
-            new DidDocumentService({
-              id: `${publicDid}#vpr-ecs-org-c-vp`,
-              serviceEndpoint: `${publicApiBaseUrl}/self-vtr/ecs-org-c-vp.json`,
-              type: 'LinkedVerifiablePresentation',
-            }),
-          )
-      }
-
-      for (let i = 0; i < agent.config.endpoints.length; i++) {
-        builder.addService(
-          new DidCommV1Service({
-            id: `${publicDid}#did-communication`,
-            serviceEndpoint: agent.config.endpoints[i],
-            priority: i,
-            routingKeys: [], // TODO: Support mediation
-            recipientKeys: [keyAgreementId],
-            accept: ['didcomm/aip2;env=rfc19'],
-          }),
-        )
-      }
-
-      if (anoncredsServiceBaseUrl) {
-        builder.addService(
-          new DidDocumentService({
-            id: `${publicDid}#anoncreds`,
-            serviceEndpoint: `${anoncredsServiceBaseUrl}/anoncreds/v1`,
-            type: 'AnonCredsRegistry',
-          }),
-        )
-      }
     }
 
-    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
+    // Create a set of keys suitable for did self issued
+    builder
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-trust-registry-1234`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr`,
+          type: 'VerifiablePublicRegistry',
+        }),
+      )
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-service-c-vp`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+      )
+      .addService(
+        new DidDocumentService({
+          id: `${publicDid}#vpr-ecs-org-c-vp`,
+          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+      )
+
+    // Create a set of keys suitable for did communication
+    for (let i = 0; i < agent.config.endpoints.length; i++) {
+      builder.addService(
+        new DidCommV1Service({
+          id: `${publicDid}#did-communication`,
+          serviceEndpoint: agent.config.endpoints[i],
+          priority: i,
+          routingKeys: [], // TODO: Support mediation
+          recipientKeys: [keyAgreementId],
+          accept: ['didcomm/aip2;env=rfc19'],
+        }),
+      )
+    }
+
+    if (publicApiBaseUrl) {
+      builder.addService(
+        new DidDocumentService({
+          id: `${publicDid}#anoncreds`,
+          serviceEndpoint: `${publicApiBaseUrl}/anoncreds/v1`,
+          type: 'AnonCredsRegistry',
+        }),
+      )
+    }
+
     if (existingRecord) {
-      logger?.debug('Public did record already stored. DidDocument updated')
+      logger?.debug('Public did record updated')
       existingRecord.didDocument = builder.build()
       await didRepository.update(agent.context, existingRecord)
     } else {
@@ -259,5 +250,34 @@ export const setupAgent = async ({
     }
   }
 
-  return { agent, app, webSocketServer }
+  return { agent }
+}
+
+export function commonAppConfig(app: INestApplication, cors?: boolean) {
+  // Versioning
+  app.enableVersioning({
+    type: VersioningType.URI,
+  })
+
+  // Swagger
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('API Documentation')
+    .setVersion('1.0')
+    .build()
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, document)
+
+  // Pipes
+  app.useGlobalPipes(new ValidationPipe())
+
+  // CORS
+  if (cors) {
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: 'Content-Type,Authorization',
+    })
+  }
+  return app
 }

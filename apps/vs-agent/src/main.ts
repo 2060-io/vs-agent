@@ -2,16 +2,17 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod } from '@credo-ts/core'
-import { ValidationPipe, VersioningType } from '@nestjs/common'
+import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import express from 'express'
 import * as fs from 'fs'
+import { IncomingMessage } from 'http'
+import { Socket } from 'net'
 import * as path from 'path'
 
 import packageJson from '../package.json'
 
-import { VsAgentModule } from './app.module'
+import { VsAgentModule } from './admin.module'
 import {
   ADMIN_LOG_LEVEL,
   ADMIN_PORT,
@@ -27,52 +28,64 @@ import {
   AGENT_WALLET_KEY,
   AGENT_WALLET_KEY_DERIVATION_METHOD,
   askarPostgresConfig,
+  DEFAULT_AGENT_ENDPOINTS,
+  DEFAULT_PUBLIC_API_BASE_URL,
   EVENTS_BASE_URL,
   keyDerivationMethodMap,
   POSTGRES_HOST,
   PUBLIC_API_BASE_URL,
-  SELF_VTR_ENABLED,
   USE_CORS,
   USER_PROFILE_AUTODISCLOSE,
+  MASTER_LIST_CSCA_LOCATION,
 } from './config/constants'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
+import { PublicModule } from './public.module'
+import { HttpInboundTransport } from './utils/HttpInboundTransport'
 import { VsAgent } from './utils/VsAgent'
+import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
 import { TsLogger } from './utils/logger'
-import { setupAgent } from './utils/setupAgent'
+import { commonAppConfig, setupAgent } from './utils/setupAgent'
+import { setupSelfTr } from './utils/setupSelfTr'
 
-export const startAdminServer = async (agent: VsAgent, serverConfig: ServerConfig) => {
-  const app = await NestFactory.create(VsAgentModule.register(agent))
+export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
+  const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
 
-  // Version
-  app.enableVersioning({
-    type: VersioningType.URI,
-  })
+  const adminApp = await NestFactory.create(VsAgentModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(adminApp, cors)
+  await adminApp.listen(port)
 
-  // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('API Documentation')
-    .setVersion('1.0')
-    .build()
-  const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, document)
+  // PublicModule-specific config
+  const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
+  commonAppConfig(publicApp, cors)
+  publicApp.use(express.json({ limit: '5mb' }))
+  publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
+  publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
 
-  // Dto
-  app.useGlobalPipes(new ValidationPipe())
+  const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
 
-  // Cors
-  if (serverConfig.cors) {
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      allowedHeaders: 'Content-Type,Authorization',
-    })
+  const webSocketServer = agent.inboundTransports
+    .find(x => x instanceof VsAgentWsInboundTransport)
+    ?.getServer()
+  const httpInboundTransport = agent.inboundTransports.find(x => x instanceof HttpInboundTransport)
+
+  if (enableHttp) {
+    httpInboundTransport?.setApp(publicApp.getHttpAdapter().getInstance())
   }
 
-  // Port expose
-  await app.listen(serverConfig.port)
+  const httpServer = httpInboundTransport ? httpInboundTransport.server : await publicApp.listen(AGENT_PORT)
+
+  // Add WebSocket support if required
+  if (enableWs) {
+    httpServer?.on('upgrade', (request: IncomingMessage, socket: Socket, head: Buffer) => {
+      webSocketServer?.handleUpgrade(request, socket as Socket, head, socketParam => {
+        const socketId = utils.uuid()
+        webSocketServer?.emit('connection', socketParam, request, socketId)
+      })
+    })
+  }
 }
 
 const run = async () => {
@@ -91,9 +104,30 @@ const run = async () => {
     )
   }
 
+  const publicDid = AGENT_PUBLIC_DID ? parseDid(AGENT_PUBLIC_DID) : null
+
+  if (!AGENT_PUBLIC_DID) {
+    serverLogger.warn('AGENT_PUBLIC_DID is not defined. You must set it in production releases')
+  }
+
+  // Check it is a supported DID method
+  if (publicDid && publicDid.method !== 'web') {
+    serverLogger.error('Only did:web method is supported')
+    process.exit(1)
+  }
+
+  let endpoints = AGENT_ENDPOINTS
+  if (!endpoints && publicDid) endpoints = [`wss://${decodeURIComponent(publicDid.id)}`]
+  if (!endpoints) endpoints = DEFAULT_AGENT_ENDPOINTS
+
+  let publicApiBaseUrl = PUBLIC_API_BASE_URL
+  if (!publicApiBaseUrl && publicDid) publicApiBaseUrl = `https://${decodeURIComponent(publicDid.id)}`
+  if (!publicApiBaseUrl) publicApiBaseUrl = DEFAULT_PUBLIC_API_BASE_URL
+
+  serverLogger.info(`endpoints: ${endpoints} publicApiBaseUrl ${publicApiBaseUrl}`)
   const { agent } = await setupAgent({
-    endpoints: AGENT_ENDPOINTS,
-    port: Number(AGENT_PORT) || 3001,
+    endpoints,
+    port: AGENT_PORT,
     walletConfig: {
       id: AGENT_WALLET_ID || 'test-vs-agent',
       key: AGENT_WALLET_KEY || 'test-vs-agent',
@@ -103,11 +137,11 @@ const run = async () => {
     },
     label: AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
-    publicDid: AGENT_PUBLIC_DID,
+    publicDid: publicDid?.did,
     logLevel: AGENT_LOG_LEVEL,
-    publicApiBaseUrl: PUBLIC_API_BASE_URL,
-    selfVtrEnabled: SELF_VTR_ENABLED,
+    publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
+    masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
   })
 
   const discoveryOptions = (() => {
@@ -123,10 +157,15 @@ const run = async () => {
     cors: USE_CORS,
     logger: serverLogger,
     webhookUrl: EVENTS_BASE_URL,
+    publicApiBaseUrl,
     discoveryOptions,
+    endpoints,
   }
 
-  await startAdminServer(agent, conf)
+  await startServers(agent, conf)
+
+  // Initialize Self-Trust Registry
+  await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

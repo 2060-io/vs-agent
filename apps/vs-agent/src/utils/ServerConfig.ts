@@ -6,11 +6,13 @@ import { TsLogger } from './logger'
 
 export interface ServerConfig {
   port: number
+  publicApiBaseUrl: string
   cors?: boolean
   app?: Express
   logger: TsLogger
   webhookUrl?: string
   discoveryOptions?: FeatureQueryOptions[]
+  endpoints: string[]
 }
 
 export interface DidWebServerConfig extends ServerConfig {

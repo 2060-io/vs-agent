@@ -1,0 +1,404 @@
+import {
+  W3cCredential,
+  W3cPresentation,
+  W3cCredentialSchema,
+  DidRepository,
+  ClaimFormat,
+  JsonTransformer,
+  VerificationMethod,
+  W3cCredentialSubject,
+  W3cJsonLdSignPresentationOptions,
+  W3cJsonLdSignCredentialOptions,
+  LogLevel,
+} from '@credo-ts/core'
+import Ajv, { AnySchemaObject } from 'ajv/dist/2020'
+import addFormats from 'ajv-formats'
+import axios from 'axios'
+import { createHash } from 'crypto'
+
+import {
+  AGENT_LABEL,
+  SELF_ISSUED_VTC_SERVICE_TYPE,
+  SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
+  AGENT_INVITATION_IMAGE_URL,
+  SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
+  SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
+  SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
+  SELF_ISSUED_VTC_ORG_REGISTRYID,
+  SELF_ISSUED_VTC_ORG_REGISTRYURL,
+  SELF_ISSUED_VTC_ORG_ADDRESS,
+  SELF_ISSUED_VTC_ORG_TYPE,
+  SELF_ISSUED_VTC_ORG_COUNTRYCODE,
+  FALLBACK_BASE64,
+} from '../config'
+
+import { VsAgent } from './VsAgent'
+import { getEcsSchemas } from './data'
+import { TsLogger } from './logger'
+
+const ajv = new Ajv({ strict: false })
+addFormats(ajv)
+
+export const setupSelfTr = async ({
+  agent,
+  publicApiBaseUrl,
+}: {
+  agent: VsAgent
+  publicApiBaseUrl: string
+}) => {
+  const logger = new TsLogger(LogLevel.info, 'SetlTr')
+  const ecsSchemas = getEcsSchemas(publicApiBaseUrl)
+
+  const presentations = [
+    {
+      name: 'ecs-service',
+      schemaUrl: `${publicApiBaseUrl}/self-tr/schemas-example-service.json`,
+    },
+    {
+      name: 'ecs-org',
+      schemaUrl: `${publicApiBaseUrl}/self-tr/schemas-example-org.json`,
+    },
+  ]
+
+  const credentials = [
+    {
+      name: 'example-service',
+      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
+    },
+    {
+      name: 'example-org',
+      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
+    },
+  ]
+
+  for (const { name, schemaUrl } of presentations) {
+    await generateVerifiablePresentation(
+      agent,
+      logger,
+      ecsSchemas,
+      name,
+      ['VerifiableCredential', 'VerifiableTrustCredential'],
+      {
+        id: schemaUrl,
+        type: 'JsonSchemaCredential',
+      },
+    )
+  }
+
+  for (const { name, id } of credentials) {
+    await generateVerifiableCredential(
+      agent,
+      logger,
+      ecsSchemas,
+      name,
+      ['VerifiableCredential', 'JsonSchemaCredential'],
+      {
+        id,
+        claims: {
+          type: 'JsonSchema',
+          jsonSchema: {
+            $ref: id,
+          },
+        },
+      },
+      {
+        id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
+        type: 'JsonSchema',
+      },
+    )
+  }
+}
+
+/**
+ * Generates and signs a verifiable credential using the agent's DID.
+ * Stores the signed credential and its integrity metadata in the DID record.
+ *
+ * - If the claims for the subject are not provided, they are retrieved (default claims) and validated against the schema.
+ * - The integrity of the claims is tracked using a Subresource Integrity (SRI) digest.
+ * - If a credential with the same integrity already exists in the DID metadata, it is returned directly.
+ * - Otherwise, a new credential is created, signed, and stored in the DID metadata.
+ * - If a presentation is provided, the signed credential is embedded and a signed presentation is returned.
+ *
+ * @param agent - The VsAgent instance used for signing and DID management.
+ * @param logger - Logger instance for logging operations.
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param logTag - Unique identifier for the credential type and metadata key.
+ * @param type - Array of credential types (e.g., ['VerifiableCredential']).
+ * @param subject - Subject information, including ID and optional claims.
+ * @param credentialSchema - Schema definition for the credential.
+ * @param presentation - Optional presentation to include the credential.
+ * @returns The signed verifiable credential or presentation, with integrity metadata.
+ */
+async function generateVerifiableCredential(
+  agent: VsAgent,
+  logger: TsLogger,
+  ecsSchemas: Record<string, AnySchemaObject>,
+  logTag: string,
+  type: string[],
+  subject: { id: string; claims?: any },
+  credentialSchema: W3cCredentialSchema,
+  presentation?: W3cPresentation,
+): Promise<any> {
+  const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+
+  const { id: subjectId } = subject
+  let claims = subject.claims
+
+  if (!claims) {
+    claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
+  }
+  const integrityData = generateDigestSRI(JSON.stringify(claims))
+  const metadata = didRecord.metadata.get(logTag)
+  if (metadata?.integrityData === integrityData) return metadata
+
+  const unsignedCredential = new W3cCredential({
+    context: ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
+    id: agent.did,
+    type,
+    issuer: agent.did!,
+    issuanceDate: new Date().toISOString(),
+    expirationDate: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+    credentialSubject: {
+      id: subjectId,
+      claims: presentation ? claims : await addDigestSRI(subjectId, claims, ecsSchemas),
+    },
+  })
+
+  unsignedCredential.credentialSchema = presentation
+    ? credentialSchema
+    : await addDigestSRI(credentialSchema.id, credentialSchema, ecsSchemas)
+
+  const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+  const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
+
+  const signedCredential = await agent.w3cCredentials.signCredential({
+    format: ClaimFormat.LdpVc,
+    credential: unsignedCredential,
+    proofType: 'Ed25519Signature2018',
+    verificationMethod: JsonTransformer.fromJSON(
+      verificationMethod?.didDocument?.verificationMethod?.[0],
+      VerificationMethod,
+    ).id,
+    challenge: 'challenge',
+    domain: 'example.com',
+  } as W3cJsonLdSignCredentialOptions)
+
+  if (presentation) {
+    presentation.verifiableCredential = [signedCredential]
+    const signedPresentation = await agent.w3cCredentials.signPresentation({
+      format: ClaimFormat.LdpVp,
+      presentation,
+      proofType: 'Ed25519Signature2018',
+      verificationMethod: JsonTransformer.fromJSON(
+        verificationMethod?.didDocument?.verificationMethod?.[0],
+        VerificationMethod,
+      ).id,
+      challenge: 'challenge',
+      domain: 'example.com',
+    } as W3cJsonLdSignPresentationOptions)
+    return signedPresentation
+  } else {
+    didRecord.metadata.set(logTag, { ...signedCredential.jsonCredential, integrityData })
+    await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
+    return signedCredential.jsonCredential
+  }
+}
+
+/**
+ * Generates and signs a verifiable presentation containing a verifiable credential.
+ * Stores the signed presentation and its integrity metadata in the DID record.
+ *
+ * - Retrieves and validates claims for the agent's DID.
+ * - Computes an integrity digest for the claims.
+ * - If a presentation with the same integrity already exists in the DID metadata, it is returned.
+ * - Otherwise, a new presentation is created, signed, and stored in the DID metadata.
+ *
+ * @param agent - The VsAgent instance used for signing and DID management.
+ * @param logger - Logger instance for logging operations.
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param logTag - Unique identifier for the presentation type and metadata key.
+ * @param type - Array of credential types to include.
+ * @param credentialSchema - Schema definition for the credential.
+ * @returns The signed verifiable presentation, with integrity metadata.
+ */
+async function generateVerifiablePresentation(
+  agent: VsAgent,
+  logger: TsLogger,
+  ecsSchemas: Record<string, AnySchemaObject>,
+  logTag: string,
+  type: string[],
+  credentialSchema: W3cCredentialSchema,
+) {
+  if (!agent.did) throw Error('The DID must be set up')
+  const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+  const integrityData = generateDigestSRI(
+    JSON.stringify(await getClaims(ecsSchemas, { id: agent.did }, logTag)),
+  )
+  const metadata = didRecord.metadata.get(logTag)
+  if (metadata?.integrityData === integrityData) return metadata
+
+  const presentation = new W3cPresentation({
+    context: ['https://www.w3.org/2018/credentials/v1'],
+    id: agent.did,
+    type: ['VerifiablePresentation'],
+    holder: agent.did,
+    verifiableCredential: [],
+  })
+  const result = await generateVerifiableCredential(
+    agent,
+    logger,
+    ecsSchemas,
+    logTag,
+    type,
+    { id: agent.did },
+    credentialSchema,
+    presentation,
+  )
+  didRecord.metadata.set(logTag, { ...result, integrityData })
+  await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
+  return result
+}
+
+/**
+ * Retrieves and validates claims for a credential subject.
+ * If claims are not found, builds default claims based on the logTag.
+ * Validates claims against the ECS schema for the given logTag.
+ *
+ * @param ecsSchemas - Map of ECS schemas for validation.
+ * @param subject - Credential subject, including ID.
+ * @param logTag - Unique identifier for the credential type.
+ * @returns The validated claims object.
+ * @throws If claims are invalid or schema is missing.
+ */
+async function getClaims(
+  ecsSchemas: Record<string, AnySchemaObject>,
+  { id: subjectId }: W3cCredentialSubject,
+  logTag: string,
+) {
+  // Default claims fallback
+  const claims =
+    logTag === 'ecs-service'
+      ? {
+          name: AGENT_LABEL,
+          type: SELF_ISSUED_VTC_SERVICE_TYPE,
+          description: SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
+          logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
+          minimumAgeRequired: SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
+          termsAndConditions: SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
+          privacyPolicy: SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
+        }
+      : {
+          name: AGENT_LABEL,
+          logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
+          registryId: SELF_ISSUED_VTC_ORG_REGISTRYID,
+          registryUrl: SELF_ISSUED_VTC_ORG_REGISTRYURL,
+          address: SELF_ISSUED_VTC_ORG_ADDRESS,
+          type: SELF_ISSUED_VTC_ORG_TYPE,
+          countryCode: SELF_ISSUED_VTC_ORG_COUNTRYCODE,
+        }
+
+  const ecsSchema = ecsSchemas[logTag]
+  if (!ecsSchema) {
+    throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
+  }
+
+  const validate = ajv.compile(ecsSchema.properties?.credentialSubject)
+  const credentialSubject = { id: subjectId, ...claims }
+  const isValid = validate(credentialSubject)
+
+  if (!isValid) {
+    const errorDetails = validate.errors?.map(e => ({
+      message: e.message,
+      path: e.instancePath,
+      keyword: e.keyword,
+      params: e.params,
+    }))
+    console.error(`Validation failed for ${logTag}`, errorDetails)
+    throw new Error(`Invalid claims for ${logTag}: ${JSON.stringify(errorDetails, null, 2)}`)
+  }
+
+  return claims
+}
+
+/**
+ * Adds a Subresource Integrity (SRI) digest to the provided data using the schema content
+ * fetched from the provided URL or from a local schema map as fallback.
+ *
+ * @template T - The type of the data object.
+ * @param id - The URL of the schema to fetch.
+ * @param data - The object to which the digest will be added.
+ * @param ecsSchemas - Optional map of local schemas to use as fallback if the fetch fails.
+ * @returns A new object combining the original data and a `digestSRI` property.
+ * @throws Error if both the fetch and local fallback fail.
+ */
+async function addDigestSRI<T extends object>(
+  id?: string,
+  data?: T,
+  ecsSchemas?: Record<string, AnySchemaObject>,
+): Promise<T & { digestSRI: string }> {
+  if (!id || !data) {
+    throw new Error(`id and data has requiered`)
+  }
+  const response = await fetch(id)
+  const key = id.split('/').pop()
+  const fallbackSchema = key && ecsSchemas?.[key]
+
+  if (!response.ok && !fallbackSchema) {
+    throw new Error(`Failed to fetch schema from ${id}: ${response.status} ${response.statusText}, and no local fallback found.`)
+  }
+
+  let schemaContent: string
+
+  if (response.ok) {
+    schemaContent = await response.text()
+  } else {
+    schemaContent = JSON.stringify({ schema: JSON.stringify(fallbackSchema) })
+  }
+
+  return {
+    ...data,
+    digestSRI: generateDigestSRI(schemaContent),
+  }
+}
+
+/**
+ * Generates a SRI digest string for the given content using the specified algorithm.
+ * @param content - The content to hash.
+ * @param algorithm - The hash algorithm to use (default: sha256).
+ * @returns The SRI digest string.
+ */
+function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
+  const hash = createHash(algorithm)
+    .update(JSON.stringify(JSON.parse(content)), 'utf8')
+    .digest('base64')
+  return `${algorithm}-${hash}`
+}
+
+/**
+ * Converts an image URL to a Base64-encoded data URI string.
+ *
+ * @param url - The image URL to convert.
+ * @returns A Base64 data URI string, or a fallback placeholder if the image cannot be fetched or is invalid.
+ */
+export async function urlToBase64(url?: string): Promise<string> {
+  if (!url) {
+    console.warn('No URL provided for image conversion.')
+    return FALLBACK_BASE64
+  }
+
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer' })
+
+    const contentType = response.headers['content-type']
+    if (!contentType || !contentType.startsWith('image/')) {
+      console.warn(`The fetched resource is not an image. Content-Type: ${contentType}`)
+      return FALLBACK_BASE64
+    }
+
+    const base64 = Buffer.from(response.data).toString('base64')
+    return `data:${contentType};base64,${base64}`
+  } catch (error) {
+    console.error(`Failed to convert URL to Base64. URL: ${url}`, error)
+    return FALLBACK_BASE64
+  }
+}

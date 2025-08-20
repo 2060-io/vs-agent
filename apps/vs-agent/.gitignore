@@ -6,3 +6,4 @@ build
 logs.txt
 examples/**/afj
 tails/
+.env

@@ -155,7 +155,7 @@ spec:
             - name: AGENT_INVITATION_IMAGE_URL
               value: "{{ tpl .Values.didcommInvitationImageUrl . }}"
             - name: EVENTS_BASE_URL
-              value: "{{ .Values.eventsBaseUrl }}"
+              value: "{{ tpl .Values.eventsBaseUrl . }}"
             - name: AGENT_PUBLIC_DID
               value: "did:web:{{ tpl .Values.ingress.host . }}"
 {{- with .Values.extraEnv }}
@@ -167,6 +167,22 @@ spec:
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.didcommPort }}
+            livenessProbe:
+              httpGet:
+                path: /v1/health
+                port: {{ .Values.adminPort }}
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 5
+              failureThreshold: 2
+            readinessProbe:
+              httpGet:
+                path: /v1/health
+                port: {{ .Values.adminPort }}
+              initialDelaySeconds: 15
+              periodSeconds: 60
+              timeoutSeconds: 5
+              failureThreshold: 2
             volumeMounts:
             - name: {{ .Values.name }}-vsa-pv
               mountPath: /root/.afj
