@@ -11,14 +11,19 @@ import {
 } from 'didwebvh-ts'
 
 /**
- * Extended WebvhDidCrypto class implementing the Signer interface.
- * Provides cryptographic operations for DID documents using Ed25519.
+ * Extension of the WebvhDidCrypto class implementing the Signer interface.
+ * Provides cryptographic operations for DID documents using Ed25519 keys.
  */
 export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
   private publicKeyMultibase: string
   private context: AgentContext
   public readonly supportedMethods: string[] = ['webvh']
 
+  /**
+   * Creates a new instance of WebvhDidCryptoExt.
+   * @param context - The agent context containing wallet and configuration.
+   * @param publicKeyMultibase - The public key encoded in multibase format.
+   */
   constructor(context: AgentContext, publicKeyMultibase: string) {
     super(context)
     this.context = context
@@ -26,8 +31,8 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
   }
 
   /**
-   * Returns the verification method identifier in DID:key format.
-   * @returns The DID:key identifier string.
+   * Gets the verification method identifier in DID:key format.
+   * @returns The DID:key identifier as a string.
    */
   getVerificationMethodId(): string {
     return `did:key:${this.publicKeyMultibase}`
@@ -36,7 +41,7 @@ export class WebvhDidCryptoExt extends WebvhDidCrypto implements Signer {
   /**
    * Signs the provided input document using the Ed25519 secret key.
    * @param input - The signing input containing the document and proof.
-   * @returns A promise resolving to the signing output with the proof value.
+   * @returns A promise that resolves to the signing output with the proof value.
    * @throws Error if the secret key is not found or signing fails.
    */
   async sign(input: SigningInput): Promise<SigningOutput> {

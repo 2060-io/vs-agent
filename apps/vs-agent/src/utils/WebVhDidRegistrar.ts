@@ -76,10 +76,20 @@ interface WebVhDidUpdateOptions extends DidUpdateOptions {
   witnessProofs?: WitnessProofFileEntry[]
 }
 
+/**
+ * DID Registrar implementation for the 'webvh' method.
+ * Handles creation, update, and (future) deactivation of DIDs using the webvh method.
+ */
 export class WebVhDidRegistrar implements DidRegistrar {
   private cryptoInstancesCache = new Map<string, { signer: Signer; verifier: Verifier }>()
   supportedMethods: string[] = ['webvh']
 
+  /**
+   * Updates an existing DID document and its log in the repository.
+   * @param agentContext The agent context.
+   * @param options The update options, including DID, log, signer, verifier, and services.
+   * @returns The result of the DID update.
+   */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     try {
       const { did, domain, log, services } = options
@@ -160,6 +170,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
   /**
    * Creates a new DID document and saves it in the repository.
    * @param agentContext The agent context.
+   * @param options The creation options, including domain, endpoints, controller, signer, and verifier.
    * @returns The result of the DID creation.
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
@@ -200,7 +211,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       await didRepository.save(agentContext, didRecord)
       agentContext.config.logger.info('Public didWebVh record saved')
 
-      // Add default services
+      // Add default services if endpoints are provided
       if (endpoints && endpoints.length > 0) {
         return await this.update(agentContext, {
           did,
@@ -245,7 +256,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
   }
 
   /**
-   * Sets up crypto instances (signer/verifier) based on options or creates new ones
+   * Sets up crypto instances (signer/verifier) based on options or creates new ones.
+   * @param agentContext The agent context.
+   * @param publicKeyMultibase The public key in multibase format.
+   * @param options Options containing signer and/or verifier.
+   * @returns An object containing signer and verifier instances.
    */
   private async parseCryptoInstance(
     agentContext: AgentContext,
@@ -277,10 +292,20 @@ export class WebVhDidRegistrar implements DidRegistrar {
     }
   }
 
+  /**
+   * Retrieves cached crypto instances (signer and verifier) for a given DID.
+   * @param did The DID string.
+   * @returns An object containing signer and verifier, if available.
+   */
   private getCachedCryptoInstances(did: string): { signer?: Signer; verifier?: Verifier } {
     return this.cryptoInstancesCache.get(did) ?? {}
   }
 
+  /**
+   * Generates a new Ed25519 public key in multibase format and stores the private key in the wallet.
+   * @param agentContext The agent context.
+   * @returns The public key in multibase format.
+   */
   private async generatePublicKey(agentContext: AgentContext): Promise<string> {
     const keyPair = crypto.generateKeyPair()
     const secret = multibaseEncode(new Uint8Array(keyPair.secretKey), MultibaseEncoding.BASE58_BTC)
