@@ -76,11 +76,22 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     try {
-      const { did, domain, log, services } = options
+      const { did, domain, services } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const [didRecord] = await didRepository.getCreatedDids(agentContext, { did, method: 'webvh' })
-      const { controller, verificationMethod: verificationMethods } = log[0].state
+      const log = didRecord.metadata.get('log') as any[]
+      if (!log) {
+        return {
+          didDocumentMetadata: {},
+          didRegistrationMetadata: {},
+          didState: {
+            state: 'failed',
+            reason: 'The log registry must be created before it can be edited',
+          },
+        }
+      }
 
+      const { controller, verificationMethod: verificationMethods } = log[0]?.state
       if (!verificationMethods || verificationMethods.length === 0) {
         return {
           didDocumentMetadata: {},
