@@ -116,8 +116,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/webvh':
-        specifier: 0.5.17-alpha-20250807200940
-        version: 0.5.17-alpha-20250807200940(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
+        specifier: 0.5.17-alpha-20250818210456
+        version: 0.5.17-alpha-20250818210456(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@hyperledger/anoncreds-nodejs':
         specifier: 0.2.4
         version: 0.2.4
@@ -1168,8 +1168,8 @@ packages:
   '@credo-ts/question-answer@0.5.11':
     resolution: {integrity: sha512-ls/NFaWCh+iHR4U88BcJZ8l2hhZ1dUI+cZu6irBnWhKMz4www4x+azhX9BZ9Ejq3BM7CcTvGYaTvUJjskhnN5Q==}
 
-  '@credo-ts/webvh@0.5.17-alpha-20250807200940':
-    resolution: {integrity: sha512-qzFipC8Vh3/5v31opRxsfaDLOFfdpwiOzzgSDXIYN5Pry3Mcw4PVBjrzqrPTdSv9TtfI4CRNx1e9qPIaSJmoYA==}
+  '@credo-ts/webvh@0.5.17-alpha-20250818210456':
+    resolution: {integrity: sha512-b2q3hXMcugKrngZlwL9ypImJeXCTpAYW+N0hY4AUifjl2cwaR/MwtuyBAGg5e1XvYrU8PQRJfscVuVmXBhxxkA==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3375,6 +3375,10 @@ packages:
 
   didwebvh-ts@2.4.1:
     resolution: {integrity: sha512-TAEVIXYjTQUmj2AG6tCmsiXsbOTU8lcm12ZJ7mX7ER7k6Cou1HIgv7i2iDsfqQ8FRAE6G5XI+al5rSiVxyZVGw==}
+    hasBin: true
+
+  didwebvh-ts@2.5.3:
+    resolution: {integrity: sha512-VTjA6yKRplrxV2lA1d14lf6B+0uVLdZzPwoqnTuHm/RQVPG1xNj7CRm6Gl5wEnq3NEd/9xJBabqAY7adX94MIQ==}
     hasBin: true
 
   diff-sequences@29.6.3:
@@ -6125,7 +6129,7 @@ packages:
   superagent@8.1.2:
     resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
     engines: {node: '>=6.4.0 <13 || >=14'}
-    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+    deprecated: Please upgrade to v9.0.0+ as we have fixed a public vulnerability with formidable dependency. Note that v9.0.0+ requires Node.js v14.18.0+. See https://github.com/ladjs/superagent/pull/1800 for insight. This project is supported and maintained by the team at Forward Email @ https://forwardemail.net
 
   supertest@6.3.4:
     resolution: {integrity: sha512-erY3HFDG0dPnhw4U+udPfrzXa4xhSG+n4rxfRuZWCUvjFWwKl+OxWf/7zk50s84/fAAs7vf5QAb9uRa0cCykxw==}
@@ -7763,13 +7767,13 @@ snapshots:
       - supports-color
       - web-streams-polyfill
 
-  '@credo-ts/webvh@0.5.17-alpha-20250807200940(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)':
+  '@credo-ts/webvh@0.5.17-alpha-20250818210456(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@credo-ts/anoncreds': 0.5.11(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/core': 0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
-      didwebvh-ts: 2.4.1
+      didwebvh-ts: 2.5.3
       json-canonicalize: 1.2.0
       tsyringe: 4.8.0
     transitivePeerDependencies:
@@ -10770,6 +10774,11 @@ snapshots:
   did-resolver@4.1.0: {}
 
   didwebvh-ts@2.4.1:
+    dependencies:
+      '@noble/hashes': 1.8.0
+      json-canonicalize: 1.2.0
+
+  didwebvh-ts@2.5.3:
     dependencies:
       '@noble/hashes': 1.8.0
       json-canonicalize: 1.2.0
