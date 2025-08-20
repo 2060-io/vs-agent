@@ -36,6 +36,22 @@ import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
   endpoints: string[]
+  signer: Signer
+  verifier?: Verifier
+  verificationMethods?: VerificationMethod[]
+  paths?: string[]
+  updateKeys?: string[]
+  controller?: string
+  context?: string | string[] | object | object[]
+  alsoKnownAs?: string[]
+  portable?: boolean
+  nextKeyHashes?: string[]
+  witness?: WitnessParameter | null
+  watchers?: string[] | null
+  created?: string
+  authentication?: string[]
+  assertionMethod?: string[]
+  keyAgreement?: string[]
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
@@ -121,17 +137,21 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { domain, endpoints } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const baseMethod = await this.generateVerificationMethod(agentContext, domain)
+      const baseMethod =
+        options.verificationMethods?.[0] ?? (await this.generateVerificationMethod(agentContext, domain))
 
       // Create crypto instance
       const crypto = new WebvhDidCryptoExt(agentContext, baseMethod)
+      const signer = options.signer ?? crypto
+      const verifier = options.verifier ?? crypto
+
       // Create DID
       const { did, doc, log } = await createDID({
         domain,
-        signer: crypto,
+        signer,
         updateKeys: [baseMethod.publicKeyMultibase],
         verificationMethods: [baseMethod],
-        verifier: crypto,
+        verifier,
       })
 
       // Save didRegistry
@@ -151,8 +171,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
           did,
           didDocument,
           log,
-          signer: crypto,
-          verifier: crypto,
+          signer,
+          verifier,
           domain,
           services: endpoints.map(
             (endpoint, i) =>
