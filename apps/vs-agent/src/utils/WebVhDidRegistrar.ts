@@ -16,6 +16,7 @@ import {
   DidCommV1Service,
   DidDocument,
 } from '@credo-ts/core'
+import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
 import {
   createDID,
@@ -31,7 +32,7 @@ import {
   WitnessProofFileEntry,
 } from 'didwebvh-ts'
 
-import { WebvhDidCryptoExt } from './WebvhDidCryptoExt'
+import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
@@ -261,31 +262,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
   private async parseCryptoInstance(
     agentContext: AgentContext,
     publicKeyMultibase: string,
-    options: { verifier?: Verifier; signer?: Signer },
-  ): Promise<{
-    signer: Signer
-    verifier: Verifier
-  }> {
-    if (options.signer && options.verifier) {
-      return {
-        signer: options.signer,
-        verifier: options.verifier,
-      }
-    }
-
-    if (options.signer || options.verifier) {
-      const crypto = new WebvhDidCryptoExt(agentContext, publicKeyMultibase)
-      return {
-        signer: options.signer ?? crypto,
-        verifier: options.verifier ?? crypto,
-      }
-    }
-
-    const crypto = new WebvhDidCryptoExt(agentContext, publicKeyMultibase)
-    return {
-      signer: crypto,
-      verifier: crypto,
-    }
+    options: { verifier?: Verifier; signer?: Signer } = {},
+  ): Promise<{ signer: Signer; verifier: Verifier }> {
+    const signer = options.signer ?? new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
+    const verifier = options.verifier ?? new WebvhDidCrypto(agentContext)
+    return { signer, verifier }
   }
 
   /**

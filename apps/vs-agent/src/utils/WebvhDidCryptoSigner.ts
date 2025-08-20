@@ -1,5 +1,4 @@
 import { AgentContext, Key, KeyType, Buffer } from '@credo-ts/core'
-import * as crypto from '@stablelib/ed25519'
 import {
   multibaseDecode,
   multibaseEncode,
@@ -8,14 +7,13 @@ import {
   Signer,
   SigningInput,
   SigningOutput,
-  Verifier,
 } from 'didwebvh-ts'
 
 /**
- * Extension of the WebvhDidCrypto class implementing the Signer and Verifier interfaces.
+ * Extension of the WebvhDidCrypto class implementing the Signer interface.
  * Provides cryptographic operations for DID documents using Ed25519 keys.
  */
-export class WebvhDidCryptoExt implements Signer, Verifier {
+export class WebvhDidCryptoSigner implements Signer {
   private publicKeyMultibase: string
   private agentContext: AgentContext
   public readonly supportedMethods: string[] = ['webvh']
@@ -59,22 +57,6 @@ export class WebvhDidCryptoExt implements Signer, Verifier {
     } catch (error) {
       this.agentContext.config.logger.error('Ed25519 signing error:', error)
       throw error
-    }
-  }
-
-  /**
-   * Verifies a default signature for a given message and public key using Ed25519.
-   * @param signature - The signature to verify.
-   * @param message - The message that was signed.
-   * @param publicKey - The public key to verify against.
-   * @returns A promise that resolves to true if the signature is valid, false otherwise.
-   */
-  async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
-    try {
-      return crypto.verify(publicKey, message, signature)
-    } catch (error) {
-      this.agentContext.config.logger.error('Error verifying signature:', error)
-      return false
     }
   }
 }
