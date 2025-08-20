@@ -37,27 +37,12 @@ import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
   endpoints: string[]
-  signer: Signer
-  verifier?: Verifier
-  verificationMethods?: VerificationMethod[]
-  paths?: string[]
-  updateKeys?: string[]
-  controller?: string
-  context?: string | string[] | object | object[]
-  alsoKnownAs?: string[]
-  portable?: boolean
-  nextKeyHashes?: string[]
-  witness?: WitnessParameter | null
-  watchers?: string[] | null
-  created?: string
-  authentication?: string[]
-  assertionMethod?: string[]
-  keyAgreement?: string[]
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
   log: DIDLog
   signer: Signer
+  verifier?: Verifier
   services?: DidDocumentService[]
   domain?: string
   updated?: string
@@ -70,7 +55,6 @@ interface WebVhDidUpdateOptions extends DidUpdateOptions {
   nextKeyHashes?: string[]
   witness?: WitnessParameter | null
   watchers?: string[] | null
-  verifier?: Verifier
   authentication?: string[]
   assertionMethod?: string[]
   keyAgreement?: string[]
@@ -175,12 +159,12 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain, endpoints, controller } = options
+      const { domain, endpoints } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
 
       // Create crypto instance
       const publicKeyMultibase = await this.generatePublicKey(agentContext)
-      const { signer, verifier } = await this.parseCryptoInstance(agentContext, publicKeyMultibase, options)
+      const { signer, verifier } = await this.parseCryptoInstance(agentContext, publicKeyMultibase)
 
       // Create DID
       const { did, doc, log } = await createDID({
@@ -189,7 +173,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         updateKeys: [publicKeyMultibase],
         verificationMethods: [
           {
-            controller: typeof controller === 'string' ? controller : String(controller?.[0]),
+            controller: `did:webvh:{SCID}:${domain}`,
             type: 'Ed25519VerificationKey2018',
             publicKeyMultibase,
           },
