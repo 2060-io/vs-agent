@@ -98,12 +98,15 @@ export class WebVhDidRegistrar implements DidRegistrar {
         }
       }
 
-      // Get cached crypto instances
-      let { signer, verifier } = this.getCachedCryptoInstances(did)
-
-      // Allow override with provided instances
-      if (options.signer) signer = options.signer
-      if (options.verifier) verifier = options.verifier
+      // Always use parseCryptoInstance to get signer/verifier
+      const { signer, verifier } = await this.parseCryptoInstance(
+        agentContext,
+        verificationMethods[0].publicKeyMultibase,
+        {
+          signer: options.signer ?? this.getCachedCryptoInstances(did).signer,
+          verifier: options.verifier ?? this.getCachedCryptoInstances(did).verifier,
+        },
+      )
 
       if (!signer || !verifier) {
         throw new Error(
@@ -175,7 +178,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         updateKeys: [publicKeyMultibase],
         verificationMethods: [
           {
-            controller: typeof controller === 'string' ? controller : controller?.[0],
+            controller: typeof controller === 'string' ? controller : String(controller?.[0]),
             type: 'Ed25519VerificationKey2018',
             publicKeyMultibase,
           },
