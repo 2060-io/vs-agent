@@ -19,7 +19,6 @@ import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
 import {
   createDID,
-  DIDLog,
   multibaseDecode,
   multibaseEncode,
   MultibaseEncoding,
@@ -36,7 +35,6 @@ interface WebVhDidCreateOptions extends DidCreateOptions {
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
-  log: DIDLog
   signer: Signer
   verifier?: Verifier
   domain?: string
@@ -206,7 +204,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
         return await this.update(agentContext, {
           did,
           didDocument,
-          log,
           signer,
           verifier,
           domain,
