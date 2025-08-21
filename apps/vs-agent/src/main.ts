@@ -2,7 +2,12 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
+import {
+  DidCommV1Service,
+  KeyDerivationMethod,
+  parseDid,
+  utils,
+} from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
