@@ -2,12 +2,7 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import {
-  DidCommV1Service,
-  KeyDerivationMethod,
-  parseDid,
-  utils,
-} from '@credo-ts/core'
+import { DidCommV1Service, KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
@@ -180,18 +175,17 @@ const run = async () => {
     const services = endpoints.map(
       (endpoint, i) =>
         new DidCommV1Service({
-          id: `did:webvh:{SCID}:${domain}#did-communication`,
+          id: `{DID}#did-communication`,
           serviceEndpoint: endpoint,
           priority: i,
           routingKeys: [], // TODO: Support mediation
-          recipientKeys: [`did:webvh:{SCID}:${domain}#key-agreement-1`],
+          recipientKeys: [`{DID}#key-agreement-1`],
           accept: ['didcomm/aip2;env=rfc19'],
-        })
+        }),
     )
 
     await agent.dids.create({ method: 'webvh', domain, services })
   }
-
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

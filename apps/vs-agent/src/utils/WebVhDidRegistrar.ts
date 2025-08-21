@@ -79,7 +79,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication,
         assertionMethod,
         keyAgreement,
-        service: services,
+        service,
         verificationMethod: verificationMethods,
       } = inputDidDocument
       if (!verificationMethods || verificationMethods.length === 0) {
@@ -123,7 +123,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication: normalizeMethodArray(authentication),
         assertionMethod: normalizeMethodArray(assertionMethod),
         keyAgreement: normalizeMethodArray(keyAgreement),
-        services,
+        services: service?.map(svc => JSON.parse(JSON.stringify(svc).replace(/{DID}/g, did))),
       })
 
       const didDocument = new DidDocument(doc)
@@ -261,19 +261,5 @@ export class WebVhDidRegistrar implements DidRegistrar {
       keyType: KeyType.Ed25519,
     })
     return multibaseEncode(new Uint8Array([0xed, 0x01, ...key.publicKey]), MultibaseEncoding.BASE58_BTC)
-  }
-
-  private async saveDidRecord(
-    agentContext: AgentContext,
-    did: string,
-    didDocument: DidDocument,
-    log: any[],
-    role: DidDocumentRole = DidDocumentRole.Created
-  ) {
-    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-    const didRecord = new DidRecord({ did, role, didDocument })
-    didRecord.metadata.set('log', log)
-    await didRepository.save(agentContext, didRecord)
-    agentContext.config.logger.info('Public didWebVh record saved')
   }
 }
