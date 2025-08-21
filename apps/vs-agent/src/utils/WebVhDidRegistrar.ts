@@ -13,7 +13,6 @@ import {
   KeyType,
   Buffer,
   DidDocumentService,
-  DidCommV1Service,
   DidDocument,
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
@@ -26,40 +25,26 @@ import {
   MultibaseEncoding,
   Signer,
   updateDID,
-  VerificationMethod,
   Verifier,
-  WitnessParameter,
-  WitnessProofFileEntry,
 } from 'didwebvh-ts'
 
 import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
-  endpoints: string[]
+  services?: DidDocumentService[]
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
   log: DIDLog
   signer: Signer
   verifier?: Verifier
-  services?: DidDocumentService[]
   domain?: string
-  updated?: string
   updateKeys?: string[]
-  verificationMethods?: VerificationMethod[]
-  controller?: string
-  context?: string | string[] | object | object[]
-  alsoKnownAs?: string[]
-  portable?: boolean
-  nextKeyHashes?: string[]
-  witness?: WitnessParameter | null
-  watchers?: string[] | null
-  authentication?: string[]
-  assertionMethod?: string[]
-  keyAgreement?: string[]
-  witnessProofs?: WitnessProofFileEntry[]
 }
+
+const normalizeMethodArray = (arr?: (string | { id: string })[]) =>
+  arr?.map(item => (typeof item === 'string' ? item : item.id))
 
 /**
  * DID Registrar implementation for the 'webvh' method.
@@ -76,7 +61,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     try {
-      const { did, domain, services } = options
+      const { did, domain, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const [didRecord] = await didRepository.getCreatedDids(agentContext, { did, method: 'webvh' })
       const log = didRecord.metadata.get('log') as any[]
@@ -91,7 +76,14 @@ export class WebVhDidRegistrar implements DidRegistrar {
         }
       }
 
-      const { controller, verificationMethod: verificationMethods } = log[0]?.state
+      const {
+        controller,
+        authentication,
+        assertionMethod,
+        keyAgreement,
+        service: services,
+        verificationMethod: verificationMethods,
+      } = inputDidDocument
       if (!verificationMethods || verificationMethods.length === 0) {
         return {
           didDocumentMetadata: {},
@@ -106,7 +98,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       // Always use parseCryptoInstance to get signer/verifier
       const { signer, verifier } = await this.parseCryptoInstance(
         agentContext,
-        verificationMethods[0].publicKeyMultibase,
+        verificationMethods[0].publicKeyMultibase!,
         {
           signer: options.signer,
           verifier: options.verifier,
@@ -124,10 +116,15 @@ export class WebVhDidRegistrar implements DidRegistrar {
         signer,
         verifier,
         domain,
-        verificationMethods,
-        assertionMethod: [verificationMethods![0].id!],
-        keyAgreement: [`${did}#key-agreement-1`],
+        ...inputDidDocument,
+        verificationMethods: verificationMethods.map(vm => ({
+          ...vm,
+          publicKeyMultibase: vm.publicKeyMultibase!,
+        })),
         controller: Array.isArray(controller) ? controller[0] : controller,
+        authentication: normalizeMethodArray(authentication),
+        assertionMethod: normalizeMethodArray(assertionMethod),
+        keyAgreement: normalizeMethodArray(keyAgreement),
         services,
       })
 
@@ -170,7 +167,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain, endpoints } = options
+      const { domain, services } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
 
       // Create crypto instance
@@ -203,8 +200,9 @@ export class WebVhDidRegistrar implements DidRegistrar {
       await didRepository.save(agentContext, didRecord)
       agentContext.config.logger.info('Public didWebVh record saved')
 
-      // Add default services if endpoints are provided
-      if (endpoints && endpoints.length > 0) {
+      // Add default services if are provided
+      if (services && services.length > 0) {
+        didDocument.service = services
         return await this.update(agentContext, {
           did,
           didDocument,
@@ -212,17 +210,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
           signer,
           verifier,
           domain,
-          services: endpoints.map(
-            (endpoint, i) =>
-              new DidCommV1Service({
-                id: `${did}#did-communication`,
-                serviceEndpoint: endpoint,
-                priority: i,
-                routingKeys: [], // TODO: Support mediation
-                recipientKeys: [`${did}#key-agreement-1`],
-                accept: ['didcomm/aip2;env=rfc19'],
-              }),
-          ),
         })
       }
 
@@ -277,5 +264,19 @@ export class WebVhDidRegistrar implements DidRegistrar {
       keyType: KeyType.Ed25519,
     })
     return multibaseEncode(new Uint8Array([0xed, 0x01, ...key.publicKey]), MultibaseEncoding.BASE58_BTC)
+  }
+
+  private async saveDidRecord(
+    agentContext: AgentContext,
+    did: string,
+    didDocument: DidDocument,
+    log: any[],
+    role: DidDocumentRole = DidDocumentRole.Created
+  ) {
+    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+    const didRecord = new DidRecord({ did, role, didDocument })
+    didRecord.metadata.set('log', log)
+    await didRepository.save(agentContext, didRecord)
+    agentContext.config.logger.info('Public didWebVh record saved')
   }
 }

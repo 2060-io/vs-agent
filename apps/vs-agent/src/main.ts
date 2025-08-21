@@ -169,12 +169,24 @@ const run = async () => {
 
   // Create did:webvh
   const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
-  if (!didRecord)
-    await agent.dids.create({
-      method: 'webvh',
-      domain: endpoints[0].split('//')[1],
-      endpoints: conf.endpoints,
-    })
+  if (!didRecord) {
+    const domain = new URL(endpoints[0]).host
+
+    const services = endpoints.map(
+      (endpoint, i) =>
+        new DidCommV1Service({
+          id: `did:webvh:{SCID}:${domain}#did-communication`,
+          serviceEndpoint: endpoint,
+          priority: i,
+          routingKeys: [], // TODO: Support mediation
+          recipientKeys: [`did:webvh:{SCID}:${domain}#key-agreement-1`],
+          accept: ['didcomm/aip2;env=rfc19'],
+        })
+    )
+
+    await agent.dids.create({ method: 'webvh', domain, services })
+  }
+
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
