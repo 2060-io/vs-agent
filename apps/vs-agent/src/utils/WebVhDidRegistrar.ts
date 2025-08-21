@@ -36,8 +36,6 @@ interface WebVhDidCreateOptions extends DidCreateOptions {
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
-  signer: Signer
-  verifier?: Verifier
   domain?: string
 }
 
@@ -58,6 +56,13 @@ export class WebVhDidRegistrar implements DidRegistrar {
    * @returns The result of the DID update.
    */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
+    return this._update(agentContext, { ...options })
+  }
+
+  public async _update(
+    agentContext: AgentContext,
+    options: WebVhDidUpdateOptions & { signer?: Signer; verifier?: Verifier },
+  ): Promise<DidUpdateResult> {
     try {
       const { did, domain, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
@@ -205,7 +210,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       // Add default services if are provided
       if (services && services.length > 0) {
         didDocument.service = services
-        return await this.update(agentContext, {
+        return await this._update(agentContext, {
           did,
           didDocument,
           signer,
