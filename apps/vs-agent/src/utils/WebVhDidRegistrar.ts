@@ -51,14 +51,22 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
   /**
    * Updates an existing DID document and its log in the repository.
+   * Uses internal logic to validate verification methods and handle errors.
    * @param agentContext The agent context.
    * @param options The update options, including DID, log, signer, verifier, and services.
-   * @returns The result of the DID update.
+   * @returns The result of the DID update, with error handling and validation.
    */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     return this._update(agentContext, { ...options })
   }
 
+  /**
+   * Internal update logic for a DID document.
+   * Handles validation, crypto instance setup, and repository update.
+   * @param agentContext The agent context.
+   * @param options The update options, including signer and verifier.
+   * @returns The result of the DID update, with error handling.
+   */
   public async _update(
     agentContext: AgentContext,
     options: WebVhDidUpdateOptions & { signer?: Signer; verifier?: Verifier },
@@ -168,9 +176,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
   /**
    * Creates a new DID document and saves it in the repository.
+   * Handles crypto instance setup, DID creation, and error handling.
+   * If services are provided, updates the DID document with those services.
    * @param agentContext The agent context.
    * @param options The creation options, including domain, endpoints, controller, signer, and verifier.
-   * @returns The result of the DID creation.
+   * @returns The result of the DID creation, with error handling.
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
