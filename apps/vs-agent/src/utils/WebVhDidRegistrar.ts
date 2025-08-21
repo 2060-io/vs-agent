@@ -67,7 +67,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
    * @param options The update options, including signer and verifier.
    * @returns The result of the DID update, with error handling.
    */
-  public async _update(
+  private async _update(
     agentContext: AgentContext,
     options: WebVhDidUpdateOptions & { signer?: Signer; verifier?: Verifier },
   ): Promise<DidUpdateResult> {
