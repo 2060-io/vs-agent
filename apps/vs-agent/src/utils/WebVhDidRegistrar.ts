@@ -98,7 +98,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const verificationMethods =
         inputVerificationMethod ?? (log[log.length - 1].state.verificationMethod as VerificationMethod[])
       const updateKeys = log[log.length - 1].parameters.updateKeys
-      if (!verificationMethods || verificationMethods.length === 0) {
+      if (!verificationMethods?.length || !verificationMethods[0].publicKeyMultibase) {
         return {
           didDocumentMetadata: {},
           didRegistrationMetadata: {},
@@ -109,21 +109,10 @@ export class WebVhDidRegistrar implements DidRegistrar {
         }
       }
 
-      // Always use parseCryptoInstance to get signer/verifier
-      const { signer, verifier } = await this.parseCryptoInstance(
-        agentContext,
-        verificationMethods[0].publicKeyMultibase!,
-        {
-          signer: options.signer,
-          verifier: options.verifier,
-        },
-      )
-
-      if (!signer || !verifier) {
-        throw new Error(
-          `No crypto instances available for DID: ${did}. Provide signer and verifier in options.`,
-        )
-      }
+      // Get signer/verifier
+      const signer =
+        options.signer ?? new WebvhDidCryptoSigner(agentContext, verificationMethods[0].publicKeyMultibase)
+      const verifier = options.verifier ?? new WebvhDidCrypto(agentContext)
 
       const { log: logResult, doc } = await updateDID({
         log,
@@ -189,7 +178,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
       // Create crypto instance
       const publicKeyMultibase = await this.generatePublicKey(agentContext)
-      const { signer, verifier } = await this.parseCryptoInstance(agentContext, publicKeyMultibase)
+      const signer = new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
+      const verifier = new WebvhDidCrypto(agentContext)
 
       // Create DID
       const { did, doc, log } = await createDID({
@@ -248,23 +238,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
         },
       }
     }
-  }
-
-  /**
-   * Sets up crypto instances (signer/verifier) based on options or creates new ones.
-   * @param agentContext The agent context.
-   * @param publicKeyMultibase The public key in multibase format.
-   * @param options Options containing signer and/or verifier.
-   * @returns An object containing signer and verifier instances.
-   */
-  private async parseCryptoInstance(
-    agentContext: AgentContext,
-    publicKeyMultibase: string,
-    options: { verifier?: Verifier; signer?: Signer } = {},
-  ): Promise<{ signer: Signer; verifier: Verifier }> {
-    const signer = options.signer ?? new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
-    const verifier = options.verifier ?? new WebvhDidCrypto(agentContext)
-    return { signer, verifier }
   }
 
   /**
