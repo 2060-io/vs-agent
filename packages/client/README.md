@@ -15,53 +15,50 @@ This package ensures that the client stays updated with the latest API versionin
 Find the public repository here: [VS Agent](../../README.md)
 
 ## How it works
-```plantuml
-@startuml
-
-package "2060 Ecosystem" {
-    package "VS Agent (VS-A)" {
-        class VsAgent {
-            + Handles DIDComm communication
-            + Manages agent wallet and credentials
-            + Exposes API for client interactions
-        }
+```mermaid
+classDiagram
+    class VsAgent {
+        + Handles DIDComm communication
+        + Manages agent wallet and credentials
+        + Exposes API for client interactions
     }
-    
-    package "Libraries" {
-        class NestJSClient {
-            + Plug-and-play integration
-            + Selectable modules for various services
-            + Modules:
-              -- MessageEventOptions: Configures message event handling
-              -- ConnectionEventOptions: Configures connection event handling
-              -- CredentialOptions: Configures credential management
-        }
-        class Client ##red {
-            + Directly manages requests to SA
-            + Facilitates reception of requests from modules
-            + Provides an abstraction for service communication
-            + Interfaces:
-              -- messages
-              -- credentialTypes
-              -- revocationRegistries
-              -- invitations
-      
-        }
-        class ModelLibrary {
-            + Defines required data models
-            + Ensures type safety across services
-        }
+
+    class NestJSClient {
+        + Plug-and-play integration
+        + Selectable modules for various services
+        + Modules:
+        -- MessageEventOptions: Configures message event handling
+        -- ConnectionEventOptions: Configures connection event handling
+        -- CredentialOptions: Configures credential management
+        -- StatsOptions: Configures stats management
     }
-}
 
-NestJSClient --> VsAgent : Uses
-Client --> VsAgent : Sends requests
-Client --> VsAgent : Receives requests
-Client --> ModelLibrary : Uses models
-ModelLibrary --> VsAgent : Provides data models
-NestJSClient --> ModelLibrary : Uses models
+    class Client {
+        + Directly manages requests to SA
+        + Facilitates reception of requests from modules
+        + Provides an abstraction for service communication
+        + Interfaces:
+        -- messages
+        -- credentialTypes
+        -- revocationRegistries
+        -- invitations
+    }
 
-@enduml
+    class ModelLibrary {
+        + Defines required data models
+        + Ensures type safety across services
+    }
+
+    %% Relations
+    NestJSClient --> VsAgent : Uses
+    Client --> VsAgent : Sends requests
+    Client --> VsAgent : Receives requests
+    Client --> ModelLibrary : Uses models
+    ModelLibrary --> VsAgent : Provides data models
+    NestJSClient --> ModelLibrary : Uses models
+
+    %% Style
+    style Client stroke:#333,stroke-width:4px
 ```
 
 ## Installation

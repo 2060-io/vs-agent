@@ -127,7 +127,23 @@ export REDIRECT_DEFAULT_URL_TO_INVITATION_URL=false
 
 ## Flow Diagram
 
-![Flow Diagram](docs/chatbot-example.png)
+```mermaid
+sequenceDiagram
+    actor User as DIDComm Wallet
+    participant Agent as VS Agent
+    participant Bot as Chatbot Service
+
+    User ->> Agent: Scan QR (invitation/qr)
+    Agent ->> User: Send invitation
+    User ->> Agent: Establish connection
+    Agent ->> Bot: Forward connection event (HTTP webhook)
+    Bot ->> Agent: Send message/menus
+    Agent ->> User: Deliver chat messages
+    User ->> Agent: Respond to bot
+    Agent ->> Bot: Forward user message
+    Bot ->> Agent: Issue credential offer
+    Agent ->> User: Deliver credential offer
+```
 
 ## Troubleshooting
 
