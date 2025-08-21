@@ -14,6 +14,7 @@ import {
   Buffer,
   DidDocumentService,
   DidDocument,
+  VerificationMethod,
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
@@ -38,7 +39,6 @@ interface WebVhDidUpdateOptions extends DidUpdateOptions {
   signer: Signer
   verifier?: Verifier
   domain?: string
-  updateKeys?: string[]
 }
 
 const normalizeMethodArray = (arr?: (string | { id: string })[]) =>
@@ -80,8 +80,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
         assertionMethod,
         keyAgreement,
         service,
-        verificationMethod: verificationMethods,
+        verificationMethod: inputVerificationMethod,
       } = inputDidDocument
+      const verificationMethods =
+        inputVerificationMethod ?? (log[log.length - 1].state.verificationMethod as VerificationMethod[])
+      const updateKeys = log[log.length - 1].parameters.updateKeys
       if (!verificationMethods || verificationMethods.length === 0) {
         return {
           didDocumentMetadata: {},
@@ -114,6 +117,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         signer,
         verifier,
         domain,
+        updateKeys,
         ...inputDidDocument,
         verificationMethods: verificationMethods.map(vm => ({
           ...vm,
