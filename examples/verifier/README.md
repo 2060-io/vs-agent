@@ -37,7 +37,23 @@ cd vs-agent/examples/verifier
 
 ## Flow Diagram
 
-![Flow Diagram](docs/verifier-example.png)
+```mermaid
+sequenceDiagram
+    actor User as DIDComm Wallet
+    participant Agent as VS Agent
+    participant Verifier as Verifier Service
+
+    User ->> Agent: Scan QR (invitation/qr)
+    Agent ->> User: Send invitation
+    User ->> Agent: Establish connection
+    Agent ->> Verifier: Forward connection event
+    Verifier ->> Agent: Send proof request
+    Agent ->> User: Deliver presentation request
+    User ->> Agent: Present credential
+    Agent ->> Verifier: Forward presentation
+    Verifier ->> Agent: Send verification result
+    Agent ->> User: Deliver result
+```
 
 ## Usage
 
