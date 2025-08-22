@@ -17,7 +17,7 @@ import {
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
-import { createDID, multibaseDecode, multibaseEncode, MultibaseEncoding, updateDID } from 'didwebvh-ts'
+import { createDID, DIDLog, multibaseDecode, multibaseEncode, MultibaseEncoding, updateDID } from 'didwebvh-ts'
 
 import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 
@@ -56,7 +56,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       })
       if (!didRecord) return this.handleError('DID record not found.')
 
-      const log = didRecord.metadata.get('log') as any[]
+      const log = didRecord.metadata.get('log') as DIDLog
       if (!log) return this.handleError('The log registry must be created before it can be edited.')
 
       const {
