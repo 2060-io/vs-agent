@@ -29,6 +29,7 @@ import { QuestionAnswerModule } from '@credo-ts/question-answer'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
@@ -92,7 +93,12 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
         tailsFileService: new FullTailsFileService({
           tailsServerBaseUrl: `${options.publicApiBaseUrl}/anoncreds/v1/tails`,
         }),
-        registries: [new WebVhAnonCredsRegistry()],
+        registries: [
+          new DidWebAnonCredsRegistry({
+            cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },
+          }),
+          new WebVhAnonCredsRegistry(),
+        ],
       }),
       actionMenu: new ActionMenuModule(),
       calls: new DidCommCallsModule(),
