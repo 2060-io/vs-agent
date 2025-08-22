@@ -50,7 +50,10 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { did, domain, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const didRecord = await didRepository.findCreatedDid(agentContext, did)
+      const didRecord = await didRepository.getSingleByQuery(agentContext, {
+        role: DidDocumentRole.Created,
+        did,
+      })
       if (!didRecord) return this.handleError('DID record not found.')
 
       const log = didRecord.metadata.get('log') as any[]
