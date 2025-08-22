@@ -21,7 +21,10 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did, method: 'web' })
+      let [didRecord] = await agent.dids.getCreatedDids({ did: agent.did, method: 'web' })
+      if (!didRecord) {
+        ;[didRecord] = await agent.dids.getCreatedDids({ did: agent.did, method: 'webvh' })
+      }
       const didDocument = didRecord.didDocument
       if (didDocument) {
         return didDocument
