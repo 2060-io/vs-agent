@@ -231,21 +231,22 @@ export const setupAgent = async ({
       const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
 
       if (didRecord) {
-        logger.error(`DID:webvh with domain "${domain}" already exists`)
-        throw new Error(`DID:webvh with domain "${domain}" already exists`)
+        logger.debug(`DID:webvh with domain "${domain}" already exists`)
+        agent.did = didRecord.did
+      } else {
+        const {
+          didState: { did, didDocument: createdDoc },
+        } = await agent.dids.create({ method: 'webvh', domain })
+        if (!did || !createdDoc) {
+          logger.error('Failed to create did:webvh record')
+          process.exit(1)
+        }
+        // Basic services
+        createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
+        await agent.dids.update({ did, didDocument: createdDoc, domain })
+        logger?.debug('Public did:webvh record created')
+        agent.did = did
       }
-      const {
-        didState: { did, didDocument: createdDoc },
-      } = await agent.dids.create({ method: 'webvh', domain })
-      if (!did || !createdDoc) {
-        logger.error('Failed to create did:webvh record')
-        process.exit(1)
-      }
-      // Basic services
-      createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
-      await agent.dids.update({ did, didDocument: createdDoc, domain })
-      logger?.debug('Public did:webvh record created')
-      agent.did = did
     }
   }
 
