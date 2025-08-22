@@ -9,6 +9,7 @@ import { Response } from 'express'
 import * as fs from 'fs'
 
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
+import { VsAgent } from '../../../utils/VsAgent'
 
 @Controller()
 export class DidWebController {
@@ -22,9 +23,7 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-      const domain = agent.did.split(':').pop()
-      const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+      const didRecord = await resolveDidRecord(agent)
       const didDocument = didRecord?.didDocument
       if (didDocument) {
         return didDocument
@@ -41,8 +40,8 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
-      const didDocument = didRecord.didDocument
+      const didRecord = await resolveDidRecord(agent)
+      const didDocument = didRecord?.didDocument
       if (didDocument) {
         const jsonl = JSON.stringify(didRecord.metadata.get('log'))
         res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
@@ -194,4 +193,20 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+}
+
+async function resolveDidRecord(agent: VsAgent) {
+  if (!agent?.did) {
+    throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+  }
+
+  const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+  const domain = agent.did.split(':').pop()
+  const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+
+  if (!didRecord) {
+    throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+  }
+
+  return didRecord
 }
