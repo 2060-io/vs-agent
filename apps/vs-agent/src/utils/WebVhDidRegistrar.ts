@@ -4,17 +4,16 @@ import {
   DidCreateResult,
   DidDeactivateOptions,
   DidDeactivateResult,
-  DidDocumentRole,
-  DidRecord,
   DidRegistrar,
   DidRepository,
   DidUpdateOptions,
   DidUpdateResult,
   KeyType,
   Buffer,
-  DidDocumentService,
   DidDocument,
   VerificationMethod,
+  DidRecord,
+  DidDocumentRole,
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
@@ -32,7 +31,6 @@ import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 
 interface WebVhDidCreateOptions extends DidCreateOptions {
   domain: string
-  services?: DidDocumentService[]
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
@@ -74,7 +72,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { did, domain, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const [didRecord] = await didRepository.getCreatedDids(agentContext, { did, method: 'webvh' })
+      const [didRecord] = await didRepository.getCreatedDids(agentContext, { method: 'webvh' })
       const log = didRecord.metadata.get('log') as any[]
       if (!log) {
         return {
@@ -92,12 +90,12 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication,
         assertionMethod,
         keyAgreement,
-        service,
+        service: services,
         verificationMethod: inputVerificationMethod,
       } = inputDidDocument
       const verificationMethods =
         inputVerificationMethod ?? (log[log.length - 1].state.verificationMethod as VerificationMethod[])
-      const updateKeys = log[log.length - 1].parameters.updateKeys
+      const { updateKeys } = log[log.length - 1].parameters
       if (!verificationMethods?.length || !verificationMethods[0].publicKeyMultibase) {
         return {
           didDocumentMetadata: {},
@@ -129,7 +127,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication: normalizeMethodArray(authentication),
         assertionMethod: normalizeMethodArray(assertionMethod),
         keyAgreement: normalizeMethodArray(keyAgreement),
-        services: service?.map(svc => JSON.parse(JSON.stringify(svc).replace(/{DID}/g, did))),
+        services,
       })
 
       const didDocument = new DidDocument(doc)
@@ -173,13 +171,15 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain, services } = options
+      const { domain } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+      const [didRecord] = await didRepository.getCreatedDids(agentContext, { method: 'webvh' })
 
       // Create crypto instance
       const publicKeyMultibase = await this.generatePublicKey(agentContext)
       const signer = new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
       const verifier = new WebvhDidCrypto(agentContext)
+      const baseDid = `did:webvh:{SCID}:${domain}`
 
       // Create DID
       const { did, doc, log } = await createDID({
@@ -188,7 +188,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         updateKeys: [publicKeyMultibase],
         verificationMethods: [
           {
-            controller: `did:webvh:{SCID}:${domain}`,
+            controller: baseDid,
             type: 'Ed25519VerificationKey2018',
             publicKeyMultibase,
           },
@@ -198,25 +198,22 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
       // Save didRegistry
       const didDocument = new DidDocument(doc)
-      const didRecord = new DidRecord({
+      const existingServices = didRecord.didDocument?.service
+      const newRecord = new DidRecord({
         did,
-        role: DidDocumentRole.Created,
         didDocument,
+        role: DidDocumentRole.Created,
       })
-      didRecord.metadata.set('log', log)
-      await didRepository.save(agentContext, didRecord)
-      agentContext.config.logger.info('Public didWebVh record saved')
+      newRecord.metadata.set('log', log)
+      newRecord.id = didRecord.id
+      await didRepository.update(agentContext, newRecord)
+      agentContext.config.logger.info('Public didWebVh record created')
 
-      // Add default services if are provided
-      if (services && services.length > 0) {
-        didDocument.service = services
-        return await this._update(agentContext, {
-          did,
-          didDocument,
-          signer,
-          verifier,
-          domain,
-        })
+      if (existingServices?.length) {
+        didDocument.service = existingServices.map(svc =>
+          JSON.parse(JSON.stringify(svc).replace(/SCID/g, log[0].parameters.scid!)),
+        )
+        return this._update(agentContext, { did, didDocument, signer, verifier, domain })
       }
 
       return {
