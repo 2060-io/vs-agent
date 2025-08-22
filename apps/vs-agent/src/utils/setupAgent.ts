@@ -1,12 +1,9 @@
 import {
-  ConnectionEventTypes,
-  ConnectionStateChangedEvent,
   convertPublicKeyToX25519,
   DidCommV1Service,
   DidDocumentBuilder,
   DidDocumentRole,
   DidDocumentService,
-  DidExchangeState,
   DidRecord,
   DidRepository,
   HttpOutboundTransport,
@@ -106,23 +103,6 @@ export const setupAgent = async ({
     // If a public did is specified, check if it's already stored in the wallet. If it's not the case,
     // create a new one and generate keys for DIDComm (if there are endpoints configured)
     // TODO: Make DIDComm version, keys, etc. configurable. Keys can also be imported
-
-    // Auto-accept connections that go to the public did
-    agent.events.on(
-      ConnectionEventTypes.ConnectionStateChanged,
-      async (data: ConnectionStateChangedEvent) => {
-        logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
-        const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
-        if (
-          oob?.outOfBandInvitation.id === publicDid &&
-          data.payload.connectionRecord.state === DidExchangeState.RequestReceived
-        ) {
-          logger.debug(`Incoming connection request for ${publicDid}`)
-          await agent.connections.acceptRequest(data.payload.connectionRecord.id)
-          logger.debug(`Accepted request for ${publicDid}`)
-        }
-      },
-    )
 
     const didRepository = agent.context.dependencyManager.resolve(DidRepository)
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
