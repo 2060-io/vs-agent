@@ -3,6 +3,7 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
+import { DidRepository } from '@credo-ts/core'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
 import { Response } from 'express'
 import * as fs from 'fs'
@@ -21,8 +22,10 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
     if (agent.did) {
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      const didDocument = didRecord.didDocument
+      const didRepository = agent.context.dependencyManager.resolve(DidRepository)
+      const domain = agent.did.split(':').pop()
+      const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+      const didDocument = didRecord?.didDocument
       if (didDocument) {
         return didDocument
       } else {
