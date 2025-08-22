@@ -2,7 +2,7 @@ import 'reflect-metadata'
 
 import type { ServerConfig } from './utils/ServerConfig'
 
-import { DidCommV1Service, KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
+import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
@@ -144,6 +144,13 @@ const run = async () => {
     masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
   })
 
+  // Create did:webvh
+  if (publicDid?.method === 'webvh') {
+    const domain = new URL(endpoints[0]).host
+    const created = await agent.dids.create({ method: 'webvh', domain })
+    agent.did = created.didState.did
+  }
+
   const discoveryOptions = (() => {
     try {
       return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'discovery.json'), 'utf-8'))
@@ -165,27 +172,8 @@ const run = async () => {
   await startServers(agent, conf)
 
   // Initialize Self-Trust Registry
-  await setupSelfTr({ agent, publicApiBaseUrl })
-
-  // Create did:webvh
-  const [didRecord] = await agent.dids.getCreatedDids({ method: 'webvh' })
-  if (!didRecord) {
-    const domain = new URL(endpoints[0]).host
-
-    const services = endpoints.map(
-      (endpoint, i) =>
-        new DidCommV1Service({
-          id: `{DID}#did-communication`,
-          serviceEndpoint: endpoint,
-          priority: i,
-          routingKeys: [], // TODO: Support mediation
-          recipientKeys: [`{DID}#key-agreement-1`],
-          accept: ['didcomm/aip2;env=rfc19'],
-        }),
-    )
-
-    await agent.dids.create({ method: 'webvh', domain, services })
-  }
+  // TODO: Must be enabled for webvh
+  publicDid?.method === 'web' && (await setupSelfTr({ agent, publicApiBaseUrl }))
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
