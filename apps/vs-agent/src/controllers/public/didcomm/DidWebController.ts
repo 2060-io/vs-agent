@@ -22,16 +22,12 @@ export class DidWebController {
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
-    if (agent.did) {
-      const didRecord = await resolveDidRecord(agent)
-      const didDocument = didRecord?.didDocument
-      if (didDocument) {
-        return didDocument
-      } else {
-        throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
-      }
+    const didRecord = await resolveDidRecord(agent)
+    const didDocument = didRecord?.didDocument
+    if (didDocument) {
+      return didDocument
     } else {
-      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
     }
   }
 
@@ -39,19 +35,15 @@ export class DidWebController {
   async getDidDocumentLD(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
-    if (agent.did) {
-      const didRecord = await resolveDidRecord(agent)
-      const didDocument = didRecord?.didDocument
-      if (didDocument) {
-        const jsonl = JSON.stringify(didRecord.metadata.get('log'))
-        res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
-        res.setHeader('Cache-Control', 'no-cache')
-        res.send(jsonl)
-      } else {
-        throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
-      }
+    const didRecord = await resolveDidRecord(agent)
+    const didDocument = didRecord?.didDocument
+    if (didDocument) {
+      const jsonl = JSON.stringify(didRecord.metadata.get('log'))
+      res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
+      res.setHeader('Cache-Control', 'no-cache')
+      res.send(jsonl)
     } else {
-      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
     }
   }
 
