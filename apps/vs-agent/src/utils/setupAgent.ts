@@ -9,6 +9,7 @@ import {
   HttpOutboundTransport,
   KeyType,
   LogLevel,
+  ParsedDid,
   TypedArrayEncoder,
   WalletConfig,
 } from '@credo-ts/core'
@@ -31,7 +32,7 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   publicApiBaseUrl,
-  publicDid,
+  parsedDid,
   autoDiscloseUserProfile,
   masterListCscaLocation,
 }: {
@@ -43,10 +44,11 @@ export const setupAgent = async ({
   logLevel?: LogLevel
   publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
-  publicDid?: string
+  parsedDid?: ParsedDid
   masterListCscaLocation?: string
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
+  const publicDid = parsedDid?.did
 
   if (endpoints.length === 0) {
     throw new Error('There are no DIDComm endpoints defined. Please set at least one (e.g. wss://myhost)')
@@ -213,20 +215,40 @@ export const setupAgent = async ({
       )
     }
 
-    if (existingRecord) {
+    const didDocument = builder.build()
+    if (existingRecord && parsedDid?.method === 'web') {
       logger?.debug('Public did record updated')
-      existingRecord.didDocument = builder.build()
+      existingRecord.didDocument = didDocument
       await didRepository.update(agent.context, existingRecord)
-    } else {
+    } else if (!existingRecord && parsedDid?.method === 'web') {
       await didRepository.save(
         agent.context,
         new DidRecord({
           did: publicDid,
           role: DidDocumentRole.Created,
-          didDocument: builder.build(),
+          didDocument,
         }),
       )
       logger?.debug('Public did record saved')
+    }
+
+    const [didRecord] = await didRepository.getCreatedDids(agent.context, { method: 'webvh' })
+    if (!didRecord && parsedDid?.method === 'webvh') {
+      const domain = new URL(endpoints[0]).host
+      const {
+        didState: { did, didDocument: createdDoc },
+      } = await agent.dids.create({ method: 'webvh', domain })
+      if (!did || !createdDoc) {
+        logger.error('Failed to create did:webvh record')
+        process.exit(1)
+      }
+      // Updated by default
+      createdDoc.service = didDocument.service
+      await agent.dids.update({ did, didDocument: createdDoc, domain })
+      logger?.debug('Public did webvh record created')
+      agent.did = did
+    } else if (didRecord) {
+      agent.did = didRecord.did
     }
   }
 

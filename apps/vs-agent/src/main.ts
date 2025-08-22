@@ -137,19 +137,12 @@ const run = async () => {
     },
     label: AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
-    publicDid: publicDid?.did,
+    parsedDid: publicDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
     masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
   })
-
-  // Create did:webvh
-  if (publicDid?.method === 'webvh') {
-    const domain = new URL(endpoints[0]).host
-    const created = await agent.dids.create({ method: 'webvh', domain })
-    agent.did = created.didState.did
-  }
 
   const discoveryOptions = (() => {
     try {
