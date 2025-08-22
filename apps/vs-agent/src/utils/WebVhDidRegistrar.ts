@@ -50,18 +50,11 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { did, domain, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const [didRecord] = await didRepository.getCreatedDids(agentContext, { method: 'webvh' })
+      const didRecord = await didRepository.findCreatedDid(agentContext, did)
+      if (!didRecord) return this.handleError('DID record not found.')
+
       const log = didRecord.metadata.get('log') as any[]
-      if (!log) {
-        return {
-          didDocumentMetadata: {},
-          didRegistrationMetadata: {},
-          didState: {
-            state: 'failed',
-            reason: 'The log registry must be created before it can be edited',
-          },
-        }
-      }
+      if (!log) return this.handleError('The log registry must be created before it can be edited.')
 
       const {
         controller,
@@ -74,16 +67,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const verificationMethods =
         inputVerificationMethod ?? (log[log.length - 1].state.verificationMethod as VerificationMethod[])
       const { updateKeys } = log[log.length - 1].parameters
-      if (!verificationMethods?.length || !verificationMethods[0].publicKeyMultibase) {
-        return {
-          didDocumentMetadata: {},
-          didRegistrationMetadata: {},
-          didState: {
-            state: 'failed',
-            reason: 'At least one verification method must be provided.',
-          },
-        }
-      }
+      if (!verificationMethods?.length || !verificationMethods[0].publicKeyMultibase)
+        return this.handleError('At least one verification method must be provided.')
 
       // Get signer/verifier
       const signer = new WebvhDidCryptoSigner(agentContext, verificationMethods[0].publicKeyMultibase)
@@ -122,14 +107,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         },
       }
     } catch (error) {
-      return {
-        didDocumentMetadata: {},
-        didRegistrationMetadata: {},
-        didState: {
-          state: 'failed',
-          reason: error instanceof Error ? error.message : 'Unknown error occurred.',
-        },
-      }
+      return this.handleError(error instanceof Error ? error.message : 'Unknown error occurred.')
     }
   }
 
@@ -193,14 +171,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         },
       }
     } catch (error) {
-      return {
-        didDocumentMetadata: {},
-        didRegistrationMetadata: {},
-        didState: {
-          state: 'failed',
-          reason: error instanceof Error ? error.message : 'Unknown error occurred.',
-        },
-      }
+      return this.handleError(error instanceof Error ? error.message : 'Unknown error occurred.')
     }
   }
 
@@ -217,5 +188,16 @@ export class WebVhDidRegistrar implements DidRegistrar {
       keyType: KeyType.Ed25519,
     })
     return multibaseEncode(new Uint8Array([0xed, 0x01, ...key.publicKey]), MultibaseEncoding.BASE58_BTC)
+  }
+
+  private handleError(reason: string): DidUpdateResult | DidCreateResult {
+    return {
+      didDocumentMetadata: {},
+      didRegistrationMetadata: {},
+      didState: {
+        state: 'failed',
+        reason,
+      },
+    }
   }
 }
