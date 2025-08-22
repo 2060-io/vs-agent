@@ -192,18 +192,8 @@ export const setupAgent = async ({
       )
 
     // Create a set of keys suitable for did communication
-    for (let i = 0; i < agent.config.endpoints.length; i++) {
-      builder.addService(
-        new DidCommV1Service({
-          id: `${publicDid}#did-communication`,
-          serviceEndpoint: agent.config.endpoints[i],
-          priority: i,
-          routingKeys: [], // TODO: Support mediation
-          recipientKeys: [keyAgreementId],
-          accept: ['didcomm/aip2;env=rfc19'],
-        }),
-      )
-    }
+    const commServices = registerCommService(publicDid, agent.config.endpoints, keyAgreementId)
+    commServices.forEach(service => builder.addService(service))
 
     if (publicApiBaseUrl) {
       builder.addService(
@@ -243,7 +233,7 @@ export const setupAgent = async ({
         process.exit(1)
       }
       // Updated by default
-      createdDoc.service = didDocument.service
+      createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
       await agent.dids.update({ did, didDocument: createdDoc, domain })
       logger?.debug('Public did webvh record created')
       agent.did = did
@@ -282,4 +272,24 @@ export function commonAppConfig(app: INestApplication, cors?: boolean) {
     })
   }
   return app
+}
+
+function registerCommService(
+  publicDid: string,
+  endpoints: string[],
+  keyAgreementId: string,
+): DidCommV1Service[] {
+  const services = endpoints.map((endpoint, index) => {
+    const service = new DidCommV1Service({
+      id: `${publicDid}#did-communication`,
+      serviceEndpoint: endpoint,
+      priority: index,
+      routingKeys: [], // TODO: Support mediation
+      recipientKeys: [keyAgreementId],
+      accept: ['didcomm/aip2;env=rfc19'],
+    })
+
+    return service
+  })
+  return services
 }

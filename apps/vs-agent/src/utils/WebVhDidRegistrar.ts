@@ -68,12 +68,12 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication,
         assertionMethod,
         keyAgreement,
-        service: service,
+        service: services,
         verificationMethod: inputVerificationMethod,
       } = inputDidDocument
       const verificationMethods =
         inputVerificationMethod ?? (log[log.length - 1].state.verificationMethod as VerificationMethod[])
-      const { updateKeys, scid } = log[log.length - 1].parameters
+      const { updateKeys } = log[log.length - 1].parameters
       if (!verificationMethods?.length || !verificationMethods[0].publicKeyMultibase) {
         return {
           didDocumentMetadata: {},
@@ -104,7 +104,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         authentication: normalizeMethodArray(authentication),
         assertionMethod: normalizeMethodArray(assertionMethod),
         keyAgreement: normalizeMethodArray(keyAgreement),
-        services: service?.map(svc => JSON.parse(JSON.stringify(svc).replace(/SCID/g, scid))),
+        services,
       })
 
       const didDocument = new DidDocument(doc)
