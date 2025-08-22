@@ -17,7 +17,14 @@ import {
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
-import { createDID, DIDLog, multibaseDecode, multibaseEncode, MultibaseEncoding, updateDID } from 'didwebvh-ts'
+import {
+  createDID,
+  DIDLog,
+  multibaseDecode,
+  multibaseEncode,
+  MultibaseEncoding,
+  updateDID,
+} from 'didwebvh-ts'
 
 import { WebvhDidCryptoSigner } from './WebvhDidCryptoSigner'
 

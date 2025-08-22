@@ -206,25 +206,34 @@ export const setupAgent = async ({
     }
 
     const didDocument = builder.build()
-    if (existingRecord && parsedDid?.method === 'web') {
-      logger?.debug('Public did record updated')
-      existingRecord.didDocument = didDocument
-      await didRepository.update(agent.context, existingRecord)
-    } else if (!existingRecord && parsedDid?.method === 'web') {
-      await didRepository.save(
-        agent.context,
-        new DidRecord({
-          did: publicDid,
-          role: DidDocumentRole.Created,
-          didDocument,
-        }),
-      )
-      logger?.debug('Public did record saved')
+    // --- Handling did:web ---
+    if (parsedDid?.method === 'web') {
+      if (existingRecord) {
+        existingRecord.didDocument = didDocument
+        await didRepository.update(agent.context, existingRecord)
+        logger?.debug('Public did:web record updated')
+      } else {
+        await didRepository.save(
+          agent.context,
+          new DidRecord({
+            did: publicDid,
+            role: DidDocumentRole.Created,
+            didDocument,
+          }),
+        )
+        logger?.debug('Public did:web record saved')
+      }
     }
 
-    const domain = new URL(endpoints[0]).host
-    const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
-    if (!didRecord && parsedDid?.method === 'webvh') {
+    // --- Handling did:webvh ---
+    if (parsedDid?.method === 'webvh') {
+      const domain = new URL(endpoints[0]).host
+      const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+
+      if (didRecord) {
+        logger.error(`DID:webvh with domain "${domain}" already exists`)
+        throw new Error(`DID:webvh with domain "${domain}" already exists`)
+      }
       const {
         didState: { did, didDocument: createdDoc },
       } = await agent.dids.create({ method: 'webvh', domain })
@@ -232,13 +241,11 @@ export const setupAgent = async ({
         logger.error('Failed to create did:webvh record')
         process.exit(1)
       }
-      // Updated by default
+      // Basic services
       createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
       await agent.dids.update({ did, didDocument: createdDoc, domain })
-      logger?.debug('Public did webvh record created')
+      logger?.debug('Public did:webvh record created')
       agent.did = did
-    } else if (didRecord) {
-      agent.did = didRecord.did
     }
   }
 
