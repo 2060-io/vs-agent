@@ -109,6 +109,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
 
       const didDocument = new DidDocument(doc)
       didRecord.metadata.set('log', logResult)
+      didRecord.setTags({ domain })
       await didRepository.update(agentContext, didRecord)
 
       return {
@@ -179,6 +180,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         role: DidDocumentRole.Created,
       })
       didRecord.metadata.set('log', log)
+      didRecord.setTags({ domain })
       await didRepository.save(agentContext, didRecord)
 
       return {
