@@ -222,9 +222,9 @@ export const setupAgent = async ({
       logger?.debug('Public did record saved')
     }
 
-    const [didRecord] = await didRepository.getCreatedDids(agent.context, { method: 'webvh' })
+    const domain = new URL(endpoints[0]).host
+    const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
     if (!didRecord && parsedDid?.method === 'webvh') {
-      const domain = new URL(endpoints[0]).host
       const {
         didState: { did, didDocument: createdDoc },
       } = await agent.dids.create({ method: 'webvh', domain })
