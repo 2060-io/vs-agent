@@ -138,6 +138,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
     try {
       const { domain } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+      const record = await didRepository.findSingleByQuery(agentContext, { domain })
+      if (record) return this.handleError(`A record with domain "${domain}" already exists.`)
 
       // Create crypto instance
       const publicKeyMultibase = await this.generatePublicKey(agentContext)
