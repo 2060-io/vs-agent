@@ -111,8 +111,8 @@ const run = async () => {
   }
 
   // Check it is a supported DID method
-  if (publicDid && publicDid.method !== 'web') {
-    serverLogger.error('Only did:web method is supported')
+  if (publicDid && !['web', 'webvh'].includes(publicDid.method)) {
+    serverLogger.error('Only did:web or did:webvh method is supported')
     process.exit(1)
   }
 
@@ -137,7 +137,7 @@ const run = async () => {
     },
     label: AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
-    publicDid: publicDid?.did,
+    parsedDid: publicDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
@@ -165,7 +165,8 @@ const run = async () => {
   await startServers(agent, conf)
 
   // Initialize Self-Trust Registry
-  await setupSelfTr({ agent, publicApiBaseUrl })
+  // TODO: Must be enabled for webvh
+  if (publicDid?.method === 'web') await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

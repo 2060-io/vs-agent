@@ -26,6 +26,7 @@ import {
   V2ProofProtocol,
 } from '@credo-ts/core'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
+import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
@@ -33,6 +34,7 @@ import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { WebVhDidRegistrar } from './WebVhDidRegistrar'
 
 type VsAgentModules = {
   askar: AskarModule
@@ -95,6 +97,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           new DidWebAnonCredsRegistry({
             cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },
           }),
+          new WebVhAnonCredsRegistry(),
         ],
       }),
       actionMenu: new ActionMenuModule(),
@@ -111,7 +114,10 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           }),
         ],
       }),
-      dids: new DidsModule({ resolvers: [new CachedWebDidResolver()] }),
+      dids: new DidsModule({
+        resolvers: [new CachedWebDidResolver()],
+        registrars: [new WebVhDidRegistrar()],
+      }),
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
       proofs: new ProofsModule({
         autoAcceptProofs: AutoAcceptProof.ContentApproved,

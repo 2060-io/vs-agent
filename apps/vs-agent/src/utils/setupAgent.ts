@@ -1,17 +1,15 @@
 import {
-  ConnectionEventTypes,
-  ConnectionStateChangedEvent,
   convertPublicKeyToX25519,
   DidCommV1Service,
   DidDocumentBuilder,
   DidDocumentRole,
   DidDocumentService,
-  DidExchangeState,
   DidRecord,
   DidRepository,
   HttpOutboundTransport,
   KeyType,
   LogLevel,
+  ParsedDid,
   TypedArrayEncoder,
   WalletConfig,
 } from '@credo-ts/core'
@@ -34,7 +32,7 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   publicApiBaseUrl,
-  publicDid,
+  parsedDid,
   autoDiscloseUserProfile,
   masterListCscaLocation,
 }: {
@@ -46,10 +44,11 @@ export const setupAgent = async ({
   logLevel?: LogLevel
   publicApiBaseUrl: string
   autoDiscloseUserProfile?: boolean
-  publicDid?: string
+  parsedDid?: ParsedDid
   masterListCscaLocation?: string
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
+  const publicDid = parsedDid?.did
 
   if (endpoints.length === 0) {
     throw new Error('There are no DIDComm endpoints defined. Please set at least one (e.g. wss://myhost)')
@@ -106,23 +105,6 @@ export const setupAgent = async ({
     // If a public did is specified, check if it's already stored in the wallet. If it's not the case,
     // create a new one and generate keys for DIDComm (if there are endpoints configured)
     // TODO: Make DIDComm version, keys, etc. configurable. Keys can also be imported
-
-    // Auto-accept connections that go to the public did
-    agent.events.on(
-      ConnectionEventTypes.ConnectionStateChanged,
-      async (data: ConnectionStateChangedEvent) => {
-        logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
-        const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
-        if (
-          oob?.outOfBandInvitation.id === publicDid &&
-          data.payload.connectionRecord.state === DidExchangeState.RequestReceived
-        ) {
-          logger.debug(`Incoming connection request for ${publicDid}`)
-          await agent.connections.acceptRequest(data.payload.connectionRecord.id)
-          logger.debug(`Accepted request for ${publicDid}`)
-        }
-      },
-    )
 
     const didRepository = agent.context.dependencyManager.resolve(DidRepository)
     const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
@@ -210,18 +192,8 @@ export const setupAgent = async ({
       )
 
     // Create a set of keys suitable for did communication
-    for (let i = 0; i < agent.config.endpoints.length; i++) {
-      builder.addService(
-        new DidCommV1Service({
-          id: `${publicDid}#did-communication`,
-          serviceEndpoint: agent.config.endpoints[i],
-          priority: i,
-          routingKeys: [], // TODO: Support mediation
-          recipientKeys: [keyAgreementId],
-          accept: ['didcomm/aip2;env=rfc19'],
-        }),
-      )
-    }
+    const commServices = registerCommService(publicDid, agent.config.endpoints, keyAgreementId)
+    commServices.forEach(service => builder.addService(service))
 
     if (publicApiBaseUrl) {
       builder.addService(
@@ -233,20 +205,48 @@ export const setupAgent = async ({
       )
     }
 
-    if (existingRecord) {
-      logger?.debug('Public did record updated')
-      existingRecord.didDocument = builder.build()
-      await didRepository.update(agent.context, existingRecord)
-    } else {
-      await didRepository.save(
-        agent.context,
-        new DidRecord({
-          did: publicDid,
-          role: DidDocumentRole.Created,
-          didDocument: builder.build(),
-        }),
-      )
-      logger?.debug('Public did record saved')
+    const didDocument = builder.build()
+    // --- Handling did:web ---
+    if (parsedDid?.method === 'web') {
+      if (existingRecord) {
+        existingRecord.didDocument = didDocument
+        await didRepository.update(agent.context, existingRecord)
+        logger?.debug('Public did:web record updated')
+      } else {
+        await didRepository.save(
+          agent.context,
+          new DidRecord({
+            did: publicDid,
+            role: DidDocumentRole.Created,
+            didDocument,
+          }),
+        )
+        logger?.debug('Public did:web record saved')
+      }
+    }
+
+    // --- Handling did:webvh ---
+    if (parsedDid?.method === 'webvh') {
+      const domain = new URL(endpoints[0]).host
+      const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+
+      if (didRecord) {
+        logger.debug(`DID:webvh with domain "${domain}" already exists`)
+        agent.did = didRecord.did
+      } else {
+        const {
+          didState: { did, didDocument: createdDoc },
+        } = await agent.dids.create({ method: 'webvh', domain })
+        if (!did || !createdDoc) {
+          logger.error('Failed to create did:webvh record')
+          process.exit(1)
+        }
+        // Basic services
+        createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
+        await agent.dids.update({ did, didDocument: createdDoc, domain })
+        logger?.debug('Public did:webvh record created')
+        agent.did = did
+      }
     }
   }
 
@@ -280,4 +280,24 @@ export function commonAppConfig(app: INestApplication, cors?: boolean) {
     })
   }
   return app
+}
+
+function registerCommService(
+  publicDid: string,
+  endpoints: string[],
+  keyAgreementId: string,
+): DidCommV1Service[] {
+  const services = endpoints.map((endpoint, index) => {
+    const service = new DidCommV1Service({
+      id: `${publicDid}#did-communication`,
+      serviceEndpoint: endpoint,
+      priority: index,
+      routingKeys: [], // TODO: Support mediation
+      recipientKeys: [keyAgreementId],
+      accept: ['didcomm/aip2;env=rfc19'],
+    })
+
+    return service
+  })
+  return services
 }

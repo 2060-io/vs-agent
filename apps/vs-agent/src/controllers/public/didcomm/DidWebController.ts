@@ -7,8 +7,8 @@ import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '
 import { Response } from 'express'
 import * as fs from 'fs'
 
-import { baseFilePath, tailsIndex } from '../../../services'
-import { VsAgentService } from '../../../services/VsAgentService'
+import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
+import { VsAgent } from '../../../utils/VsAgent'
 
 @Controller()
 export class DidWebController {
@@ -21,16 +21,28 @@ export class DidWebController {
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
     agent.config.logger.info(`Public DidDocument requested`)
-    if (agent.did) {
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-      const didDocument = didRecord.didDocument
-      if (didDocument) {
-        return didDocument
-      } else {
-        throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
-      }
+    const didRecord = await resolveDidRecord(agent)
+    const didDocument = didRecord?.didDocument
+    if (didDocument) {
+      return didDocument
     } else {
-      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+    }
+  }
+
+  @Get('/.well-known/did.jsonl')
+  async getDidDocumentLD(@Res() res: Response) {
+    const agent = await this.agentService.getAgent()
+    agent.config.logger.info(`Public DidDocument requested`)
+    const didRecord = await resolveDidRecord(agent)
+    const didDocument = didRecord?.didDocument
+    if (didDocument) {
+      const jsonl = JSON.stringify(didRecord.metadata.get('log'))
+      res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
+      res.setHeader('Cache-Control', 'no-cache')
+      res.send(jsonl)
+    } else {
+      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
     }
   }
 
@@ -172,4 +184,17 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+}
+
+async function resolveDidRecord(agent: VsAgent) {
+  if (!agent.did) {
+    throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+  }
+  const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+
+  if (!didRecord) {
+    throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+  }
+
+  return didRecord
 }

@@ -131,4 +131,18 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
       await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
     },
   )
+
+  // Auto-accept connections that go to the public did
+  agent.events.on(ConnectionEventTypes.ConnectionStateChanged, async (data: ConnectionStateChangedEvent) => {
+    config.logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
+    const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
+    if (
+      oob?.outOfBandInvitation.id === agent.did &&
+      data.payload.connectionRecord.state === DidExchangeState.RequestReceived
+    ) {
+      config.logger.debug(`Incoming connection request for ${agent.did}`)
+      await agent.connections.acceptRequest(data.payload.connectionRecord.id)
+      config.logger.debug(`Accepted request for ${agent.did}`)
+    }
+  })
 }
