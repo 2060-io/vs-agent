@@ -136,9 +136,9 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
     try {
-      const { domain } = options
+      const { domain, method = 'webvh' } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const record = await didRepository.findSingleByQuery(agentContext, { domain })
+      const record = await didRepository.findSingleByQuery(agentContext, { domain, method })
       if (record) return this.handleError(`A record with domain "${domain}" already exists.`)
 
       // Create crypto instance
