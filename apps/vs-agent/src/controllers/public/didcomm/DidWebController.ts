@@ -3,7 +3,6 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { DidRepository } from '@credo-ts/core'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
 import { Response } from 'express'
 import * as fs from 'fs'
@@ -188,13 +187,10 @@ export class DidWebController {
 }
 
 async function resolveDidRecord(agent: VsAgent) {
-  if (!agent?.did) {
+  if (!agent.did) {
     throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
   }
-
-  const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-  const domain = agent.did.split(':').pop()
-  const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
+  const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
   if (!didRecord) {
     throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
