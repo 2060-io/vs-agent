@@ -26,7 +26,7 @@ These variables are usually important for every deployment, since they define ho
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
 In order to make your agent reachable by other VS agents and user agents like Hologram, you need to expose your `AGENT_PORT` to the internet. For `did:web`, you must define an `AGENT_PUBLIC_DID` matching the external hostname (e.g. if your VS-A instance public interface is accessible at `https://myagent.com:3001`, you must set `AGENT_PUBLIC_DID` to `did:web:myagent.com%3A3001`).
-For `did:webvh`, the value of `SCID` is calculated automatically, so you must omit `AGENT_PUBLIC_DID` and let the service generate the actual DID.
+For `did:webvh`, the `SCID` is calculated automatically, and only the domain-based DID (`did:webvh:domain`) should be configured in the `AGENT_PUBLIC_DID` environment variable.
 
 > **Note**: Although it is possible to run VS Agent without any public DID, it is mandatory to do so in order to make possible for the agent to create its own credential types and therefore issue credentials. Note that you'll need HTTPS in order to fully support did:web specification.
 >
