@@ -166,7 +166,7 @@ const run = async () => {
 
   // Initialize Self-Trust Registry
   // TODO: Must be enabled for webvh
-  publicDid?.method === 'web' && (await setupSelfTr({ agent, publicApiBaseUrl }))
+  if (publicDid?.method === 'web') await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
