@@ -19,9 +19,6 @@ overrides:
   '@credo-ts/anoncreds': 0.5.11
 
 patchedDependencies:
-  '@credo-ts/webvh':
-    hash: eduukar37ftvv4psrrmv3gboa4
-    path: patches/@credo-ts__webvh.patch
   didwebvh-ts:
     hash: 62ugs4ac352w4mzq7mdr2h7wjy
     path: patches/didwebvh-ts.patch
@@ -124,8 +121,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/webvh':
-        specifier: 0.5.17-alpha-20250827115113
-        version: 0.5.17-alpha-20250827115113(patch_hash=eduukar37ftvv4psrrmv3gboa4)(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
+        specifier: 0.5.17-alpha-20250828184632
+        version: 0.5.17-alpha-20250828184632(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@hyperledger/anoncreds-nodejs':
         specifier: 0.2.4
         version: 0.2.4
@@ -1198,8 +1195,8 @@ packages:
   '@credo-ts/question-answer@0.5.11':
     resolution: {integrity: sha512-ls/NFaWCh+iHR4U88BcJZ8l2hhZ1dUI+cZu6irBnWhKMz4www4x+azhX9BZ9Ejq3BM7CcTvGYaTvUJjskhnN5Q==}
 
-  '@credo-ts/webvh@0.5.17-alpha-20250827115113':
-    resolution: {integrity: sha512-ZDu1MY0Zz0bXNPH+luGYRIu5FuovS4P/5rbv0FK1jTrgwO6kIT5WgBwZdZFrtf0CVCKjDaUzXUjPlaiqgcsuPg==}
+  '@credo-ts/webvh@0.5.17-alpha-20250828184632':
+    resolution: {integrity: sha512-T8qCZAOCTUOPo4mhcQI1SXt4FB5HMZsNJz8fotO6THal2N5hzwKom7Oz8PgfCr77svgcqGc8b5/DzhRIBxTlqQ==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -7840,7 +7837,7 @@ snapshots:
       - supports-color
       - web-streams-polyfill
 
-  '@credo-ts/webvh@0.5.17-alpha-20250827115113(patch_hash=eduukar37ftvv4psrrmv3gboa4)(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)':
+  '@credo-ts/webvh@0.5.17-alpha-20250828184632(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@credo-ts/anoncreds': 0.5.11(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@credo-ts/core': 0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
