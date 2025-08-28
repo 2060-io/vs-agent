@@ -178,7 +178,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
         keyAgreement: normalizeMethodArray(keyAgreement),
         services,
       })
-      console.log(`logResult: ${JSON.stringify(logResult)}`)
       didRecord.metadata.set('log', logResult)
       didRecord.didDocument = inputDidDocument
       await didRepository.update(agentContext, didRecord)
