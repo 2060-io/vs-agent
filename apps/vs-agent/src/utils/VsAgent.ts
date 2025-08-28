@@ -23,7 +23,6 @@ import {
   CredoError,
   DidCommV1Service,
   DidDocument,
-  DidDocumentBuilder,
   DidDocumentService,
   DidRepository,
   DidsModule,
@@ -75,13 +74,13 @@ interface AgentOptions<VsAgentModules> {
 export class VsAgent extends Agent<VsAgentModules> {
   public did?: string
   public autoDiscloseUserProfile?: boolean
-  public publicApiBaseUrl?: string
+  public publicApiBaseUrl: string
 
   public constructor(
     options: AgentOptions<VsAgentModules> & {
       did?: string
       autoDiscloseUserProfile?: boolean
-      publicApiBaseUrl?: string
+      publicApiBaseUrl: string
     },
   ) {
     super(options)
@@ -114,62 +113,39 @@ export class VsAgent extends Agent<VsAgentModules> {
       // DID has not been created yet. Let's do it
       if (!existingRecord) {
         if (parsedDid.method === 'web') {
+          const didDocument = new DidDocument({ id: parsedDid.did })
+          await this.createAndAddDidCommKeysAndServices(didDocument)
+
+          // Add Self TR
+          await this.createAndAddLinkedVpServices(didDocument)
+
+          // Add AnonCreds Services
+          await this.createAndAddAnonCredsServices(didDocument)
+
           await this.dids.create({
             method: 'web',
             domain,
-            didDocument: await this.buildDidDocument(parsedDid.did),
+            didDocument,
           })
           this.did = parsedDid.did
         } else if (parsedDid.method === 'webvh') {
           const {
-            didState: { did: publicDid, didDocument: createdDoc },
+            didState: { did: publicDid, didDocument },
           } = await this.dids.create({ method: 'webvh', domain })
-          if (!publicDid || !createdDoc) {
+          if (!publicDid || !didDocument) {
             this.logger.error('Failed to create did:webvh record')
             process.exit(1)
           }
 
           // Add DIDComm services and keys
-          const {
-            verificationMethods,
-            authentication,
-            assertionMethod,
-            keyAgreement,
-            services: didcommServices,
-            context,
-          } = await this.createDidCommKeysAndServices(publicDid)
-          createdDoc.context = [...(createdDoc.context ?? []), ...context]
-          createdDoc.verificationMethod = [...(createdDoc.verificationMethod ?? []), ...verificationMethods]
-          createdDoc.authentication = [...(createdDoc.authentication ?? []), authentication]
-          createdDoc.assertionMethod = [...(createdDoc.assertionMethod ?? []), assertionMethod]
-          createdDoc.keyAgreement = [...(createdDoc.keyAgreement ?? []), keyAgreement]
-          createdDoc.service = [...(createdDoc.service ?? []), ...didcommServices]
+          await this.createAndAddDidCommKeysAndServices(didDocument)
 
-          // Add Self-TR services
-          createdDoc.service = [
-            ...(createdDoc.service ?? []),
-            ...[
-              new DidDocumentService({
-                id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-                serviceEndpoint: `${this.publicApiBaseUrl}/self-tr`,
-                type: 'VerifiablePublicRegistry',
-              }),
-              new DidDocumentService({
-                id: `${publicDid}#vpr-ecs-service-c-vp`,
-                serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
-                type: 'LinkedVerifiablePresentation',
-              }),
-              new DidDocumentService({
-                id: `${publicDid}#vpr-ecs-org-c-vp`,
-                serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
-                type: 'LinkedVerifiablePresentation',
-              }),
-            ],
-          ]
-          console.log(`createdDoc: ${JSON.stringify(createdDoc)}`)
+          // Add Linked VP services
+          await this.createAndAddLinkedVpServices(didDocument)
 
           // TODO: Add AnonCreds services once it is supported
-          const result = await this.dids.update({ did: publicDid, didDocument: createdDoc })
+
+          const result = await this.dids.update({ did: publicDid, didDocument })
           if (result.didState.state !== 'finished') {
             this.logger.error(`Cannot update DID ${publicDid}`)
             process.exit(1)
@@ -209,66 +185,6 @@ export class VsAgent extends Agent<VsAgentModules> {
     }
   }
 
-  private async buildDidDocument(publicDid: string) {
-    const {
-      verificationMethods,
-      authentication,
-      assertionMethod,
-      keyAgreement,
-      services: didcommServices,
-      context,
-    } = await this.createDidCommKeysAndServices(publicDid)
-
-    const builder = new DidDocumentBuilder(publicDid)
-
-    builder
-      .addContext(context[0])
-      .addContext(context[1])
-      .addVerificationMethod(verificationMethods[0])
-      .addVerificationMethod(verificationMethods[1])
-      .addAuthentication(authentication)
-      .addAssertionMethod(assertionMethod)
-      .addKeyAgreement(keyAgreement)
-
-    didcommServices.forEach(service => builder.addService(service))
-
-    // Create a set of keys suitable for did self issued
-    builder
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr`,
-          type: 'VerifiablePublicRegistry',
-        }),
-      )
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-service-c-vp`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
-          type: 'LinkedVerifiablePresentation',
-        }),
-      )
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-org-c-vp`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
-          type: 'LinkedVerifiablePresentation',
-        }),
-      )
-
-    if (this.publicApiBaseUrl) {
-      builder.addService(
-        new DidDocumentService({
-          id: `${publicDid}#anoncreds`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/anoncreds/v1`,
-          type: 'AnonCredsRegistry',
-        }),
-      )
-    }
-
-    return builder.build()
-  }
-
   private async findCreatedDid(parsedDid: ParsedDid) {
     const didRepository = this.dependencyManager.resolve(DidRepository)
 
@@ -296,7 +212,9 @@ export class VsAgent extends Agent<VsAgentModules> {
     })
   }
 
-  private async createDidCommKeysAndServices(publicDid: string) {
+  private async createAndAddDidCommKeysAndServices(didDocument: DidDocument) {
+    const publicDid = didDocument.id
+
     const context = [
       'https://w3id.org/security/suites/ed25519-2018/v1',
       'https://w3id.org/security/suites/x25519-2019/v1',
@@ -327,9 +245,52 @@ export class VsAgent extends Agent<VsAgentModules> {
     const assertionMethod = verificationMethodId
     const keyAgreement = keyAgreementId
 
-    const services = this.getDidCommServices(publicDid)
+    const didcommServices = this.getDidCommServices(publicDid)
 
-    return { context, verificationMethods, authentication, assertionMethod, keyAgreement, services }
+    didDocument.context = [...(didDocument.context ?? []), ...context]
+    didDocument.verificationMethod = [...(didDocument.verificationMethod ?? []), ...verificationMethods]
+    didDocument.authentication = [...(didDocument.authentication ?? []), authentication]
+    didDocument.assertionMethod = [...(didDocument.assertionMethod ?? []), assertionMethod]
+    didDocument.keyAgreement = [...(didDocument.keyAgreement ?? []), keyAgreement]
+    didDocument.service = [...(didDocument.service ?? []), ...didcommServices]
+  }
+
+  private async createAndAddLinkedVpServices(didDocument: DidDocument) {
+    const publicDid = didDocument.id
+    didDocument.service = [
+      ...(didDocument.service ?? []),
+      ...[
+        // FIXME: remove VerifiablePublicRegistry service. this is not part of a service DID Document
+        // It is here because verre is forcing us to have it for self signed ECS creds
+        new DidDocumentService({
+          id: `${publicDid}#vpr-schemas-trust-registry-1234`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr`,
+          type: 'VerifiablePublicRegistry',
+        }),
+        new DidDocumentService({
+          id: `${publicDid}#vpr-schemas-service-c-vp`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+        new DidDocumentService({
+          id: `${publicDid}#vpr-schemas-org-c-vp`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+      ],
+    ]
+  }
+
+  private async createAndAddAnonCredsServices(didDocument: DidDocument) {
+    const publicDid = didDocument.id
+    didDocument.service = [
+      ...(didDocument.service ?? []),
+      new DidDocumentService({
+        id: `${publicDid}#anoncreds`,
+        serviceEndpoint: `${this.publicApiBaseUrl}/anoncreds/v1`,
+        type: 'AnonCredsRegistry',
+      }),
+    ]
   }
 }
 

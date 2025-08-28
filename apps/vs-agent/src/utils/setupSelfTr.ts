@@ -166,7 +166,7 @@ async function generateVerifiableCredential(
     ? credentialSchema
     : await addDigestSRI(credentialSchema.id, credentialSchema, ecsSchemas)
 
-  // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated 
+  // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
   const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
     method => method.type === 'Ed25519VerificationKey2018',
