@@ -1,18 +1,4 @@
-import {
-  convertPublicKeyToX25519,
-  DidCommV1Service,
-  DidDocumentBuilder,
-  DidDocumentRole,
-  DidDocumentService,
-  DidRecord,
-  DidRepository,
-  HttpOutboundTransport,
-  KeyType,
-  LogLevel,
-  ParsedDid,
-  TypedArrayEncoder,
-  WalletConfig,
-} from '@credo-ts/core'
+import { HttpOutboundTransport, LogLevel, ParsedDid, WalletConfig } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -71,184 +57,23 @@ export const setupAgent = async ({
   })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
-  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
-
-  let webSocketServer: WebSocket.Server | undefined
-  let httpInboundTransport: HttpInboundTransport | undefined
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    httpInboundTransport = new HttpInboundTransport({ port })
-    agent.registerInboundTransport(httpInboundTransport)
+    agent.registerInboundTransport(new HttpInboundTransport({ port }))
   }
 
+  const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
   if (enableWs) {
     logger.info('Inbound WebSocket transport enabled')
-    webSocketServer = new WebSocket.Server({ noServer: true })
-    agent.registerInboundTransport(new VsAgentWsInboundTransport({ server: webSocketServer }))
+    agent.registerInboundTransport(
+      new VsAgentWsInboundTransport({ server: new WebSocket.Server({ noServer: true }) }),
+    )
   }
 
   agent.registerOutboundTransport(new HttpOutboundTransport())
   agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
-
-  // Make sure default User Profile corresponds to settings in environment variables
-  const imageUrl = displayPictureUrl
-  const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
-
-  await agent.modules.userProfile.updateUserProfileData({
-    displayName: label,
-    displayPicture,
-  })
-
-  if (publicDid) {
-    // If a public did is specified, check if it's already stored in the wallet. If it's not the case,
-    // create a new one and generate keys for DIDComm (if there are endpoints configured)
-    // TODO: Make DIDComm version, keys, etc. configurable. Keys can also be imported
-
-    const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-    const existingRecord = await didRepository.findCreatedDid(agent.context, publicDid)
-
-    const builder = new DidDocumentBuilder(publicDid)
-
-    builder
-      .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
-      .addContext('https://w3id.org/security/suites/x25519-2019/v1')
-
-    // If the document already exists (i.e. DID record previously created), take base keys from it
-    // and just populate those services that can vary according to the configuration
-    const keyAgreementId = `${publicDid}#key-agreement-1`
-    if (existingRecord?.didDocument) {
-      logger?.debug('Public did record already stored. DidDocument keys will be restored from it')
-      const verificationMethods = existingRecord.didDocument.verificationMethod ?? []
-      for (const method of verificationMethods) {
-        builder.addVerificationMethod(method)
-      }
-
-      const authentications = existingRecord.didDocument.authentication ?? []
-      for (const auth of authentications) {
-        builder.addAuthentication(auth)
-      }
-
-      const assertionMethods = existingRecord.didDocument.assertionMethod ?? []
-      for (const assert of assertionMethods) {
-        builder.addAssertionMethod(assert)
-      }
-
-      const keyAgreements = existingRecord.didDocument.keyAgreement ?? []
-      for (const key of keyAgreements) {
-        builder.addKeyAgreement(key)
-      }
-    } else {
-      logger?.debug('Public did record not found. Creating key pair and DidDocument')
-      const ed25519 = await agent.context.wallet.createKey({ keyType: KeyType.Ed25519 })
-      const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
-      const publicKeyX25519 = TypedArrayEncoder.toBase58(
-        convertPublicKeyToX25519(TypedArrayEncoder.fromBase58(ed25519.publicKeyBase58)),
-      )
-
-      builder
-        .addContext('https://w3id.org/security/suites/ed25519-2018/v1')
-        .addContext('https://w3id.org/security/suites/x25519-2019/v1')
-        .addVerificationMethod({
-          controller: publicDid,
-          id: verificationMethodId,
-          publicKeyBase58: ed25519.publicKeyBase58,
-          type: 'Ed25519VerificationKey2018',
-        })
-        .addVerificationMethod({
-          controller: publicDid,
-          id: keyAgreementId,
-          publicKeyBase58: publicKeyX25519,
-          type: 'X25519KeyAgreementKey2019',
-        })
-        .addAuthentication(verificationMethodId)
-        .addAssertionMethod(verificationMethodId)
-        .addKeyAgreement(keyAgreementId)
-    }
-
-    // Create a set of keys suitable for did self issued
-    builder
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-trust-registry-1234`,
-          serviceEndpoint: `${publicApiBaseUrl}/self-tr`,
-          type: 'VerifiablePublicRegistry',
-        }),
-      )
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-service-c-vp`,
-          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
-          type: 'LinkedVerifiablePresentation',
-        }),
-      )
-      .addService(
-        new DidDocumentService({
-          id: `${publicDid}#vpr-ecs-org-c-vp`,
-          serviceEndpoint: `${publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
-          type: 'LinkedVerifiablePresentation',
-        }),
-      )
-
-    // Create a set of keys suitable for did communication
-    const commServices = registerCommService(publicDid, agent.config.endpoints, keyAgreementId)
-    commServices.forEach(service => builder.addService(service))
-
-    if (publicApiBaseUrl) {
-      builder.addService(
-        new DidDocumentService({
-          id: `${publicDid}#anoncreds`,
-          serviceEndpoint: `${publicApiBaseUrl}/anoncreds/v1`,
-          type: 'AnonCredsRegistry',
-        }),
-      )
-    }
-
-    const didDocument = builder.build()
-    // --- Handling did:web ---
-    if (parsedDid?.method === 'web') {
-      if (existingRecord) {
-        existingRecord.didDocument = didDocument
-        await didRepository.update(agent.context, existingRecord)
-        logger?.debug('Public did:web record updated')
-      } else {
-        await didRepository.save(
-          agent.context,
-          new DidRecord({
-            did: publicDid,
-            role: DidDocumentRole.Created,
-            didDocument,
-          }),
-        )
-        logger?.debug('Public did:web record saved')
-      }
-    }
-
-    // --- Handling did:webvh ---
-    if (parsedDid?.method === 'webvh') {
-      const domain = new URL(endpoints[0]).host
-      const didRecord = await didRepository.findSingleByQuery(agent.context, { domain })
-
-      if (didRecord) {
-        logger.debug(`DID:webvh with domain "${domain}" already exists`)
-        agent.did = didRecord.did
-      } else {
-        const {
-          didState: { did, didDocument: createdDoc },
-        } = await agent.dids.create({ method: 'webvh', domain })
-        if (!did || !createdDoc) {
-          logger.error('Failed to create did:webvh record')
-          process.exit(1)
-        }
-        // Basic services
-        createdDoc.service = registerCommService(did, agent.config.endpoints, `${did}#key-agreement-1`)
-        await agent.dids.update({ did, didDocument: createdDoc, domain })
-        logger?.debug('Public did:webvh record created')
-        agent.did = did
-      }
-    }
-  }
 
   return { agent }
 }
@@ -280,24 +105,4 @@ export function commonAppConfig(app: INestApplication, cors?: boolean) {
     })
   }
   return app
-}
-
-function registerCommService(
-  publicDid: string,
-  endpoints: string[],
-  keyAgreementId: string,
-): DidCommV1Service[] {
-  const services = endpoints.map((endpoint, index) => {
-    const service = new DidCommV1Service({
-      id: `${publicDid}#did-communication`,
-      serviceEndpoint: endpoint,
-      priority: index,
-      routingKeys: [], // TODO: Support mediation
-      recipientKeys: [keyAgreementId],
-      accept: ['didcomm/aip2;env=rfc19'],
-    })
-
-    return service
-  })
-  return services
 }

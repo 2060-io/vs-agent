@@ -20,7 +20,7 @@ export class DidWebController {
   @Get('/.well-known/did.json')
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
-    agent.config.logger.info(`Public DidDocument requested`)
+    agent.config.logger.debug(`Public DID document requested`)
     const didRecord = await resolveDidRecord(agent)
     const didDocument = didRecord?.didDocument
     if (didDocument) {
@@ -33,7 +33,7 @@ export class DidWebController {
   @Get('/.well-known/did.jsonl')
   async getDidDocumentLD(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
-    agent.config.logger.info(`Public DidDocument requested`)
+    agent.config.logger.debug(`Public DID log requested`)
     const didRecord = await resolveDidRecord(agent)
     const didDocument = didRecord?.didDocument
     if (didDocument) {

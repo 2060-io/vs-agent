@@ -52,8 +52,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "version": "pnpm version",
-    "test": "jest --passWithNoTests",
-    "postinstall": "patch-package"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-calls": "^0.0.10",
@@ -62,13 +61,13 @@
     "@2060.io/credo-ts-didcomm-receipts": "0.0.7",
     "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
     "@2060.io/vs-agent-model": "workspace:*",
-    "@credo-ts/action-menu": "0.5.17-alpha-20250818210456",
-    "@credo-ts/anoncreds": "0.5.17-alpha-20250818210456",
-    "@credo-ts/askar": "0.5.17-alpha-20250818210456",
-    "@credo-ts/core": "0.5.17-alpha-20250818210456",
-    "@credo-ts/node": "0.5.17-alpha-20250818210456",
-    "@credo-ts/question-answer": "0.5.17-alpha-20250818210456",
-    "@credo-ts/webvh": "0.5.17-alpha-20250818210456",
+    "@credo-ts/action-menu": "0.5.17-alpha-20250827115113",
+    "@credo-ts/anoncreds": "0.5.17-alpha-20250827115113",
+    "@credo-ts/askar": "0.5.17-alpha-20250827115113",
+    "@credo-ts/core": "0.5.17-alpha-20250827115113",
+    "@credo-ts/node": "0.5.17-alpha-20250827115113",
+    "@credo-ts/question-answer": "0.5.17-alpha-20250827115113",
+    "@credo-ts/webvh": "0.5.17-alpha-20250827115113",
     "@hyperledger/anoncreds-nodejs": "^0.2.4",
     "@hyperledger/aries-askar-nodejs": "^0.2.3",
     "@nestjs/bull": "^10.2.1",
@@ -99,7 +98,6 @@
     "@types/multer": "^1.4.7",
     "@types/node-fetch": "^2.6.4",
     "@types/uuid": "^8.3.4",
-    "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "ts-node-dev": "^2.0.0"
   }

@@ -1,0 +1,13 @@
+diff --git a/build/dids/WebvhDidResolver.js b/build/dids/WebvhDidResolver.js
+index 12c6f99339ad161a0e3c67b3f78ff6c921364e7f..366f5aa33af2d7aa90096ee0b3e4f273379bfbc4 100644
+--- a/build/dids/WebvhDidResolver.js
++++ b/build/dids/WebvhDidResolver.js
+@@ -103,7 +103,7 @@ class WebvhDidResolver {
+         const crypto = new WebvhDidCrypto_1.WebvhDidCrypto(agentContext);
+         const { doc } = await (0, didwebvh_ts_1.resolveDID)(did, { verifier: crypto });
+         return {
+-            didDocument: new core_1.DidDocument(doc),
++            didDocument: core_1.JsonTransformer(doc, DidDocument),
+             didDocumentMetadata: {},
+             didResolutionMetadata: {},
+         };

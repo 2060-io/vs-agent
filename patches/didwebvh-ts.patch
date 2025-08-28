@@ -1,0 +1,18 @@
+diff --git a/dist/cjs/index.cjs b/dist/cjs/index.cjs
+index 82106b50b0133bef42934a030c6d1fe49bb09e32..5cee6cefb89f4409fd0f0726b8db1df785a3817f 100644
+--- a/dist/cjs/index.cjs
++++ b/dist/cjs/index.cjs
+@@ -1534,8 +1534,12 @@ var updateDID = async (options) => {
+     context: options.context || lastEntry.state["@context"],
+     domain: options.domain ?? lastEntry.state.id?.split(":").at(-1) ?? "",
+     updateKeys: options.updateKeys ?? [],
+-    verificationMethods: safeVerificationMethods ?? []
++    verificationMethods: []
+   });
++
++  if (safeVerificationMethods) {
++    doc.verificationMethod = safeVerificationMethods
++  }
+   if (options.services && options.services.length > 0) {
+     doc.service = options.services;
+   }
