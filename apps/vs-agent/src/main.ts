@@ -104,24 +104,24 @@ const run = async () => {
     )
   }
 
-  const publicDid = AGENT_PUBLIC_DID ? parseDid(AGENT_PUBLIC_DID) : null
+  const parsedDid = AGENT_PUBLIC_DID ? parseDid(AGENT_PUBLIC_DID) : null
 
   if (!AGENT_PUBLIC_DID) {
     serverLogger.warn('AGENT_PUBLIC_DID is not defined. You must set it in production releases')
   }
 
   // Check it is a supported DID method
-  if (publicDid && !['web', 'webvh'].includes(publicDid.method)) {
+  if (parsedDid && !['web', 'webvh'].includes(parsedDid.method)) {
     serverLogger.error('Only did:web or did:webvh method is supported')
     process.exit(1)
   }
 
   let endpoints = AGENT_ENDPOINTS
-  if (!endpoints && publicDid) endpoints = [`wss://${decodeURIComponent(publicDid.id)}`]
+  if (!endpoints && parsedDid) endpoints = [`wss://${decodeURIComponent(parsedDid.id)}`]
   if (!endpoints) endpoints = DEFAULT_AGENT_ENDPOINTS
 
   let publicApiBaseUrl = PUBLIC_API_BASE_URL
-  if (!publicApiBaseUrl && publicDid) publicApiBaseUrl = `https://${decodeURIComponent(publicDid.id)}`
+  if (!publicApiBaseUrl && parsedDid) publicApiBaseUrl = `https://${decodeURIComponent(parsedDid.id)}`
   if (!publicApiBaseUrl) publicApiBaseUrl = DEFAULT_PUBLIC_API_BASE_URL
 
   serverLogger.info(`endpoints: ${endpoints} publicApiBaseUrl ${publicApiBaseUrl}`)
@@ -137,7 +137,7 @@ const run = async () => {
     },
     label: AGENT_LABEL || 'Test VS Agent',
     displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
-    parsedDid: publicDid ?? undefined,
+    parsedDid: parsedDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
@@ -165,8 +165,7 @@ const run = async () => {
   await startServers(agent, conf)
 
   // Initialize Self-Trust Registry
-  // TODO: Must be enabled for webvh
-  if (publicDid?.method === 'web') await setupSelfTr({ agent, publicApiBaseUrl })
+  await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)

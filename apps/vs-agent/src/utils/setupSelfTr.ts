@@ -4,8 +4,6 @@ import {
   W3cCredentialSchema,
   DidRepository,
   ClaimFormat,
-  JsonTransformer,
-  VerificationMethod,
   W3cCredentialSubject,
   W3cJsonLdSignPresentationOptions,
   W3cJsonLdSignCredentialOptions,
@@ -168,17 +166,20 @@ async function generateVerifiableCredential(
     ? credentialSchema
     : await addDigestSRI(credentialSchema.id, credentialSchema, ecsSchemas)
 
-  const didRepository = agent.context.dependencyManager.resolve(DidRepository)
-  const verificationMethod = await didRepository.findCreatedDid(agent.context, agent.did ?? '')
+  // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
+  // key for this feature
+  const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
+    method => method.type === 'Ed25519VerificationKey2018',
+  )
+  if (!verificationMethod) {
+    throw new Error('Cannot find a suitable Ed25519Signature2018 verification method in DID Document')
+  }
 
   const signedCredential = await agent.w3cCredentials.signCredential({
     format: ClaimFormat.LdpVc,
     credential: unsignedCredential,
     proofType: 'Ed25519Signature2018',
-    verificationMethod: JsonTransformer.fromJSON(
-      verificationMethod?.didDocument?.verificationMethod?.[0],
-      VerificationMethod,
-    ).id,
+    verificationMethod: verificationMethod.id,
     challenge: 'challenge',
     domain: 'example.com',
   } as W3cJsonLdSignCredentialOptions)
@@ -189,10 +190,7 @@ async function generateVerifiableCredential(
       format: ClaimFormat.LdpVp,
       presentation,
       proofType: 'Ed25519Signature2018',
-      verificationMethod: JsonTransformer.fromJSON(
-        verificationMethod?.didDocument?.verificationMethod?.[0],
-        VerificationMethod,
-      ).id,
+      verificationMethod: verificationMethod.id,
       challenge: 'challenge',
       domain: 'example.com',
     } as W3cJsonLdSignPresentationOptions)

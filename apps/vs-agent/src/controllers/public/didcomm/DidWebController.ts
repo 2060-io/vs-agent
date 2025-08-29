@@ -4,6 +4,7 @@ import {
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
+import { DIDLog } from 'didwebvh-ts'
 import { Response } from 'express'
 import * as fs from 'fs'
 
@@ -20,7 +21,7 @@ export class DidWebController {
   @Get('/.well-known/did.json')
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
-    agent.config.logger.info(`Public DidDocument requested`)
+    agent.config.logger.debug(`Public DID document requested`)
     const didRecord = await resolveDidRecord(agent)
     const didDocument = didRecord?.didDocument
     if (didDocument) {
@@ -33,11 +34,11 @@ export class DidWebController {
   @Get('/.well-known/did.jsonl')
   async getDidDocumentLD(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
-    agent.config.logger.info(`Public DidDocument requested`)
+    agent.config.logger.debug(`Public DID log requested`)
     const didRecord = await resolveDidRecord(agent)
     const didDocument = didRecord?.didDocument
     if (didDocument) {
-      const jsonl = JSON.stringify(didRecord.metadata.get('log'))
+      const jsonl = (didRecord.metadata.get('log') as DIDLog[]).map(entry => JSON.stringify(entry)).join('\n')
       res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
       res.setHeader('Cache-Control', 'no-cache')
       res.send(jsonl)

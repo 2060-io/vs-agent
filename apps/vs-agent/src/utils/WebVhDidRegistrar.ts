@@ -14,6 +14,7 @@ import {
   VerificationMethod,
   DidRecord,
   DidDocumentRole,
+  JsonTransformer,
 } from '@credo-ts/core'
 import { WebvhDidCrypto } from '@credo-ts/webvh/build/dids'
 import * as crypto from '@stablelib/ed25519'
@@ -33,7 +34,7 @@ interface WebVhDidCreateOptions extends DidCreateOptions {
 }
 
 interface WebVhDidUpdateOptions extends DidUpdateOptions {
-  domain?: string
+  didDocument: DidDocument
 }
 
 const normalizeMethodArray = (arr?: (string | { id: string })[]) =>
@@ -47,6 +48,71 @@ export class WebVhDidRegistrar implements DidRegistrar {
   supportedMethods: string[] = ['webvh']
 
   /**
+   * Creates a new DID document and saves it in the repository.
+   * Handles crypto instance setup, DID creation, and error handling.
+   * If services are provided, updates the DID document with those services.
+   * @param agentContext The agent context.
+   * @param options The creation options, including domain, endpoints, controller, signer, and verifier.
+   * @returns The result of the DID creation, with error handling.
+   */
+  public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
+    try {
+      const { domain } = options
+      const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+      const record = await didRepository.findSingleByQuery(agentContext, {
+        role: DidDocumentRole.Created,
+        domain,
+        method: 'webvh',
+      })
+      if (record) return this.handleError(`A record with domain "${domain}" already exists.`)
+
+      // Create crypto instance
+      const publicKeyMultibase = await this.generatePublicKey(agentContext)
+      const signer = new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
+      const verifier = new WebvhDidCrypto(agentContext)
+      const baseDid = `did:webvh:{SCID}:${domain}`
+
+      // Create DID
+      const { did, doc, log } = await createDID({
+        domain,
+        signer,
+        updateKeys: [publicKeyMultibase],
+        verificationMethods: [
+          {
+            controller: baseDid,
+            type: 'Ed25519VerificationKey2020',
+            publicKeyMultibase,
+          },
+        ],
+        verifier,
+      })
+
+      // Save didRegistry
+      const didDocument = JsonTransformer.fromJSON(doc, DidDocument)
+      const didRecord = new DidRecord({
+        did,
+        didDocument,
+        role: DidDocumentRole.Created,
+      })
+      didRecord.metadata.set('log', log)
+      didRecord.setTags({ domain })
+      await didRepository.save(agentContext, didRecord)
+
+      return {
+        didDocumentMetadata: {},
+        didRegistrationMetadata: {},
+        didState: {
+          state: 'finished',
+          did,
+          didDocument,
+        },
+      }
+    } catch (error) {
+      return this.handleError(error instanceof Error ? error.message : 'Unknown error occurred.')
+    }
+  }
+
+  /**
    * Updates an existing DID document and its log in the repository.
    * Uses internal logic to validate verification methods and handle errors.
    * @param agentContext The agent context.
@@ -55,15 +121,17 @@ export class WebVhDidRegistrar implements DidRegistrar {
    */
   public async update(agentContext: AgentContext, options: WebVhDidUpdateOptions): Promise<DidUpdateResult> {
     try {
-      const { did, domain, didDocument: inputDidDocument } = options
+      const { did, didDocument: inputDidDocument } = options
       const didRepository = agentContext.dependencyManager.resolve(DidRepository)
       const didRecord = await didRepository.getSingleByQuery(agentContext, {
         role: DidDocumentRole.Created,
         did,
+        method: 'webvh',
       })
-      if (!didRecord) return this.handleError('DID record not found.')
+      if (!didRecord) return this.handleError('DID not found')
 
       const log = didRecord.metadata.get('log') as DIDLog
+      const domain = didRecord.getTag('domain') as string
       if (!log) return this.handleError('The log registry must be created before it can be edited.')
 
       const {
@@ -101,10 +169,8 @@ export class WebVhDidRegistrar implements DidRegistrar {
         keyAgreement: normalizeMethodArray(keyAgreement),
         services,
       })
-
-      const didDocument = new DidDocument(doc)
       didRecord.metadata.set('log', logResult)
-      didRecord.setTags({ domain })
+      didRecord.didDocument = JsonTransformer.fromJSON(doc, DidDocument)
       await didRepository.update(agentContext, didRecord)
 
       return {
@@ -113,7 +179,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         didState: {
           state: 'finished',
           did,
-          didDocument,
+          didDocument: didRecord.didDocument,
         },
       }
     } catch (error) {
@@ -124,67 +190,6 @@ export class WebVhDidRegistrar implements DidRegistrar {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   deactivate(agentContext: AgentContext, options: DidDeactivateOptions): Promise<DidDeactivateResult> {
     throw new Error('Method not implemented.')
-  }
-
-  /**
-   * Creates a new DID document and saves it in the repository.
-   * Handles crypto instance setup, DID creation, and error handling.
-   * If services are provided, updates the DID document with those services.
-   * @param agentContext The agent context.
-   * @param options The creation options, including domain, endpoints, controller, signer, and verifier.
-   * @returns The result of the DID creation, with error handling.
-   */
-  public async create(agentContext: AgentContext, options: WebVhDidCreateOptions): Promise<DidCreateResult> {
-    try {
-      const { domain, method = 'webvh' } = options
-      const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-      const record = await didRepository.findSingleByQuery(agentContext, { domain, method })
-      if (record) return this.handleError(`A record with domain "${domain}" already exists.`)
-
-      // Create crypto instance
-      const publicKeyMultibase = await this.generatePublicKey(agentContext)
-      const signer = new WebvhDidCryptoSigner(agentContext, publicKeyMultibase)
-      const verifier = new WebvhDidCrypto(agentContext)
-      const baseDid = `did:webvh:{SCID}:${domain}`
-
-      // Create DID
-      const { did, doc, log } = await createDID({
-        domain,
-        signer,
-        updateKeys: [publicKeyMultibase],
-        verificationMethods: [
-          {
-            controller: baseDid,
-            type: 'Ed25519VerificationKey2018',
-            publicKeyMultibase,
-          },
-        ],
-        verifier,
-      })
-
-      // Save didRegistry
-      const didDocument = new DidDocument(doc)
-      const didRecord = new DidRecord({
-        did,
-        didDocument,
-        role: DidDocumentRole.Created,
-      })
-      didRecord.metadata.set('log', log)
-      didRecord.setTags({ domain })
-      await didRepository.save(agentContext, didRecord)
-
-      return {
-        didDocumentMetadata: {},
-        didRegistrationMetadata: {},
-        didState: {
-          state: 'finished',
-          did,
-          didDocument,
-        },
-      }
-    } catch (error) {
-      return this.handleError(error instanceof Error ? error.message : 'Unknown error occurred.')
-    }
   }
 
   /**
