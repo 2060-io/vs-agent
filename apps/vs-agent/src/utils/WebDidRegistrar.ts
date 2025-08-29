@@ -96,16 +96,7 @@ export class WebDidRegistrar implements DidRegistrar {
         $or: [{ did }, { domain, method: 'web' }],
       })
 
-      if (!didRecord) {
-        return {
-          didDocumentMetadata: {},
-          didRegistrationMetadata: {},
-          didState: {
-            state: 'failed',
-            reason: 'Did not found',
-          },
-        }
-      }
+      if (!didRecord) return this.handleError('Did not found')
 
       didRecord.didDocument = inputDidDocument
 

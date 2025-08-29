@@ -128,16 +128,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         did,
         method: 'webvh',
       })
-      if (!didRecord) {
-        return {
-          didDocumentMetadata: {},
-          didRegistrationMetadata: {},
-          didState: {
-            state: 'failed',
-            reason: 'Did not found',
-          },
-        }
-      }
+      if (!didRecord) return this.handleError('DID not found')
 
       const log = didRecord.metadata.get('log') as DIDLog
       const domain = didRecord.getTag('domain') as string
@@ -161,7 +152,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
       const signer = new WebvhDidCryptoSigner(agentContext, verificationMethods[0].publicKeyMultibase)
       const verifier = new WebvhDidCrypto(agentContext)
 
-      const { log: logResult } = await updateDID({
+      const { log: logResult, doc } = await updateDID({
         log,
         signer,
         verifier,
@@ -179,7 +170,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         services,
       })
       didRecord.metadata.set('log', logResult)
-      didRecord.didDocument = inputDidDocument
+      didRecord.didDocument = JsonTransformer.fromJSON(doc, DidDocument)
       await didRepository.update(agentContext, didRecord)
 
       return {
@@ -188,7 +179,7 @@ export class WebVhDidRegistrar implements DidRegistrar {
         didState: {
           state: 'finished',
           did,
-          didDocument: inputDidDocument,
+          didDocument: didRecord.didDocument,
         },
       }
     } catch (error) {
