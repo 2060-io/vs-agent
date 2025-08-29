@@ -91,8 +91,8 @@ importers:
         specifier: 0.0.2
         version: 0.0.2(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@2060.io/credo-ts-didcomm-mrtd':
-        specifier: 0.0.15
-        version: 0.0.15(@credo-ts/core@0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)
+        specifier: 0.0.16
+        version: 0.0.16(@credo-ts/core@0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)
       '@2060.io/credo-ts-didcomm-receipts':
         specifier: 0.0.7
         version: 0.0.7(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -592,8 +592,8 @@ packages:
     peerDependencies:
       '@credo-ts/core': 0.5.11
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.15':
-    resolution: {integrity: sha512-7yOIIOhA2v+nAeZPDGdNjuj0ltIglZIXAGHSDZZ6+lqoebqwKtWq161M56kWvngB0YqEfjj+JJfesHqOwPX6pA==}
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.16':
+    resolution: {integrity: sha512-g7i64skx76C2bqOYDHop1Nuo0B20VFBjSs9gQcapjHuLLuxkWlBQxYk4T+/mJids4pwCI25pitrdi8ZzPY9QRw==}
     peerDependencies:
       '@credo-ts/core': 0.5.11
 
@@ -6893,7 +6893,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.15(@credo-ts/core@0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)':
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.16(@credo-ts/core@0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)':
     dependencies:
       '@credo-ts/core': 0.5.11(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@li0ard/tsemrtd': 0.2.2(typescript@5.7.2)
