@@ -65,7 +65,8 @@
   "packageManager": "pnpm@9.15.3",
   "pnpm": {
     "patchedDependencies": {
-      "didwebvh-ts": "patches/didwebvh-ts.patch"
+      "didwebvh-ts": "patches/didwebvh-ts.patch",
+      "@credo-ts/core": "patches/@credo-ts__core.patch"
     }
   }
 }
