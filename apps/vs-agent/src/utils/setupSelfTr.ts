@@ -9,6 +9,10 @@ import {
   W3cJsonLdSignCredentialOptions,
   LogLevel,
 } from '@credo-ts/core'
+// No type definitions available for this library
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import { purposes } from '@digitalcredentials/jsonld-signatures'
 import Ajv, { AnySchemaObject } from 'ajv/dist/2020'
 import addFormats from 'ajv-formats'
 import axios from 'axios'
@@ -180,8 +184,7 @@ async function generateVerifiableCredential(
     credential: unsignedCredential,
     proofType: 'Ed25519Signature2018',
     verificationMethod: verificationMethod.id,
-    challenge: 'challenge',
-    domain: 'example.com',
+    proofPurpose: new purposes.AssertionProofPurpose(),
   } as W3cJsonLdSignCredentialOptions)
 
   if (presentation) {
@@ -191,8 +194,7 @@ async function generateVerifiableCredential(
       presentation,
       proofType: 'Ed25519Signature2018',
       verificationMethod: verificationMethod.id,
-      challenge: 'challenge',
-      domain: 'example.com',
+      proofPurpose: new purposes.AssertionProofPurpose(),
     } as W3cJsonLdSignPresentationOptions)
     return signedPresentation
   } else {

@@ -260,13 +260,6 @@ export class VsAgent extends Agent<VsAgentModules> {
     didDocument.service = [
       ...(didDocument.service ?? []),
       ...[
-        // FIXME: remove VerifiablePublicRegistry service. this is not part of a service DID Document
-        // It is here because verre is forcing us to have it for self signed ECS creds
-        new DidDocumentService({
-          id: `${publicDid}#vpr-schemas-trust-registry-1234`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr`,
-          type: 'VerifiablePublicRegistry',
-        }),
         new DidDocumentService({
           id: `${publicDid}#vpr-schemas-service-c-vp`,
           serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
@@ -278,6 +271,11 @@ export class VsAgent extends Agent<VsAgentModules> {
           type: 'LinkedVerifiablePresentation',
         }),
       ],
+    ]
+
+    didDocument.context = [
+      ...(didDocument.context ?? []),
+      'https://identity.foundation/linked-vp/contexts/v1',
     ]
   }
 
