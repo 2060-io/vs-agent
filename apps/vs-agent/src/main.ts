@@ -165,7 +165,7 @@ const run = async () => {
   await startServers(agent, conf)
 
   // Initialize Self-Trust Registry
-  await setupSelfTr({ agent, publicApiBaseUrl })
+  if (agent.did) await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
