@@ -23,7 +23,7 @@ patchedDependencies:
     hash: um6w6ru27l5szbsxsm2jrvumym
     path: patches/@credo-ts__core.patch
   didwebvh-ts:
-    hash: 62ugs4ac352w4mzq7mdr2h7wjy
+    hash: pb6oc6i5xoppd6hx3fexyfqduy
     path: patches/didwebvh-ts.patch
 
 importers:
@@ -167,7 +167,7 @@ importers:
         version: 0.0.1-alpha.14(@credo-ts/anoncreds@0.5.11(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(@credo-ts/core@0.5.11(patch_hash=um6w6ru27l5szbsxsm2jrvumym)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(@hyperledger/anoncreds-shared@0.2.4)
       didwebvh-ts:
         specifier: 2.5.3
-        version: 2.5.3(patch_hash=62ugs4ac352w4mzq7mdr2h7wjy)
+        version: 2.5.3(patch_hash=pb6oc6i5xoppd6hx3fexyfqduy)
       express:
         specifier: ^4.18.1
         version: 4.21.2
@@ -7846,7 +7846,7 @@ snapshots:
       '@credo-ts/core': 0.5.11(patch_hash=um6w6ru27l5szbsxsm2jrvumym)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
-      didwebvh-ts: 2.5.3(patch_hash=62ugs4ac352w4mzq7mdr2h7wjy)
+      didwebvh-ts: 2.5.3(patch_hash=pb6oc6i5xoppd6hx3fexyfqduy)
       json-canonicalize: 1.2.0
       tsyringe: 4.8.0
     transitivePeerDependencies:
@@ -10896,7 +10896,7 @@ snapshots:
 
   did-resolver@4.1.0: {}
 
-  didwebvh-ts@2.5.3(patch_hash=62ugs4ac352w4mzq7mdr2h7wjy):
+  didwebvh-ts@2.5.3(patch_hash=pb6oc6i5xoppd6hx3fexyfqduy):
     dependencies:
       '@noble/hashes': 1.8.0
       json-canonicalize: 1.2.0
