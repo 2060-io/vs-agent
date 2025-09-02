@@ -33,6 +33,7 @@ export type EMrtdRawData = {
     custodyInformation?: string
     mrzString?: string
   }
+  verification?: EMrtdData['verification']
 }
 
 export interface EMrtdDataSubmitMessageOptions extends BaseMessageOptions {
@@ -63,7 +64,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
 
   public dataGroups?: EMrtdRawData
 
-  public parseDataGroups({ raw, parsed }: EMrtdData) {
+  public parseDataGroups({ raw, parsed, verification }: EMrtdData) {
     if (!parsed || !parsed.fields) return this.dataGroups
 
     const dataUrls = parsed.fields.images.map(image => {
@@ -124,6 +125,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
         custodyInformation: parsed.fields.additionalPersonalData?.custodyInformation,
         mrzString: parsed.fields.mrzData,
       },
+      verification,
     }
     return newEmrtdData
   }
