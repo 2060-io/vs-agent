@@ -1,4 +1,4 @@
-import { EMrtdData } from '@2060.io/credo-ts-didcomm-mrtd'
+import { EMrtdData, SodVerification } from '@2060.io/credo-ts-didcomm-mrtd'
 import * as Mrz from 'mrz'
 
 import { convertShortDate } from '../../utils'
@@ -33,7 +33,7 @@ export type EMrtdRawData = {
     custodyInformation?: string
     mrzString?: string
   }
-  verification?: EMrtdData['verification']
+  verification?: SodVerification
 }
 
 export interface EMrtdDataSubmitMessageOptions extends BaseMessageOptions {
