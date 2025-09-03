@@ -62,11 +62,5 @@
     "@credo-ts/askar": "0.5.11",
     "@credo-ts/anoncreds": "0.5.11"
   },
-  "packageManager": "pnpm@9.15.3",
-  "pnpm": {
-    "patchedDependencies": {
-      "didwebvh-ts": "patches/didwebvh-ts.patch",
-      "@credo-ts/core": "patches/@credo-ts__core.patch"
-    }
-  }
+  "packageManager": "pnpm@9.15.3"
 }

@@ -8,7 +8,6 @@ WORKDIR /www
 ENV RUN_MODE="docker"
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-COPY patches ./patches
 
 COPY packages/model/package.json packages/model/package.json
 COPY apps/vs-agent/package.json apps/vs-agent/package.json
