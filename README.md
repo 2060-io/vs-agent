@@ -24,7 +24,7 @@ docker pull io2060/vs-agent
 Or build it directly from this repo:
 
 ```
-docker build -t vs-agent:dev ./apps/vs-agent
+docker build -t vs-agent:dev -f ./apps/vs-agent/Dockerfile .
 ```
 
 Then, you can just run it. Don't forget to set the environment variables as required! See [VS Agent Configuration](./apps/vs-agent/README.md#configuration) for a detailed description:
