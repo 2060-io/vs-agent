@@ -129,6 +129,17 @@ export class VsAgent extends Agent<VsAgentModules> {
           })
           this.did = parsedDid.did
         } else if (parsedDid.method === 'webvh') {
+          // If there is an existing did:web with the same domain, this could be an
+          // upgrade. There should be no problem on removing did:web record since we
+          // can use newer keys for DIDComm bootstrapping, but we should at least warn
+          // about that
+          const didRepository = this.dependencyManager.resolve(DidRepository)
+          const existingDidWebRecord = await didRepository.findCreatedDid(this.context, `did:web:${domain}`)
+          if (existingDidWebRecord) {
+            this.logger.warn('Existing record for legacy did:web found. Removing it')
+            await didRepository.delete(this.context, existingDidWebRecord)
+          }
+
           const {
             didState: { did: publicDid, didDocument },
           } = await this.dids.create({ method: 'webvh', domain })

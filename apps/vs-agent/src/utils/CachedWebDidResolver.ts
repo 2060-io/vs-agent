@@ -1,8 +1,8 @@
 import {
   AgentContext,
+  DidRepository,
   DidResolutionOptions,
   DidResolutionResult,
-  DidsApi,
   WebDidResolver,
 } from '@credo-ts/core'
 import { ParsedDID } from 'did-resolver'
@@ -15,8 +15,13 @@ export class CachedWebDidResolver extends WebDidResolver {
     didResolutionOptions: DidResolutionOptions,
   ): Promise<DidResolutionResult> {
     // First check within our own public dids, as there is no need to resolve it through HTTPS
-    const didsApi = agentContext.dependencyManager.resolve(DidsApi)
-    const [didRecord] = await didsApi.getCreatedDids({ did })
+    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+    const didRecord = await didRepository.findSingleByQuery(agentContext, {
+      $or: [
+        { did, method: 'web' },
+        { domain: parsed.id, method: 'webvh' }, // Find equivalent did:webvh, since this might be a legacy alias
+      ],
+    })
 
     if (didRecord?.didDocument) {
       return {
