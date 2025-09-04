@@ -56,9 +56,9 @@ export class InvitationRoutesController {
   }
 
   @Get('/invitation')
-  async getInvitation(@Res() res: Response) {
+  async getInvitation(@Res() res: Response, @Query('legacy') legacy?: boolean) {
     const agent = await this.agentService.getAgent()
-    const { url: invitationUrl } = await createInvitation(agent)
+    const { url: invitationUrl } = await createInvitation({ agent, useLegacyDid: legacy })
 
     if (REDIRECT_DEFAULT_URL_TO_INVITATION_URL) res.redirect(invitationUrl)
     else res.send(invitationUrl)
@@ -72,9 +72,10 @@ export class InvitationRoutesController {
     @Query('size') size?: number,
     @Query('padding') padding?: number,
     @Query('level') level?: string,
+    @Query('legacy') legacy?: boolean,
   ) {
     const agent = await this.agentService.getAgent()
-    const { url: invitationUrl } = await createInvitation(agent)
+    const { url: invitationUrl } = await createInvitation({ agent, useLegacyDid: legacy })
 
     function isQRCodeErrorCorrectionLevel(input?: string): input is QRCode.QRCodeErrorCorrectionLevel {
       return input ? ['low', 'medium', 'quartile', 'high', 'L', 'M', 'Q', 'H'].includes(input) : false

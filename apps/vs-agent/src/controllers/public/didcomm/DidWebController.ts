@@ -3,6 +3,7 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
+import { DidDocument, DidDocumentService, JsonTransformer, parseDid } from '@credo-ts/core'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
 import { DIDLog } from 'didwebvh-ts'
 import { Response } from 'express'
@@ -22,28 +23,58 @@ export class DidWebController {
   async getDidDocument() {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`Public DID document requested`)
-    const didRecord = await resolveDidRecord(agent)
-    const didDocument = didRecord?.didDocument
+    const { didDocument } = await resolveDidDocumentData(agent)
+
     if (didDocument) {
-      return didDocument
-    } else {
-      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+      const parsedDid = parseDid(didDocument.id)
+
+      if (parsedDid.method === 'web') return didDocument
+
+      // In case of did:webvh, we'll need to add some steps to publish a did:web, as per
+      // https://identity.foundation/didwebvh/v1.0/#publishing-a-parallel-didweb-did
+      if (parsedDid.method === 'webvh' && parsedDid.id.includes(':')) {
+        const scid = parsedDid.id.split(':')[0]
+
+        // Start with resolved version of the DIDDoc from did:webvh
+        const legacyDidDocument = new DidDocument(didDocument)
+
+        // We add the legacy did:web AnonCreds service (important in case the agent had previously did:web objects)
+        legacyDidDocument.service = [
+          ...(legacyDidDocument.service ?? []),
+          new DidDocumentService({
+            id: `${didDocument.id}#anoncreds`,
+            serviceEndpoint: `${this.publicApiBaseUrl}/anoncreds/v1`,
+            type: 'AnonCredsRegistry',
+          }),
+        ]
+
+        // Update alsoKnownAs
+        legacyDidDocument.alsoKnownAs = [parsedDid.did]
+
+        // Execute text replacement: did:webvh:<scid> by did:web
+        const stringified = JSON.stringify(legacyDidDocument.toJSON())
+        const replaced = stringified.replace(new RegExp(`did:webvh:${scid}`, 'g'), 'did:web')
+
+        return new DidDocument(JsonTransformer.fromJSON(JSON.parse(replaced), DidDocument))
+      }
     }
+
+    // Neither did:web nor did:webvh
+    throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
   }
 
   @Get('/.well-known/did.jsonl')
-  async getDidDocumentLD(@Res() res: Response) {
+  async getDidLog(@Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`Public DID log requested`)
-    const didRecord = await resolveDidRecord(agent)
-    const didDocument = didRecord?.didDocument
-    if (didDocument) {
-      const jsonl = (didRecord.metadata.get('log') as DIDLog[]).map(entry => JSON.stringify(entry)).join('\n')
+    const { didLog } = await resolveDidDocumentData(agent)
+
+    if (didLog) {
       res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
       res.setHeader('Cache-Control', 'no-cache')
-      res.send(jsonl)
+      res.send(didLog)
     } else {
-      throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
+      throw new HttpException('DID Log not found', HttpStatus.NOT_FOUND)
     }
   }
 
@@ -187,15 +218,18 @@ export class DidWebController {
   }
 }
 
-async function resolveDidRecord(agent: VsAgent) {
-  if (!agent.did) {
-    throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
-  }
+async function resolveDidDocumentData(agent: VsAgent) {
+  if (!agent.did) return {}
+
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
   if (!didRecord) {
     throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)
   }
 
-  return didRecord
+  const didDocument = didRecord.didDocument
+
+  const didLog = didRecord.metadata.get('log') as DIDLog[] | null
+
+  return { didDocument, didLog: didLog?.map(entry => JSON.stringify(entry)).join('\n') }
 }

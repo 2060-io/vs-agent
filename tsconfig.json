@@ -5,6 +5,7 @@
     "files": true
   },
   "compilerOptions": {
+    "skipLibCheck": true,   
     "baseUrl": ".",
     "paths": {
       "@2060.io/*": ["packages/*/src"]

@@ -143,7 +143,10 @@ export class VsAgent extends Agent<VsAgentModules> {
           // Add Linked VP services
           await this.createAndAddLinkedVpServices(didDocument)
 
-          // TODO: Add AnonCreds services once it is supported
+          // Add implicit services
+          await this.createAndAddWebVhImplicitServices(didDocument)
+
+          didDocument.alsoKnownAs = [`did:web:${domain}`]
 
           const result = await this.dids.update({ did: publicDid, didDocument })
           if (result.didState.state !== 'finished') {
@@ -276,6 +279,29 @@ export class VsAgent extends Agent<VsAgentModules> {
     didDocument.context = [
       ...(didDocument.context ?? []),
       'https://identity.foundation/linked-vp/contexts/v1',
+    ]
+  }
+
+  /**
+   * Basic implicit webvh services, for the moment pointing to the service VP
+   * and public base URL
+   */
+  private async createAndAddWebVhImplicitServices(didDocument: DidDocument) {
+    const publicDid = didDocument.id
+    didDocument.service = [
+      ...(didDocument.service ?? []),
+      ...[
+        new DidDocumentService({
+          id: `${publicDid}#whois`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+        new DidDocumentService({
+          id: `${publicDid}#files`,
+          serviceEndpoint: `${this.publicApiBaseUrl}`,
+          type: 'relativeRef',
+        }),
+      ],
     ]
   }
 
