@@ -1,4 +1,4 @@
-import { AgentMessage, HandshakeProtocol } from '@credo-ts/core'
+import { AgentMessage, HandshakeProtocol, parseDid } from '@credo-ts/core'
 
 import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../config/constants'
 
@@ -11,12 +11,24 @@ import { VsAgent } from './VsAgent'
  * @param agent
  * @returns
  */
-export async function createInvitation(agent: VsAgent, messages?: AgentMessage[]) {
+export async function createInvitation(options: {
+  agent: VsAgent
+  messages?: AgentMessage[]
+  useLegacyDid?: boolean
+}) {
+  const { agent, messages, useLegacyDid } = options
+
+  // Use legacy did:web in case agent's did is webvh and using legacy did
+  const invitationDid =
+    agent.did && parseDid(agent.did).method === 'webvh' && useLegacyDid
+      ? `did:web:${parseDid(agent.did).id.split(':')[1]}`
+      : agent.did
+
   const outOfBandInvitation = (
     await agent.oob.createInvitation({
       label: agent.config.label,
       handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
-      invitationDid: agent.did,
+      invitationDid,
       multiUseInvitation: !messages,
       imageUrl: AGENT_INVITATION_IMAGE_URL,
       messages,

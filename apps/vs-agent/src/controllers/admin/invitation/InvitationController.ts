@@ -4,8 +4,8 @@ import {
   CreateInvitationResult,
 } from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import { Controller, Get, Post, Body, Inject } from '@nestjs/common'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { Controller, Get, Post, Body, Inject, Query } from '@nestjs/common'
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger'
 
 import { UrlShorteningService } from '../../../services/UrlShorteningService'
 import { VsAgentService } from '../../../services/VsAgentService'
@@ -26,8 +26,9 @@ export class InvitationController {
   ) {}
 
   @Get('/')
-  public async getInvitation(): Promise<CreateInvitationResult> {
-    return await createInvitation(await this.agentService.getAgent())
+  @ApiQuery({ name: 'legacy', required: false, type: Boolean })
+  public async getInvitation(@Query('legacy') useLegacyDid?: boolean,): Promise<CreateInvitationResult> {
+    return await createInvitation({ agent: await this.agentService.getAgent(), useLegacyDid })
   }
 
   @Post('/presentation-request')
@@ -55,7 +56,7 @@ export class InvitationController {
   ): Promise<CreatePresentationRequestResult> {
     const agent = await this.agentService.getAgent()
 
-    const { requestedCredentials, ref, callbackUrl } = options
+    const { requestedCredentials, ref, callbackUrl, useLegacyDid } = options
 
     if (!requestedCredentials?.length) {
       throw Error('You must specify a least a requested credential')
@@ -114,7 +115,11 @@ export class InvitationController {
     request.proofRecord.metadata.set('_2060/callbackParameters', { ref, callbackUrl })
     await agent.proofs.update(request.proofRecord)
 
-    const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
+    const { url } = await createInvitation({
+      agent: await this.agentService.getAgent(),
+      messages: [request.message],
+      useLegacyDid,
+    })
 
     const shortUrlId = await this.urlShortenerService.createShortUrl({
       longUrl: url,
@@ -148,7 +153,7 @@ export class InvitationController {
   ): Promise<CreateCredentialOfferResult> {
     const agent = await this.agentService.getAgent()
 
-    const { claims, credentialDefinitionId } = options
+    const { claims, credentialDefinitionId, useLegacyDid } = options
 
     if (claims && !Array.isArray(claims)) {
       throw new Error('Received claims is not an array')
@@ -193,7 +198,11 @@ export class InvitationController {
       },
     })
 
-    const { url } = await createInvitation(await this.agentService.getAgent(), [request.message])
+    const { url } = await createInvitation({
+      agent: await this.agentService.getAgent(),
+      messages: [request.message],
+      useLegacyDid,
+    })
 
     const shortUrlId = await this.urlShortenerService.createShortUrl({
       longUrl: url,
