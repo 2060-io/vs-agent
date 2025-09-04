@@ -37,13 +37,14 @@ This Helm chart deploys **VS Agent** application with a StatefulSet, supporting 
 | `adminPort`   | Port for admin interface                 | `3000`  |
 | `didcommPort`   | Port for agent communication (`didcomm`) | `3001`  |
 
-### Didcomm Configuration
+### Agent Configuration
 
 | Parameter                  | Description                                      | Default                          |
 | -------------------------- | ------------------------------------------------ | -------------------------------- |
 | `didcommLabel`                | Label for the agent                              | `VS Agent`                      |
 | `eventsBaseUrl`            | Base URL for events                              | `https://events.example.com`    |
 | `didcommInvitationImageUrl`  | URL for the agent invitation image               | `https://example.com/invitation.png` |
+| `publicDidMethod`          | DID method to use for public DID: 'web' or 'webvh' | `webvh` |
 | `extraEnv`                 | Additional environment variables for the agent   | `[]`                            |
 
 ### Database Configuration (Optional)
