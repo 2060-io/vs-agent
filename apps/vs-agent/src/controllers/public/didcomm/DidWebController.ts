@@ -87,7 +87,9 @@ export class DidWebController {
     agent.config.logger.debug(`Schema requested: ${schemaId}`)
 
     const issuerId = await getWebDid(agent)
-    if (!issuerId) throw new HttpException('', HttpStatus.NOT_FOUND)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
 
     const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
     const schemaRecord = await schemaRepository.findBySchemaId(
@@ -111,7 +113,9 @@ export class DidWebController {
     agent.config.logger.debug(`credential definition requested: ${credentialDefinitionId}`)
 
     const issuerId = await getWebDid(agent)
-    if (!issuerId) throw new HttpException('', HttpStatus.NOT_FOUND)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
 
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
@@ -135,7 +139,9 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
     const issuerId = await getWebDid(agent)
-    if (!issuerId) throw new HttpException('', HttpStatus.NOT_FOUND)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
 
     const revocationDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsRevocationRegistryDefinitionRepository,
@@ -167,7 +173,9 @@ export class DidWebController {
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
 
     const issuerId = await getWebDid(agent)
-    if (!issuerId) throw new HttpException('', HttpStatus.NOT_FOUND)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
 
     const revocationDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsRevocationRegistryDefinitionRepository,
