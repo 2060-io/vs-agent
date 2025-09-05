@@ -11,6 +11,7 @@ import * as fs from 'fs'
 
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
 import { VsAgent } from '../../../utils/VsAgent'
+import { getWebDid } from '../../../utils/agent'
 
 @Controller()
 export class DidWebController {
@@ -83,15 +84,17 @@ export class DidWebController {
   @Get('/anoncreds/v1/schema/:schemaId')
   async getSchema(@Param('schemaId') schemaId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
-    if (!agent.did) {
-      throw new HttpException('DID not found', HttpStatus.NOT_FOUND)
+    agent.config.logger.debug(`Schema requested: ${schemaId}`)
+
+    const issuerId = await getWebDid(agent)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
-    agent.config.logger.debug(`Schema requested: ${schemaId}`)
     const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
     const schemaRecord = await schemaRepository.findBySchemaId(
       agent.context,
-      `${agent.did}?service=anoncreds&relativeRef=/schema/${schemaId}`,
+      `${issuerId}?service=anoncreds&relativeRef=/schema/${schemaId}`,
     )
 
     if (schemaRecord) {
@@ -108,13 +111,19 @@ export class DidWebController {
   async getCredDef(@Param('credentialDefinitionId') credentialDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`credential definition requested: ${credentialDefinitionId}`)
+
+    const issuerId = await getWebDid(agent)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
+
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
 
     const credentialDefinitionRecord = await credentialDefinitionRepository.findByCredentialDefinitionId(
       agent.context,
-      `${agent.did}?service=anoncreds&relativeRef=/credDef/${credentialDefinitionId}`,
+      `${issuerId}?service=anoncreds&relativeRef=/credDef/${credentialDefinitionId}`,
     )
 
     if (credentialDefinitionRecord) {
@@ -128,8 +137,12 @@ export class DidWebController {
   @Get('/anoncreds/v1/revRegDef/:revocationDefinitionId')
   async getRevRegDef(@Param('revocationDefinitionId') revocationDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
-
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
+    const issuerId = await getWebDid(agent)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
+
     const revocationDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsRevocationRegistryDefinitionRepository,
     )
@@ -137,7 +150,7 @@ export class DidWebController {
     const revocationDefinitionRecord =
       await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
         agent.context,
-        `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        `${issuerId}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
       )
 
     if (revocationDefinitionRecord) {
@@ -157,8 +170,13 @@ export class DidWebController {
   @Get('/anoncreds/v1/revStatus/:revocationDefinitionId/:timestamp?')
   async getRevStatus(@Param('revocationDefinitionId') revocationDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
-
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
+
+    const issuerId = await getWebDid(agent)
+    if (!issuerId) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
+
     const revocationDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsRevocationRegistryDefinitionRepository,
     )
@@ -166,7 +184,7 @@ export class DidWebController {
     const revocationDefinitionRecord =
       await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
         agent.context,
-        `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        `${issuerId}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
       )
 
     if (revocationDefinitionRecord) {
