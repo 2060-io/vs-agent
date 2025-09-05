@@ -11,6 +11,7 @@ import * as fs from 'fs'
 
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
 import { VsAgent } from '../../../utils/VsAgent'
+import { getWebDid } from '../../../utils/agent'
 
 @Controller()
 export class DidWebController {
@@ -227,14 +228,6 @@ export class DidWebController {
   }
 }
 
-async function getWebDid(agent: VsAgent) {
-  if (agent.did) {
-    const parsedDid = parseDid(agent.did)
-
-    if (parsedDid.method === 'web') return agent.did
-    if (parsedDid.method === 'webvh') return `did:web:${parsedDid.id.split(':')[1]}`
-  }
-}
 async function resolveDidDocumentData(agent: VsAgent) {
   if (!agent.did) return {}
 
