@@ -49,14 +49,15 @@ export class DidWebController {
           }),
         ]
 
-        // Update alsoKnownAs
-        legacyDidDocument.alsoKnownAs = [parsedDid.did]
-
         // Execute text replacement: did:webvh:<scid> by did:web
         const stringified = JSON.stringify(legacyDidDocument.toJSON())
         const replaced = stringified.replace(new RegExp(`did:webvh:${scid}`, 'g'), 'did:web')
 
-        return new DidDocument(JsonTransformer.fromJSON(JSON.parse(replaced), DidDocument))
+        return new DidDocument({
+          ...JsonTransformer.fromJSON(JSON.parse(replaced), DidDocument),
+          // Update alsoKnownAs
+          alsoKnownAs: [parsedDid.did],
+        })
       }
     }
 
