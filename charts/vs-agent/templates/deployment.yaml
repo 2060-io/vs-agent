@@ -148,8 +148,6 @@ spec:
             image: io2060/vs-agent:{{ .Chart.Version }}
             imagePullPolicy: Always
             env:
-            - name: AGENT_ENDPOINT
-              value: "wss://{{ tpl .Values.ingress.host . }}:443"
             - name: AGENT_LABEL
               value: {{ .Values.didcommLabel }}
             - name: AGENT_INVITATION_IMAGE_URL
@@ -157,7 +155,7 @@ spec:
             - name: EVENTS_BASE_URL
               value: "{{ tpl .Values.eventsBaseUrl . }}"
             - name: AGENT_PUBLIC_DID
-              value: "did:web:{{ tpl .Values.ingress.host . }}"
+              value: "did:{{ default "webvh" .Values.publicDidMethod }}:{{ tpl .Values.ingress.host . }}"
 {{- with .Values.extraEnv }}
 {{- range . }}
             - name: {{ .name }}

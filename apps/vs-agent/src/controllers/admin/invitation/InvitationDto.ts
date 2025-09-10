@@ -26,6 +26,12 @@ export class CreatePresentationRequestDto implements CreatePresentationRequestOp
     example: '[{ credentialDefinitionId: "myCredentialDefinition", attributes: ["name","age"] }]',
   })
   requestedCredentials!: RequestedCredential[]
+
+  @ApiProperty({
+    description: 'Use legacy did:web in case of did:webvh',
+    example: 'true',
+  })
+  useLegacyDid?: boolean
 }
 
 export class CreateCredentialOfferDto implements CreateCredentialOfferOptions {
@@ -42,4 +48,10 @@ export class CreateCredentialOfferDto implements CreateCredentialOfferOptions {
   })
   @IsNotEmpty()
   claims!: ClaimOptions[]
+
+  @ApiProperty({
+    description: 'Use legacy did:web in case of did:webvh',
+    example: 'true',
+  })
+  useLegacyDid?: boolean
 }

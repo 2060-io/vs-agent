@@ -33,6 +33,7 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
+import { getWebDid } from '../../../utils/agent'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -103,7 +104,8 @@ export class CredentialTypesController {
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
 
-      const issuerId = agent.did
+      // At the moment, we only support did:web AnonCreds method, so we need to get did:web version of DID
+      const issuerId = await getWebDid(agent)
 
       if (!issuerId) {
         throw new Error('Agent does not have any defined public DID')
@@ -314,7 +316,8 @@ export class CredentialTypesController {
       )
       const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
-      const issuerId = agent.did
+      // At the moment, we only support did:web AnonCreds method, so we need to get did:web version of DID
+      const issuerId = await getWebDid(agent)
 
       if (await credentialDefinitionRepository.findByCredentialDefinitionId(agent.context, options.id)) {
         throw new Error('Credential type already exists')

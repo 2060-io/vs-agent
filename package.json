@@ -55,18 +55,12 @@
     "@hyperledger/aries-askar-nodejs": "0.2.3",
     "@hyperledger/anoncreds-shared": "0.2.4",
     "@hyperledger/aries-askar-shared": "0.2.3",
-    "@credo-ts/action-menu": "0.5.11",
-    "@credo-ts/core": "0.5.11",
-    "@credo-ts/question-answer": "0.5.11",
-    "@credo-ts/node": "0.5.11",
-    "@credo-ts/askar": "0.5.11",
-    "@credo-ts/anoncreds": "0.5.11"
+    "@credo-ts/action-menu": "0.5.18-alpha-20250903145047",
+    "@credo-ts/core": "0.5.18-alpha-20250903145047",
+    "@credo-ts/question-answer": "0.5.18-alpha-20250903145047",
+    "@credo-ts/node": "0.5.18-alpha-20250903145047",
+    "@credo-ts/askar": "0.5.18-alpha-20250903145047",
+    "@credo-ts/anoncreds": "0.5.18-alpha-20250903145047"
   },
-  "packageManager": "pnpm@9.15.3",
-  "pnpm": {
-    "patchedDependencies": {
-      "didwebvh-ts": "patches/didwebvh-ts.patch",
-      "@credo-ts/core": "patches/@credo-ts__core.patch"
-    }
-  }
+  "packageManager": "pnpm@9.15.3"
 }

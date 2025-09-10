@@ -129,6 +129,17 @@ export class VsAgent extends Agent<VsAgentModules> {
           })
           this.did = parsedDid.did
         } else if (parsedDid.method === 'webvh') {
+          // If there is an existing did:web with the same domain, this could be an
+          // upgrade. There should be no problem on removing did:web record since we
+          // can use newer keys for DIDComm bootstrapping, but we should at least warn
+          // about that
+          const didRepository = this.dependencyManager.resolve(DidRepository)
+          const existingDidWebRecord = await didRepository.findCreatedDid(this.context, `did:web:${domain}`)
+          if (existingDidWebRecord) {
+            this.logger.warn('Existing record for legacy did:web found. Removing it')
+            await didRepository.delete(this.context, existingDidWebRecord)
+          }
+
           const {
             didState: { did: publicDid, didDocument },
           } = await this.dids.create({ method: 'webvh', domain })
@@ -143,7 +154,10 @@ export class VsAgent extends Agent<VsAgentModules> {
           // Add Linked VP services
           await this.createAndAddLinkedVpServices(didDocument)
 
-          // TODO: Add AnonCreds services once it is supported
+          // Add implicit services
+          await this.createAndAddWebVhImplicitServices(didDocument)
+
+          didDocument.alsoKnownAs = [`did:web:${domain}`]
 
           const result = await this.dids.update({ did: publicDid, didDocument })
           if (result.didState.state !== 'finished') {
@@ -276,6 +290,29 @@ export class VsAgent extends Agent<VsAgentModules> {
     didDocument.context = [
       ...(didDocument.context ?? []),
       'https://identity.foundation/linked-vp/contexts/v1',
+    ]
+  }
+
+  /**
+   * Basic implicit webvh services, for the moment pointing to the service VP
+   * and public base URL
+   */
+  private async createAndAddWebVhImplicitServices(didDocument: DidDocument) {
+    const publicDid = didDocument.id
+    didDocument.service = [
+      ...(didDocument.service ?? []),
+      ...[
+        new DidDocumentService({
+          id: `${publicDid}#whois`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          type: 'LinkedVerifiablePresentation',
+        }),
+        new DidDocumentService({
+          id: `${publicDid}#files`,
+          serviceEndpoint: `${this.publicApiBaseUrl}`,
+          type: 'relativeRef',
+        }),
+      ],
     ]
   }
 

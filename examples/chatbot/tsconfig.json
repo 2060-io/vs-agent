@@ -10,6 +10,7 @@
     "sourceMap": true,
     "strict": true,
     "noEmitOnError": true,
+    "skipLibCheck": true,
     "lib": ["dom"],
     "types": ["node"],
     "esModuleInterop": true,

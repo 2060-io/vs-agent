@@ -20,6 +20,7 @@ export class QrController {
   @ApiQuery({ name: 'level', required: false, type: String })
   @ApiQuery({ name: 'bcolor', required: false, type: String })
   @ApiQuery({ name: 'fcolor', required: false, type: String })
+  @ApiQuery({ name: 'legacy', required: false, type: Boolean })
   public async getQrCode(
     @Res() res: Response,
     @Query('size') size?: number,
@@ -27,8 +28,12 @@ export class QrController {
     @Query('level') level?: string,
     @Query('bcolor') bcolor?: string,
     @Query('fcolor') fcolor?: string,
+    @Query('legacy') useLegacyDid?: boolean,
   ) {
-    const { url: invitationUrl } = await createInvitation(await this.agentService.getAgent())
+    const { url: invitationUrl } = await createInvitation({
+      agent: await this.agentService.getAgent(),
+      useLegacyDid,
+    })
 
     function isQRCodeErrorCorrectionLevel(input?: string): input is QRCode.QRCodeErrorCorrectionLevel {
       return input ? ['low', 'medium', 'quartile', 'high', 'L', 'M', 'Q', 'H'].includes(input) : false
