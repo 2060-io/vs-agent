@@ -39,7 +39,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
     const resourceId = this.digestMultibase(canonicalize(options.credentialDefinition))
 
-    const credentialDefinitionId = `${options.credentialDefinition.issuerId}/anoncreds/v1/credDef/${resourceId}`
+    const credentialDefinitionId = `${options.credentialDefinition.issuerId}/resources/${resourceId}`
 
     return {
       credentialDefinitionState: {
@@ -62,7 +62,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     // Nothing to actually do other than generating a revocation registry definition id
     const resourceId = this.digestMultibase(canonicalize(options.revocationRegistryDefinition))
 
-    const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/anoncreds/v1/revRegDef/${resourceId}`
+    const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/resources/${resourceId}`
 
     return {
       revocationRegistryDefinitionState: {
@@ -109,25 +109,25 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     return digestMultibase
   }
 
-  public async createProof(agentContext: AgentContext, unsecuredDocument: unsecuredDocument, verificationMethod: string) {
+  public async createProof(
+    agentContext: AgentContext,
+    unsecuredDocument: unsecuredDocument,
+    verificationMethod: string,
+  ) {
     const cryptosuite = new EddsaJcs2022Cryptosuite(agentContext)
     try {
-      const creationResult = await cryptosuite.createProof(
-        unsecuredDocument,
-        {
-          type: 'DataIntegrityProof',
-          cryptosuite: 'eddsa-jcs-2022',
-          verificationMethod,
-          proofPurpose: 'assertionMethod',
-        }
-      )
+      const creationResult = await cryptosuite.createProof(unsecuredDocument, {
+        type: 'DataIntegrityProof',
+        cryptosuite: 'eddsa-jcs-2022',
+        verificationMethod,
+        proofPurpose: 'assertionMethod',
+      })
       return creationResult
     } catch (error) {
       agentContext.config.logger.error('Error during proof creation of did:webvh resource', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       })
-      return null
     }
   }
 }

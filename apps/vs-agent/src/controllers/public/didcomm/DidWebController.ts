@@ -11,7 +11,6 @@ import * as fs from 'fs'
 
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
 import { VsAgent } from '../../../utils/VsAgent'
-import { getWebDid } from '../../../utils/agent'
 
 @Controller()
 export class DidWebController {
@@ -87,15 +86,14 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`Schema requested: ${schemaId}`)
 
-    const issuerId = await getWebDid(agent)
-    if (!issuerId) {
+    if (!agent.did) {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
     const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
     const schemaRecord = await schemaRepository.findBySchemaId(
       agent.context,
-      `${issuerId}?service=anoncreds&relativeRef=/schema/${schemaId}`,
+      `${agent.did}?service=anoncreds&relativeRef=/schema/${schemaId}`,
     )
 
     if (schemaRecord) {
@@ -113,8 +111,7 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`credential definition requested: ${credentialDefinitionId}`)
 
-    const issuerId = await getWebDid(agent)
-    if (!issuerId) {
+    if (!agent.did) {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
@@ -124,7 +121,7 @@ export class DidWebController {
 
     const credentialDefinitionRecord = await credentialDefinitionRepository.findByCredentialDefinitionId(
       agent.context,
-      `${issuerId}?service=anoncreds&relativeRef=/credDef/${credentialDefinitionId}`,
+      `${agent.did}?service=anoncreds&relativeRef=/credDef/${credentialDefinitionId}`,
     )
 
     if (credentialDefinitionRecord) {
@@ -139,8 +136,7 @@ export class DidWebController {
   async getRevRegDef(@Param('revocationDefinitionId') revocationDefinitionId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
-    const issuerId = await getWebDid(agent)
-    if (!issuerId) {
+    if (!agent.did) {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
@@ -151,7 +147,7 @@ export class DidWebController {
     const revocationDefinitionRecord =
       await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
         agent.context,
-        `${issuerId}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
       )
 
     if (revocationDefinitionRecord) {
@@ -173,8 +169,7 @@ export class DidWebController {
     const agent = await this.agentService.getAgent()
     agent.config.logger.debug(`revocate definition requested: ${revocationDefinitionId}`)
 
-    const issuerId = await getWebDid(agent)
-    if (!issuerId) {
+    if (!agent.did) {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
@@ -185,7 +180,7 @@ export class DidWebController {
     const revocationDefinitionRecord =
       await revocationDefinitionRepository.findByRevocationRegistryDefinitionId(
         agent.context,
-        `${issuerId}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
+        `${agent.did}?service=anoncreds&relativeRef=/revRegDef/${revocationDefinitionId}`,
       )
 
     if (revocationDefinitionRecord) {

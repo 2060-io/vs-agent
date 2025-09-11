@@ -40,12 +40,3 @@ export async function createInvitation(options: {
     }),
   }
 }
-
-export async function getWebDid(agent: VsAgent) {
-  if (agent.did) {
-    const parsedDid = parseDid(agent.did)
-
-    if (parsedDid.method === 'web') return agent.did
-    if (parsedDid.method === 'webvh') return `did:web:${parsedDid.id.split(':')[1]}`
-  }
-}
