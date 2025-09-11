@@ -1,4 +1,7 @@
 import {
+  AnonCredsCredentialDefinition,
+  AnonCredsRevocationRegistryDefinition,
+  AnonCredsSchema,
   RegisterCredentialDefinitionOptions,
   RegisterCredentialDefinitionReturn,
   RegisterRevocationRegistryDefinitionOptions,
@@ -8,25 +11,54 @@ import {
   RegisterSchemaOptions,
   RegisterSchemaReturn,
 } from '@credo-ts/anoncreds'
-import { AgentContext, CredoError, TypedArrayEncoder } from '@credo-ts/core'
+import { AgentContext, CredoError, DidRepository, TypedArrayEncoder } from '@credo-ts/core'
 import { MultiBaseEncoder, MultiHashEncoder } from '@credo-ts/core/build/utils'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { canonicalize } from 'json-canonicalize'
+
 import { EddsaJcs2022Cryptosuite, unsecuredDocument } from './eddsa-jcs-2022'
+
+export type WebVhRegisterSchemaOptions = Omit<RegisterSchemaOptions, 'options'> & {
+  options?: {
+    verificationMethod?: string
+  }
+}
 
 export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
   public async registerSchema(
     agentContext: AgentContext,
-    options?: RegisterSchemaOptions,
+    options?: WebVhRegisterSchemaOptions,
   ): Promise<RegisterSchemaReturn> {
     if (!options?.schema) throw new CredoError('Schema options must be provided.')
 
     const resourceId = this.digestMultibase(canonicalize(options.schema))
+    const schemaId = `${options.schema.issuerId}/resources/${resourceId}`
 
-    const schemaId = `${options.schema.issuerId}/anoncreds/v1/schema/${resourceId}`
+    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+    const didRecord = await didRepository.findCreatedDid(agentContext, options.schema.issuerId)
+    if (!didRecord) throw new CredoError(`No DID found for issuer ${options.schema.issuerId}`)
+
+    const verificationMethod =
+      options?.options?.verificationMethod ??
+      (didRecord.didDocument?.verificationMethod?.[0]?.publicKeyMultibase
+        ? didRecord.didDocument.verificationMethod[0].id
+        : undefined)
+    if (!verificationMethod) throw new CredoError(`No verification method found for DID ${didRecord.id}`)
+
+    const registrationMetadata = await this.buildSignedResource(agentContext, {
+      content: options.schema,
+      id: schemaId,
+      metadata: {
+        resourceId,
+        resourceType: 'anonCredsSchema',
+        resourceName: options.schema.name,
+      },
+      verificationMethod,
+    })
+
     return {
       schemaState: { state: 'finished', schema: options.schema, schemaId },
-      registrationMetadata: {},
+      registrationMetadata,
       schemaMetadata: {},
     }
   }
@@ -128,6 +160,41 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       })
+    }
+  }
+
+  async buildSignedResource(
+    agentContext: AgentContext,
+    {
+      content,
+      id,
+      metadata,
+      verificationMethod,
+      extra,
+    }: {
+      content: AnonCredsSchema | AnonCredsCredentialDefinition | AnonCredsRevocationRegistryDefinition
+      id: string
+      metadata: Record<string, unknown>
+      verificationMethod: string
+      extra?: Record<string, unknown>
+    },
+  ) {
+    const resourcePayload = {
+      '@context': [
+        'https://opsecid.github.io/attested-resource/v1',
+        'https://w3id.org/security/data-integrity/v2',
+      ],
+      type: ['AttestedResource'],
+      id,
+      content,
+      metadata,
+      ...(extra ?? {}),
+    }
+
+    const proof = await this.createProof(agentContext, resourcePayload, verificationMethod)
+    return {
+      ...resourcePayload,
+      proof,
     }
   }
 }

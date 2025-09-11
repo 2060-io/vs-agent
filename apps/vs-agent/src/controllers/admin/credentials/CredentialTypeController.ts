@@ -118,7 +118,7 @@ export class CredentialTypesController {
         schema = schemaState.schema
       } else {
         // No schema specified. A new one will be created
-        const { schemaState } = await agent.modules.anoncreds.registerSchema({
+        const schemaResult = await agent.modules.anoncreds.registerSchema({
           schema: {
             attrNames: options.attributes,
             name: options.name,
@@ -128,12 +128,19 @@ export class CredentialTypesController {
           options: {},
         })
 
-        this.logger.debug!(`schemaState: ${JSON.stringify(schemaState)}`)
-        schemaId = schemaState.schemaId
-        schema = schemaState.schema
+        this.logger.debug!(`schemaState: ${JSON.stringify(schemaResult.schemaState)}`)
+        schemaId = schemaResult.schemaState.schemaId
+        schema = schemaResult.schemaState.schema
 
         if (!schemaId || !schema) {
           throw new Error('Schema for the credential definition could not be created')
+        }
+        const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
+        if (schemaResult.registrationMetadata) {
+          await schemaRepository.getBySchemaId(agent.context, schemaId).then(async record => {
+            record.metadata.set('registrationMetadata', schemaResult.registrationMetadata)
+            await schemaRepository.update(agent.context, record)
+          })
         }
       }
 

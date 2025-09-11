@@ -230,6 +230,37 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  @Get('/resources/:resourceId')
+  async getWebVhResources(@Param('resourceId') resourceId: string, @Res() res: Response) {
+    const agent = await this.agentService.getAgent()
+    const resourcePath = `${agent.did}/resources/${resourceId}`
+
+    agent.config.logger.debug(`requested resource ${resourceId}`)
+
+    if (!resourceId) {
+      throw new HttpException('resourceId not found', HttpStatus.CONFLICT)
+    }
+    if (!agent.did) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
+
+    const schemaRepo = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
+    const credDefRepo = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionRepository)
+    const revocDefRepo = agent.dependencyManager.resolve(AnonCredsRevocationRegistryDefinitionRepository)
+
+    const [schemaRecord, credentialDefinitionRecord, revocationDefinitionRecord] = await Promise.all([
+      schemaRepo.findBySchemaId(agent.context, resourcePath),
+      credDefRepo.findByCredentialDefinitionId(agent.context, resourcePath),
+      revocDefRepo.findByRevocationRegistryDefinitionId(agent.context, resourcePath),
+    ])
+    const record = [schemaRecord, credentialDefinitionRecord, revocationDefinitionRecord].find(Boolean)
+    if (!record) throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
+
+    if ('schema' in record) {
+      res.send(record.metadata.get('registrationMetadata'))
+    }
+  }
 }
 
 async function resolveDidDocumentData(agent: VsAgent) {
