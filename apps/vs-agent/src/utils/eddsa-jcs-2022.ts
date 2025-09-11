@@ -38,6 +38,18 @@ export class EddsaJcs2022Cryptosuite {
     this.agentContext.config.logger.error(error)
   }
 
+  public async _publicKeyFromId(verificationMethodId: string) {
+    const didDocument = await this.didApi.resolveDidDocument(verificationMethodId)
+    const verificationMethod = didDocument.dereferenceVerificationMethod(verificationMethodId)
+    if (!verificationMethod.publicKeyMultibase) {
+      const err = `Public key not found for ${verificationMethodId}`
+      this._logError(err)
+      throw new CredoError(err)
+    }
+    const decoded = multibaseDecode(verificationMethod.publicKeyMultibase).bytes
+    return decoded
+  }
+
   public transformation(unsecuredDocument: object, options: ProofOptions) {
     // https://www.w3.org/TR/vc-di-eddsa/#transformation-eddsa-jcs-2022
     if (options.type !== 'DataIntegrityProof') {
@@ -83,8 +95,8 @@ export class EddsaJcs2022Cryptosuite {
 
   public async proofSerialization(hashData: Uint8Array, options: ProofOptions) {
     // https://www.w3.org/TR/vc-di-eddsa/#proof-serialization-eddsa-jcs-2022
-    const decoded = multibaseDecode(options.verificationMethod).bytes
-    const key = Key.fromPublicKey(decoded, KeyType.Ed25519)
+    const decoded = await this._publicKeyFromId(options.verificationMethod)
+    const key = Key.fromPublicKey(Buffer.from(decoded.slice(2).slice(0, 32)), KeyType.Ed25519)
     const proofBytes = await this.agentContext.wallet.sign({
       key,
       data: Buffer.from(hashData),
