@@ -99,10 +99,10 @@ export class CredentialTypesController {
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
       const agent = await this.agentService.getAgent()
+      const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
-      const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
       const issuerId = agent.did
       if (!issuerId) {
@@ -435,6 +435,9 @@ export class CredentialTypesController {
   public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
+      const revocationRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
       const credentialDefinitionId = options.credentialDefinitionId
 
       const cred = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
@@ -463,6 +466,14 @@ export class CredentialTypesController {
       this.logger.debug!(
         `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
       )
+      if (revocationResult.registrationMetadata) {
+        await revocationRepository
+          .getByRevocationRegistryDefinitionId(agent.context, revocationRegistryDefinitionId)
+          .then(async record => {
+            record.metadata.set('registrationMetadata', revocationResult.registrationMetadata)
+            await revocationRepository.update(agent.context, record)
+          })
+      }
 
       const revStatusListResult = await agent.modules.anoncreds.registerRevocationStatusList({
         revocationStatusList: {
