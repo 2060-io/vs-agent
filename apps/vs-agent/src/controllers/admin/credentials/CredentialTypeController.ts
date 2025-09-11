@@ -102,6 +102,7 @@ export class CredentialTypesController {
 
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
+      const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
       const issuerId = agent.did
       if (!issuerId) {
@@ -135,7 +136,6 @@ export class CredentialTypesController {
         if (!schemaId || !schema) {
           throw new Error('Schema for the credential definition could not be created')
         }
-        const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
         if (schemaResult.registrationMetadata) {
           await schemaRepository.getBySchemaId(agent.context, schemaId).then(async record => {
             record.metadata.set('registrationMetadata', schemaResult.registrationMetadata)
@@ -172,6 +172,7 @@ export class CredentialTypesController {
       )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
+      credentialDefinitionRecord.metadata.set('registrationMetadata', registrationResult.registrationMetadata)
 
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 

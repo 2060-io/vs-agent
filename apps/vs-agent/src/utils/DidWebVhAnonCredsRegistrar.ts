@@ -24,6 +24,24 @@ export type WebVhRegisterSchemaOptions = Omit<RegisterSchemaOptions, 'options'> 
   }
 }
 
+export type WebVhRegisterCredentialDefinitionOptions = Omit<
+  RegisterCredentialDefinitionOptions,
+  'options'
+> & {
+  options?: {
+    verificationMethod?: string
+  }
+}
+
+export type WebVhRegisterRevocationRegistryDefinitionOptions = Omit<
+  RegisterRevocationRegistryDefinitionOptions,
+  'options'
+> & {
+  options?: {
+    verificationMethod?: string
+  }
+}
+
 export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
   public async registerSchema(
     agentContext: AgentContext,
@@ -34,16 +52,11 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     const resourceId = this.digestMultibase(canonicalize(options.schema))
     const schemaId = `${options.schema.issuerId}/resources/${resourceId}`
 
-    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
-    const didRecord = await didRepository.findCreatedDid(agentContext, options.schema.issuerId)
-    if (!didRecord) throw new CredoError(`No DID found for issuer ${options.schema.issuerId}`)
-
-    const verificationMethod =
-      options?.options?.verificationMethod ??
-      (didRecord.didDocument?.verificationMethod?.[0]?.publicKeyMultibase
-        ? didRecord.didDocument.verificationMethod[0].id
-        : undefined)
-    if (!verificationMethod) throw new CredoError(`No verification method found for DID ${didRecord.id}`)
+    const verificationMethod = await this.getVerificationMethodId(
+      agentContext,
+      options.schema.issuerId,
+      options?.options?.verificationMethod,
+    )
 
     const registrationMetadata = await this.buildSignedResource(agentContext, {
       content: options.schema,
@@ -65,13 +78,30 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
   public async registerCredentialDefinition(
     agentContext: AgentContext,
-    options?: RegisterCredentialDefinitionOptions,
+    options?: WebVhRegisterCredentialDefinitionOptions,
   ): Promise<RegisterCredentialDefinitionReturn> {
     if (!options?.credentialDefinition) throw new CredoError('credentialDefinition options must be provided.')
 
     const resourceId = this.digestMultibase(canonicalize(options.credentialDefinition))
 
     const credentialDefinitionId = `${options.credentialDefinition.issuerId}/resources/${resourceId}`
+
+    const verificationMethod = await this.getVerificationMethodId(
+      agentContext,
+      options.credentialDefinition.issuerId,
+      options?.options?.verificationMethod,
+    )
+
+    const registrationMetadata = await this.buildSignedResource(agentContext, {
+      content: options.credentialDefinition,
+      id: credentialDefinitionId,
+      metadata: {
+        resourceId,
+        resourceType: 'anonCredsCredDef',
+        resourceName: options.credentialDefinition.tag,
+      },
+      verificationMethod,
+    })
 
     return {
       credentialDefinitionState: {
@@ -80,21 +110,38 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         credentialDefinitionId,
       },
       credentialDefinitionMetadata: {},
-      registrationMetadata: {},
+      registrationMetadata,
     }
   }
 
   public async registerRevocationRegistryDefinition(
     agentContext: AgentContext,
-    options?: RegisterRevocationRegistryDefinitionOptions,
+    options?: WebVhRegisterRevocationRegistryDefinitionOptions,
   ): Promise<RegisterRevocationRegistryDefinitionReturn> {
     if (!options?.revocationRegistryDefinition)
-      throw new CredoError('credentialDefinition options must be provided.')
+      throw new CredoError('revocationRegistryDefinition options must be provided.')
 
     // Nothing to actually do other than generating a revocation registry definition id
     const resourceId = this.digestMultibase(canonicalize(options.revocationRegistryDefinition))
 
     const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/resources/${resourceId}`
+
+    const verificationMethod = await this.getVerificationMethodId(
+      agentContext,
+      options.revocationRegistryDefinition.issuerId,
+      options?.options?.verificationMethod,
+    )
+
+    const registrationMetadata = await this.buildSignedResource(agentContext, {
+      content: options.revocationRegistryDefinition,
+      id: revocationRegistryDefinitionId,
+      metadata: {
+        resourceId,
+        resourceType: 'anonCredsRevocRegDef',
+        resourceName: options.revocationRegistryDefinition.tag,
+      },
+      verificationMethod,
+    })
 
     return {
       revocationRegistryDefinitionState: {
@@ -102,7 +149,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         revocationRegistryDefinition: options.revocationRegistryDefinition,
         revocationRegistryDefinitionId,
       },
-      registrationMetadata: {},
+      registrationMetadata,
       revocationRegistryDefinitionMetadata: {},
     }
   }
@@ -163,7 +210,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     }
   }
 
-  async buildSignedResource(
+  private async buildSignedResource(
     agentContext: AgentContext,
     {
       content,
@@ -196,5 +243,29 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
       ...resourcePayload,
       proof,
     }
+  }
+
+  private async getVerificationMethodId(
+    agentContext: AgentContext,
+    issuerId: string,
+    explicitVerificationMethod?: string,
+  ): Promise<string> {
+    const didRepository = agentContext.dependencyManager.resolve(DidRepository)
+
+    const didRecord = await didRepository.findCreatedDid(agentContext, issuerId)
+    if (!didRecord) {
+      throw new CredoError(`No DID found for issuer ${issuerId}`)
+    }
+
+    const verificationMethod =
+      explicitVerificationMethod ??
+      (didRecord.didDocument?.verificationMethod?.[0]?.publicKeyMultibase
+        ? didRecord.didDocument.verificationMethod[0].id
+        : undefined)
+
+    if (!verificationMethod) {
+      throw new CredoError(`No verification method found for DID ${didRecord.id}`)
+    }
+    return verificationMethod
   }
 }

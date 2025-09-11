@@ -257,9 +257,7 @@ export class DidWebController {
     const record = [schemaRecord, credentialDefinitionRecord, revocationDefinitionRecord].find(Boolean)
     if (!record) throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
 
-    if ('schema' in record) {
-      res.send(record.metadata.get('registrationMetadata'))
-    }
+    res.send(record.metadata.get('registrationMetadata'))
   }
 }
 
