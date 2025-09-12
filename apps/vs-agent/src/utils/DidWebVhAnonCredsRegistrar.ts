@@ -163,6 +163,29 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     }
   }
 
+  public async updateRevocationRegistryDefinition(
+    agentContext: AgentContext,
+    registrationMetadata: { proof?: Proof } & Record<string, object>,
+    extraInfo: Record<string, object>,
+  ) {
+    const { proof, ...restMetadata } = registrationMetadata
+
+    const vm = proof?.verificationMethod
+    if (!vm) throw new Error('verificationMethod not found in proof')
+    const verificationMethod = typeof vm === 'string' ? vm : vm.id
+
+    const updatedMetadata = { ...restMetadata, ...extraInfo }
+
+    const newProof = await this.createProof(agentContext, updatedMetadata, verificationMethod)
+
+    return {
+      registrationMetadata: {
+        ...updatedMetadata,
+        proof: newProof,
+      },
+    }
+  }
+
   public async registerRevocationStatusList(
     agentContext: AgentContext,
     options?: WebVhRegisterRevocationStatusListOptions,
