@@ -245,19 +245,12 @@ export class DidWebController {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
-    const schemaRepo = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
-    const credDefRepo = agent.dependencyManager.resolve(AnonCredsCredentialDefinitionRepository)
-    const revocDefRepo = agent.dependencyManager.resolve(AnonCredsRevocationRegistryDefinitionRepository)
+    const record = await agent.genericRecords.findById(resourcePath)
+    if (!record) {
+      throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
+    }
 
-    const [schemaRecord, credentialDefinitionRecord, revocationDefinitionRecord] = await Promise.all([
-      schemaRepo.findBySchemaId(agent.context, resourcePath),
-      credDefRepo.findByCredentialDefinitionId(agent.context, resourcePath),
-      revocDefRepo.findByRevocationRegistryDefinitionId(agent.context, resourcePath),
-    ])
-    const record = [schemaRecord, credentialDefinitionRecord, revocationDefinitionRecord].find(Boolean)
-    if (!record) throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
-
-    res.send(record.metadata.get('registrationMetadata'))
+    res.send(record.content)
   }
 }
 

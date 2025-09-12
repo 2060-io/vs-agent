@@ -16,7 +16,7 @@ import {
   AnonCredsSchemaRecord,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { utils } from '@credo-ts/core'
+import { Proof, utils } from '@credo-ts/core'
 import {
   Body,
   Controller,
@@ -33,6 +33,7 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
+import { DidWebVhAnonCredsRegistrar } from '../../../utils/DidWebVhAnonCredsRegistrar'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -99,7 +100,6 @@ export class CredentialTypesController {
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
       const agent = await this.agentService.getAgent()
-      const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
@@ -137,9 +137,9 @@ export class CredentialTypesController {
           throw new Error('Schema for the credential definition could not be created')
         }
         if (schemaResult.registrationMetadata) {
-          await schemaRepository.getBySchemaId(agent.context, schemaId).then(async record => {
-            record.metadata.set('registrationMetadata', schemaResult.registrationMetadata)
-            await schemaRepository.update(agent.context, record)
+          await agent.genericRecords.save({
+            id: schemaResult.registrationMetadata.id as string,
+            content: schemaResult.registrationMetadata,
           })
         }
       }
@@ -172,7 +172,11 @@ export class CredentialTypesController {
       )
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
-      credentialDefinitionRecord.metadata.set('registrationMetadata', registrationResult.registrationMetadata)
+
+      await agent.genericRecords.save({
+        id: registrationResult.registrationMetadata.id as string,
+        content: registrationResult.registrationMetadata,
+      })
 
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 
@@ -466,14 +470,12 @@ export class CredentialTypesController {
       this.logger.debug!(
         `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
       )
-      if (revocationResult.registrationMetadata) {
-        await revocationDefinitionRepository
-          .getByRevocationRegistryDefinitionId(agent.context, revocationRegistryDefinitionId)
-          .then(async record => {
-            record.metadata.set('registrationMetadata', revocationResult.registrationMetadata)
-            await revocationDefinitionRepository.update(agent.context, record)
-          })
-      }
+
+      // save registration metadata for webvh
+      const revocationRecord = await agent.genericRecords.save({
+        id: revocationResult.registrationMetadata.id as string,
+        content: revocationResult.registrationMetadata,
+      })
 
       const revStatusListResult = await agent.modules.anoncreds.registerRevocationStatusList({
         revocationStatusList: {
@@ -490,10 +492,35 @@ export class CredentialTypesController {
           agent.context,
           revocationRegistryDefinitionId,
         )
+
+      // Update revocation definition with revocation status list and registration metadata
+      const timestamp = revStatusListResult.revocationStatusListState.revocationStatusList.timestamp
+      const registry = new DidWebVhAnonCredsRegistrar()
+      const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
+        agent.context,
+        revocationResult.registrationMetadata as { proof?: Proof } & Record<string, object>,
+        {
+          links: [
+            {
+              id: revStatusListResult.registrationMetadata.id as string,
+              type: 'anonCredsStatusList',
+              timestamp,
+            },
+          ],
+        },
+      )
+
       revocationDefinitionRecord.metadata.set(
         'revStatusList',
         revStatusListResult.revocationStatusListState.revocationStatusList,
       )
+      await agent.genericRecords.save({
+        id: revStatusListResult.registrationMetadata.id as string,
+        content: revStatusListResult.registrationMetadata,
+      })
+
+      revocationRecord.content = registrationMetadata
+      await agent.genericRecords.update(revocationRecord)
       await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
       this.logger.log(`Revocation Registry Definition Id: ${revocationRegistryDefinitionId}`)
