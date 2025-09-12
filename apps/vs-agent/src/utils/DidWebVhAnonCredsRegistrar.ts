@@ -1,6 +1,7 @@
 import {
   AnonCredsCredentialDefinition,
   AnonCredsRevocationRegistryDefinition,
+  AnonCredsRevocationStatusListWithoutTimestamp,
   AnonCredsSchema,
   RegisterCredentialDefinitionOptions,
   RegisterCredentialDefinitionReturn,
@@ -11,7 +12,7 @@ import {
   RegisterSchemaOptions,
   RegisterSchemaReturn,
 } from '@credo-ts/anoncreds'
-import { AgentContext, CredoError, DidRepository, TypedArrayEncoder } from '@credo-ts/core'
+import { AgentContext, CredoError, DidRepository, Proof, TypedArrayEncoder } from '@credo-ts/core'
 import { MultiBaseEncoder, MultiHashEncoder } from '@credo-ts/core/build/utils'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { canonicalize } from 'json-canonicalize'
@@ -35,6 +36,15 @@ export type WebVhRegisterCredentialDefinitionOptions = Omit<
 
 export type WebVhRegisterRevocationRegistryDefinitionOptions = Omit<
   RegisterRevocationRegistryDefinitionOptions,
+  'options'
+> & {
+  options?: {
+    verificationMethod?: string
+  }
+}
+
+export type WebVhRegisterRevocationStatusListOptions = Omit<
+  RegisterRevocationStatusListOptions,
   'options'
 > & {
   options?: {
@@ -121,7 +131,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     if (!options?.revocationRegistryDefinition)
       throw new CredoError('revocationRegistryDefinition options must be provided.')
 
-    // Nothing to actually do other than generating a revocation registry definition id
     const resourceId = this.digestMultibase(canonicalize(options.revocationRegistryDefinition))
 
     const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/resources/${resourceId}`
@@ -156,26 +165,40 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
   public async registerRevocationStatusList(
     agentContext: AgentContext,
-    options?: RegisterRevocationStatusListOptions,
+    options?: WebVhRegisterRevocationStatusListOptions,
   ): Promise<RegisterRevocationStatusListReturn> {
     if (!options?.revocationStatusList) throw new CredoError('revocationStatusList options must be provided.')
 
-    // Nothing to actually do other than adding a timestamp
     const timestamp = Math.floor(new Date().getTime() / 1000)
-    const latestRevocationStatusList = await this.getRevocationStatusList(
+    const resourceId = this.digestMultibase(canonicalize(options.revocationStatusList))
+
+    const resourceStatusListId = `${options.revocationStatusList.issuerId}/resources/${resourceId}`
+
+    const verificationMethod = await this.getVerificationMethodId(
       agentContext,
-      options.revocationStatusList.revRegDefId,
-      timestamp,
+      options.revocationStatusList.issuerId,
+      options?.options?.verificationMethod,
     )
+
+    const registrationMetadata = await this.buildSignedResource(agentContext, {
+      content: options.revocationStatusList,
+      id: resourceStatusListId,
+      metadata: {
+        resourceId,
+        resourceType: 'anonCredsStatusList',
+        resourceName: '0',
+      },
+      verificationMethod,
+    })
 
     return {
       revocationStatusListState: {
         state: 'finished',
         revocationStatusList: { ...options.revocationStatusList, timestamp },
       },
-      registrationMetadata: {},
+      registrationMetadata,
       revocationStatusListMetadata: {
-        previousVersionId: latestRevocationStatusList.revocationStatusList?.timestamp.toString() || '',
+        previousVersionId: '',
         nextVersionId: '',
       },
     }
@@ -217,13 +240,15 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
       id,
       metadata,
       verificationMethod,
-      extra,
     }: {
-      content: AnonCredsSchema | AnonCredsCredentialDefinition | AnonCredsRevocationRegistryDefinition
+      content:
+        | AnonCredsSchema
+        | AnonCredsCredentialDefinition
+        | AnonCredsRevocationRegistryDefinition
+        | AnonCredsRevocationStatusListWithoutTimestamp
       id: string
       metadata: Record<string, unknown>
       verificationMethod: string
-      extra?: Record<string, unknown>
     },
   ) {
     const resourcePayload = {
@@ -235,7 +260,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
       id,
       content,
       metadata,
-      ...(extra ?? {}),
     }
 
     const proof = await this.createProof(agentContext, resourcePayload, verificationMethod)
