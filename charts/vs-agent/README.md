@@ -86,6 +86,54 @@ extraEnv:
     value: custom-value
 ```
 
+---
+
+### Resources (New)
+
+Configurable CPU/Memory requests and limits for the VS-Agent container and, if enabled, for PostgreSQL and Redis. Defaults are conservative and can be adjusted after observing real usage.
+
+#### VS-Agent container
+
+| Parameter                   | Description                    | Default |
+| --------------------------- | ------------------------------ | ------- |
+| `resources.requests.cpu`    | Minimum reserved CPU           | `100m`  |
+| `resources.requests.memory` | Minimum reserved memory        | `256Mi` |
+| `resources.limits.cpu`      | Maximum allowed CPU            | `500m`  |
+| `resources.limits.memory`   | Maximum allowed memory         | `512Mi` |
+
+#### PostgreSQL (optional)
+
+> Applies only when `database.enabled: true`.
+
+| Parameter                                  | Description              | Default |
+| ------------------------------------------ | ------------------------ | ------- |
+| `database.resources.requests.cpu`          | Minimum reserved CPU     | `150m`  |
+| `database.resources.requests.memory`       | Minimum reserved memory  | `256Mi` |
+| `database.resources.limits.cpu`            | Maximum allowed CPU      | `400m`  |
+| `database.resources.limits.memory`         | Maximum allowed memory   | `512Mi` |
+
+#### Redis (optional)
+
+> Applies only when `redis.enabled: true`.
+
+| Parameter                             | Description               | Default |
+| ------------------------------------- | ------------------------- | ------- |
+| `redis.resources.requests.cpu`        | Minimum reserved CPU      | `25m`   |
+| `redis.resources.requests.memory`     | Minimum reserved memory   | `64Mi`  |
+| `redis.resources.limits.cpu`          | Maximum allowed CPU       | `100m`  |
+| `redis.resources.limits.memory`       | Maximum allowed memory    | `128Mi` |
+
+#### Quick Helm overrides
+
+```bash
+helm upgrade --install vs-agent ./vs-agent-chart \
+  -n your-namespace \
+  --set resources.requests.cpu=100m \
+  --set resources.requests.memory=256Mi \
+  --set resources.limits.cpu=500m \
+  --set resources.limits.memory=512Mi
+```
+
 ## Usage
 
 1. Update values in your `values.yaml` file as needed.
@@ -104,4 +152,3 @@ helm uninstall vs-agent -n your-namespace
 ```
 
 This will delete all resources created by the chart in the specified namespace.
-

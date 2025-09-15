@@ -78,5 +78,6 @@ spec:
               value: "{{ tpl .Values.env.webrtcUrl . }}"
             ports:
             -  containerPort: {{ .Values.env.port | default 5000 }}
-
+            resources:
+  {{- toYaml .Values.resources | nindent 12 }}
 

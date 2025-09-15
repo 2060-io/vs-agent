@@ -165,6 +165,8 @@ spec:
             ports:
             -  containerPort: {{ .Values.adminPort }}
             -  containerPort: {{ .Values.didcommPort }}
+            resources:
+{{- toYaml .Values.resources | nindent 12 }}
             livenessProbe:
               httpGet:
                 path: /v1/health
@@ -197,6 +199,8 @@ spec:
               value: "/var/lib/postgresql/data/pgdata"
             ports:
             -  containerPort: 5432
+            resources:
+{{- toYaml .Values.database.resources | nindent 12 }}
             volumeMounts:
             - name: {{ .Values.name }}-pg-pv-main
               mountPath: /var/lib/postgresql/data
@@ -207,6 +211,8 @@ spec:
             imagePullPolicy: Always
             ports:
             -  containerPort: 6379
+            resources:
+{{- toYaml .Values.redis.resources | nindent 12 }}
             volumeMounts:
             - name: {{ .Values.name }}-redis-main
               mountPath: /home/data

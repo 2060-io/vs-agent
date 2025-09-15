@@ -15,14 +15,36 @@ didcommLabel: "VS Agent"
 eventsBaseUrl: "https://events.{{ .Values.global.domain }}"
 didcommInvitationImageUrl: "https://image.{{ .Values.global.domain }}/invitation.png"
 publicDidMethod: "webvh"
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
 
 # DB and Redis configuration
 database:
   enabled: false
   user: unicid
   pwd: mypassword123
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
 redis: 
   enabled: false
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 # Enable cors for the VS Agent
 ingress:
