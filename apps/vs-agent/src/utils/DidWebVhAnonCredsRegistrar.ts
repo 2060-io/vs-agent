@@ -62,12 +62,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
     const resourceId = this.digestMultibase(canonicalize(options.schema))
     const schemaId = `${options.schema.issuerId}/resources/${resourceId}`
 
-    const verificationMethod = await this.getVerificationMethodId(
-      agentContext,
-      options.schema.issuerId,
-      options?.options?.verificationMethod,
-    )
-
     const registrationMetadata = await this.buildSignedResource(agentContext, {
       content: options.schema,
       id: schemaId,
@@ -76,7 +70,8 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         resourceType: 'anonCredsSchema',
         resourceName: options.schema.name,
       },
-      verificationMethod,
+      issuerId: options.schema.issuerId,
+      verificationMethod: options?.options?.verificationMethod,
     })
 
     return {
@@ -96,12 +91,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
     const credentialDefinitionId = `${options.credentialDefinition.issuerId}/resources/${resourceId}`
 
-    const verificationMethod = await this.getVerificationMethodId(
-      agentContext,
-      options.credentialDefinition.issuerId,
-      options?.options?.verificationMethod,
-    )
-
     const registrationMetadata = await this.buildSignedResource(agentContext, {
       content: options.credentialDefinition,
       id: credentialDefinitionId,
@@ -110,7 +99,8 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         resourceType: 'anonCredsCredDef',
         resourceName: options.credentialDefinition.tag,
       },
-      verificationMethod,
+      issuerId: options.credentialDefinition.issuerId,
+      verificationMethod: options.options?.verificationMethod,
     })
 
     return {
@@ -135,12 +125,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
     const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/resources/${resourceId}`
 
-    const verificationMethod = await this.getVerificationMethodId(
-      agentContext,
-      options.revocationRegistryDefinition.issuerId,
-      options?.options?.verificationMethod,
-    )
-
     const registrationMetadata = await this.buildSignedResource(agentContext, {
       content: options.revocationRegistryDefinition,
       id: revocationRegistryDefinitionId,
@@ -149,7 +133,8 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         resourceType: 'anonCredsRevocRegDef',
         resourceName: options.revocationRegistryDefinition.tag,
       },
-      verificationMethod,
+      issuerId: options.revocationRegistryDefinition.issuerId,
+      verificationMethod: options.options?.verificationMethod,
     })
 
     return {
@@ -197,12 +182,6 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
 
     const resourceStatusListId = `${options.revocationStatusList.issuerId}/resources/${resourceId}`
 
-    const verificationMethod = await this.getVerificationMethodId(
-      agentContext,
-      options.revocationStatusList.issuerId,
-      options?.options?.verificationMethod,
-    )
-
     const registrationMetadata = await this.buildSignedResource(agentContext, {
       content: options.revocationStatusList,
       id: resourceStatusListId,
@@ -211,7 +190,8 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         resourceType: 'anonCredsStatusList',
         resourceName: '0',
       },
-      verificationMethod,
+      issuerId: options.revocationStatusList.issuerId,
+      verificationMethod: options?.options?.verificationMethod,
     })
 
     return {
@@ -262,6 +242,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
       content,
       id,
       metadata,
+      issuerId,
       verificationMethod,
     }: {
       content:
@@ -271,9 +252,16 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
         | AnonCredsRevocationStatusListWithoutTimestamp
       id: string
       metadata: Record<string, unknown>
-      verificationMethod: string
+      issuerId: string
+      verificationMethod?: string
     },
   ) {
+    const verificationMethodId = await this.getVerificationMethodId(
+      agentContext,
+      issuerId,
+      verificationMethod,
+    )
+
     const resourcePayload = {
       '@context': [
         'https://opsecid.github.io/attested-resource/v1',
@@ -285,7 +273,7 @@ export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
       metadata,
     }
 
-    const proof = await this.createProof(agentContext, resourcePayload, verificationMethod)
+    const proof = await this.createProof(agentContext, resourcePayload, verificationMethodId)
     return {
       ...resourcePayload,
       proof,
