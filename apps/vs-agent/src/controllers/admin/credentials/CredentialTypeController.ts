@@ -33,7 +33,7 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { DidWebVhAnonCredsRegistrar } from '../../../utils/DidWebVhAnonCredsRegistrar'
+import { DidWebVhAnonCredsRegistry } from '../../../utils/DidWebVhAnonCredsRegistry'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -492,7 +492,7 @@ export class CredentialTypesController {
 
       // Update revocation definition with revocation status list and registration metadata
       const timestamp = revocationStatusListState.revocationStatusList.timestamp
-      const registry = new DidWebVhAnonCredsRegistrar()
+      const registry = new DidWebVhAnonCredsRegistry()
       const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
         agent.context,
         revocationRegistration as { proof?: Proof } & Record<string, object>,

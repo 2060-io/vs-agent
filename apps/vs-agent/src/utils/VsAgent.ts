@@ -44,7 +44,7 @@ import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { CachedWebDidResolver } from './CachedWebDidResolver'
-import { DidWebVhAnonCredsRegistrar } from './DidWebVhAnonCredsRegistrar'
+import { DidWebVhAnonCredsRegistry } from './DidWebVhAnonCredsRegistry'
 import { WebDidRegistrar } from './WebDidRegistrar'
 import { WebVhDidRegistrar } from './WebVhDidRegistrar'
 
@@ -354,7 +354,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
           new DidWebAnonCredsRegistry({
             cacheOptions: { allowCaching: true, cacheDurationInSeconds: 24 * 60 * 60 },
           }),
-          new DidWebVhAnonCredsRegistrar(),
+          new DidWebVhAnonCredsRegistry(),
         ],
       }),
       actionMenu: new ActionMenuModule(),
