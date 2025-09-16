@@ -474,7 +474,7 @@ export class CredentialTypesController {
         await agent.modules.anoncreds.registerRevocationStatusList({
           revocationStatusList: {
             issuerId: cred.credentialDefinition.issuerId,
-            revocationRegistryDefinitionId: revocationRegistryDefinitionId,
+            revocationRegistryDefinitionId,
           },
           options: {},
         })
