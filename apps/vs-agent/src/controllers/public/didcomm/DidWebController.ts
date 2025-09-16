@@ -3,7 +3,6 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { DidDocument, DidDocumentService, JsonTransformer, parseDid } from '@credo-ts/core'
 import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
 import { DIDLog } from 'didwebvh-ts'
 import { Response } from 'express'
@@ -12,6 +11,7 @@ import * as fs from 'fs'
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
 import { VsAgent } from '../../../utils/VsAgent'
 import { getWebDid } from '../../../utils/agent'
+import { getLegacyDidDocument } from '../../../utils/legacyDidWeb'
 
 @Controller()
 export class DidWebController {
@@ -26,40 +26,7 @@ export class DidWebController {
     agent.config.logger.debug(`Public DID document requested`)
     const { didDocument } = await resolveDidDocumentData(agent)
 
-    if (didDocument) {
-      const parsedDid = parseDid(didDocument.id)
-
-      if (parsedDid.method === 'web') return didDocument
-
-      // In case of did:webvh, we'll need to add some steps to publish a did:web, as per
-      // https://identity.foundation/didwebvh/v1.0/#publishing-a-parallel-didweb-did
-      if (parsedDid.method === 'webvh' && parsedDid.id.includes(':')) {
-        const scid = parsedDid.id.split(':')[0]
-
-        // Start with resolved version of the DIDDoc from did:webvh
-        const legacyDidDocument = new DidDocument(didDocument)
-
-        // We add the legacy did:web AnonCreds service (important in case the agent had previously did:web objects)
-        legacyDidDocument.service = [
-          ...(legacyDidDocument.service ?? []),
-          new DidDocumentService({
-            id: `${didDocument.id}#anoncreds`,
-            serviceEndpoint: `${this.publicApiBaseUrl}/anoncreds/v1`,
-            type: 'AnonCredsRegistry',
-          }),
-        ]
-
-        // Execute text replacement: did:webvh:<scid> by did:web
-        const stringified = JSON.stringify(legacyDidDocument.toJSON())
-        const replaced = stringified.replace(new RegExp(`did:webvh:${scid}`, 'g'), 'did:web')
-
-        return new DidDocument({
-          ...JsonTransformer.fromJSON(JSON.parse(replaced), DidDocument),
-          // Update alsoKnownAs
-          alsoKnownAs: [parsedDid.did],
-        })
-      }
-    }
+    if (didDocument) return getLegacyDidDocument(didDocument, this.publicApiBaseUrl)
 
     // Neither did:web nor did:webvh
     throw new HttpException('DID Document not found', HttpStatus.NOT_FOUND)

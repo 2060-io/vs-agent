@@ -27,7 +27,7 @@ export class InvitationController {
 
   @Get('/')
   @ApiQuery({ name: 'legacy', required: false, type: Boolean })
-  public async getInvitation(@Query('legacy') useLegacyDid?: boolean,): Promise<CreateInvitationResult> {
+  public async getInvitation(@Query('legacy') useLegacyDid?: boolean): Promise<CreateInvitationResult> {
     return await createInvitation({ agent: await this.agentService.getAgent(), useLegacyDid })
   }
 

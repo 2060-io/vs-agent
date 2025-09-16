@@ -371,7 +371,10 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
         ],
       }),
       dids: new DidsModule({
-        resolvers: [new CachedWebDidResolver(), new WebvhDidResolver()],
+        resolvers: [
+          new CachedWebDidResolver({ publicApiBaseUrl: options.publicApiBaseUrl }),
+          new WebvhDidResolver(),
+        ],
         registrars: [new WebDidRegistrar(), new WebVhDidRegistrar()],
       }),
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
