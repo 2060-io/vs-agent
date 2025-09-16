@@ -495,7 +495,7 @@ export class CredentialTypesController {
       const registry = new DidWebVhAnonCredsRegistrar()
       const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
         agent.context,
-        statusRegistration as { proof?: Proof } & Record<string, object>,
+        revocationRegistration as { proof?: Proof } & Record<string, object>,
         {
           links: [
             {
