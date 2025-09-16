@@ -437,9 +437,6 @@ export class CredentialTypesController {
   public async createRevocationRegistry(@Body() options: CreateRevocationRegistryDto): Promise<string> {
     try {
       const agent = await this.agentService.getAgent()
-      const revocationDefinitionRepository = agent.dependencyManager.resolve(
-        AnonCredsRevocationRegistryDefinitionRepository,
-      )
       const credentialDefinitionId = options.credentialDefinitionId
 
       const cred = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
@@ -484,6 +481,9 @@ export class CredentialTypesController {
       if (!revocationStatusListState.revocationStatusList) {
         throw new Error(`Failed to create revocation status list`)
       }
+      const revocationDefinitionRepository = agent.dependencyManager.resolve(
+        AnonCredsRevocationRegistryDefinitionRepository,
+      )
       const revocationDefinitionRecord =
         await revocationDefinitionRepository.getByRevocationRegistryDefinitionId(
           agent.context,
