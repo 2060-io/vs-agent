@@ -52,7 +52,7 @@ export type WebVhRegisterRevocationStatusListOptions = Omit<
   }
 }
 
-export class DidWebVhAnonCredsRegistrar extends WebVhAnonCredsRegistry {
+export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
   public async registerSchema(
     agentContext: AgentContext,
     options?: WebVhRegisterSchemaOptions,
