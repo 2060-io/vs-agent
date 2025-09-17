@@ -217,7 +217,10 @@ export class DidWebController {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
-    const record = await agent.genericRecords.findById(resourcePath)
+    const [record] = await agent.genericRecords.findAllByQuery({
+      attestedResourceId: resourcePath,
+      type: 'AttestedResource',
+    })
     if (!record) {
       throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
     }

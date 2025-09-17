@@ -119,7 +119,7 @@ export class CredentialTypesController {
         schema = schemaState.schema
       } else {
         // No schema specified. A new one will be created
-        const { schemaState, registrationMetadata: schemaRegistration } =
+        const { schemaState, registrationMetadata: schemaMetadata } =
           await agent.modules.anoncreds.registerSchema({
             schema: {
               attrNames: options.attributes,
@@ -129,6 +129,9 @@ export class CredentialTypesController {
             },
             options: {},
           })
+        const { attestedResource: schemaRegistration } = schemaMetadata as {
+          attestedResource: Record<string, unknown>
+        }
 
         this.logger.debug!(`schemaState: ${JSON.stringify(schemaState)}`)
         schemaId = schemaState.schemaId
@@ -139,17 +142,21 @@ export class CredentialTypesController {
         }
         if (schemaRegistration) {
           await agent.genericRecords.save({
-            id: schemaRegistration.id as string,
+            id: utils.uuid(),
             content: schemaRegistration,
+            tags: { attestedResourceId: schemaRegistration.id as string, type: 'AttestedResource' },
           })
         }
       }
 
-      const { credentialDefinitionState, registrationMetadata: credentialRegistration } =
+      const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
         await agent.modules.anoncreds.registerCredentialDefinition({
           credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
           options: { supportRevocation: options.supportRevocation },
         })
+      const { attestedResource: credentialRegistration } = credDefMetadata as {
+        attestedResource: Record<string, unknown>
+      }
 
       const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
       this.logger.debug!(`credentialDefinitionState: ${JSON.stringify(credentialDefinitionState)}`)
@@ -172,8 +179,9 @@ export class CredentialTypesController {
       credentialDefinitionRecord.setTag('version', options.version)
 
       await agent.genericRecords.save({
-        id: credentialRegistration.id as string,
+        id: utils.uuid(),
         content: credentialRegistration,
+        tags: { attestedResourceId: credentialRegistration.id as string, type: 'AttestedResource' },
       })
 
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
@@ -446,7 +454,7 @@ export class CredentialTypesController {
           `No suitable revocation configuration found for the given credentialDefinitionId: ${credentialDefinitionId}`,
         )
       }
-      const { revocationRegistryDefinitionState, registrationMetadata: revocationRegistration } =
+      const { revocationRegistryDefinitionState, registrationMetadata: revDefMetadata } =
         await agent.modules.anoncreds.registerRevocationRegistryDefinition({
           revocationRegistryDefinition: {
             credentialDefinitionId,
@@ -456,6 +464,9 @@ export class CredentialTypesController {
           },
           options: {},
         })
+      const { attestedResource: revocationRegistration } = revDefMetadata as {
+        attestedResource: Record<string, unknown>
+      }
       const revocationRegistryDefinitionId = revocationRegistryDefinitionState.revocationRegistryDefinitionId
       if (!revocationRegistryDefinitionId) {
         throw new Error(`Cannot create credential revocations: ${JSON.stringify(revocationRegistration)}`)
@@ -466,11 +477,12 @@ export class CredentialTypesController {
 
       // save registration metadata for webvh
       const revocationRecord = await agent.genericRecords.save({
-        id: revocationRegistration.id as string,
+        id: utils.uuid(),
         content: revocationRegistration,
+        tags: { attestedResourceId: revocationRegistration.id as string, type: 'AttestedResource' },
       })
 
-      const { revocationStatusListState, registrationMetadata: statusRegistration } =
+      const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
           revocationStatusList: {
             issuerId: cred.credentialDefinition.issuerId,
@@ -478,6 +490,9 @@ export class CredentialTypesController {
           },
           options: {},
         })
+      const { attestedResource: statusRegistration } = revListMetadata as {
+        attestedResource: Record<string, unknown>
+      }
       if (!revocationStatusListState.revocationStatusList) {
         throw new Error(`Failed to create revocation status list`)
       }
@@ -509,8 +524,9 @@ export class CredentialTypesController {
 
       revocationDefinitionRecord.metadata.set('revStatusList', revocationStatusListState.revocationStatusList)
       await agent.genericRecords.save({
-        id: statusRegistration.id as string,
+        id: utils.uuid(),
         content: statusRegistration,
+        tags: { attestedResourceId: statusRegistration.id as string, type: 'AttestedResource' },
       })
 
       revocationRecord.content = registrationMetadata

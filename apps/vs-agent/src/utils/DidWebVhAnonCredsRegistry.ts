@@ -62,7 +62,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
     const resourceId = this.digestMultibase(canonicalize(options.schema))
     const schemaId = `${options.schema.issuerId}/resources/${resourceId}`
 
-    const registrationMetadata = await this.buildSignedResource(agentContext, {
+    const attestedResource = await this.buildSignedResource(agentContext, {
       content: options.schema,
       id: schemaId,
       metadata: {
@@ -76,7 +76,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
 
     return {
       schemaState: { state: 'finished', schema: options.schema, schemaId },
-      registrationMetadata,
+      registrationMetadata: { attestedResource },
       schemaMetadata: {},
     }
   }
@@ -91,7 +91,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
 
     const credentialDefinitionId = `${options.credentialDefinition.issuerId}/resources/${resourceId}`
 
-    const registrationMetadata = await this.buildSignedResource(agentContext, {
+    const attestedResource = await this.buildSignedResource(agentContext, {
       content: options.credentialDefinition,
       id: credentialDefinitionId,
       metadata: {
@@ -110,7 +110,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
         credentialDefinitionId,
       },
       credentialDefinitionMetadata: {},
-      registrationMetadata,
+      registrationMetadata: { attestedResource },
     }
   }
 
@@ -125,7 +125,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
 
     const revocationRegistryDefinitionId = `${options.revocationRegistryDefinition.issuerId}/resources/${resourceId}`
 
-    const registrationMetadata = await this.buildSignedResource(agentContext, {
+    const attestedResource = await this.buildSignedResource(agentContext, {
       content: options.revocationRegistryDefinition,
       id: revocationRegistryDefinitionId,
       metadata: {
@@ -143,7 +143,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
         revocationRegistryDefinition: options.revocationRegistryDefinition,
         revocationRegistryDefinitionId,
       },
-      registrationMetadata,
+      registrationMetadata: { attestedResource },
       revocationRegistryDefinitionMetadata: {},
     }
   }
@@ -182,7 +182,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
 
     const resourceStatusListId = `${options.revocationStatusList.issuerId}/resources/${resourceId}`
 
-    const registrationMetadata = await this.buildSignedResource(agentContext, {
+    const attestedResource = await this.buildSignedResource(agentContext, {
       content: options.revocationStatusList,
       id: resourceStatusListId,
       metadata: {
@@ -199,7 +199,7 @@ export class DidWebVhAnonCredsRegistry extends WebVhAnonCredsRegistry {
         state: 'finished',
         revocationStatusList: { ...options.revocationStatusList, timestamp },
       },
-      registrationMetadata,
+      registrationMetadata: { attestedResource },
       revocationStatusListMetadata: {
         previousVersionId: '',
         nextVersionId: '',
