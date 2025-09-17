@@ -34,6 +34,7 @@ import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { DidWebVhAnonCredsRegistry } from '../../../utils/DidWebVhAnonCredsRegistry'
+import { VsAgent } from '../../../utils/VsAgent'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -104,13 +105,13 @@ export class CredentialTypesController {
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
 
-      const issuerId = options.schemaId ?? agent.did
+      const issuerId = options.issuerId ?? agent.did
       if (!issuerId) {
         throw new Error('Agent does not have any defined public DID')
       }
 
-      if (schemaId) {
-        const schemaState = await agent.modules.anoncreds.getSchema(schemaId)
+      if (options.schemaId) {
+        const schemaState = await agent.modules.anoncreds.getSchema(options.schemaId)
 
         if (!schemaState.schema) {
           throw new Error('Specified schema has not been found')
@@ -140,13 +141,7 @@ export class CredentialTypesController {
         if (!schemaId || !schema) {
           throw new Error('Schema for the credential definition could not be created')
         }
-        if (schemaRegistration) {
-          await agent.genericRecords.save({
-            id: utils.uuid(),
-            content: schemaRegistration,
-            tags: { attestedResourceId: schemaRegistration.id as string, type: 'AttestedResource' },
-          })
-        }
+        await this.saveAttestedResource(agent, schemaRegistration)
       }
 
       const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
@@ -178,12 +173,7 @@ export class CredentialTypesController {
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
 
-      await agent.genericRecords.save({
-        id: utils.uuid(),
-        content: credentialRegistration,
-        tags: { attestedResourceId: credentialRegistration.id as string, type: 'AttestedResource' },
-      })
-
+      await this.saveAttestedResource(agent, credentialRegistration)
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 
       return {
@@ -449,7 +439,7 @@ export class CredentialTypesController {
 
       const cred = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
 
-      if (!cred || !cred.credentialDefinition?.value.revocation) {
+      if (!cred?.credentialDefinition?.value.revocation) {
         throw new Error(
           `No suitable revocation configuration found for the given credentialDefinitionId: ${credentialDefinitionId}`,
         )
@@ -476,11 +466,7 @@ export class CredentialTypesController {
       )
 
       // save registration metadata for webvh
-      const revocationRecord = await agent.genericRecords.save({
-        id: utils.uuid(),
-        content: revocationRegistration,
-        tags: { attestedResourceId: revocationRegistration.id as string, type: 'AttestedResource' },
-      })
+      const revocationRecord = await this.saveAttestedResource(agent, revocationRegistration)
 
       const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
@@ -506,31 +492,29 @@ export class CredentialTypesController {
         )
 
       // Update revocation definition with revocation status list and registration metadata
-      const timestamp = revocationStatusListState.revocationStatusList.timestamp
-      const registry = new DidWebVhAnonCredsRegistry()
-      const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
-        agent.context,
-        revocationRegistration as { proof?: Proof } & Record<string, object>,
-        {
-          links: [
-            {
-              id: statusRegistration.id as string,
-              type: 'anonCredsStatusList',
-              timestamp,
-            },
-          ],
-        },
-      )
+      if (statusRegistration && revocationRecord) {
+        const timestamp = revocationStatusListState.revocationStatusList.timestamp
+        const registry = new DidWebVhAnonCredsRegistry()
+        const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
+          agent.context,
+          revocationRegistration as { proof?: Proof } & Record<string, object>,
+          {
+            links: [
+              {
+                id: statusRegistration.id as string,
+                type: 'anonCredsStatusList',
+                timestamp,
+              },
+            ],
+          },
+        )
+        await this.saveAttestedResource(agent, statusRegistration)
+
+        revocationRecord.content = registrationMetadata
+        await agent.genericRecords.update(revocationRecord)
+      }
 
       revocationDefinitionRecord.metadata.set('revStatusList', revocationStatusListState.revocationStatusList)
-      await agent.genericRecords.save({
-        id: utils.uuid(),
-        content: statusRegistration,
-        tags: { attestedResourceId: statusRegistration.id as string, type: 'AttestedResource' },
-      })
-
-      revocationRecord.content = registrationMetadata
-      await agent.genericRecords.update(revocationRecord)
       await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
       this.logger.log(`Revocation Registry Definition Id: ${revocationRegistryDefinitionId}`)
@@ -578,5 +562,14 @@ export class CredentialTypesController {
     )
 
     return revocationRegistryDefinitionIds
+  }
+
+  private async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
+    if (!resource) return
+    return await agent.genericRecords.save({
+      id: utils.uuid(),
+      content: resource,
+      tags: { attestedResourceId: resource.id as string, type: 'AttestedResource' },
+    })
   }
 }
