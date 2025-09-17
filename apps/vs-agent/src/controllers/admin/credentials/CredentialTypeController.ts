@@ -104,13 +104,13 @@ export class CredentialTypesController {
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
 
-      const issuerId = agent.did
+      const issuerId = options.schemaId ?? agent.did
       if (!issuerId) {
         throw new Error('Agent does not have any defined public DID')
       }
 
-      if (options.schemaId) {
-        const schemaState = await agent.modules.anoncreds.getSchema(options.schemaId)
+      if (schemaId) {
+        const schemaState = await agent.modules.anoncreds.getSchema(schemaId)
 
         if (!schemaState.schema) {
           throw new Error('Specified schema has not been found')
