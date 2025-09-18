@@ -34,6 +34,15 @@ export class CreateCredentialTypeDto {
   schemaId?: string
 
   @ApiProperty({
+    description: 'New issuer id in case you want to',
+    example: 'did:web:issuer',
+  })
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  issuerId?: string
+
+  @ApiProperty({
     description:
       'Indicates whether to enable credential revocation support. If enabled, it allows revocation of issued credentials.',
     example: true,
