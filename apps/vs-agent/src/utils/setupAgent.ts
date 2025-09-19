@@ -21,6 +21,8 @@ export const setupAgent = async ({
   parsedDid,
   autoDiscloseUserProfile,
   masterListCscaLocation,
+  autoUpdateStorageOnStartup,
+  backupBeforeStorageUpdate,
 }: {
   port: number
   walletConfig: WalletConfig
@@ -32,6 +34,8 @@ export const setupAgent = async ({
   autoDiscloseUserProfile?: boolean
   parsedDid?: ParsedDid
   masterListCscaLocation?: string
+  autoUpdateStorageOnStartup?: boolean
+  backupBeforeStorageUpdate?: boolean
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
   const publicDid = parsedDid?.did
@@ -46,8 +50,9 @@ export const setupAgent = async ({
       connectionImageUrl: displayPictureUrl,
       endpoints,
       walletConfig,
-      autoUpdateStorageOnStartup: true,
       logger,
+      autoUpdateStorageOnStartup,
+      backupBeforeStorageUpdate,
     },
     did: publicDid,
     autoDiscloseUserProfile,

@@ -14,14 +14,14 @@ In this section we will divide them depending on how likely different users will
 
 These variables are usually important for every deployment, since they define how VS Agent will be accessed from the outside world (User Agents, other Verifiable Services and your controller, who will be managing its Admin API and receiving events from it):
 
-| Variable                   | Description                                     | Default value           |
-| -------------------------- | ----------------------------------------------- | ----------------------- |
-| AGENT_PORT                 | Port where DIDComm agent will be running        | 3001                    |
-| ADMIN_PORT                 | Administration interface port                   | 3000                    |
-| AGENT_PUBLIC_DID           | Agent's public DID (in did:web or did:webvh format)          | none                    |
-| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations | none                    |
-| AGENT_LABEL                | Label to show to other DIDComm agents           | Test VS Agent           |
-| EVENTS_BASE_URL            | Base URL for sending events                     | <http://localhost:5000> |
+| Variable                   | Description                                         | Default value           |
+| -------------------------- | --------------------------------------------------- | ----------------------- |
+| AGENT_PORT                 | Port where DIDComm agent will be running            | 3001                    |
+| ADMIN_PORT                 | Administration interface port                       | 3000                    |
+| AGENT_PUBLIC_DID           | Agent's public DID (in did:web or did:webvh format) | none                    |
+| AGENT_INVITATION_IMAGE_URL | Public URL for image to be shown in invitations     | none                    |
+| AGENT_LABEL                | Label to show to other DIDComm agents               | Test VS Agent           |
+| EVENTS_BASE_URL            | Base URL for sending events                         | <http://localhost:5000> |
 
 VS Agent includes a public and an administration interface, each running in ports 3001 and 3000 respectively (which could be overriden by setting `AGENT_PORT` and `ADMIN_PORT` in case you are running the application locally and these ports are used by other apps).
 
@@ -103,8 +103,12 @@ These are variables that are updated only on specific use cases.
 | REDIRECT_DEFAULT_URL_TO_INVITATION_URL | Default redirect to AGENT_INVITATION_BASE_URL                                                                                                                                                                              | true                     |
 | USER_PROFILE_AUTODISCLOSE              | Whether to disclose User Profile when requested by another agent. If not set, User Profile can manually be sent by using a Profile message                                                                                 | false                    |
 | MASTER_LIST_CSCA_LOCATION              | **Enables the eMRTD verification module**. Location (URL or absolute path) of the CSCA Master List in **LDIF** format When set, VS Agent loads trust anchors at startup and activates ePassport verification capabilities. | none                     |
+| AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP   | Toggle automatic storage migration on startup. If true, the agent runs migrations and attempts to make a backup of the wallet on startup                                                                                   | false                    |
+| AGENT_BACKUP_BEFORE_STORAGE_UPDATE     | Toggle backup before storage update. If true, the agent creates a backup of the wallet using Askar's export before performing storage migrations                                                                           | false                    |
 
 > **Note about Key derivation method**: By default, we use the strongest ARGON2I_MOD, but since this is the slowest one as well, depending on the security infrastructure you have, you might want to not derive the key at all (use RAW). However, in versions of VS Agent we are going to deprecate this setting, so we recommend to keep the default setting to make migration process easier.
+
+> **Note about storage update and backup**: When migrating a wallet from SQLite to Postgres and restoring it in VS Agent with a new (sanitized) profile name, the agent may attempt to run a storage migration and create a backup of the Postgres wallet. Askar currently does not support exporting non‑SQLite wallets, so the default backup behaviour will cause a fatal error. To avoid this, set AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP=false and/or AGENT_BACKUP_BEFORE_STORAGE_UPDATE=false in your environment. This disables the automatic update and backup features and allows the agent to start successfully with the migrated wallet.
 
 ### Agent feature discovery
 
