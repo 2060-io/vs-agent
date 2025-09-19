@@ -37,6 +37,8 @@ import {
   USE_CORS,
   USER_PROFILE_AUTODISCLOSE,
   MASTER_LIST_CSCA_LOCATION,
+  AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
+  AGENT_BACKUP_BEFORE_STORAGE_UPDATE,
 } from './config/constants'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -142,6 +144,8 @@ const run = async () => {
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
     masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
+    autoUpdateStorageOnStartup: AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
+    backupBeforeStorageUpdate: AGENT_BACKUP_BEFORE_STORAGE_UPDATE,
   })
 
   const discoveryOptions = (() => {

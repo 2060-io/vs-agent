@@ -100,3 +100,9 @@ export const FALLBACK_BASE64 =
 
 //master list CSCA location
 export const MASTER_LIST_CSCA_LOCATION = process.env.MASTER_LIST_CSCA_LOCATION
+
+//Storage update configuration sqlite
+export const AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP =
+  process.env.AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP !== 'false'
+
+export const AGENT_BACKUP_BEFORE_STORAGE_UPDATE = process.env.AGENT_BACKUP_BEFORE_STORAGE_UPDATE !== 'false'
