@@ -16,7 +16,7 @@ import {
   AnonCredsSchemaRecord,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { utils } from '@credo-ts/core'
+import { Proof, utils } from '@credo-ts/core'
 import {
   Body,
   Controller,
@@ -33,7 +33,8 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { getWebDid } from '../../../utils/agent'
+import { DidWebVhAnonCredsRegistry } from '../../../utils/DidWebVhAnonCredsRegistry'
+import { VsAgent } from '../../../utils/VsAgent'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
@@ -104,9 +105,7 @@ export class CredentialTypesController {
       let schemaId: string | undefined
       let schema: AnonCredsSchema | undefined
 
-      // At the moment, we only support did:web AnonCreds method, so we need to get did:web version of DID
-      const issuerId = await getWebDid(agent)
-
+      const issuerId = options.issuerId ?? agent.did
       if (!issuerId) {
         throw new Error('Agent does not have any defined public DID')
       }
@@ -121,15 +120,19 @@ export class CredentialTypesController {
         schema = schemaState.schema
       } else {
         // No schema specified. A new one will be created
-        const { schemaState } = await agent.modules.anoncreds.registerSchema({
-          schema: {
-            attrNames: options.attributes,
-            name: options.name,
-            version: options.version,
-            issuerId,
-          },
-          options: {},
-        })
+        const { schemaState, registrationMetadata: schemaMetadata } =
+          await agent.modules.anoncreds.registerSchema({
+            schema: {
+              attrNames: options.attributes,
+              name: options.name,
+              version: options.version,
+              issuerId,
+            },
+            options: {},
+          })
+        const { attestedResource: schemaRegistration } = schemaMetadata as {
+          attestedResource: Record<string, unknown>
+        }
 
         this.logger.debug!(`schemaState: ${JSON.stringify(schemaState)}`)
         schemaId = schemaState.schemaId
@@ -138,22 +141,23 @@ export class CredentialTypesController {
         if (!schemaId || !schema) {
           throw new Error('Schema for the credential definition could not be created')
         }
+        await this.saveAttestedResource(agent, schemaRegistration)
       }
 
-      const registrationResult = await agent.modules.anoncreds.registerCredentialDefinition({
-        credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
-        options: { supportRevocation: options.supportRevocation },
-      })
+      const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
+        await agent.modules.anoncreds.registerCredentialDefinition({
+          credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
+          options: { supportRevocation: options.supportRevocation },
+        })
+      const { attestedResource: credentialRegistration } = credDefMetadata as {
+        attestedResource: Record<string, unknown>
+      }
 
-      const credentialDefinitionId = registrationResult.credentialDefinitionState.credentialDefinitionId
-      this.logger.debug!(
-        `credentialDefinitionState: ${JSON.stringify(registrationResult.credentialDefinitionState)}`,
-      )
+      const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
+      this.logger.debug!(`credentialDefinitionState: ${JSON.stringify(credentialDefinitionState)}`)
 
       if (!credentialDefinitionId) {
-        throw new Error(
-          `Cannot create credential definition: ${JSON.stringify(registrationResult.registrationMetadata)}`,
-        )
+        throw new Error(`Cannot create credential definition: ${JSON.stringify(credentialRegistration)}`)
       }
 
       this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
@@ -169,6 +173,7 @@ export class CredentialTypesController {
       credentialDefinitionRecord.setTag('name', options.name)
       credentialDefinitionRecord.setTag('version', options.version)
 
+      await this.saveAttestedResource(agent, credentialRegistration)
       await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
 
       return {
@@ -316,14 +321,11 @@ export class CredentialTypesController {
       )
       const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
 
-      // At the moment, we only support did:web AnonCreds method, so we need to get did:web version of DID
-      const issuerId = await getWebDid(agent)
-
       if (await credentialDefinitionRepository.findByCredentialDefinitionId(agent.context, options.id)) {
         throw new Error('Credential type already exists')
       }
 
-      if (!issuerId) {
+      if (!agent.did) {
         throw new Error('Agent does not have any defined public DID')
       }
 
@@ -437,39 +439,47 @@ export class CredentialTypesController {
 
       const cred = await agent.modules.anoncreds.getCredentialDefinition(credentialDefinitionId)
 
-      if (!cred || !cred.credentialDefinition?.value.revocation) {
+      if (!cred?.credentialDefinition?.value.revocation) {
         throw new Error(
           `No suitable revocation configuration found for the given credentialDefinitionId: ${credentialDefinitionId}`,
         )
       }
-      const revocationResult = await agent.modules.anoncreds.registerRevocationRegistryDefinition({
-        revocationRegistryDefinition: {
-          credentialDefinitionId,
-          tag: 'default',
-          maximumCredentialNumber: options.maximumCredentialNumber,
-          issuerId: cred.credentialDefinition.issuerId,
-        },
-        options: {},
-      })
-      const revocationRegistryDefinitionId =
-        revocationResult.revocationRegistryDefinitionState.revocationRegistryDefinitionId
+      const { revocationRegistryDefinitionState, registrationMetadata: revDefMetadata } =
+        await agent.modules.anoncreds.registerRevocationRegistryDefinition({
+          revocationRegistryDefinition: {
+            credentialDefinitionId,
+            tag: 'default',
+            maximumCredentialNumber: options.maximumCredentialNumber,
+            issuerId: cred.credentialDefinition.issuerId,
+          },
+          options: {},
+        })
+      const { attestedResource: revocationRegistration } = revDefMetadata as {
+        attestedResource: Record<string, unknown>
+      }
+      const revocationRegistryDefinitionId = revocationRegistryDefinitionState.revocationRegistryDefinitionId
       if (!revocationRegistryDefinitionId) {
-        throw new Error(
-          `Cannot create credential revocations: ${JSON.stringify(revocationResult.registrationMetadata)}`,
-        )
+        throw new Error(`Cannot create credential revocations: ${JSON.stringify(revocationRegistration)}`)
       }
       this.logger.debug!(
-        `revocationRegistryDefinitionState: ${JSON.stringify(revocationResult.revocationRegistryDefinitionState)}`,
+        `revocationRegistryDefinitionState: ${JSON.stringify(revocationRegistryDefinitionState)}`,
       )
 
-      const revStatusListResult = await agent.modules.anoncreds.registerRevocationStatusList({
-        revocationStatusList: {
-          issuerId: cred.credentialDefinition.issuerId,
-          revocationRegistryDefinitionId: revocationRegistryDefinitionId,
-        },
-        options: {},
-      })
-      if (!revStatusListResult.revocationStatusListState.revocationStatusList) {
+      // save registration metadata for webvh
+      const revocationRecord = await this.saveAttestedResource(agent, revocationRegistration)
+
+      const { revocationStatusListState, registrationMetadata: revListMetadata } =
+        await agent.modules.anoncreds.registerRevocationStatusList({
+          revocationStatusList: {
+            issuerId: cred.credentialDefinition.issuerId,
+            revocationRegistryDefinitionId,
+          },
+          options: {},
+        })
+      const { attestedResource: statusRegistration } = revListMetadata as {
+        attestedResource: Record<string, unknown>
+      }
+      if (!revocationStatusListState.revocationStatusList) {
         throw new Error(`Failed to create revocation status list`)
       }
       const revocationDefinitionRepository = agent.dependencyManager.resolve(
@@ -480,10 +490,31 @@ export class CredentialTypesController {
           agent.context,
           revocationRegistryDefinitionId,
         )
-      revocationDefinitionRecord.metadata.set(
-        'revStatusList',
-        revStatusListResult.revocationStatusListState.revocationStatusList,
-      )
+
+      // Update revocation definition with revocation status list and registration metadata
+      if (statusRegistration && revocationRecord) {
+        const timestamp = revocationStatusListState.revocationStatusList.timestamp
+        const registry = new DidWebVhAnonCredsRegistry()
+        const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
+          agent.context,
+          revocationRegistration as { proof?: Proof } & Record<string, object>,
+          {
+            links: [
+              {
+                id: statusRegistration.id as string,
+                type: 'anonCredsStatusList',
+                timestamp,
+              },
+            ],
+          },
+        )
+        await this.saveAttestedResource(agent, statusRegistration)
+
+        revocationRecord.content = registrationMetadata
+        await agent.genericRecords.update(revocationRecord)
+      }
+
+      revocationDefinitionRecord.metadata.set('revStatusList', revocationStatusListState.revocationStatusList)
       await revocationDefinitionRepository.update(agent.context, revocationDefinitionRecord)
 
       this.logger.log(`Revocation Registry Definition Id: ${revocationRegistryDefinitionId}`)
@@ -531,5 +562,14 @@ export class CredentialTypesController {
     )
 
     return revocationRegistryDefinitionIds
+  }
+
+  private async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
+    if (!resource) return
+    return await agent.genericRecords.save({
+      id: utils.uuid(),
+      content: resource,
+      tags: { attestedResourceId: resource.id as string, type: 'AttestedResource' },
+    })
   }
 }

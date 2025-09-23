@@ -202,6 +202,31 @@ export class DidWebController {
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  @Get('/resources/:resourceId')
+  async getWebVhResources(@Param('resourceId') resourceId: string, @Res() res: Response) {
+    const agent = await this.agentService.getAgent()
+    const resourcePath = `${agent.did}/resources/${resourceId}`
+
+    agent.config.logger.debug(`requested resource ${resourceId}`)
+
+    if (!resourceId) {
+      throw new HttpException('resourceId not found', HttpStatus.CONFLICT)
+    }
+    if (!agent.did) {
+      throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
+    }
+
+    const [record] = await agent.genericRecords.findAllByQuery({
+      attestedResourceId: resourcePath,
+      type: 'AttestedResource',
+    })
+    if (!record) {
+      throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
+    }
+
+    res.send(record.content)
+  }
 }
 
 async function resolveDidDocumentData(agent: VsAgent) {
