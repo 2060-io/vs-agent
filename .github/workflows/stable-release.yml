@@ -71,7 +71,7 @@ jobs:
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
           TAGS=(
-            "v${{ steps.release-please.outputs.tag_name-without-v }}"
+            "${{ steps.release-please.outputs.tag_name }}"
             "latest"
           )
 
