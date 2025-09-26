@@ -22,8 +22,7 @@ import {
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
-
-import { PresentationDataDto } from './dto/presentation-data.dto'
+import { PresentationDataDto } from '../../presentations/dto/presentation-data.dto'
 
 @ApiTags('presentations')
 @Controller({

@@ -12,10 +12,13 @@ import {
   ApiParam,
 } from '@nestjs/swagger'
 
-import { VsAgentService } from '../../services/VsAgentService'
-import { VsAgent } from '../../utils/VsAgent'
+import { VsAgentService } from '../../../services/VsAgentService'
+
 import { MessageServiceFactory } from './services/MessageServiceFactory'
-import { BaseMessageDto } from './dto/base-message.dto'
+
+import { BaseMessageDto } from '../../message/dto/base-message.dto'
+
+import { VsAgent } from '../../../utils/VsAgent'
 
 @ApiTags('message')
 @Controller({ path: 'message', version: '1' })

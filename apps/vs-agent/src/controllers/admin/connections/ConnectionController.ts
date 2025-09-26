@@ -22,10 +22,10 @@ import {
   ApiExtraModels,
   getSchemaPath,
 } from '@nestjs/swagger'
-import { Response } from 'express'
 
-import { VsAgentService } from '../../services/VsAgentService'
-import { ConnectionDto } from './dto/connection.dto'
+import { Response } from 'express'
+import { VsAgentService } from '../../../services/VsAgentService'
+import { ConnectionDto } from '../../connections/dto/connection.dto'
 
 @ApiTags('connections')
 @ApiExtraModels(ConnectionDto)
