@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/2060-io/vs-agent/compare/v1.4.0...v1.5.0) (2025-09-26)
+
+
+### Features
+
+* make storage‐update and backup configurable ([#231](https://github.com/2060-io/vs-agent/issues/231)) ([5350103](https://github.com/2060-io/vs-agent/commit/535010326ca0ab1fa07a693b8886e89bd608ab7a))
+* support did:webvh object registration ([#227](https://github.com/2060-io/vs-agent/issues/227)) ([ebf5f14](https://github.com/2060-io/vs-agent/commit/ebf5f140ffda537a4cc6b2cedd7ca4425546ef4e))
+
 ## [1.4.0](https://github.com/2060-io/vs-agent/compare/v1.3.2...v1.4.0) (2025-09-19)
 
 
