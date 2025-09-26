@@ -31,6 +31,6 @@
     "ts-node-dev": "^2.0.0"
   },
   "peerDependencies": {
-    "@credo-ts/core": "0.5.18-alpha-20250903145047"
+    "@credo-ts/core": "0.5.18-alpha-20250926091534"
   }
 }
