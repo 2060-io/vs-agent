@@ -4,9 +4,17 @@ import {
   CreateInvitationResult,
 } from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import { Controller, Get, Post, Body, Inject, Query } from '@nestjs/common'
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { Controller, Get, Post, Body, Query } from '@nestjs/common'
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger'
 
+import { PUBLIC_API_BASE_URL } from '../../../config/constants'
 import { UrlShorteningService } from '../../../services/UrlShorteningService'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { createInvitation } from '../../../utils/agent'
@@ -22,16 +30,35 @@ export class InvitationController {
   constructor(
     private readonly agentService: VsAgentService,
     private readonly urlShortenerService: UrlShorteningService,
-    @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {}
 
   @Get('/')
+  @ApiOperation({
+    summary: 'Connection Invitation',
+    description:
+      '### Connection Invitation\n\nIt\'s a GET request to `/invitation`. It does not receive any parameter.\n\nResponse from VS Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:\n\n```json\n{\n  "url": "string containing long form URL-encoded invitation"\n}\n```',
+  })
+  @ApiOkResponse({
+    description: 'Out-of-band invitation payload',
+    schema: {
+      example: {
+        url: 'https://hologram.zone/?oob=eyJ0eXAiOiJKV1QiLCJhbGci...',
+      },
+    },
+  })
   @ApiQuery({ name: 'legacy', required: false, type: Boolean })
   public async getInvitation(@Query('legacy') useLegacyDid?: boolean): Promise<CreateInvitationResult> {
     return await createInvitation({ agent: await this.agentService.getAgent(), useLegacyDid })
   }
 
   @Post('/presentation-request')
+  @ApiOperation({
+    summary: 'Presentation Request',
+    description: [
+      '### Presentation Request\n\nPresentation Request invitation codes are created by specifying details of the credentials required.\n\nThis means that a single presentation request can ask for a number of attributes present in a credential a holder might possess.\nAt the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified,\nthen VS Agent will ask for all attributes in the credential.\n\nIt\'s a POST to `/invitation/presentation-request` which receives a JSON object in the body\n\n```json\n{\n  "callbackUrl": "https://myhost.com/presentation_callback ",\n  "ref": "1234-5678",\n  "requestedCredentials": [\n    {\n      "credentialDefinitionId": "full credential definition identifier",\n      "attributes": ["attribute-1", "attribute-2"]\n    }\n  ]\n}\n```',
+      '#### Presentation Callback API\n\nWhen the presentation flow is completed (either successfully or not), VS Agent calls its `callbackUrl` as an HTTP POST with the following body:\n\n```json\n{\n  "ref": "1234-5678",\n  "presentationRequestId": "unique identifier for the flow",\n  "status": "PresentationStatus",\n  "claims": [\n    { "name": "attribute-1", "value": "value-1" },\n    { "name": "attribute-2", "value": "value-2" }\n  ]\n}\n```',
+    ].join('\n\n'),
+  })
   @ApiBody({
     type: CreatePresentationRequestDto,
     examples: {
@@ -48,6 +75,16 @@ export class InvitationController {
             },
           ],
         },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Presentation request invitation',
+    schema: {
+      example: {
+        proofExchangeId: '123e4567-e89b-12d3-a456-426614174000',
+        url: 'didcomm://example.com/...',
+        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=abcd1234`,
       },
     },
   })
@@ -125,7 +162,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.proofRecord.id,
     })
-    const shortUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
+    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
 
     return {
       proofExchangeId: request.proofRecord.id,
@@ -135,6 +172,37 @@ export class InvitationController {
   }
 
   @Post('/credential-offer')
+  @ApiOperation({
+    summary: 'Credential Offer',
+    description:
+      "### Credential Offer\n\nCredential offer invitation codes include a preview of the offered credential, meaning by that its `credentialDefinitionId` and claims.\n\nIt's a POST to `/invitation/credential-offer` which receives a JSON object in the body",
+  })
+  @ApiBody({
+    description:
+      "### Credential Offer\n\nCredential offer invitation codes include a preview of the offered credential, meaning by that its `credentialDefinitionId` and claims.\n\nIt's a POST to `/invitation/credential-offer` which receives a JSON object in the body",
+    type: CreateCredentialOfferDto,
+    examples: {
+      example: {
+        summary: 'Phone Number VC Offer',
+        value: {
+          credentialDefinitionId:
+            'did:web:chatbot-demo.dev.2060.io?service=anoncreds&relativeRef=/credDef/8TsGLaSPVKPVMXK8APzBRcXZryxutvQuZnnTcDmbqd9p',
+          claims: [{ name: 'phoneNumber', value: '+57128348520' }],
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Credential offer invitation',
+    schema: {
+      example: {
+        credentialExchangeId: 'abcd1234-5678efgh-9012ijkl-3456mnop',
+        url: 'didcomm://example.com/offer/...',
+        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=wxyz7890`,
+      },
+    },
+  })
+  @ApiBadRequestResponse({ description: 'Invalid offer payload' })
   @ApiBody({
     type: CreateCredentialOfferDto,
     examples: {
@@ -208,7 +276,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.credentialRecord.id,
     })
-    const shortUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
+    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
 
     return {
       credentialExchangeId: request.credentialRecord.id,

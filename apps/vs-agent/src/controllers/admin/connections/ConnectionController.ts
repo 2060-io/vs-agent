@@ -10,12 +10,25 @@ import {
   Query,
   Res,
 } from '@nestjs/common'
-import { ApiQuery, ApiTags } from '@nestjs/swagger'
-import { Response } from 'express'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiParam,
+  ApiOkResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger'
 
+import { Response } from 'express'
 import { VsAgentService } from '../../../services/VsAgentService'
+import { ConnectionDto } from '../../connections/dto/connection.dto'
 
 @ApiTags('connections')
+@ApiExtraModels(ConnectionDto)
 @Controller({
   path: 'connections',
   version: '1',
@@ -33,11 +46,24 @@ export class ConnectionController {
    * @returns ConnectionRecord[]
    */
   @Get('/')
-  @ApiQuery({ name: 'outOfBandId', required: false, type: String })
-  @ApiQuery({ name: 'state', required: false, type: String })
-  @ApiQuery({ name: 'did', required: false, type: String })
-  @ApiQuery({ name: 'theirDid', required: false, type: String })
-  @ApiQuery({ name: 'threadId', required: false, type: String })
+  @ApiOperation({
+    summary: 'List all connections',
+    description: 'Retrieve all connection records, optionally filtered by query parameters.',
+  })
+  @ApiQuery({ name: 'outOfBandId', required: false, type: String, description: 'Filter by Out-of-band ID' })
+  @ApiQuery({
+    name: 'state',
+    required: false,
+    description: 'Filter by connection state',
+    enum: Object.values(DidExchangeState),
+  })
+  @ApiQuery({ name: 'did', required: false, type: String, description: 'Filter by my DID' })
+  @ApiQuery({ name: 'theirDid', required: false, type: String, description: 'Filter by their DID' })
+  @ApiQuery({ name: 'threadId', required: false, type: String, description: 'Filter by thread ID' })
+  @ApiOkResponse({
+    description: 'Array of connection records',
+    schema: { type: 'array', items: { $ref: getSchemaPath(ConnectionDto) } },
+  })
   public async getAllConnections(
     @Query('outOfBandId') outOfBandId?: string,
     @Query('state') state?: DidExchangeState,
@@ -75,16 +101,33 @@ export class ConnectionController {
   /**
    * Retrieve connection record by connection id
    * @param connectionId Connection identifier
-   * @returns ConnectionRecord
+   * @returns ConnectionDto
    */
   @Get(':connectionId')
+  @ApiOperation({
+    summary: 'Get a connection by ID',
+    description: 'Retrieve a single connection record by its unique identifier.',
+  })
+  @ApiParam({
+    name: 'connectionId',
+    type: String,
+    description: 'UUID of the connection',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  })
+  @ApiOkResponse({
+    description: 'Connection record',
+    schema: { $ref: getSchemaPath(ConnectionDto) },
+  })
+  @ApiNotFoundResponse({ description: 'Connection not found' })
   public async getConnectionById(@Param('connectionId') connectionId: string) {
     const agent = await this.agentService.getAgent()
 
     const connection = await agent.connections.findById(connectionId)
 
     if (!connection)
-      throw new NotFoundException({ reason: `connection with connection id "${connectionId}" not found.` })
+      throw new NotFoundException({
+        reason: `connection with connection id "${connectionId}" not found.`,
+      })
 
     return connection.toJSON()
   }
@@ -94,8 +137,24 @@ export class ConnectionController {
    *
    * @param connectionId Connection identifier
    */
-  @Delete('/:connectionId')
-  public async deleteConnection(@Param('connectionId') connectionId: string, @Res() response: Response) {
+  @Delete(':connectionId')
+  @ApiOperation({
+    summary: 'Delete a connection',
+    description: 'Deletes a connection record by its unique identifier.',
+  })
+  @ApiParam({
+    name: 'connectionId',
+    type: String,
+    description: 'UUID of the connection to delete',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  })
+  @ApiNoContentResponse({ description: 'Connection deleted successfully' })
+  @ApiNotFoundResponse({ description: 'Connection not found' })
+  @ApiInternalServerErrorResponse({ description: 'Internal server error' })
+  public async deleteConnection(
+    @Param('connectionId') connectionId: string,
+    @Res() response: Response,
+  ): Promise<void> {
     const agent = await this.agentService.getAgent()
 
     try {
@@ -103,7 +162,9 @@ export class ConnectionController {
       response.status(204)
     } catch (error) {
       if (error instanceof RecordNotFoundError) {
-        throw new NotFoundException({ reason: `connection with connection id "${connectionId}" not found.` })
+        throw new NotFoundException({
+          reason: `connection with connection id "${connectionId}" not found.`,
+        })
       }
       throw new HttpException(
         {

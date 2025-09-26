@@ -27,9 +27,9 @@ In addition, it supports a notification mechanism to subscribe to any event the 
       - [Receipts](#receipts)
       - [Contextual Menu Request](#contextual-menu-request)
       - [Contextual Menu Update](#contextual-menu-update)
-      - [Contextual Menu Selection](#contextual-menu-selection)
+      - [Contextual Menu Select](#contextual-menu-select)
       - [Display Menu](#display-menu)
-      - [Menu Selection](#menu-selection)
+      - [Menu Select](#menu-select)
       - [Invitation](#invitation)
       - [Profile](#profile)
       - [Terminate Connection](#terminate-connection)
@@ -105,7 +105,7 @@ Currently, the following messages can be submitted and received:
 - Menu Select (`menu-select`)
 - Contextual Menu Request (`contextual-menu-request`)
 - Contextual Menu Update (`contextual-menu-update`)
-- Contextual Menu Selection (`contextual-menu-select`)
+- Contextual Menu Select (`contextual-menu-select`)
 - Media (`media`)
 - Receipts (`receipts`)
 - Invitation (`invitation`)
@@ -132,10 +132,9 @@ Parameters:
 
 ```json
 {
-  ...
   "type": "credential-request",
   "credentialDefinitionId": "id",
-  "claims": [{ "name": "claim-name", mimeType: "mime-type", "value": 'claim-value' }, ...]
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }]
 }
 ```
 
@@ -151,23 +150,24 @@ By sending this message, a Verifiable Credential is effectively issued and sent 
 This message could be sent as a response to a Credential Request. In such case, `threadId` is used to identify credential details. But it can also start a new Credential Issuance flow, and specify
 
 Parameters:
+
 - (optional) Credential Definition ID
 - (optional) Revocation Definition ID
 - (optional) Revocation Index
 - (optional) Claims
 
-**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process. 
+**Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process.
 
 ```json
 {
-  ...
   "type": "credential-issuance",
   "credentialDefinitionId": "id",
   "revocationRegistryDefinitionId": "id",
   "revocationRegistryIndex": 1,
-  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }, ...]
+  "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }]
 }
 ```
+
 #### Credential Revocation
 
 By sending this message, a Verifiable Credential is effectively revoked and a notification is sent to the DIDComm connection it has been issued to.
@@ -176,8 +176,7 @@ In this context, `threadId` is used to identify the details of the credential
 
 ```json
 {
-  ...
-  "type": "credential-revocation",
+  "type": "credential-revocation"
 }
 ```
 
@@ -195,7 +194,6 @@ Parameters:
 
 ```json
 {
-  ...
   "type": "credential-reception",
   "state": "done"
 }
@@ -207,13 +205,14 @@ Starts an Identity Verification flow, requesting a certain number of identity pr
 
 ```json
 {
-  ...
   "type": "identity-proof-request",
-  "requestedProofItems": [{
-    "id": UUID,
-    "type": RequestedProofItemType,
-    "specific-field": SpecificFieldType
-  }]
+  "requestedProofItems": [
+    {
+      "id": "UUID",
+      "type": "RequestedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -225,13 +224,14 @@ This message is used to inform about the submission of a certain proof identity 
 
 ```json
 {
-   ...
-   "type": "identity-proof-submit",
-   "submittedProofItems": [{
-      "id": UUID,
-      "type": SubmittedProofItemType,
-      "specific-field": SpecificFieldType
-    }]
+  "type": "identity-proof-submit",
+  "submittedProofItems": [
+    {
+      "id": "UUID",
+      "type": "SubmittedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -243,13 +243,14 @@ This message is used to inform about the result of the processing of a certain i
 
 ```json
 {
-   ...
-   "type": "identity-proof-result",
-   "proofItemResults": [{
-      "id": UUID,
-      "type": SubmittedProofItemType,
-      "specific-field": SpecificFieldType
-   }]
+  "type": "identity-proof-result",
+  "proofItemResults": [
+    {
+      "id": "UUID",
+      "type": "SubmittedProofItemType",
+      "specific-field": "SpecificFieldType"
+    }
+  ]
 }
 ```
 
@@ -261,9 +262,8 @@ Sends a simple text to a destination
 
 ```json
 {
-   ...
-   "type": "text",
-   "content": string
+  "type": "text",
+  "content": "string"
 }
 ```
 
@@ -273,33 +273,35 @@ Shares media files to a destination. They might be previously encrypted and stor
 
 ```json
 {
-   ...
-   "type": "media",
-   "description": string,
-   "items": [{
-    "mimeType": string,
-    "filename": string,
-    "description": string,
-    "byteCount": number,
-    "uri": string,
-    "ciphering": { "algorithm": string, ... },
-    "preview": string,
-    "width": number,
-    "height": number,
-    "duration": number,
-    "title": string,
-    "icon": string,
-    "openingMode": string,
-    "screenOrientaton": string
-   }]
+  "type": "media",
+  "description": "string",
+  "items": [
+    {
+      "mimeType": "string",
+      "filename": "string",
+      "description": "string",
+      "byteCount": "number",
+      "uri": "string",
+      "ciphering": { "algorithm": "string" },
+      "preview": "string",
+      "width": "number",
+      "height": "number",
+      "duration": "number",
+      "title": "string",
+      "icon": "string",
+      "openingMode": "string",
+      "screenOrientaton": "string"
+    }
+  ]
 }
 ```
 
 `mimeType` is mandatory and specifies the kind of media that is being shared. Some supported types are:
-  - `image/png` and `image/jpg` for images
-  - `video/*` for videos
-  - `audio/*` for voice notes
-  - `text/html` for links to websites
+
+- `image/png` and `image/jpg` for images
+- `video/*` for videos
+- `audio/*` for voice notes
+- `text/html` for links to websites
 
 `filename`, `description` and `byteCount` are optional but recommended to make it easier for the receiving end to know information about the file about to be downloaded.
 
@@ -310,6 +312,7 @@ Shares media files to a destination. They might be previously encrypted and stor
 - `duration` is used in videos and audio files to specify the number of seconds they last
 
 There are some parameters used in Links (`text/html` mimeType):
+
 - title
 - icon: URL or Data URI containing the icon to show as preview of the website
 - openingMode: `embedded` or `fullScreen`
@@ -325,13 +328,14 @@ Sends message updates for a number of messages.
 
 ```json
 {
-   ...
-   "type": "receipts",
-   "receipts" : [{
-      "messageId": string,
-      "state": MessageState,
-      "timestamp": Date,
-   }]
+  "type": "receipts",
+  "receipts": [
+    {
+      "messageId": "string",
+      "state": "MessageState",
+      "timestamp": "Date"
+    }
+  ]
 }
 ```
 
@@ -341,8 +345,7 @@ Requests a destination agent context menu root (if any). The other side should a
 
 ```json
 {
-   ...
-   "type": "contextual-menu-request",
+  "type": "contextual-menu-request"
 }
 ```
 
@@ -354,33 +357,32 @@ Sends or updates the contents for the contextual menu to destination agent.
 
 ```json
 {
-   ...
-   "type": "contextual-menu-update",
-   "payload": {
-    "title": string,
-    "description": string,
-    "options" : [
+  "type": "contextual-menu-update",
+  "payload": {
+    "title": "string",
+    "description": "string",
+    "options": [
       {
-        "id": string,
-        "title": string,
-        "description": string
-      }],
+        "id": "string",
+        "title": "string",
+        "description": "string"
+      }
+    ]
+  }
 }
 ```
 
 Description fields are optional and used as a prompt to give more details about each option (and the contextual menu itself). ID fields are used to identify the selection when an agent interacts with the contextual menu.
 
-#### Contextual Menu Selection
+#### Contextual Menu Select
 
 Submits the selected item of context menu.
 
 ```json
 {
-   ...
-   "type": "contextual-menu-select",
-   "selectionId" : string
+  "type": "contextual-menu-select",
+  "selectionId": "string"
 }
-
 ```
 
 _selectionId_ field matches the id from the option that user has selected.
@@ -391,33 +393,33 @@ Sends a menu to display different actions in destination agent
 
 ```json
 {
-   ...
+
    "type": "menu-display",
-   "prompt": string
+   "prompt": "string"
    "menuItems" : [
    {
-     id: string,
-     text: string,
-     action: Action
+     "id": "string",
+     "text": "string",
+     "action": "Action"
    }],
 }
 ```
 
 For each item, `action` is an optional field used in case that an external action is required when the user chooses it. For instance, open a browsing session or connecting with another contact. Currently, `Action` items are not yet defined.
 
-#### Menu Selection
+#### Menu Select
 
 Submits the selected item of a presented menu, defined in `threadId` field.
 
 ```json
 {
-   ...
-   "type": "menu-select",
-   "menuItems" : [
+  "type": "menu-select",
+  "menuItems": [
     {
-      id: string
-    }],
-  "content": string
+      "id": "string"
+    }
+  ],
+  "content": "string"
 }
 ```
 
@@ -433,11 +435,10 @@ The generated message Id will be used as invitationId un subsequent Connection S
 
 ```json
 {
-   ...
-   "type": "invitation",
-   "label": string,
-   "imageUrl": string,
-   "did": string,
+  "type": "invitation",
+  "label": "string",
+  "imageUrl": "string",
+  "did": "string"
 }
 ```
 
@@ -452,11 +453,10 @@ Sends User Profile to a particular connection. An Agent may have its default pro
 
 ```json
 {
-   ...
-   "type": "profile",
-   "displayName": string,
-   "displayImageUrl": string,
-   "displayIconUrl": string
+  "type": "profile",
+  "displayName": "string",
+  "displayImageUrl": "string",
+  "displayIconUrl": "string"
 }
 ```
 
@@ -466,8 +466,7 @@ Terminates a particular connection, notifying the other party through a 'Hangup'
 
 ```json
 {
-   ...
-   "type": "terminate-connection",
+  "type": "terminate-connection"
 }
 ```
 
@@ -477,11 +476,10 @@ Create a call offer from a service to initiate a WebRTC call and notify the othe
 
 ```json
 {
-   ...
-   "type": "call-offer",
-   "parameters": {
-      key: value
-   },
+  "type": "call-offer",
+  "parameters": {
+    "key": "value"
+  }
 }
 ```
 
@@ -491,11 +489,10 @@ Accept a call offer from a third party to initiate a WebRTC call. This message w
 
 ```json
 {
-   ...
-   "type": "call-accept",
-   "parameters": {
-      key: value
-   },
+  "type": "call-accept",
+  "parameters": {
+    "key": "value"
+  }
 }
 ```
 
@@ -505,8 +502,7 @@ Reject a call offer from a third party to initiate a WebRTC call. This message w
 
 ```json
 {
-   ...
-   "type": "call-reject",
+  "type": "call-reject"
 }
 ```
 
@@ -516,8 +512,7 @@ End a call offer from a third party to initiate a WebRTC call. This message will
 
 ```json
 {
-   ...
-   "type": "call-end",
+  "type": "call-end"
 }
 ```
 
@@ -527,8 +522,7 @@ Request the other party to provide the Machine Readable Zone string from a valid
 
 ```json
 {
-   ...
-   "type": "mrz-data-request",
+  "type": "mrz-data-request"
 }
 ```
 
@@ -540,10 +534,9 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 
 ```json
 {
-   ...
-   "type": "mrz-data-submit",
-   "state": MrtdSubmitState,
-   "mrzData": MrzData
+  "type": "mrz-data-submit",
+  "state": "MrtdSubmitState",
+  "mrzData": "MrzData"
 }
 ```
 
@@ -554,26 +547,45 @@ The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending
 - `parsed` interprets the contents and classify the document in a format from ICAO 9303 document (TD1, TD2, TD3, etc.). Example:
 
 ```json
-{"raw":["I<UTOD23145890<1233<<<<<<<<<<<","7408122F1204159UTO<<<<<<<<<<<6","ERIKSSON<<ANNA<MARIA<<<<<<<<<<"],
-"parsed":{
-    "valid":false,
-    "fields":
-      {"documentCode":"I","issuingState":null,"documentNumber":"D23145890123","documentNumberCheckDigit":"3","optional1":"1233","birthDate":"740812","birthDateCheckDigit":"2","sex":"female","expirationDate":"120415","expirationDateCheckDigit":"9","nationality":null,"optional2":"","compositeCheckDigit":null,"lastName":"ERIKSSON","firstName":"ANNA MARIA"},
-    "format":"TD1"}
+{
+  "raw": [
+    "I<UTOD23145890<1233<<<<<<<<<<<",
+    "7408122F1204159UTO<<<<<<<<<<<6",
+    "ERIKSSON<<ANNA<MARIA<<<<<<<<<<"
+  ],
+  "parsed": {
+    "valid": false,
+    "fields": {
+      "documentCode": "I",
+      "issuingState": null,
+      "documentNumber": "D23145890123",
+      "documentNumberCheckDigit": "3",
+      "optional1": "1233",
+      "birthDate": "740812",
+      "birthDateCheckDigit": "2",
+      "sex": "female",
+      "expirationDate": "120415",
+      "expirationDateCheckDigit": "9",
+      "nationality": null,
+      "optional2": "",
+      "compositeCheckDigit": null,
+      "lastName": "ERIKSSON",
+      "firstName": "ANNA MARIA"
+    },
+    "format": "TD1"
   }
+}
 ```
 
 More info about the meaning of each field (and validity) can be found in [MRZ](https://github.com/cheminfo/mrz), the underlying library we are using for MRZ parsing.
 
 #### eMRTD Data Request
 
-
 Request the other party to read and provide eMRTD (Electronic Machine Readable Travel Document) data from a compatible electronic document.
 
 ```json
 {
-   ...
-   "type": "emrtd-data-request",
+  "type": "emrtd-data-request"
 }
 ```
 
@@ -583,15 +595,13 @@ Request the other party to read and provide eMRTD (Electronic Machine Readable T
 
 Submit data retrieved from an electronic Machine Readable Travel Document. This message may be sent either individually or as a response to an eMRTD Data Request.
 
-
 The state can be one of 'submitted', 'declined', 'timeout' or 'error', depending on how the flow went. The latter is used for unspecified errors (e.g. User Agent not capable of handling the request).
 
 ```json
 {
-   ...
-   "type": "emrtd-data-submit",
-   "state": MrtdSubmitState,
-   "dataGroups": EMrtdData
+  "type": "emrtd-data-submit",
+  "state": "MrtdSubmitState",
+  "dataGroups": "EMrtdData"
 }
 ```
 
@@ -660,9 +670,9 @@ Events are JSON-encoded and include their underlying data in their payload field
 
 ```json
 {
-    "timestamp": NumericDate,
-    "type": EventType,
-    "event-specific-field": EventSpecificFieldType,
+  "timestamp": "NumericDate",
+  "type": "EventType",
+  "event-specific-field": "EventSpecificFieldType"
 }
 ```
 
@@ -676,11 +686,10 @@ Sent whenever a connection has been created or updated. Event format is as follo
 
 ```json
 {
-  ...
   "type": "connection-state-updated",
-  "connectionId": UUID,
-  "invitationId": UUID,
-  "state": ConnectionState
+  "connectionId": "UUID",
+  "invitationId": "UUID",
+  "state": "ConnectionState"
 }
 ```
 
@@ -692,12 +701,11 @@ Sent when a message delivery status has been changed. Event format is as follows
 
 ```json
 {
-  ...
   "type": "message-state-updated",
-  "messageId": UUID,
-  "timestamp": NumericDate,
-  "connectionId": UUID,
-  "state": MessageState
+  "messageId": "UUID",
+  "timestamp": "NumericDate",
+  "connectionId": "UUID",
+  "state": "MessageState"
 }
 ```
 
@@ -709,9 +717,8 @@ Sent when a message is received. Event format is as follows:
 
 ```json
 {
-  ...
   "type": "message-received",
-  "message": Message,
+  "message": "Message"
 }
 ```
 
@@ -738,10 +745,9 @@ VS Agent supports the creation of invitation codes that are used to start flows 
 
 ### Connection Invitation
 
-It's a GET request to `/invitation`. It does not receive any parameter. 
+It's a GET request to `/invitation`. It does not receive any parameter.
 
 Response from VS Agent is a JSON object containing an URL-encoded invitation, ready to be rendered in a QR code or sent as a link for processing of an Aries-compatible DIDComm agent:
-
 
 ```json
 {
@@ -751,7 +757,7 @@ Response from VS Agent is a JSON object containing an URL-encoded invitation, re
 
 Note that the following VS Agent configuration environment variables are used when creating invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
 
@@ -759,7 +765,7 @@ Note that the following VS Agent configuration environment variables are used wh
 
 Presentation Request invitation codes are created by specifying details of the credentials required.
 
-This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess. 
+This means that a single presentation request can ask for a number of attributes present in a credential a holder might possess.
 At the moment, credential requirements are only filtered by their `credentialDefinitionId`. If no `attributes` are specified,
 then VS Agent will ask for all attributes in the credential.
 
@@ -770,9 +776,9 @@ It's a POST to `/invitation/presentation-request` which receives a JSON object i
   "callbackUrl": "https://myhost.com/presentation_callback ",
   "ref": "1234-5678",
   "requestedCredentials": [
-    { 
+    {
       "credentialDefinitionId": "full credential definition identifier",
-      "attributes": [ "attribute-1", "attribute-2"]
+      "attributes": ["attribute-1", "attribute-2"]
     }
   ]
 }
@@ -786,18 +792,18 @@ Response will include the invitation code in both short and long form URL format
 
 ```json
 {
-    "url": "string containing long form URL-encoded invitation",
-    "shortUrl": "string containing a shortened URL for the invitation",
-    "proofExchangeId": "unique identifier for the flow",
+  "url": "string containing long form URL-encoded invitation",
+  "shortUrl": "string containing a shortened URL for the invitation",
+  "proofExchangeId": "unique identifier for the flow"
 }
 ```
 
 Note that the following VS Agent configuration environment variables are used when creating presentation request invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like `https://myHost.com/s?id=<uuid>`)
 
 #### Presentation Callback API
 
@@ -807,8 +813,11 @@ When the presentation flow is completed (either successfully or not), VS Agent c
 {
   "ref": "1234-5678",
   "presentationRequestId": "unique identifier for the flow",
-  "status": PresentationStatus,
-  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+  "status": "PresentationStatus",
+  "claims": [
+    { "name": "attribute-1", "value": "value-1" },
+    { "name": "attribute-2", "value": "value-2" }
+  ]
 }
 ```
 
@@ -821,7 +830,6 @@ Possible values for PresentationStatus are:
 - 'verification-error'
 - 'unspecified-error'
 
-
 ### Credential Offer
 
 Credential offer invitation codes include a preview of the offered credential, meaning by that its `credentialDefinitionId` and claims.
@@ -831,7 +839,10 @@ It's a POST to `/invitation/credential-offer` which receives a JSON object in th
 ```json
 {
   "credentialDefinitionId": "full credential definition identifier",
-  "claims": [ { "name": "attribute-1", "value": "value-1" }, { "name": "attribute-2", "value": "value-2" }]
+  "claims": [
+    { "name": "attribute-1", "value": "value-1" },
+    { "name": "attribute-2", "value": "value-2" }
+  ]
 }
 ```
 
@@ -839,18 +850,18 @@ Response will include the invitation code in both short and long form URL format
 
 ```json
 {
-    "url": "string containing long form URL-encoded invitation",
-    "shortUrl": "string containing a shortened URL for the invitation",
-    "credentialOfferId": "unique identifier for the flow",
+  "url": "string containing long form URL-encoded invitation",
+  "shortUrl": "string containing a shortened URL for the invitation",
+  "credentialOfferId": "unique identifier for the flow"
 }
 ```
 
 Note that the following VS Agent configuration environment variables are used when creating credential offer invitations:
 
-- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. https://hologram.zone/)
+- AGENT_INVITATION_BASE_URL: Base URL for long-form invitations (e.g. <https://hologram.zone/>)
 - AGENT_INVITATION_IMAGE_URL: An optional image URL to display along the connection invitation
 - AGENT_LABEL: An optional label to show along the connection invitation
-- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like https://myHost.com/s?id=<uuid>)
+- PUBLIC_API_BASE_URL: Base URL for short URL creation (resulting something like `https://myHost.com/s?id=<uuid>`)
 
 ## Presentations
 
@@ -865,7 +876,6 @@ It is possible to query all presentation flows created by VS Agent through the e
 
 It is possible to query for a single presentation by executing a GET to `/presentations/<proofExchangeId>`.
 
-
 ## Verifiable Data Registry Operations
 
 This section specifies the different endpoints provided by the VS Agent to operate with the VDR.
@@ -878,10 +888,9 @@ It's a POST request to `/credential-types` which receives a JSON object in the b
 
 ```json
 {
-  "name": string,
-  "version": string,
-  "attributes": ["attribute-1", "attribute-2", ... ]
-
+  "name": "string",
+  "version": "string",
+  "attributes": ["attribute-1", "attribute-2"]
 }
 ```
 
@@ -889,8 +898,7 @@ Response from VS Agent will generally result in a 200 HTTP response code and inc
 
 ```json
 {
-  "message": string (optional, only in case of error)
-  "id": credential definition Id (as registered in VDR)
+  "message": "string (optional, only in case of error)",
+  "id": "credential definition Id (as registered in VDR)"
 }
 ```
-

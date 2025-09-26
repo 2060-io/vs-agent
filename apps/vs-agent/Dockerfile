@@ -31,5 +31,6 @@ COPY apps/vs-agent/tsconfig.json apps/vs-agent/tsconfig.json
 COPY apps/vs-agent/tsconfig.build.json apps/vs-agent/tsconfig.build.json
 COPY apps/vs-agent/nest-cli.json apps/vs-agent/nest-cli.json
 
+
 RUN pnpm build
 CMD ["pnpm", "start"]

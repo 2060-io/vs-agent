@@ -1,25 +1,28 @@
-import type { VsAgentInfo } from '@2060.io/vs-agent-model'
-
 import { Controller, Get } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiOkResponse, getSchemaPath, ApiExtraModels } from '@nestjs/swagger'
+
+
 
 import { VsAgentService } from '../../../services/VsAgentService'
-
+import { VsAgentInfoDto } from '../../agent/dto/vs-agent-info.dto'
 @ApiTags('agent')
-@Controller({
-  path: 'agent',
-  version: '1',
-})
+@ApiExtraModels(VsAgentInfoDto)
+@Controller({ path: 'agent', version: '1' })
 export class VsAgentController {
   constructor(private readonly vsAgentService: VsAgentService) {}
 
-  /**
-   * Retrieve basic agent information
-   */
   @Get('/')
-  public async getAgentInfo(): Promise<VsAgentInfo> {
+  @ApiOperation({
+    summary: 'Get vs-agent information',
+    description:
+      'Returns the core configuration and status of this VS Agent instance, including the user-facing label, available endpoints, initialization state, and public DID (if set).',
+  })
+  @ApiOkResponse({
+    description: 'Agent information retrieved successfully',
+    schema: { $ref: getSchemaPath(VsAgentInfoDto) },
+  })
+  public async getAgentInfo(): Promise<VsAgentInfoDto> {
     const vsAgent = await this.vsAgentService.getAgent()
-
     return {
       label: vsAgent.config.label,
       endpoints: vsAgent.config.endpoints,
