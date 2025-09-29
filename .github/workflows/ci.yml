@@ -10,4 +10,4 @@ on:
 
 jobs:
   ci:
-    uses: 2060-io/devops/.github/workflows/2060-linter-call.yml@main
+    uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@main
