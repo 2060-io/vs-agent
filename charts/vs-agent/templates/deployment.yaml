@@ -30,6 +30,35 @@ spec:
 # Ingress resource for the VS Agent
 # This resource defines how external traffic can access the VS Agent service
 # It routes traffic to the agent service and provides TLS termination
+{{- if and .Values.ingress.private.host .Values.ingress.private.tlsSecret }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: private-{{ .Values.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/enable-cors: "{{ .Values.ingress.private.enableCors | default "true" }}"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ .Values.ingress.private.whitelistSourceRange }}"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ tpl .Values.ingress.private.host . }}
+      secretName: {{ tpl .Values.ingress.private.tlsSecret . }}
+  rules:
+    - host: {{ tpl .Values.ingress.private.host . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                 name: {{ .Values.name }}
+                 port:
+                   number: {{ .Values.adminPort }}
+{{- end }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

@@ -33,6 +33,9 @@ vs-agent-chart:
   ingress:
     host: '{{ .Values.name }}.{{ .Values.global.domain }}' # Host for the vs agent service
     tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert # TLS secret for the vs agent service
+    private:
+      whitelistSourceRange: "" # Source IP ranges allowed to access the private ingress (e.g. "192.168.1.0/24,10.0.0.0/8").
+      host: '' # Private ingress host (if this value is set, the private Ingress will be enabled)
 
   # Environment variables specific to the chatbot backend service
   extraEnv:
