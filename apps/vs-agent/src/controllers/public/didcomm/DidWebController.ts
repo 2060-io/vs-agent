@@ -39,7 +39,7 @@ export class DidWebController {
     const { didLog } = await resolveDidDocumentData(agent)
 
     if (didLog) {
-      res.setHeader('Content-Type', 'application/jsonl; charset=utf-8')
+      res.setHeader('Content-Type', 'text/jsonl; charset=utf-8')
       res.setHeader('Cache-Control', 'no-cache')
       res.send(didLog)
     } else {
