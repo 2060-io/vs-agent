@@ -14,6 +14,16 @@ import { ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 
+import {
+  ApiOperation,
+  ApiOkResponse,
+  ApiNoContentResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger'
+import { PresentationDataDto } from '../../presentations/dto/presentation-data.dto'
+
 @ApiTags('presentations')
 @Controller({
   path: 'presentations',
@@ -30,6 +40,16 @@ export class PresentationsController {
    * @returns
    */
   @Get('/')
+  @ApiOperation({
+    summary: 'List all presentations',
+    description:
+      '## Presentations\n\nIt is possible to query all presentation flows created by VS Agent through the endpoint `/presentations`, which will respond with records using the following format:\n\n- proofExchangeId: flow identifier (the same as the one used in events and other responses)\n- state: current state of the presentation flow (e.g. `request-sent` when it was just started, `done` when finished)\n- claims: array containing the claims received within the presentation\n- verified: boolean stating if the presentation is valid (only meaningful when state is `done`)\n- threadId: DIDComm thread id (shared with the other party)\n- updatedAt: last time activity was recorded for this flow\n\nIt is possible to query for a single presentation by executing a GET to `/presentations/<proofExchangeId>`.',
+  })
+  @ApiOkResponse({
+    description: 'Array of presentation data',
+    type: PresentationDataDto,
+    isArray: true,
+  })
   public async getAllPresentations(): Promise<PresentationData[]> {
     const agent = await this.agentService.getAgent()
 
@@ -48,6 +68,12 @@ export class PresentationsController {
    * @param proofExchangeId Proof Exchange Id
    */
   @Delete('/:proofExchangeId')
+  @ApiOperation({
+    summary: 'Delete a presentation exchange record',
+  })
+  @ApiNoContentResponse({ description: 'Presentation exchange deleted' })
+  @ApiBadRequestResponse({ description: 'Invalid proofExchangeId' })
+  @ApiNotFoundResponse({ description: 'Presentation exchange not found' })
   public async deleteProofExchangeById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
     await agent.proofs.deleteById(proofExchangeId, { deleteAssociatedDidCommMessages: true })
@@ -60,6 +86,10 @@ export class PresentationsController {
    * @returns ConnectionRecord
    */
   @Get('/:proofExchangeId')
+  @ApiOperation({
+    summary: 'Get presentation by proofExchangeId',
+  })
+  @ApiOkResponse({ description: 'Presentation data', type: PresentationDataDto })
   public async getPresentationById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
 
