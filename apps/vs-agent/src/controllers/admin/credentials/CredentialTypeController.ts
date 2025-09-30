@@ -17,6 +17,7 @@ import {
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
 import { Proof, utils } from '@credo-ts/core'
+import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import {
   Body,
   Controller,
@@ -33,7 +34,6 @@ import {
 import { ApiBody, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { DidWebVhAnonCredsRegistry } from '../../../utils/DidWebVhAnonCredsRegistry'
 import { VsAgent } from '../../../utils/VsAgent'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
@@ -494,7 +494,7 @@ export class CredentialTypesController {
       // Update revocation definition with revocation status list and registration metadata
       if (statusRegistration && revocationRecord) {
         const timestamp = revocationStatusListState.revocationStatusList.timestamp
-        const registry = new DidWebVhAnonCredsRegistry()
+        const registry = new WebVhAnonCredsRegistry()
         const { registrationMetadata } = await registry.updateRevocationRegistryDefinition(
           agent.context,
           revocationRegistration as { proof?: Proof } & Record<string, object>,
