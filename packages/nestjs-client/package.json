@@ -23,7 +23,7 @@
     "@2060.io/credo-ts-didcomm-mrtd": "0.0.17",
     "@2060.io/vs-agent-client": "workspace:*",
     "@2060.io/vs-agent-model": "workspace:*",
-    "@credo-ts/core": "0.5.18-alpha-20250926091534",
+    "@credo-ts/core": "0.5.18-alpha-20250930143725",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
