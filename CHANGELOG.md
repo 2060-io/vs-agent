@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/2060-io/vs-agent/compare/v1.4.0...v1.5.0) (2025-09-30)
+
+
+### Features
+
+* make storage‐update and backup configurable ([#231](https://github.com/2060-io/vs-agent/issues/231)) ([5350103](https://github.com/2060-io/vs-agent/commit/535010326ca0ab1fa07a693b8886e89bd608ab7a))
+* support did:webvh object registration ([#227](https://github.com/2060-io/vs-agent/issues/227)) ([ebf5f14](https://github.com/2060-io/vs-agent/commit/ebf5f140ffda537a4cc6b2cedd7ca4425546ef4e))
+
+
+### Bug Fixes
+
+* admin port for secure endpoint ([#242](https://github.com/2060-io/vs-agent/issues/242)) ([42c6b56](https://github.com/2060-io/vs-agent/commit/42c6b56735e83f8c8257be6bc75993120990f3e5))
+* webvh log content type ([#238](https://github.com/2060-io/vs-agent/issues/238)) ([f330d35](https://github.com/2060-io/vs-agent/commit/f330d3569268de16eca6480293f35eab2819fae2))
+
 ## [1.4.0](https://github.com/2060-io/vs-agent/compare/v1.3.2...v1.4.0) (2025-09-19)
 
 
