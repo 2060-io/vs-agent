@@ -52,6 +52,11 @@ ingress:
   tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
   public:
     enableCors: true
+  private:
+    enableCors: true
+    whitelistSourceRange: "" # e.g. "xxx.xx.xxx.xxx/32"
+    tlsSecret: "private.{{ .Values.name }}.{{ .Values.global.domain }}-cert"
+    host: ""
 
 # Extra environment variables (extensible)
 extraEnv: []
