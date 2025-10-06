@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/2060-io/vs-agent/compare/v1.5.1...v1.5.2) (2025-10-06)
+
+
+### Bug Fixes
+
+* migrate DID verification methods to Multikey format ([#245](https://github.com/2060-io/vs-agent/issues/245)) ([ac6710b](https://github.com/2060-io/vs-agent/commit/ac6710be32f79a980c9d9477ddbedef4ba5cffe1))
+
 ## [1.5.1](https://github.com/2060-io/vs-agent/compare/v1.5.0...v1.5.1) (2025-10-06)
 
 
