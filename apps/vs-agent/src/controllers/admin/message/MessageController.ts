@@ -1,24 +1,19 @@
-import { BaseMessage, MessageType } from '@2060.io/vs-agent-model'
+import { BaseMessage } from '@2060.io/vs-agent-model'
 import { DidExchangeState, utils } from '@credo-ts/core'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import {
   ApiBody,
   ApiTags,
   ApiOkResponse,
-  ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   getSchemaPath,
-  ApiOperation,
-  ApiParam,
 } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-
-import { MessageServiceFactory } from './services/MessageServiceFactory'
-
+import { VsAgent } from '../../../utils/VsAgent'
 import { BaseMessageDto } from '../../message/dto/base-message.dto'
 
-import { VsAgent } from '../../../utils/VsAgent'
+import { MessageServiceFactory } from './services/MessageServiceFactory'
 
 @ApiTags('message')
 @Controller({ path: 'message', version: '1' })
