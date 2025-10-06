@@ -27,6 +27,7 @@ import {
   DidRepository,
   DidsModule,
   InitConfig,
+  Key,
   KeyType,
   ParsedDid,
   parseDid,
@@ -235,22 +236,21 @@ export class VsAgent extends Agent<VsAgentModules> {
     const keyAgreementId = `${publicDid}#key-agreement-1`
     const ed25519 = await this.wallet.createKey({ keyType: KeyType.Ed25519 })
     const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
-    const publicKeyX25519 = TypedArrayEncoder.toBase58(
-      convertPublicKeyToX25519(TypedArrayEncoder.fromBase58(ed25519.publicKeyBase58)),
-    )
+    const publicKeyX25519 = convertPublicKeyToX25519(TypedArrayEncoder.fromBase58(ed25519.publicKeyBase58))
+    const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
 
     const verificationMethods = [
       {
         controller: publicDid,
         id: verificationMethodId,
-        publicKeyBase58: ed25519.publicKeyBase58,
-        type: 'Ed25519VerificationKey2018',
+        publicKeyMultibase: ed25519.fingerprint,
+        type: 'Multikey',
       },
       {
         controller: publicDid,
         id: keyAgreementId,
-        publicKeyBase58: publicKeyX25519,
-        type: 'X25519KeyAgreementKey2019',
+        publicKeyMultibase: x25519Key.fingerprint,
+        type: 'Multikey',
       },
     ]
 
