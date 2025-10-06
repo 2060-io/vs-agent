@@ -1,7 +1,7 @@
 // src/modules/message/dto/base-message.dto.ts
 
-import { ApiProperty, ApiPropertyOptional, ApiHideProperty } from '@nestjs/swagger'
 import { BaseMessage, MessageType } from '@2060.io/vs-agent-model'
+import { ApiProperty, ApiPropertyOptional, ApiHideProperty } from '@nestjs/swagger'
 
 export class BaseMessageDto extends BaseMessage {
   @ApiProperty({
