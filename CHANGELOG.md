@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/2060-io/vs-agent/compare/v1.5.0...v1.5.1) (2025-10-06)
+
+
+### Bug Fixes
+
+* remove PUBLIC_API_BASE_URL constant on invitation url ([#243](https://github.com/2060-io/vs-agent/issues/243)) ([498b752](https://github.com/2060-io/vs-agent/commit/498b752372e8abaa5736ae3fe37434be9ecc8c87))
+
 ## [1.5.0](https://github.com/2060-io/vs-agent/compare/v1.4.0...v1.5.0) (2025-09-30)
 
 
