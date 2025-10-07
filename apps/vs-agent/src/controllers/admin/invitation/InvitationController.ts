@@ -4,7 +4,7 @@ import {
   CreateInvitationResult,
 } from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import { Controller, Get, Post, Body, Query } from '@nestjs/common'
+import { Controller, Get, Post, Body, Query, Inject } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -14,7 +14,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 
-import { PUBLIC_API_BASE_URL } from '../../../config/constants'
 import { UrlShorteningService } from '../../../services/UrlShorteningService'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { createInvitation } from '../../../utils/agent'
@@ -30,6 +29,7 @@ export class InvitationController {
   constructor(
     private readonly agentService: VsAgentService,
     private readonly urlShortenerService: UrlShorteningService,
+    @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {}
 
   @Get('/')
@@ -84,7 +84,7 @@ export class InvitationController {
       example: {
         proofExchangeId: '123e4567-e89b-12d3-a456-426614174000',
         url: 'didcomm://example.com/...',
-        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=abcd1234`,
+        shortUrl: `https://mydomain.com/s?id=abcd1234`,
       },
     },
   })
@@ -162,7 +162,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.proofRecord.id,
     })
-    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
+    const shortUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
 
     return {
       proofExchangeId: request.proofRecord.id,
@@ -198,7 +198,7 @@ export class InvitationController {
       example: {
         credentialExchangeId: 'abcd1234-5678efgh-9012ijkl-3456mnop',
         url: 'didcomm://example.com/offer/...',
-        shortUrl: `${PUBLIC_API_BASE_URL}/s?id=wxyz7890`,
+        shortUrl: `https://mydomain.com/s?id=wxyz7890`,
       },
     },
   })
@@ -276,7 +276,7 @@ export class InvitationController {
       longUrl: url,
       relatedFlowId: request.credentialRecord.id,
     })
-    const shortUrl = `${PUBLIC_API_BASE_URL}/s?id=${shortUrlId}`
+    const shortUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
 
     return {
       credentialExchangeId: request.credentialRecord.id,

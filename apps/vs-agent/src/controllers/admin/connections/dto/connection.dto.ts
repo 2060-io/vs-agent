@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger'
 import { DidExchangeState } from '@credo-ts/core'
+import { ApiProperty } from '@nestjs/swagger'
 
 /**
  * Data Transfer Object for a Connection record.

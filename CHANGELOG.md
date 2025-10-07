@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.2](https://github.com/2060-io/vs-agent/compare/v1.5.1...v1.5.2) (2025-10-06)
+
+
+### Bug Fixes
+
+* migrate DID verification methods to Multikey format ([#245](https://github.com/2060-io/vs-agent/issues/245)) ([ac6710b](https://github.com/2060-io/vs-agent/commit/ac6710be32f79a980c9d9477ddbedef4ba5cffe1))
+
+## [1.5.1](https://github.com/2060-io/vs-agent/compare/v1.5.0...v1.5.1) (2025-10-06)
+
+
+### Bug Fixes
+
+* remove PUBLIC_API_BASE_URL constant on invitation url ([#243](https://github.com/2060-io/vs-agent/issues/243)) ([498b752](https://github.com/2060-io/vs-agent/commit/498b752372e8abaa5736ae3fe37434be9ecc8c87))
+
 ## [1.5.0](https://github.com/2060-io/vs-agent/compare/v1.4.0...v1.5.0) (2025-09-30)
 
 
