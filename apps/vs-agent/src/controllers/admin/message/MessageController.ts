@@ -11,8 +11,8 @@ import {
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
-import { BaseMessageDto } from './dto/base-message.dto'
 
+import { BaseMessageDto } from './dto/base-message.dto'
 import { MessageServiceFactory } from './services/MessageServiceFactory'
 
 @ApiTags('message')

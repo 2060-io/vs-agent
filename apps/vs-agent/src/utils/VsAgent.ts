@@ -32,7 +32,6 @@ import {
   ParsedDid,
   parseDid,
   ProofsModule,
-  TypedArrayEncoder,
   V2CredentialProtocol,
   V2ProofProtocol,
 } from '@credo-ts/core'
@@ -231,7 +230,7 @@ export class VsAgent extends Agent<VsAgentModules> {
 
     const context = [
       'https://w3id.org/security/multikey/v1',
-      'https://w3id.org/security/suites/ed25519-2018/v1',
+      'https://w3id.org/security/suites/ed25519-2020/v1',
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
     const keyAgreementId = `${publicDid}#key-agreement-1`
@@ -245,7 +244,7 @@ export class VsAgent extends Agent<VsAgentModules> {
         controller: publicDid,
         id: verificationMethodId,
         publicKeyMultibase: ed25519.fingerprint,
-        type: 'Multikey',
+        type: 'Ed25519VerificationKey2020',
       },
       {
         controller: publicDid,
