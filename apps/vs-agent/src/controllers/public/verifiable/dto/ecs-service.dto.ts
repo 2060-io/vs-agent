@@ -42,10 +42,10 @@ export class ServiceCredentialDto {
   description!: string
 
   @ApiProperty({
-    description: 'Base64 encoded logo of the service',
-    example: 'iVBORw0KGgoAAAANSUhEUgAAA...',
+    description: 'URL logo of the organization',
+    example: 'https://example.com/logos/org-logo.png',
   })
-  @IsString()
+  @IsUrl()
   logo!: string
 
   @ApiProperty({

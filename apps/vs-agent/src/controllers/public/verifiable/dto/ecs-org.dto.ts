@@ -23,10 +23,10 @@ export class OrganizationCredentialDto {
   name!: string
 
   @ApiProperty({
-    description: 'Base64 encoded logo of the organization',
-    example: 'iVBORw0KGgoAAAANSUhEUgAAA...',
+    description: 'URL logo of the organization',
+    example: 'https://example.com/logos/org-logo.png',
   })
-  @IsString()
+  @IsUrl()
   logo!: string
 
   @ApiProperty({
