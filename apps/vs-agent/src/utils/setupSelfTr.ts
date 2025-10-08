@@ -5,9 +5,9 @@ import {
   DidRepository,
   ClaimFormat,
   W3cCredentialSubject,
-  W3cJsonLdSignPresentationOptions,
-  W3cJsonLdSignCredentialOptions,
   LogLevel,
+  W3cJsonLdVerifiableCredential,
+  W3cJsonLdVerifiablePresentation,
 } from '@credo-ts/core'
 // No type definitions available for this library
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -173,34 +173,60 @@ async function generateVerifiableCredential(
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
   const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
-    method => method.type === 'Ed25519VerificationKey2018',
+    method => method.type === 'Multikey',
   )
   if (!verificationMethod) {
-    throw new Error('Cannot find a suitable Ed25519Signature2018 verification method in DID Document')
+    throw new Error('Cannot find a suitable Multikey verification method in DID Document')
   }
 
-  const signedCredential = await agent.w3cCredentials.signCredential({
-    format: ClaimFormat.LdpVc,
-    credential: unsignedCredential,
-    proofType: 'Ed25519Signature2018',
-    verificationMethod: verificationMethod.id,
-    proofPurpose: new purposes.AssertionProofPurpose(),
-  } as W3cJsonLdSignCredentialOptions)
-
+  const signedCredential = await signerW3c(agent, unsignedCredential, verificationMethod.id)
   if (presentation) {
     presentation.verifiableCredential = [signedCredential]
-    const signedPresentation = await agent.w3cCredentials.signPresentation({
-      format: ClaimFormat.LdpVp,
-      presentation,
-      proofType: 'Ed25519Signature2018',
-      verificationMethod: verificationMethod.id,
-      proofPurpose: new purposes.AssertionProofPurpose(),
-    } as W3cJsonLdSignPresentationOptions)
-    return signedPresentation
+    return await signerW3c(agent, presentation, verificationMethod.id)
   } else {
     didRecord.metadata.set(logTag, { ...signedCredential.jsonCredential, integrityData })
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
     return signedCredential.jsonCredential
+  }
+}
+
+export async function signerW3c(
+  agent: VsAgent,
+  obj: W3cCredential,
+  verificationMethod: string,
+): Promise<W3cJsonLdVerifiableCredential>
+
+export async function signerW3c(
+  agent: VsAgent,
+  obj: W3cPresentation,
+  verificationMethod: string,
+): Promise<W3cJsonLdVerifiablePresentation>
+
+export async function signerW3c(
+  agent: VsAgent,
+  obj: W3cCredential | W3cPresentation,
+  verificationMethod: string,
+) {
+  const proofPurpose = new purposes.AssertionProofPurpose()
+
+  if (obj instanceof W3cCredential) {
+    return await agent.w3cCredentials.signCredential({
+      format: ClaimFormat.LdpVc,
+      credential: obj,
+      proofType: 'Ed25519Signature2018',
+      verificationMethod,
+      proofPurpose,
+    })
+  }
+
+  if (obj instanceof W3cPresentation) {
+    return await agent.w3cCredentials.signPresentation({
+      format: ClaimFormat.LdpVp,
+      presentation: obj,
+      proofType: 'Ed25519Signature2018',
+      verificationMethod,
+      proofPurpose,
+    })
   }
 }
 
@@ -270,31 +296,31 @@ async function generateVerifiablePresentation(
  * @returns The validated claims object.
  * @throws If claims are invalid or schema is missing.
  */
-async function getClaims(
+export async function getClaims(
   ecsSchemas: Record<string, AnySchemaObject>,
-  { id: subjectId }: W3cCredentialSubject,
+  { id, claims }: W3cCredentialSubject,
   logTag: string,
 ) {
   // Default claims fallback
-  const claims =
+  claims =
     logTag === 'ecs-service'
       ? {
-          name: AGENT_LABEL,
-          type: SELF_ISSUED_VTC_SERVICE_TYPE,
-          description: SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
-          logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
-          minimumAgeRequired: SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
-          termsAndConditions: SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
-          privacyPolicy: SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
+          name: claims?.name ?? AGENT_LABEL,
+          type: claims?.type ?? SELF_ISSUED_VTC_SERVICE_TYPE,
+          description: claims?.description ?? SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
+          logo: await urlToBase64((claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
+          minimumAgeRequired: claims?.minimumAgeRequired ?? SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
+          termsAndConditions: claims?.termsAndConditions ?? SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
+          privacyPolicy: claims?.privacyPolicy ?? SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
         }
       : {
-          name: AGENT_LABEL,
-          logo: await urlToBase64(AGENT_INVITATION_IMAGE_URL),
-          registryId: SELF_ISSUED_VTC_ORG_REGISTRYID,
-          registryUrl: SELF_ISSUED_VTC_ORG_REGISTRYURL,
-          address: SELF_ISSUED_VTC_ORG_ADDRESS,
-          type: SELF_ISSUED_VTC_ORG_TYPE,
-          countryCode: SELF_ISSUED_VTC_ORG_COUNTRYCODE,
+          name: claims?.name ?? AGENT_LABEL,
+          logo: await urlToBase64((claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
+          registryId: claims?.registryId ?? SELF_ISSUED_VTC_ORG_REGISTRYID,
+          registryUrl: claims?.registryUrl ?? SELF_ISSUED_VTC_ORG_REGISTRYURL,
+          address: claims?.address ?? SELF_ISSUED_VTC_ORG_ADDRESS,
+          type: claims?.type ?? SELF_ISSUED_VTC_ORG_TYPE,
+          countryCode: claims?.countryCode ?? SELF_ISSUED_VTC_ORG_COUNTRYCODE,
         }
 
   const ecsSchema = ecsSchemas[logTag]
@@ -303,7 +329,7 @@ async function getClaims(
   }
 
   const validate = ajv.compile(ecsSchema.properties?.credentialSubject)
-  const credentialSubject = { id: subjectId, ...claims }
+  const credentialSubject = { id, ...claims }
   const isValid = validate(credentialSubject)
 
   if (!isValid) {
@@ -369,7 +395,7 @@ async function addDigestSRI<T extends object>(
  * @param algorithm - The hash algorithm to use (default: sha256).
  * @returns The SRI digest string.
  */
-function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
+export function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
   const hash = createHash(algorithm)
     .update(JSON.stringify(JSON.parse(content)), 'utf8')
     .digest('base64')

@@ -229,6 +229,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     const publicDid = didDocument.id
 
     const context = [
+      'https://w3id.org/security/multikey/v1',
       'https://w3id.org/security/suites/ed25519-2018/v1',
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
