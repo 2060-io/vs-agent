@@ -178,7 +178,7 @@ async function generateVerifiableCredential(
       method.id === didRecord.didDocument?.assertionMethod?.[0],
   )
   if (!verificationMethod) {
-    throw new Error('Cannot find a suitable Ed25519VerificationKey2020 verification method in DID Document')
+    throw new Error('Cannot find a suitable Ed25519Signature2020 verification method in DID Document')
   }
 
   const signedCredential = await agent.w3cCredentials.signCredential({
