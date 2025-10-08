@@ -173,7 +173,7 @@ async function generateVerifiableCredential(
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
   const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
-    method => method.type === 'Multikey',
+    method => method.type === 'Multikey' && method.id === didRecord.didDocument?.assertionMethod?.[0],
   )
   if (!verificationMethod) {
     throw new Error('Cannot find a suitable Multikey verification method in DID Document')
