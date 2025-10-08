@@ -86,14 +86,20 @@ export class TrustController {
 
   @Delete('credentials')
   @ApiOperation({ summary: 'Delete a verifiable credential' })
-  @ApiQuery({ name: 'id', required: true, type: String })
+  @ApiQuery({
+    name: 'id',
+    required: true,
+    type: String,
+    description: 'ID of the credential to delete',
+    examples: {
+      service: { value: 'ecs-service', description: 'Example for ECS Service credential' },
+      org: { value: 'ecs-org', description: 'Example for ECS Organization credential' },
+    },
+  })
   @ApiResponse({ status: 200, description: 'Credential deleted' })
   async removeCredentials(@Query('id') id: string) {
     try {
-      throw new HttpException(
-        { message: 'This method is not implemented yet' + id },
-        HttpStatus.NOT_IMPLEMENTED,
-      )
+      return await this.trustService.removeSchemaData(id)
     } catch (error) {
       this.logger.error(`removeCredentials: ${error.message}`)
       throw new HttpException('Failed to delete credential', HttpStatus.INTERNAL_SERVER_ERROR)

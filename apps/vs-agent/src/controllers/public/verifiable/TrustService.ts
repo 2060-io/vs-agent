@@ -1,8 +1,9 @@
-import { DidRepository, JsonTransformer, W3cCredential, W3cPresentation } from '@credo-ts/core'
+import { DidRecord, DidRepository, JsonTransformer, W3cCredential, W3cPresentation } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { instanceToPlain } from 'class-transformer'
 
 import { VsAgentService } from '../../../services/VsAgentService'
+import { VsAgent } from '../../../utils/VsAgent'
 import { getEcsSchemas } from '../../../utils/data'
 import { generateDigestSRI, getClaims, signerW3c } from '../../../utils/setupSelfTr'
 
@@ -23,9 +24,7 @@ export class TrustService {
   // Helper function to retrieve schema data based on tag name
   public async getSchemaData(tagName: string, notFoundMessage: string) {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-
+      const { didRecord } = await this.getDidRecord()
       const metadata = didRecord.metadata.get(tagName)
       if (metadata) {
         const { integrityData, ...rest } = metadata
@@ -35,15 +34,31 @@ export class TrustService {
 
       throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
     } catch (error) {
-      this.logger.error(`Error loading data "${tagName}": ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
+      this.handleError('loading', tagName, error, 'Failed to load schema')
+    }
+  }
+
+  public async removeSchemaData(tagName: string) {
+    try {
+      const { agent, didRecord } = await this.getDidRecord()
+      const metadata = didRecord.metadata.get(tagName)
+      if (!metadata) {
+        throw new HttpException(`Metadata with tag "${tagName}" not found`, HttpStatus.NOT_FOUND)
+      }
+
+      didRecord.metadata.delete(tagName)
+      await this.updateDidRecord(agent, didRecord)
+
+      this.logger.log(`Metadata ${tagName} successfully removed`)
+      return { success: true, message: `Metadata ${tagName} removed` }
+    } catch (error) {
+      this.handleError('removing', tagName, error, 'Failed to remove schema data')
     }
   }
 
   public async updateSchemaData(tagName: string, claims: OrganizationCredentialDto | ServiceCredentialDto) {
     try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+      const { agent, didRecord } = await this.getDidRecord()
 
       // Split objects and proofs
       const { proof: presentationProof, ...unsignedPresentation } = didRecord.metadata.get(tagName) || {}
@@ -71,7 +86,7 @@ export class TrustService {
       )
 
       didRecord.metadata.set(tagName, { ...presentation, integrityData })
-      await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
+      await this.updateDidRecord(agent, didRecord)
 
       this.logger.log(`Metadata for "${tagName}" updated successfully.`)
       return presentation
@@ -79,5 +94,22 @@ export class TrustService {
       this.logger.error(`Error updating data "${tagName}": ${error.message}`)
       throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
+  }
+
+  // Helpers
+  private async getDidRecord() {
+    const agent = await this.agentService.getAgent()
+    const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+    return { agent, didRecord }
+  }
+
+  private async updateDidRecord(agent: VsAgent, didRecord: DidRecord) {
+    const repo = agent.context.dependencyManager.resolve(DidRepository)
+    await repo.update(agent.context, didRecord)
+  }
+
+  private handleError(action: string, tagName: string, error: any, defaultMsg: string) {
+    this.logger.error(`Error ${action} metadata "${tagName}": ${error.message}`)
+    throw new HttpException(defaultMsg, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 }
