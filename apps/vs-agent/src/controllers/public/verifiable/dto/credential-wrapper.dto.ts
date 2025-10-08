@@ -6,9 +6,9 @@ import { OrganizationCredentialDto } from './ecs-org.dto'
 import { ServiceCredentialDto } from './ecs-service.dto'
 
 export class CredentialWrapperDto {
-  @ApiProperty({ enum: ['organization', 'service'] })
-  @IsEnum(['organization', 'service'])
-  credentialType!: 'organization' | 'service'
+  @ApiProperty({ enum: ['ecs-org', 'ecs-service'] })
+  @IsEnum(['ecs-org', 'ecs-service'])
+  credentialType!: 'ecs-org' | 'ecs-service'
 
   @ApiProperty({
     oneOf: [
@@ -19,10 +19,10 @@ export class CredentialWrapperDto {
   @ValidateNested()
   @Type(() => Object)
   @Transform(({ value, obj }) => {
-    if (obj.credentialType === 'organization') {
+    if (obj.credentialType === 'ecs-org') {
       return Object.assign(new OrganizationCredentialDto(), value)
     }
-    if (obj.credentialType === 'service') {
+    if (obj.credentialType === 'ecs-service') {
       return Object.assign(new ServiceCredentialDto(), value)
     }
     return value
