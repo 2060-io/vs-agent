@@ -173,16 +173,18 @@ async function generateVerifiableCredential(
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
   const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
-    method => method.type === 'Ed25519VerificationKey2018',
+    method =>
+      method.type === 'Ed25519VerificationKey2020' &&
+      method.id === didRecord.didDocument?.assertionMethod?.[0],
   )
   if (!verificationMethod) {
-    throw new Error('Cannot find a suitable Ed25519Signature2018 verification method in DID Document')
+    throw new Error('Cannot find a suitable Ed25519Signature2020 verification method in DID Document')
   }
 
   const signedCredential = await agent.w3cCredentials.signCredential({
     format: ClaimFormat.LdpVc,
     credential: unsignedCredential,
-    proofType: 'Ed25519Signature2018',
+    proofType: 'Ed25519Signature2020',
     verificationMethod: verificationMethod.id,
     proofPurpose: new purposes.AssertionProofPurpose(),
   } as W3cJsonLdSignCredentialOptions)
@@ -192,7 +194,7 @@ async function generateVerifiableCredential(
     const signedPresentation = await agent.w3cCredentials.signPresentation({
       format: ClaimFormat.LdpVp,
       presentation,
-      proofType: 'Ed25519Signature2018',
+      proofType: 'Ed25519Signature2020',
       verificationMethod: verificationMethod.id,
       proofPurpose: new purposes.AssertionProofPurpose(),
     } as W3cJsonLdSignPresentationOptions)

@@ -25,6 +25,7 @@ import {
 import { Response } from 'express'
 
 import { VsAgentService } from '../../../services/VsAgentService'
+
 import { ConnectionDto } from './dto/connection.dto'
 
 @ApiTags('connections')
