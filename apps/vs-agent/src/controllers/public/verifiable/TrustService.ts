@@ -1,8 +1,12 @@
-import { DidRepository } from '@credo-ts/core'
+import { DidRepository, JsonTransformer, W3cCredential, W3cPresentation } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { instanceToPlain } from 'class-transformer'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { getEcsSchemas } from '../../../utils/data'
+import { generateDigestSRI, getClaims, signerW3c } from '../../../utils/setupSelfTr'
+
+import { OrganizationCredentialDto, ServiceCredentialDto } from './dto'
 
 @Injectable()
 export class TrustService {
@@ -36,24 +40,41 @@ export class TrustService {
     }
   }
 
-  public async updateSchemaData(tagName: string, updates: Record<string, any>) {
+  public async updateSchemaData(tagName: string, claims: OrganizationCredentialDto | ServiceCredentialDto) {
     try {
       const agent = await this.agentService.getAgent()
       const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
-      const currentMetadata = didRecord.metadata.get(tagName) || {}
+      // Split objects and proofs
+      const { proof: presentationProof, ...unsignedPresentation } = didRecord.metadata.get(tagName) || {}
+      const { proof: credentialProof, ...unsignedCredential } = unsignedPresentation.verifiableCredential[0]
 
-      const newMetadata = {
-        ...currentMetadata,
-        ...updates,
-      }
+      // Get claims in the right format
+      const credentialSubject = await getClaims(
+        this.ecsSchemas,
+        { id: agent.did, claims: instanceToPlain(claims) },
+        tagName,
+      )
+      unsignedCredential.credentialSubject = credentialSubject
+      const integrityData = generateDigestSRI(JSON.stringify(credentialSubject))
 
-      didRecord.metadata.set(tagName, newMetadata)
+      const credential = await signerW3c(
+        agent,
+        JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
+        credentialProof.verificationMethod,
+      )
+      unsignedPresentation.verifiableCredential = [credential]
+      const presentation = await signerW3c(
+        agent,
+        JsonTransformer.fromJSON(unsignedPresentation, W3cPresentation),
+        presentationProof.verificationMethod,
+      )
 
+      didRecord.metadata.set(tagName, { ...presentation, integrityData })
       await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
 
       this.logger.log(`Metadata for "${tagName}" updated successfully.`)
-      return newMetadata
+      return presentation
     } catch (error) {
       this.logger.error(`Error updating data "${tagName}": ${error.message}`)
       throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
