@@ -32,7 +32,6 @@ import {
   ParsedDid,
   parseDid,
   ProofsModule,
-  TypedArrayEncoder,
   V2CredentialProtocol,
   V2ProofProtocol,
 } from '@credo-ts/core'
