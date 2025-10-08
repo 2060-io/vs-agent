@@ -4,6 +4,8 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/
 import { VsAgentService } from '../../../services/VsAgentService'
 import { getEcsSchemas } from '../../../utils/data'
 
+import { TrustService } from './TrustService'
+
 @ApiTags('Self Trust Registry')
 @Controller('self-tr')
 export class SelfTrController {
@@ -12,6 +14,7 @@ export class SelfTrController {
 
   constructor(
     private readonly agentService: VsAgentService,
+    private readonly trustService: TrustService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
@@ -22,7 +25,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getServiceVerifiablePresentation() {
     try {
-      return this.getSchemaData('ecs-service', 'Verifiable Presentation not found')
+      return this.trustService.getSchemaData('ecs-service', 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -34,7 +37,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
   async getOrgVerifiablePresentation() {
     try {
-      return this.getSchemaData('ecs-org', 'Verifiable Presentation not found')
+      return this.trustService.getSchemaData('ecs-org', 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -46,7 +49,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getServiceVerifiableCredential() {
     try {
-      return this.getSchemaData('example-service', 'Verifiable Credential not found')
+      return this.trustService.getSchemaData('example-service', 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -58,7 +61,7 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getOrgVerifiableCredential() {
     try {
-      return this.getSchemaData('example-org', 'Verifiable Credential not found')
+      return this.trustService.getSchemaData('example-org', 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -94,25 +97,5 @@ export class SelfTrController {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
     }
     return { type: 'PERMISSION_TYPE_ISSUER', did }
-  }
-
-  // Helper function to retrieve schema data based on tag name
-  private async getSchemaData(tagName: string, notFoundMessage: string) {
-    try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-
-      const metadata = didRecord.metadata.get(tagName)
-      if (metadata) {
-        const { integrityData, ...rest } = metadata
-        void integrityData
-        return rest
-      }
-
-      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
-    } catch (error) {
-      this.logger.error(`Error loading data "${tagName}": ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
   }
 }
