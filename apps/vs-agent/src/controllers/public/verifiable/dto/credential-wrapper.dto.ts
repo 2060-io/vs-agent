@@ -5,6 +5,9 @@ import { ValidateNested, IsEnum } from 'class-validator'
 import { OrganizationCredentialDto } from './ecs-org.dto'
 import { ServiceCredentialDto } from './ecs-service.dto'
 
+/**
+ * Data Transfer Object Wrapper for essentials schemas.
+ */
 export class CredentialWrapperDto {
   @ApiProperty({ enum: ['ecs-org', 'ecs-service'] })
   @IsEnum(['ecs-org', 'ecs-service'])
