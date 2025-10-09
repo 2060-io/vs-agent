@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { IsUrl, IsOptional } from 'class-validator'
 
-
 /**
  * Data Transfer Object JsonSchemaCredential.
  */

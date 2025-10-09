@@ -201,7 +201,6 @@ async function createCredential(options: Partial<W3cCredentialOptions>) {
   return new W3cCredential(options as W3cCredentialOptions)
 }
 
-
 /**
  * Signs a W3C Verifiable Credential or Presentation using the provided agent and verification method.
  *
