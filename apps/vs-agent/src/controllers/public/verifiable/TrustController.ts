@@ -13,7 +13,7 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody, getSchemaPath } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
-import { CredentialWrapperDto } from './dto'
+import { CredentialWrapperDto, JsonSchemaCredentialDto } from './dto'
 
 @ApiTags('Verifiable Trust Credential')
 @Controller('vt')
@@ -120,14 +120,22 @@ export class TrustController {
 
   @Post('json-schema-credentials')
   @ApiOperation({ summary: 'Add a new JSON schema credential' })
-  @ApiBody({ schema: { example: { schema: {} } } })
-  @ApiResponse({ status: 201, description: 'JSON schema credential created' })
-  async createJsonSchemaCredential() {
+  @ApiBody({
+    schema: { $ref: getSchemaPath(JsonSchemaCredentialDto) },
+    examples: {
+      service: {
+        summary: 'JsonSchemaCredential Example',
+        value: {
+          id: 'https://ecosystem/schemas-example-jsc.json',
+          jsonSchemaRef: 'vpr:verana:mainnet/cs/v1/js/12345678',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'JSON schema credential updated' })
+  async updateJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
     try {
-      throw new HttpException(
-        { message: 'This method is not implemented yet' },
-        HttpStatus.NOT_IMPLEMENTED,
-      )
+      return await this.trustService.updateJsonCredential(body.id, body.jsonSchemaRef)
     } catch (error) {
       this.logger.error(`createJsonSchemaCredential: ${error.message}`)
       throw new HttpException('Failed to create JSON schema credential', HttpStatus.INTERNAL_SERVER_ERROR)

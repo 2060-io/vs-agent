@@ -5,7 +5,17 @@ import { instanceToPlain } from 'class-transformer'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
 import { getEcsSchemas } from '../../../utils/data'
-import { credentials, generateDigestSRI, getClaims, signerW3c } from '../../../utils/setupSelfTr'
+import {
+  addDigestSRI,
+  createCredential,
+  createJsonSchema,
+  createJsonSubjectRef,
+  credentials,
+  generateDigestSRI,
+  getClaims,
+  getVerificationMethodId,
+  signerW3c,
+} from '../../../utils/setupSelfTr'
 
 import { OrganizationCredentialDto, ServiceCredentialDto } from './dto'
 
@@ -112,6 +122,67 @@ export class TrustService {
       }
     } catch (error) {
       this.handleError('loading', id, error, 'Failed to load schema')
+    }
+  }
+
+  public async updateJsonCredential(id: string, jsonSchemaRef?: string) {
+    try {
+      const { agent, didRecord } = await this.getDidRecord()
+      const tag = credentials.find(({ name }) => id.includes(name))
+
+      if (!tag && !jsonSchemaRef) {
+        throw new HttpException(
+          'Either example credential or JSON Schema reference is required',
+          HttpStatus.BAD_REQUEST,
+        )
+      }
+
+      let unsignedCredential: any
+      let verificationMethodId: string
+      let integrityData: string | undefined
+
+      if (tag) {
+        const { proof: credentialProof, ...existing } = didRecord.metadata.get(tag.name) || {}
+        const ref = jsonSchemaRef ?? tag.credUrl.replace('ecosystem', `${this.publicApiBaseUrl}/self-tr`)
+        existing.credentialSubject.id = ref
+        existing.credentialSubject.jsonSchema.$ref = ref
+        unsignedCredential = existing
+        verificationMethodId = credentialProof.verificationMethod
+        integrityData = generateDigestSRI(JSON.stringify(unsignedCredential.credentialSubject))
+      } else {
+        const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef!)
+        unsignedCredential = await createCredential({
+          id: agent.did,
+          type: ['VerifiableCredential', 'JsonSchemaCredential'],
+          issuer: agent.did,
+          credentialSubject: {
+            id: subjectId,
+            claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),
+          },
+        })
+        unsignedCredential.credentialSchema = await addDigestSRI(
+          createJsonSchema.id,
+          createJsonSchema,
+          this.ecsSchemas,
+        )
+        verificationMethodId = getVerificationMethodId(didRecord)
+      }
+
+      const credential = await signerW3c(
+        agent,
+        JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
+        verificationMethodId,
+      )
+
+      if (tag && integrityData) {
+        didRecord.metadata.set(tag.name, { ...credential, integrityData })
+      }
+
+      await this.updateDidRecord(agent, didRecord)
+      return credential
+    } catch (error) {
+      this.logger.error(`Error updating data "${id}": ${error.message}`)
+      throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
