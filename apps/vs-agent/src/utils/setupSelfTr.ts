@@ -8,6 +8,7 @@ import {
   LogLevel,
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
+  W3cCredentialOptions,
 } from '@credo-ts/core'
 // No type definitions available for this library
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -133,7 +134,6 @@ export const setupSelfTr = async ({
  */
 async function generateVerifiableCredential(
   agent: VsAgent,
-  logger: TsLogger,
   ecsSchemas: Record<string, AnySchemaObject>,
   logTag: string,
   type: string[],
@@ -153,13 +153,10 @@ async function generateVerifiableCredential(
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
-  const unsignedCredential = new W3cCredential({
-    context: ['https://www.w3.org/2018/credentials/v1', 'https://www.w3.org/2018/credentials/examples/v1'],
+  const unsignedCredential = await createCredential({
     id: agent.did,
     type,
     issuer: agent.did!,
-    issuanceDate: new Date().toISOString(),
-    expirationDate: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
     credentialSubject: {
       id: subjectId,
       claims: presentation ? claims : await addDigestSRI(subjectId, claims, ecsSchemas),
@@ -191,6 +188,19 @@ async function generateVerifiableCredential(
     return signedCredential.jsonCredential
   }
 }
+
+async function createCredential(options: Partial<W3cCredentialOptions>) {
+  options.context ??= [
+    'https://www.w3.org/2018/credentials/v1',
+    'https://www.w3.org/2018/credentials/examples/v1',
+  ]
+
+  options.issuanceDate ??= new Date().toISOString()
+  options.expirationDate ??= new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString()
+
+  return new W3cCredential(options as W3cCredentialOptions)
+}
+
 
 /**
  * Signs a W3C Verifiable Credential or Presentation using the provided agent and verification method.
@@ -285,7 +295,6 @@ async function generateVerifiablePresentation(
   })
   const result = await generateVerifiableCredential(
     agent,
-    logger,
     ecsSchemas,
     logTag,
     type,
