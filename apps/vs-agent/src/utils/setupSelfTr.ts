@@ -192,6 +192,17 @@ async function generateVerifiableCredential(
   }
 }
 
+/**
+ * Signs a W3C Verifiable Credential or Presentation using the provided agent and verification method.
+ * 
+ * The function determines whether the input object is a `W3cCredential` or a `W3cPresentation`,
+ * and applies the appropriate signing operation using Linked Data Proofs (`Ed25519Signature2020`).
+ * 
+ * @param agent - The agent instance.
+ * @param obj - The credential or presentation object to be signed.
+ * @param verificationMethod - The DID verification method used to generate the proof.
+ * @returns A signed W3C Verifiable Credential or Presentation in JSON-LD format.
+ */
 export async function signerW3c(
   agent: VsAgent,
   obj: W3cCredential,
@@ -215,7 +226,7 @@ export async function signerW3c(
     return await agent.w3cCredentials.signCredential({
       format: ClaimFormat.LdpVc,
       credential: obj,
-      proofType: 'Ed25519Signature2018',
+      proofType: 'Ed25519Signature2020',
       verificationMethod,
       proofPurpose,
     })
@@ -225,7 +236,7 @@ export async function signerW3c(
     return await agent.w3cCredentials.signPresentation({
       format: ClaimFormat.LdpVp,
       presentation: obj,
-      proofType: 'Ed25519Signature2018',
+      proofType: 'Ed25519Signature2020',
       verificationMethod,
       proofPurpose,
     })
