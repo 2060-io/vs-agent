@@ -122,10 +122,10 @@ export class TrustController {
   @ApiOperation({ summary: 'Add a new JSON schema credential' })
   @ApiBody({ schema: { example: { schema: {} } } })
   @ApiResponse({ status: 201, description: 'JSON schema credential created' })
-  async createJsonSchemaCredential(@Body() body: any) {
+  async createJsonSchemaCredential() {
     try {
       throw new HttpException(
-        { message: 'This method is not implemented yet' + JSON.stringify(body) },
+        { message: 'This method is not implemented yet' },
         HttpStatus.NOT_IMPLEMENTED,
       )
     } catch (error) {
@@ -138,10 +138,10 @@ export class TrustController {
   @ApiOperation({ summary: 'Delete a JSON schema credential' })
   @ApiQuery({ name: 'id', required: true, type: String })
   @ApiResponse({ status: 200, description: 'JSON schema credential deleted' })
-  async removeJsonSchemaCredential(@Query('id') id: string) {
+  async removeJsonSchemaCredential() {
     try {
       throw new HttpException(
-        { message: 'This method is not implemented yet' + id },
+        { message: 'This method is not implemented yet' },
         HttpStatus.NOT_IMPLEMENTED,
       )
     } catch (error) {
@@ -154,10 +154,10 @@ export class TrustController {
   @ApiOperation({ summary: 'Issue a new verifiable credential' })
   @ApiBody({ schema: { example: { subject: 'user-1' } } })
   @ApiResponse({ status: 201, description: 'Credential issued' })
-  async issueCredential(@Body() body: any) {
+  async issueCredential() {
     try {
       throw new HttpException(
-        { message: `This method is not implemented yet ${JSON.stringify(body)}` },
+        { message: `This method is not implemented yet` },
         HttpStatus.NOT_IMPLEMENTED,
       )
     } catch (error) {
@@ -170,10 +170,10 @@ export class TrustController {
   @ApiOperation({ summary: 'Revoke a verifiable credential' })
   @ApiBody({ schema: { example: { id: 'cred-1' } } })
   @ApiResponse({ status: 200, description: 'Credential revoked' })
-  async revokeCredential(@Body() body: any) {
+  async revokeCredential() {
     try {
       throw new HttpException(
-        { message: `This method is not implemented yet ${JSON.stringify(body)}` },
+        { message: `This method is not implemented yet` },
         HttpStatus.NOT_IMPLEMENTED,
       )
     } catch (error) {
