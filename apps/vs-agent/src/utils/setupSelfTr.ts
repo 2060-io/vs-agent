@@ -9,6 +9,7 @@ import {
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
   W3cCredentialOptions,
+  DidRecord,
 } from '@credo-ts/core'
 // No type definitions available for this library
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -64,6 +65,22 @@ export const credentials = [
   },
 ]
 
+// Default JSON Schema objects
+export const createJsonSchema: W3cCredentialSchema = {
+  id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
+  type: 'JsonSchema',
+}
+
+export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
+  id,
+  claims: {
+    type: 'JsonSchema',
+    jsonSchema: {
+      $ref: id,
+    },
+  },
+})
+
 export const setupSelfTr = async ({
   agent,
   publicApiBaseUrl,
@@ -95,19 +112,8 @@ export const setupSelfTr = async ({
       ecsSchemas,
       name,
       ['VerifiableCredential', 'JsonSchemaCredential'],
-      {
-        id,
-        claims: {
-          type: 'JsonSchema',
-          jsonSchema: {
-            $ref: id,
-          },
-        },
-      },
-      {
-        id: 'https://www.w3.org/ns/credentials/json-schema/v2.json',
-        type: 'JsonSchema',
-      },
+      createJsonSubjectRef(id),
+      createJsonSchema,
     )
   }
 }
@@ -137,7 +143,7 @@ async function generateVerifiableCredential(
   ecsSchemas: Record<string, AnySchemaObject>,
   logTag: string,
   type: string[],
-  subject: { id: string; claims?: any },
+  subject: W3cCredentialSubject,
   credentialSchema: W3cCredentialSchema,
   presentation?: W3cPresentation,
 ): Promise<any> {
@@ -169,19 +175,12 @@ async function generateVerifiableCredential(
 
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
-  const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
-    method =>
-      method.type === 'Ed25519VerificationKey2020' &&
-      method.id === didRecord.didDocument?.assertionMethod?.[0],
-  )
-  if (!verificationMethod) {
-    throw new Error('Cannot find a suitable Ed25519Signature2020 verification method in DID Document')
-  }
+  const verificationMethodId = getVerificationMethodId(didRecord)
 
-  const signedCredential = await signerW3c(agent, unsignedCredential, verificationMethod.id)
+  const signedCredential = await signerW3c(agent, unsignedCredential, verificationMethodId)
   if (presentation) {
     presentation.verifiableCredential = [signedCredential]
-    return await signerW3c(agent, presentation, verificationMethod.id)
+    return await signerW3c(agent, presentation, verificationMethodId)
   } else {
     didRecord.metadata.set(logTag, { ...signedCredential.jsonCredential, integrityData })
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
@@ -189,7 +188,7 @@ async function generateVerifiableCredential(
   }
 }
 
-async function createCredential(options: Partial<W3cCredentialOptions>) {
+export async function createCredential(options: Partial<W3cCredentialOptions>) {
   options.context ??= [
     'https://www.w3.org/2018/credentials/v1',
     'https://www.w3.org/2018/credentials/examples/v1',
@@ -378,7 +377,7 @@ export async function getClaims(
  * @returns A new object combining the original data and a `digestSRI` property.
  * @throws Error if both the fetch and local fallback fail.
  */
-async function addDigestSRI<T extends object>(
+export async function addDigestSRI<T extends object>(
   id?: string,
   data?: T,
   ecsSchemas?: Record<string, AnySchemaObject>,
@@ -449,5 +448,22 @@ export async function urlToBase64(url?: string): Promise<string> {
   } catch (error) {
     console.error(`Failed to convert URL to Base64. URL: ${url}`, error)
     return FALLBACK_BASE64
+  }
+}
+
+export function getVerificationMethodId(didRecord: DidRecord): string {
+  try {
+    const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
+      method =>
+        method.type === 'Ed25519VerificationKey2020' &&
+        method.id === didRecord.didDocument?.assertionMethod?.[0],
+    )
+    if (!verificationMethod) {
+      throw new Error('Cannot find a suitable Ed25519Signature2020 verification method in DID Document')
+    }
+    return verificationMethod.id
+  } catch (error) {
+    console.error(`Failed to get verification method ID.`, error)
+    throw error
   }
 }
