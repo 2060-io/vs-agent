@@ -173,10 +173,12 @@ async function generateVerifiableCredential(
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
   const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
-    method => method.type === 'Multikey',
+    method =>
+      method.type === 'Ed25519VerificationKey2020' &&
+      method.id === didRecord.didDocument?.assertionMethod?.[0],
   )
   if (!verificationMethod) {
-    throw new Error('Cannot find a suitable Multikey verification method in DID Document')
+    throw new Error('Cannot find a suitable Ed25519Signature2020 verification method in DID Document')
   }
 
   const signedCredential = await signerW3c(agent, unsignedCredential, verificationMethod.id)
