@@ -1,9 +1,6 @@
-import { ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger'
-import { Transform, Type } from 'class-transformer'
-import { ValidateNested, IsEnum, IsUrl, IsOptional } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsUrl, IsOptional } from 'class-validator'
 
-import { OrganizationCredentialDto } from './ecs-org.dto'
-import { ServiceCredentialDto } from './ecs-service.dto'
 
 /**
  * Data Transfer Object JsonSchemaCredential.
@@ -15,7 +12,7 @@ export class JsonSchemaCredentialDto {
     example: 'https://p2801.ovpndev.mobiera.io/self-tr/schemas-example-service.json',
   })
   @IsUrl()
-  id!: string;
+  id!: string
 
   @ApiPropertyOptional({
     description:
@@ -26,5 +23,5 @@ export class JsonSchemaCredentialDto {
   })
   @IsOptional()
   @IsUrl()
-  jsonSchemaRef?: string;
+  jsonSchemaRef?: string
 }

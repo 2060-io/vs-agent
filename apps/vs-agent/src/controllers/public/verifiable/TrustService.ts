@@ -5,7 +5,7 @@ import { instanceToPlain } from 'class-transformer'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
 import { getEcsSchemas } from '../../../utils/data'
-import { generateDigestSRI, getClaims, signerW3c } from '../../../utils/setupSelfTr'
+import { credentials, generateDigestSRI, getClaims, signerW3c } from '../../../utils/setupSelfTr'
 
 import { OrganizationCredentialDto, ServiceCredentialDto } from './dto'
 
@@ -93,6 +93,25 @@ export class TrustService {
     } catch (error) {
       this.logger.error(`Error updating data "${tagName}": ${error.message}`)
       throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  // Helper function to retrieve json schema credential data based on id
+  public async getJsonCredential(id: string) {
+    try {
+      const { didRecord } = await this.getDidRecord()
+      const tag = credentials.find(({ name }) => id.includes(name))
+      if (!tag) {
+        throw new HttpException(`Credential with id "${id}" not found`, HttpStatus.NOT_FOUND)
+      }
+      const metadata = didRecord.metadata.get(tag.name)
+      if (metadata) {
+        const { integrityData, ...rest } = metadata
+        void integrityData
+        return rest
+      }
+    } catch (error) {
+      this.handleError('loading', id, error, 'Failed to load schema')
     }
   }
 

@@ -109,9 +109,9 @@ export class TrustController {
   @Get('json-schema-credentials')
   @ApiOperation({ summary: 'Get all JSON schema credentials' })
   @ApiResponse({ status: 200, description: 'List of JSON schema credentials' })
-  async getJsonSchemaCredentials() {
+  async getJsonSchemaCredentials(@Query('id') id: string) {
     try {
-      throw new HttpException({ message: 'This method is not implemented yet' }, HttpStatus.NOT_IMPLEMENTED)
+      return await this.trustService.getJsonCredential(id)
     } catch (error) {
       this.logger.error(`getJsonSchemaCredentials: ${error.message}`)
       throw new HttpException('Failed to get JSON schema credentials', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -140,10 +140,7 @@ export class TrustController {
   @ApiResponse({ status: 200, description: 'JSON schema credential deleted' })
   async removeJsonSchemaCredential() {
     try {
-      throw new HttpException(
-        { message: 'This method is not implemented yet' },
-        HttpStatus.NOT_IMPLEMENTED,
-      )
+      throw new HttpException({ message: 'This method is not implemented yet' }, HttpStatus.NOT_IMPLEMENTED)
     } catch (error) {
       this.logger.error(`removeJsonSchemaCredential: ${error.message}`)
       throw new HttpException('Failed to delete JSON schema credential', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -156,10 +153,7 @@ export class TrustController {
   @ApiResponse({ status: 201, description: 'Credential issued' })
   async issueCredential() {
     try {
-      throw new HttpException(
-        { message: `This method is not implemented yet` },
-        HttpStatus.NOT_IMPLEMENTED,
-      )
+      throw new HttpException({ message: `This method is not implemented yet` }, HttpStatus.NOT_IMPLEMENTED)
     } catch (error) {
       this.logger.error(`issueCredential: ${error.message}`)
       throw new HttpException('Failed to issue credential', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -172,10 +166,7 @@ export class TrustController {
   @ApiResponse({ status: 200, description: 'Credential revoked' })
   async revokeCredential() {
     try {
-      throw new HttpException(
-        { message: `This method is not implemented yet` },
-        HttpStatus.NOT_IMPLEMENTED,
-      )
+      throw new HttpException({ message: `This method is not implemented yet` }, HttpStatus.NOT_IMPLEMENTED)
     } catch (error) {
       this.logger.error(`revokeCredential: ${error.message}`)
       throw new HttpException('Failed to revoke credential', HttpStatus.INTERNAL_SERVER_ERROR)
