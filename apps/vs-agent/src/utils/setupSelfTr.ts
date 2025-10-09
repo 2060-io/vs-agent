@@ -55,11 +55,11 @@ export const presentations = [
 export const credentials = [
   {
     name: 'example-service',
-    id: `ecosystem/cs/v1/js/ecs-service`,
+    credUrl: `ecosystem/cs/v1/js/ecs-service`,
   },
   {
     name: 'example-org',
-    id: `ecosystem/cs/v1/js/ecs-org`,
+    credUrl: `ecosystem/cs/v1/js/ecs-org`,
   },
 ]
 
@@ -87,10 +87,10 @@ export const setupSelfTr = async ({
     )
   }
 
-  for (const { name, id } of credentials) {
+  for (const { name, credUrl } of credentials) {
+    const id = credUrl.replace('ecosystem', `${publicApiBaseUrl}/self-tr`)
     await generateVerifiableCredential(
       agent,
-      logger,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'JsonSchemaCredential'],
@@ -99,7 +99,7 @@ export const setupSelfTr = async ({
         claims: {
           type: 'JsonSchema',
           jsonSchema: {
-            $ref: id.replace('ecosystem', `${publicApiBaseUrl}/self-tr`),
+            $ref: id,
           },
         },
       },

@@ -5,7 +5,6 @@ import { IsUrl, IsOptional } from 'class-validator'
 /**
  * Data Transfer Object JsonSchemaCredential.
  */
-
 export class JsonSchemaCredentialDto {
   @ApiProperty({
     description: 'The URL identifier of the credential schema.',
