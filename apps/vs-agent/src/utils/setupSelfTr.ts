@@ -41,6 +41,28 @@ import { TsLogger } from './logger'
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
+export const presentations = [
+  {
+    name: 'ecs-service',
+    schemaUrl: `ecosystem/schemas-example-service.json`,
+  },
+  {
+    name: 'ecs-org',
+    schemaUrl: `ecosystem/schemas-example-org.json`,
+  },
+]
+
+export const credentials = [
+  {
+    name: 'example-service',
+    id: `ecosystem/cs/v1/js/ecs-service`,
+  },
+  {
+    name: 'example-org',
+    id: `ecosystem/cs/v1/js/ecs-org`,
+  },
+]
+
 export const setupSelfTr = async ({
   agent,
   publicApiBaseUrl,
@@ -51,28 +73,6 @@ export const setupSelfTr = async ({
   const logger = new TsLogger(LogLevel.info, 'SetlTr')
   const ecsSchemas = getEcsSchemas(publicApiBaseUrl)
 
-  const presentations = [
-    {
-      name: 'ecs-service',
-      schemaUrl: `${publicApiBaseUrl}/self-tr/schemas-example-service.json`,
-    },
-    {
-      name: 'ecs-org',
-      schemaUrl: `${publicApiBaseUrl}/self-tr/schemas-example-org.json`,
-    },
-  ]
-
-  const credentials = [
-    {
-      name: 'example-service',
-      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
-    },
-    {
-      name: 'example-org',
-      id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
-    },
-  ]
-
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
@@ -81,7 +81,7 @@ export const setupSelfTr = async ({
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
       {
-        id: schemaUrl,
+        id: schemaUrl.replace('ecosystem', `${publicApiBaseUrl}/self-tr`),
         type: 'JsonSchemaCredential',
       },
     )
@@ -99,7 +99,7 @@ export const setupSelfTr = async ({
         claims: {
           type: 'JsonSchema',
           jsonSchema: {
-            $ref: id,
+            $ref: id.replace('ecosystem', `${publicApiBaseUrl}/self-tr`),
           },
         },
       },
@@ -194,10 +194,10 @@ async function generateVerifiableCredential(
 
 /**
  * Signs a W3C Verifiable Credential or Presentation using the provided agent and verification method.
- * 
+ *
  * The function determines whether the input object is a `W3cCredential` or a `W3cPresentation`,
  * and applies the appropriate signing operation using Linked Data Proofs (`Ed25519Signature2020`).
- * 
+ *
  * @param agent - The agent instance.
  * @param obj - The credential or presentation object to be signed.
  * @param verificationMethod - The DID verification method used to generate the proof.
