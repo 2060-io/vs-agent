@@ -17,7 +17,7 @@ import {
 import { purposes } from '@digitalcredentials/jsonld-signatures'
 import Ajv, { AnySchemaObject } from 'ajv/dist/2020'
 import addFormats from 'ajv-formats'
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 import { createHash } from 'crypto'
 
 import {
@@ -118,6 +118,8 @@ export const setupSelfTr = async ({
       createJsonSchema,
     )
   }
+
+  logger.info('Self trust registry created')
 }
 
 /**
@@ -447,7 +449,15 @@ export async function urlToBase64(url?: string): Promise<string> {
     const base64 = Buffer.from(response.data).toString('base64')
     return `data:${contentType};base64,${base64}`
   } catch (error) {
-    console.error(`Failed to convert URL to Base64. URL: ${url}`, error)
+    if (isAxiosError(error)) {
+      console.error(
+        `Failed to convert URL to Base64. URL: ${url}. ` +
+          `Status: ${error.response?.status ?? 'N/A'}. ` +
+          `Message: ${error.message}`,
+      )
+    } else {
+      console.error(`Unexpected error converting URL to Base64: ${error}`)
+    }
     return FALLBACK_BASE64
   }
 }
