@@ -97,7 +97,6 @@ export const setupSelfTr = async ({
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
-      logger,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -271,9 +270,8 @@ export async function signerW3c(
  * @param credentialSchema - Schema definition for the credential.
  * @returns The signed verifiable presentation, with integrity metadata.
  */
-async function generateVerifiablePresentation(
+export async function generateVerifiablePresentation(
   agent: VsAgent,
-  logger: TsLogger,
   ecsSchemas: Record<string, AnySchemaObject>,
   logTag: string,
   type: string[],
