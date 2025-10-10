@@ -1,7 +1,15 @@
-import { DidRecord, DidRepository, JsonTransformer, W3cCredential, W3cPresentation } from '@credo-ts/core'
+import {
+  DidDocumentService,
+  DidRecord,
+  DidRepository,
+  JsonTransformer,
+  W3cCredential,
+  W3cPresentation,
+} from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
 import { instanceToPlain } from 'class-transformer'
 
+import { ECS_SCHEMA_KEYS } from '../../../config/constants'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
 import { getEcsSchemas } from '../../../utils/data'
@@ -12,9 +20,11 @@ import {
   createJsonSubjectRef,
   credentials,
   generateDigestSRI,
+  generateVerifiablePresentation,
   getClaims,
   getVerificationMethodId,
   mapToSelfTr,
+  presentations,
   signerW3c,
 } from '../../../utils/setupSelfTr'
 
@@ -53,11 +63,13 @@ export class TrustService {
   public async removeSchemaData(tagName: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
+      const linkedServiceIndex = this.findLinkedServiceIndex(didRecord, tagName)
       const metadata = didRecord.metadata.get(tagName)
-      if (!metadata) {
-        throw new HttpException(`Metadata with tag "${tagName}" not found`, HttpStatus.NOT_FOUND)
+      if (!metadata || linkedServiceIndex === -1) {
+        throw new HttpException(`Not found data with tag ${tagName}`, HttpStatus.NOT_FOUND)
       }
 
+      didRecord.didDocument?.service?.splice(linkedServiceIndex, 1)
       didRecord.metadata.delete(tagName)
       await this.updateDidRecord(agent, didRecord)
 
@@ -68,12 +80,30 @@ export class TrustService {
     }
   }
 
-  public async updateSchemaData(tagName: string, claims: OrganizationCredentialDto | ServiceCredentialDto) {
+  public async updateSchemaData(
+    tagName: (typeof ECS_SCHEMA_KEYS)[number],
+    claims: OrganizationCredentialDto | ServiceCredentialDto,
+  ) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
+      const existingMetadata = didRecord.metadata.get(tagName)
+
+      if (!existingMetadata) {
+        const { name, schemaUrl } = presentations.find(({ name }) => name === tagName)!
+        return await generateVerifiablePresentation(
+          agent,
+          this.ecsSchemas,
+          name,
+          ['VerifiableCredential', 'VerifiableTrustCredential'],
+          {
+            id: mapToSelfTr(schemaUrl, this.publicApiBaseUrl),
+            type: 'JsonSchemaCredential',
+          },
+        )
+      }
 
       // Split objects and proofs
-      const { proof: presentationProof, ...unsignedPresentation } = didRecord.metadata.get(tagName) || {}
+      const { proof: presentationProof, ...unsignedPresentation } = existingMetadata
       const { proof: credentialProof, ...unsignedCredential } = unsignedPresentation.verifiableCredential[0]
 
       // Get claims in the right format
@@ -97,6 +127,15 @@ export class TrustService {
         presentationProof.verificationMethod,
       )
 
+      const linkedServiceIndex = this.findLinkedServiceIndex(didRecord, tagName)
+      if (linkedServiceIndex === -1)
+        didRecord.didDocument?.service?.push(
+          new DidDocumentService({
+            id: `${agent.did}#vpr-schemas-${tagName.split('-').pop()}-c-vp`,
+            serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/${tagName}-c-vp.json`,
+            type: 'LinkedVerifiablePresentation',
+          }),
+        )
       didRecord.metadata.set(tagName, { ...presentation, integrityData })
       await this.updateDidRecord(agent, didRecord)
 
@@ -228,5 +267,17 @@ export class TrustService {
   private handleError(action: string, tagName: string, error: any, defaultMsg: string) {
     this.logger.error(`Error ${action} metadata "${tagName}": ${error.message}`)
     throw new HttpException(defaultMsg, HttpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  /**
+   * Finds the index of the linked service related to a given tag name.
+   *
+   * TODO: Fix service ID prefix ('vpr-schemas-' → 'vpr-ecs-') per spec
+   * Ref: https://verana-labs.github.io/verifiable-trust-spec/#vt-ecs-cred-verifiable-trust-essential-schema-credentials
+   */
+  private findLinkedServiceIndex(didRecord: DidRecord, tagName: string): number {
+    const services = didRecord.didDocument?.service ?? []
+    const normalizedTag = tagName.replace('ecs-', 'schemas-')
+    return services.findIndex(service => service.id.includes(normalizedTag))
   }
 }
