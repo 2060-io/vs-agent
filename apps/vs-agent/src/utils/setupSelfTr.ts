@@ -149,23 +149,23 @@ async function generateVerifiableCredential(
 ): Promise<any> {
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
-  const { id: subjectId } = subject
+  const { id } = subject
   let claims = subject.claims
 
   if (!claims) {
-    claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
+    claims = await getClaims(ecsSchemas, { id }, logTag)
   }
   const integrityData = generateDigestSRI(JSON.stringify(claims))
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
   const unsignedCredential = await createCredential({
-    id: agent.did,
+    id,
     type,
-    issuer: agent.did!,
+    issuer: agent.did,
     credentialSubject: {
-      id: subjectId,
-      claims: presentation ? claims : await addDigestSRI(subjectId, claims, ecsSchemas),
+      id,
+      claims: presentation ? claims : await addDigestSRI(id, claims, ecsSchemas),
     },
   })
 

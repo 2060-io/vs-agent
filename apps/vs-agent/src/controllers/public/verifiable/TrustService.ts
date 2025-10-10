@@ -36,13 +36,14 @@ export class TrustService {
     try {
       const { didRecord } = await this.getDidRecord()
       const metadata = didRecord.metadata.get(tagName)
-      if (metadata) {
-        const { integrityData, ...rest } = metadata
-        void integrityData
-        return rest
+
+      if (!metadata) {
+        throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
       }
 
-      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
+      const { integrityData, ...rest } = metadata
+      void integrityData
+      return rest
     } catch (error) {
       this.handleError('loading', tagName, error, 'Failed to load schema')
     }
@@ -114,14 +115,39 @@ export class TrustService {
       if (!tag) {
         throw new HttpException(`Credential with id "${id}" not found`, HttpStatus.NOT_FOUND)
       }
+
       const metadata = didRecord.metadata.get(tag.name)
-      if (metadata) {
-        const { integrityData, ...rest } = metadata
-        void integrityData
-        return rest
+      if (!metadata) {
+        throw new HttpException(`Metadata for credential "${tag.name}" not found`, HttpStatus.NOT_FOUND)
       }
+
+      const { integrityData, ...rest } = metadata
+      void integrityData
+      return rest
     } catch (error) {
       this.handleError('loading', id, error, 'Failed to load schema')
+    }
+  }
+
+  public async removeJsonCredential(id: string) {
+    try {
+      const { agent, didRecord } = await this.getDidRecord()
+      const tag = credentials.find(({ name }) => id.includes(name))
+      if (!tag) {
+        throw new HttpException(`No credential tag found for id "${id}`, HttpStatus.NOT_FOUND)
+      }
+      const metadata = didRecord.metadata.get(tag.name)
+      if (!metadata) {
+        throw new HttpException(`Metadata with tag "${tag.name}" not found`, HttpStatus.NOT_FOUND)
+      }
+
+      didRecord.metadata.delete(tag.name)
+      await this.updateDidRecord(agent, didRecord)
+
+      this.logger.log(`Metadata ${tag.name} successfully removed`)
+      return { success: true, message: `Metadata ${tag.name} removed` }
+    } catch (error) {
+      this.handleError('removing', id, error, 'Failed to remove schema data')
     }
   }
 
@@ -152,7 +178,7 @@ export class TrustService {
       } else {
         const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef!)
         unsignedCredential = await createCredential({
-          id: agent.did,
+          id,
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: agent.did,
           credentialSubject: {

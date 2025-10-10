@@ -146,9 +146,9 @@ export class TrustController {
   @ApiOperation({ summary: 'Delete a JSON schema credential' })
   @ApiQuery({ name: 'id', required: true, type: String })
   @ApiResponse({ status: 200, description: 'JSON schema credential deleted' })
-  async removeJsonSchemaCredential() {
+  async removeJsonSchemaCredential(@Query('id') id: string) {
     try {
-      throw new HttpException({ message: 'This method is not implemented yet' }, HttpStatus.NOT_IMPLEMENTED)
+      return await this.trustService.removeJsonCredential(id)
     } catch (error) {
       this.logger.error(`removeJsonSchemaCredential: ${error.message}`)
       throw new HttpException('Failed to delete JSON schema credential', HttpStatus.INTERNAL_SERVER_ERROR)
