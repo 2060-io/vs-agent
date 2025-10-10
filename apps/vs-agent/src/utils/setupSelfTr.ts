@@ -81,6 +81,9 @@ export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
   },
 })
 
+export const mapToSelfTr = (url: string, publicApiBaseUrl: string): string =>
+  url.replace('ecosystem', `${publicApiBaseUrl}/self-tr`)
+
 export const setupSelfTr = async ({
   agent,
   publicApiBaseUrl,
@@ -99,14 +102,14 @@ export const setupSelfTr = async ({
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
       {
-        id: schemaUrl.replace('ecosystem', `${publicApiBaseUrl}/self-tr`),
+        id: mapToSelfTr(schemaUrl, publicApiBaseUrl),
         type: 'JsonSchemaCredential',
       },
     )
   }
 
   for (const { name, credUrl } of credentials) {
-    const id = credUrl.replace('ecosystem', `${publicApiBaseUrl}/self-tr`)
+    const id = mapToSelfTr(credUrl, publicApiBaseUrl)
     await generateVerifiableCredential(
       agent,
       ecsSchemas,

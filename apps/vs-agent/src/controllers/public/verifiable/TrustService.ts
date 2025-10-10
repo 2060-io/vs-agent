@@ -14,6 +14,7 @@ import {
   generateDigestSRI,
   getClaims,
   getVerificationMethodId,
+  mapToSelfTr,
   signerW3c,
 } from '../../../utils/setupSelfTr'
 
@@ -169,7 +170,7 @@ export class TrustService {
 
       if (tag) {
         const { proof: credentialProof, ...existing } = didRecord.metadata.get(tag.name) || {}
-        const ref = jsonSchemaRef ?? tag.credUrl.replace('ecosystem', `${this.publicApiBaseUrl}/self-tr`)
+        const ref = jsonSchemaRef ?? mapToSelfTr(tag.credUrl, this.publicApiBaseUrl)
         existing.credentialSubject.id = ref
         existing.credentialSubject.jsonSchema.$ref = ref
         unsignedCredential = existing
