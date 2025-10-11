@@ -20,48 +20,24 @@ export class SelfTrController {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
-  @Get('ecs-service-c-vp.json')
-  @ApiOperation({ summary: 'Get verifiable presentation for service' })
+  @Get(':type-c-vp.json')
+  @ApiOperation({ summary: 'Get verifiable presentation by type' })
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
-  async getServiceVerifiablePresentation() {
+  async getVerifiablePresentation(@Param('type') type: string) {
     try {
-      return this.trustService.getSchemaData('ecs-service', 'Verifiable Presentation not found')
+      return this.trustService.getSchemaData(type, 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
-  @Get('ecs-org-c-vp.json')
-  @ApiOperation({ summary: 'Get verifiable presentation for organization' })
-  @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
-  async getOrgVerifiablePresentation() {
-    try {
-      return this.trustService.getSchemaData('ecs-org', 'Verifiable Presentation not found')
-    } catch (error) {
-      this.logger.error(`Error loading schema file: ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Get('schemas-example-service.json')
+  @Get('schemas-:type.json')
   @ApiOperation({ summary: 'Get verifiable credential for service' })
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
-  async getServiceVerifiableCredential() {
+  async getServiceVerifiableCredential(@Param('type') type: string) {
     try {
-      return this.trustService.getSchemaData('example-service', 'Verifiable Credential not found')
-    } catch (error) {
-      this.logger.error(`Error loading schema file: ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Get('schemas-example-org.json')
-  @ApiOperation({ summary: 'Get verifiable credential for organization' })
-  @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
-  async getOrgVerifiableCredential() {
-    try {
-      return this.trustService.getSchemaData('example-org', 'Verifiable Credential not found')
+      return this.trustService.getSchemaData(type, 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)

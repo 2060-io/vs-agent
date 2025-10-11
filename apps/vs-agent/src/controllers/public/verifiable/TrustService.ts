@@ -266,6 +266,7 @@ export class TrustService {
 
   private handleError(action: string, tagName: string, error: any, defaultMsg: string) {
     this.logger.error(`Error ${action} metadata "${tagName}": ${error.message}`)
+    if (error instanceof HttpException) throw error
     throw new HttpException(defaultMsg, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 
