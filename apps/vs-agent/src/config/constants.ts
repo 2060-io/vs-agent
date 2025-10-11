@@ -106,3 +106,6 @@ export const AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP =
   process.env.AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP !== 'false'
 
 export const AGENT_BACKUP_BEFORE_STORAGE_UPDATE = process.env.AGENT_BACKUP_BEFORE_STORAGE_UPDATE !== 'false'
+
+// Essential schemas
+export const ECS_SCHEMA_KEYS = ['ecs-org', 'ecs-service', 'ecs-person', 'ecs-user-agent']
