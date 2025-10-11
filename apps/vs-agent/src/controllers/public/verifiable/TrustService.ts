@@ -2,6 +2,7 @@ import {
   DidDocumentService,
   DidRecord,
   DidRepository,
+  JsonObject,
   JsonTransformer,
   W3cCredential,
   W3cPresentation,
@@ -248,6 +249,35 @@ export class TrustService {
       return credential
     } catch (error) {
       this.logger.error(`Error updating data "${id}": ${error.message}`)
+      throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  public async issueCredential(did: string, jsonCredschema: string, claims: JsonObject) {
+    try {
+      const { agent, didRecord } = await this.getDidRecord()
+      const unsignedCredential = await createCredential({
+        id: did,
+        type: ['VerifiableCredential', 'VerifiableTrustCredential'],
+        issuer: agent.did,
+        credentialSubject: {
+          id: did,
+          claims,
+        },
+      })
+      unsignedCredential.credentialSchema = {
+        id: jsonCredschema,
+        type: 'JsonSchemaCredential',
+      }
+      const verificationMethodId = getVerificationMethodId(didRecord)
+      const credential = await signerW3c(
+        agent,
+        JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
+        verificationMethodId,
+      )
+      return credential.jsonCredential
+    } catch (error) {
+      this.logger.error(`Error issue issue: ${error.message}`)
       throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }

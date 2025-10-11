@@ -13,7 +13,7 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody, getSchemaPath } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
-import { CredentialWrapperDto, JsonSchemaCredentialDto } from './dto'
+import { CredentialWrapperDto, IssueCredentialRequestDto, JsonSchemaCredentialDto } from './dto'
 
 @ApiTags('Verifiable Trust Credential')
 @Controller('vt')
@@ -157,11 +157,32 @@ export class TrustController {
 
   @Post('issue-credential')
   @ApiOperation({ summary: 'Issue a new verifiable credential' })
-  @ApiBody({ schema: { example: { subject: 'user-1' } } })
+  @ApiBody({
+    schema: { $ref: getSchemaPath(IssueCredentialRequestDto) },
+    examples: {
+      organization: {
+        summary: 'Organization Credential Example',
+        value: {
+          did: 'did:web:example.com',
+          jsonCredschema: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          claims: {
+            id: 'https://example.org/org/123',
+            name: 'OpenAI Research',
+            logo: 'https://example.com/logo.png',
+            registryId: 'REG-123',
+            registryUrl: 'https://registry.example.org',
+            address: '123 Main St, San Francisco, CA',
+            type: 'PRIVATE',
+            countryCode: 'US',
+          },
+        },
+      },
+    },
+  })
   @ApiResponse({ status: 201, description: 'Credential issued' })
-  async issueCredential() {
+  async issueCredential(@Body() body: IssueCredentialRequestDto) {
     try {
-      throw new HttpException({ message: `This method is not implemented yet` }, HttpStatus.NOT_IMPLEMENTED)
+      return await this.trustService.issueCredential(body.did, body.jsonCredschema, body.claims)
     } catch (error) {
       this.logger.error(`issueCredential: ${error.message}`)
       throw new HttpException('Failed to issue credential', HttpStatus.INTERNAL_SERVER_ERROR)

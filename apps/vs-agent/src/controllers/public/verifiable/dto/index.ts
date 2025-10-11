@@ -1,4 +1,5 @@
 export * from './credential-wrapper.dto'
 export * from './ecs-org.dto'
 export * from './ecs-service.dto'
+export * from './issue-credential-request.dto'
 export * from './json-schema-credential.dto'
