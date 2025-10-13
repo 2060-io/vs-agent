@@ -5,7 +5,6 @@ import {
   DidRepository,
   ClaimFormat,
   W3cCredentialSubject,
-  LogLevel,
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
   W3cCredentialOptions,
@@ -39,7 +38,6 @@ import {
 
 import { VsAgent } from './VsAgent'
 import { getEcsSchemas } from './data'
-import { TsLogger } from './logger'
 
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
@@ -94,7 +92,6 @@ export const setupSelfTr = async ({
   agent: VsAgent
   publicApiBaseUrl: string
 }) => {
-  const logger = new TsLogger(LogLevel.info, 'SetlTr')
   const ecsSchemas = getEcsSchemas(publicApiBaseUrl)
 
   for (const { name, schemaUrl } of presentations) {

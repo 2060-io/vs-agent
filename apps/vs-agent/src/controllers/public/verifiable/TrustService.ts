@@ -18,10 +18,8 @@ import {
   createJsonSchema,
   createJsonSubjectRef,
   createPresentation,
-  credentials,
   generateDigestSRI,
   getVerificationMethodId,
-  mapToSelfTr,
   signerW3c,
 } from '../../../utils/setupSelfTr'
 
