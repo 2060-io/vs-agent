@@ -32,7 +32,7 @@ export class SelfTrController {
     }
   }
 
-  @Get('schemas-:type.json')
+  @Get('schemas-:type-jsc.json')
   @ApiOperation({ summary: 'Get verifiable credential for service' })
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getServiceVerifiableCredential(@Param('type') type: string) {

@@ -118,14 +118,10 @@ export class TrustService {
   public async getJsonCredential(id: string) {
     try {
       const { didRecord } = await this.getDidRecord()
-      const tag = credentials.find(({ name }) => id.includes(name))
-      if (!tag) {
-        throw new HttpException(`Credential with id "${id}" not found`, HttpStatus.NOT_FOUND)
-      }
 
-      const metadata = didRecord.metadata.get(tag.name)
+      const metadata = didRecord.metadata.get(id)
       if (!metadata) {
-        throw new HttpException(`Metadata for credential "${tag.name}" not found`, HttpStatus.NOT_FOUND)
+        throw new HttpException(`Metadata for credential "${id}" not found`, HttpStatus.NOT_FOUND)
       }
 
       const { integrityData, ...rest } = metadata
@@ -139,78 +135,58 @@ export class TrustService {
   public async removeJsonCredential(id: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const tag = credentials.find(({ name }) => id.includes(name))
-      if (!tag) {
-        throw new HttpException(`No credential tag found for id "${id}`, HttpStatus.NOT_FOUND)
-      }
-      const metadata = didRecord.metadata.get(tag.name)
+      const metadata = didRecord.metadata.get(id)
       if (!metadata) {
-        throw new HttpException(`Metadata with tag "${tag.name}" not found`, HttpStatus.NOT_FOUND)
+        throw new HttpException(`Metadata with tag "${id}" not found`, HttpStatus.NOT_FOUND)
       }
 
-      didRecord.metadata.delete(tag.name)
+      didRecord.metadata.delete(id)
       await this.updateDidRecord(agent, didRecord)
 
-      this.logger.log(`Metadata ${tag.name} successfully removed`)
-      return { success: true, message: `Metadata ${tag.name} removed` }
+      this.logger.log(`Metadata ${id} successfully removed`)
+      return { success: true, message: `Metadata ${id} removed` }
     } catch (error) {
       this.handleError('removing', id, error, 'Failed to remove schema data')
     }
   }
 
-  public async updateJsonCredential(id: string, jsonSchemaRef?: string) {
+  public async updateJsonCredential(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const tag = credentials.find(({ name }) => id.includes(name))
-
-      if (!tag && !jsonSchemaRef) {
-        throw new HttpException(
-          'Either example credential or JSON Schema reference is required',
-          HttpStatus.BAD_REQUEST,
-        )
+      let integrityData: string | undefined
+      let { proof, ...unsignedCredential } =
+        (didRecord.metadata.get(id) as W3cJsonLdVerifiableCredential) ?? null
+      const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
+      const credentialSubject = {
+        id: subjectId,
+        claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),
       }
 
-      let unsignedCredential: any
-      let verificationMethodId: string
-      let integrityData: string | undefined
-
-      if (tag) {
-        const { proof: credentialProof, ...existing } = didRecord.metadata.get(tag.name) || {}
-        const ref = jsonSchemaRef ?? mapToSelfTr(tag.credUrl, this.publicApiBaseUrl)
-        existing.credentialSubject.id = ref
-        existing.credentialSubject.jsonSchema.$ref = ref
-        unsignedCredential = existing
-        verificationMethodId = credentialProof.verificationMethod
-        integrityData = generateDigestSRI(JSON.stringify(unsignedCredential.credentialSubject))
+      if (unsignedCredential) {
+        unsignedCredential.credentialSubject = credentialSubject
       } else {
-        const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef!)
         unsignedCredential = createCredential({
-          id,
+          id: `${this.publicApiBaseUrl}/self-tr/schemas-${id}-jsc.json`,
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: agent.did,
-          credentialSubject: {
-            id: subjectId,
-            claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),
-          },
+          credentialSubject,
         })
         unsignedCredential.credentialSchema = await addDigestSRI(
           createJsonSchema.id,
           createJsonSchema,
           this.ecsSchemas,
         )
-        verificationMethodId = getVerificationMethodId(didRecord)
       }
 
+      integrityData = generateDigestSRI(JSON.stringify(unsignedCredential))
+
+      const verificationMethodId = getVerificationMethodId(didRecord)
       const credential = await signerW3c(
         agent,
         JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
         verificationMethodId,
       )
-
-      if (tag && integrityData) {
-        didRecord.metadata.set(tag.name, { ...credential, integrityData })
-      }
-
+      didRecord.metadata.set(id, { ...credential, integrityData })
       await this.updateDidRecord(agent, didRecord)
       return credential
     } catch (error) {

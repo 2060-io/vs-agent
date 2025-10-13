@@ -114,12 +114,12 @@ export class TrustController {
     }
   }
 
-  @Get('json-schema-credentials')
+  @Get('json-schema-credentials/:schemaId')
   @ApiOperation({ summary: 'Get all JSON schema credentials' })
   @ApiResponse({ status: 200, description: 'List of JSON schema credentials' })
-  async getJsonSchemaCredentials(@Query('id') id: string) {
+  async getJsonSchemaCredentials(@Param('schemaId') schemaId: string) {
     try {
-      return await this.trustService.getJsonCredential(id)
+      return await this.trustService.getJsonCredential(schemaId)
     } catch (error) {
       this.logger.error(`getJsonSchemaCredentials: ${error.message}`)
       throw new HttpException('Failed to get JSON schema credentials', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -143,20 +143,20 @@ export class TrustController {
   @ApiResponse({ status: 201, description: 'JSON schema credential updated' })
   async updateJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
     try {
-      return await this.trustService.updateJsonCredential(body.id, body.jsonSchemaRef)
+      return await this.trustService.updateJsonCredential(body.schemaId, body.jsonSchemaRef)
     } catch (error) {
       this.logger.error(`createJsonSchemaCredential: ${error.message}`)
       throw new HttpException('Failed to create JSON schema credential', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
-  @Delete('json-schema-credentials')
+  @Delete('json-schema-credentials/:schemaId')
   @ApiOperation({ summary: 'Delete a JSON schema credential' })
   @ApiQuery({ name: 'id', required: true, type: String })
   @ApiResponse({ status: 200, description: 'JSON schema credential deleted' })
-  async removeJsonSchemaCredential(@Query('id') id: string) {
+  async removeJsonSchemaCredential(@Param('schemaId') schemaId: string) {
     try {
-      return await this.trustService.removeJsonCredential(id)
+      return await this.trustService.removeJsonCredential(schemaId)
     } catch (error) {
       this.logger.error(`removeJsonSchemaCredential: ${error.message}`)
       throw new HttpException('Failed to delete JSON schema credential', HttpStatus.INTERNAL_SERVER_ERROR)
