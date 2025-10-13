@@ -14,12 +14,7 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody, getSchemaPath } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
-import {
-  CredentialWrapperDto,
-  IssueCredentialRequestDto,
-  JsonSchemaCredentialDto,
-  W3cCredentialDto,
-} from './dto'
+import { IssueCredentialRequestDto, JsonSchemaCredentialDto, W3cCredentialDto } from './dto'
 
 @ApiTags('Verifiable Trust Credential')
 @Controller('vt')
@@ -41,45 +36,47 @@ export class TrustController {
   }
 
   @Post('credentials')
-  @ApiOperation({ summary: 'Add a new verifiable credential (organization or service)' })
+  @ApiOperation({
+    summary: 'Add a new W3C Verifiable Credential (organization or service)',
+    description:
+      'Accepts a W3C Verifiable Credential following the JSON-LD data model. Supports both organization and service credentials.',
+  })
   @ApiBody({
-    schema: { $ref: getSchemaPath(CredentialWrapperDto) },
+    schema: { $ref: getSchemaPath(W3cCredentialDto) },
     examples: {
       organization: {
         summary: 'Organization Credential Example',
+        description: 'Represents an organization using the "ecs-org" credential schema.',
         value: {
-          credentialType: 'ecs-org',
           credential: {
-            id: 'https://example.org/org/123',
-            name: 'OpenAI Research',
-            logo: 'https://example.com/logo.png',
-            registryId: 'REG-123',
-            registryUrl: 'https://registry.example.org',
-            address: '123 Main St, San Francisco, CA',
-            type: 'PRIVATE',
-            countryCode: 'US',
-          },
-        },
-      },
-      service: {
-        summary: 'Service Credential Example',
-        value: {
-          credentialType: 'ecs-service',
-          credential: {
-            id: 'https://example.org/service/789',
-            name: 'AI API',
-            type: 'API',
-            description: 'Provides advanced AI models',
-            logo: 'https://example.com/logo.png',
-            minimumAgeRequired: 18,
-            termsAndConditions: 'https://example.org/terms',
-            privacyPolicy: 'https://example.org/privacy',
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            id: 'https://example.org/credentials/123',
+            type: ['VerifiableCredential', 'EcsOrgCredential'],
+            issuer: 'did:example:issuer123',
+            issuanceDate: '2025-10-13T12:00:00Z',
+            credentialSubject: {
+              id: 'did:example:org123',
+              name: 'OpenAI Research',
+              logo: 'https://example.com/logo.png',
+              registryId: 'REG-123',
+              registryUrl: 'https://registry.example.org',
+              address: '123 Main St, San Francisco, CA',
+              type: 'PRIVATE',
+              countryCode: 'US',
+            },
+            proof: {
+              type: 'Ed25519Signature2018',
+              created: '2025-10-13T12:00:00Z',
+              proofPurpose: 'assertionMethod',
+              verificationMethod: 'did:example:issuer123#key-1',
+              jws: 'eyJhbGciOiJFZERTQSJ9...',
+            },
           },
         },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Credential created' })
+  @ApiResponse({ status: 201, description: 'Credential created successfully' })
   async updateCredential(@Body() body: W3cCredentialDto) {
     try {
       const data = await this.trustService.updateSchemaData(
@@ -134,7 +131,7 @@ export class TrustController {
       service: {
         summary: 'JsonSchemaCredential Example',
         value: {
-          id: 'https://ecosystem/schemas-example-jsc.json',
+          schemaId: 'example-service',
           jsonSchemaRef: 'vpr:verana:mainnet/cs/v1/js/12345678',
         },
       },

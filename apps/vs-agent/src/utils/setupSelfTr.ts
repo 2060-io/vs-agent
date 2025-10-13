@@ -97,6 +97,7 @@ export const setupSelfTr = async ({
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
+      `${publicApiBaseUrl}/self-tr/${name}-c-vp.json`,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -162,7 +163,7 @@ async function generateVerifiableCredential(
   }
   const integrityData = generateDigestSRI(JSON.stringify(claims))
   const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData) return metadata
+  if (metadata?.integrityData === integrityData && id === metadata?.id) return metadata
 
   const unsignedCredential = createCredential({
     id,
@@ -275,6 +276,7 @@ export async function signerW3c(
  */
 export async function generateVerifiablePresentation(
   agent: VsAgent,
+  id: string,
   ecsSchemas: Record<string, AnySchemaObject>,
   logTag: string,
   type: string[],
@@ -286,10 +288,10 @@ export async function generateVerifiablePresentation(
     JSON.stringify(await getClaims(ecsSchemas, { id: agent.did }, logTag)),
   )
   const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData) return metadata
+  if (metadata?.integrityData === integrityData && metadata?.id === id) return metadata
 
   const presentation = createPresentation({
-    id: agent.did,
+    id,
     holder: agent.did,
     verifiableCredential: [],
   })

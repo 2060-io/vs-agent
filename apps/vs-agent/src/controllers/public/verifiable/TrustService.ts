@@ -151,9 +151,9 @@ export class TrustService {
   public async updateJsonCredential(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      let integrityData: string | undefined
-      let { proof, ...unsignedCredential } =
-        (didRecord.metadata.get(id) as W3cJsonLdVerifiableCredential) ?? null
+      const { proof: _proof, ...rest } = (didRecord.metadata.get(id) as W3cJsonLdVerifiableCredential) ?? null
+      void _proof
+      let unsignedCredential = rest
       const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
@@ -175,8 +175,7 @@ export class TrustService {
           this.ecsSchemas,
         )
       }
-
-      integrityData = generateDigestSRI(JSON.stringify(unsignedCredential))
+      const integrityData = generateDigestSRI(JSON.stringify(unsignedCredential))
 
       const verificationMethodId = getVerificationMethodId(didRecord)
       const credential = await signerW3c(
