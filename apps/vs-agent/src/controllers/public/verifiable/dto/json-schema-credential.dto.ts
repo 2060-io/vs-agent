@@ -1,25 +1,29 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsUrl, IsOptional } from 'class-validator'
+import { ApiProperty } from '@nestjs/swagger'
+import { IsString, Matches, IsUrl } from 'class-validator'
 
 /**
  * Data Transfer Object JsonSchemaCredential.
  */
 export class JsonSchemaCredentialDto {
   @ApiProperty({
-    description: 'The URL identifier of the credential schema.',
-    example: 'https://p2801.ovpndev.mobiera.io/self-tr/schemas-example-service.json',
-  })
-  @IsUrl()
-  id!: string
-
-  @ApiPropertyOptional({
     description:
-      'Optional URL to the JSON Schema definition. ' +
+      'The short identifier of the credential schema (used to build the full schema URL). ' +
+      'Do not include the base URL or file extension.',
+    example: 'example-service',
+  })
+  @IsString()
+  @Matches(/^[a-z0-9\-]+$/i, {
+    message: 'schemaId must contain only letters, numbers, or hyphens.',
+  })
+  schemaId!: string
+
+  @ApiProperty({
+    description:
+      'URL to the JSON Schema definition. ' +
       'If omitted, it will be treated as a self essential schema (' +
       '`schemas-example-service.json`).',
-    example: 'https://p2801.ovpndev.mobiera.io/self-tr/cs/v1/js/ecs-service',
+    example: 'vpr:verana:mainnet/cs/v1/js/12345678',
   })
-  @IsOptional()
   @IsUrl()
-  jsonSchemaRef?: string
+  jsonSchemaRef!: string
 }
