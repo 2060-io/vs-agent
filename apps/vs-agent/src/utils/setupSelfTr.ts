@@ -47,11 +47,11 @@ addFormats(ajv)
 export const presentations = [
   {
     name: 'ecs-service',
-    schemaUrl: `ecosystem/schemas-example-service.json`,
+    schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
     name: 'ecs-org',
-    schemaUrl: `ecosystem/schemas-example-org.json`,
+    schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
 ]
 
@@ -59,12 +59,12 @@ export const credentials = [
   {
     name: 'example-service',
     credUrl: `ecosystem/cs/v1/js/ecs-service`,
-    schemaUrl: `ecosystem/schemas-example-service.json`,
+    schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
     name: 'example-org',
     credUrl: `ecosystem/cs/v1/js/ecs-org`,
-    schemaUrl: `ecosystem/schemas-example-org.json`,
+    schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
 ]
 
@@ -123,8 +123,6 @@ export const setupSelfTr = async ({
       createJsonSchema,
     )
   }
-
-  logger.info('Self trust registry created')
 }
 
 /**
