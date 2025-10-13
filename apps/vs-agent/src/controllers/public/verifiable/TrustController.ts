@@ -1,3 +1,4 @@
+import { JsonTransformer, W3cJsonLdVerifiableCredential } from '@credo-ts/core'
 import {
   Controller,
   Get,
@@ -13,7 +14,12 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody, getSchemaPath } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
-import { CredentialWrapperDto, IssueCredentialRequestDto, JsonSchemaCredentialDto } from './dto'
+import {
+  CredentialWrapperDto,
+  IssueCredentialRequestDto,
+  JsonSchemaCredentialDto,
+  W3cCredentialDto,
+} from './dto'
 
 @ApiTags('Verifiable Trust Credential')
 @Controller('vt')
@@ -25,9 +31,9 @@ export class TrustController {
   @Get('credentials/:schemaId')
   @ApiOperation({ summary: 'Get all verifiable credentials' })
   @ApiResponse({ status: 200, description: 'List of credentials' })
-  async getCredentials(@Param('schemaId') schemaId: string) {
+  async getCredential(@Param('schemaId') schemaId: string) {
     try {
-      return await this.trustService.getSchemaData(schemaId, 'Schema not found')
+      return await this.trustService.getSchemaData(schemaId.toLowerCase(), 'Schema not found')
     } catch (error) {
       this.logger.error(`getCredentials: ${error.message}`)
       throw new HttpException('Failed to get credentials', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -74,9 +80,11 @@ export class TrustController {
     },
   })
   @ApiResponse({ status: 201, description: 'Credential created' })
-  async updateCredentials(@Body() body: CredentialWrapperDto) {
+  async updateCredential(@Body() body: W3cCredentialDto) {
     try {
-      const data = await this.trustService.updateSchemaData(body.credentialType, body.credential)
+      const data = await this.trustService.updateSchemaData(
+        JsonTransformer.fromJSON(body.credential, W3cJsonLdVerifiableCredential),
+      )
       return { message: 'Credential updated', data }
     } catch (error) {
       this.logger.error(`updateCredentials: ${error.message}`)
@@ -97,9 +105,9 @@ export class TrustController {
     },
   })
   @ApiResponse({ status: 200, description: 'Credential deleted' })
-  async removeCredentials(@Query('id') id: string) {
+  async removeCredential(@Query('id') id: string) {
     try {
-      return await this.trustService.removeSchemaData(id)
+      return await this.trustService.removeSchemaData(id.toLowerCase())
     } catch (error) {
       this.logger.error(`removeCredentials: ${error.message}`)
       throw new HttpException('Failed to delete credential', HttpStatus.INTERNAL_SERVER_ERROR)

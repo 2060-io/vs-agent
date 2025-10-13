@@ -5,12 +5,10 @@ import {
   JsonObject,
   JsonTransformer,
   W3cCredential,
-  W3cPresentation,
+  W3cJsonLdVerifiableCredential,
 } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
-import { instanceToPlain } from 'class-transformer'
 
-import { ECS_SCHEMA_KEYS } from '../../../config/constants'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
 import { getEcsSchemas } from '../../../utils/data'
@@ -19,17 +17,13 @@ import {
   createCredential,
   createJsonSchema,
   createJsonSubjectRef,
+  createPresentation,
   credentials,
   generateDigestSRI,
-  generateVerifiablePresentation,
-  getClaims,
   getVerificationMethodId,
   mapToSelfTr,
-  presentations,
   signerW3c,
 } from '../../../utils/setupSelfTr'
-
-import { OrganizationCredentialDto, ServiceCredentialDto } from './dto'
 
 @Injectable()
 export class TrustService {
@@ -81,70 +75,42 @@ export class TrustService {
     }
   }
 
-  public async updateSchemaData(
-    tagName: (typeof ECS_SCHEMA_KEYS)[number],
-    claims: OrganizationCredentialDto | ServiceCredentialDto,
-  ) {
+  public async updateSchemaData(credential: W3cJsonLdVerifiableCredential) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const existingMetadata = didRecord.metadata.get(tagName)
+      const tagName = credential.type
+        .find(t => t !== 'VerifiableCredential' && t !== 'VerifiableTrustCredential')
+        ?.toLowerCase()
 
-      if (!existingMetadata) {
-        const { name, schemaUrl } = presentations.find(({ name }) => name === tagName)!
-        return await generateVerifiablePresentation(
-          agent,
-          this.ecsSchemas,
-          name,
-          ['VerifiableCredential', 'VerifiableTrustCredential'],
-          {
-            id: mapToSelfTr(schemaUrl, this.publicApiBaseUrl),
-            type: 'JsonSchemaCredential',
-          },
+      if (!tagName) {
+        throw new HttpException(
+          `No custom credential type found, skipping schema update.`,
+          HttpStatus.NOT_FOUND,
         )
       }
-
-      // Split objects and proofs
-      const { proof: presentationProof, ...unsignedPresentation } = existingMetadata
-      const { proof: credentialProof, ...unsignedCredential } = unsignedPresentation.verifiableCredential[0]
-
-      // Get claims in the right format
-      const credentialSubject = await getClaims(
-        this.ecsSchemas,
-        { id: agent.did, claims: instanceToPlain(claims) },
-        tagName,
+      const schemaKey = `schemas-${tagName}`
+      const serviceEndpoint = `${this.publicApiBaseUrl}/self-tr/${schemaKey}-c-vp.json`
+      const unsignedPresentation = createPresentation({
+        id: serviceEndpoint,
+        holder: agent.did,
+        verifiableCredential: [credential],
+      })
+      const integrityData = generateDigestSRI(JSON.stringify(credential.credentialSubject))
+      didRecord.didDocument?.service?.push(
+        new DidDocumentService({
+          id: `${agent.did}#vpr-${schemaKey}-c-vp`,
+          serviceEndpoint,
+          type: 'LinkedVerifiablePresentation',
+        }),
       )
-      unsignedCredential.credentialSubject = credentialSubject
-      const integrityData = generateDigestSRI(JSON.stringify(credentialSubject))
+      const presentation = await signerW3c(agent, unsignedPresentation, getVerificationMethodId(didRecord))
 
-      const credential = await signerW3c(
-        agent,
-        JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
-        credentialProof.verificationMethod,
-      )
-      unsignedPresentation.verifiableCredential = [credential]
-      const presentation = await signerW3c(
-        agent,
-        JsonTransformer.fromJSON(unsignedPresentation, W3cPresentation),
-        presentationProof.verificationMethod,
-      )
-
-      const linkedServiceIndex = this.findLinkedServiceIndex(didRecord, tagName)
-      if (linkedServiceIndex === -1)
-        didRecord.didDocument?.service?.push(
-          new DidDocumentService({
-            id: `${agent.did}#vpr-schemas-${tagName.split('-').pop()}-c-vp`,
-            serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/${tagName}-c-vp.json`,
-            type: 'LinkedVerifiablePresentation',
-          }),
-        )
-      didRecord.metadata.set(tagName, { ...presentation, integrityData })
+      didRecord.metadata.set(schemaKey, { ...presentation, integrityData })
       await this.updateDidRecord(agent, didRecord)
-
       this.logger.log(`Metadata for "${tagName}" updated successfully.`)
       return presentation
     } catch (error) {
-      this.logger.error(`Error updating data "${tagName}": ${error.message}`)
-      throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
+      this.handleError('updating', credential.id ?? '', error, 'Error updating credential')
     }
   }
 
@@ -218,7 +184,7 @@ export class TrustService {
         integrityData = generateDigestSRI(JSON.stringify(unsignedCredential.credentialSubject))
       } else {
         const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef!)
-        unsignedCredential = await createCredential({
+        unsignedCredential = createCredential({
           id,
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: agent.did,
@@ -248,15 +214,14 @@ export class TrustService {
       await this.updateDidRecord(agent, didRecord)
       return credential
     } catch (error) {
-      this.logger.error(`Error updating data "${id}": ${error.message}`)
-      throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
+      this.handleError('updating', id, error, 'Failed to update schema')
     }
   }
 
   public async issueCredential(did: string, jsonCredschema: string, claims: JsonObject) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const unsignedCredential = await createCredential({
+      const unsignedCredential = createCredential({
         id: did,
         type: ['VerifiableCredential', 'VerifiableTrustCredential'],
         issuer: agent.did,
@@ -277,8 +242,7 @@ export class TrustService {
       )
       return credential.jsonCredential
     } catch (error) {
-      this.logger.error(`Error issue issue: ${error.message}`)
-      throw new HttpException('Failed to update schema', HttpStatus.INTERNAL_SERVER_ERROR)
+      this.handleError('updating', did, error, 'Failed to update schema')
     }
   }
 
