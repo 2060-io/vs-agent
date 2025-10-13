@@ -58,10 +58,12 @@ export const credentials = [
   {
     name: 'example-service',
     credUrl: `ecosystem/cs/v1/js/ecs-service`,
+    schemaUrl: `ecosystem/schemas-example-service.json`,
   },
   {
     name: 'example-org',
     credUrl: `ecosystem/cs/v1/js/ecs-org`,
+    schemaUrl: `ecosystem/schemas-example-org.json`,
   },
 ]
 
@@ -107,14 +109,16 @@ export const setupSelfTr = async ({
     )
   }
 
-  for (const { name, credUrl } of credentials) {
-    const id = mapToSelfTr(credUrl, publicApiBaseUrl)
+  for (const { name, credUrl, schemaUrl } of credentials) {
+    const id = mapToSelfTr(schemaUrl, publicApiBaseUrl)
+    const ref = mapToSelfTr(credUrl, publicApiBaseUrl)
     await generateVerifiableCredential(
       agent,
+      id,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'JsonSchemaCredential'],
-      createJsonSubjectRef(id),
+      createJsonSubjectRef(ref),
       createJsonSchema,
     )
   }
@@ -144,6 +148,7 @@ export const setupSelfTr = async ({
  */
 async function generateVerifiableCredential(
   agent: VsAgent,
+  id: string,
   ecsSchemas: Record<string, AnySchemaObject>,
   logTag: string,
   type: string[],
@@ -153,11 +158,11 @@ async function generateVerifiableCredential(
 ): Promise<any> {
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
 
-  const { id } = subject
+  const { id: subjectId } = subject
   let claims = subject.claims
 
   if (!claims) {
-    claims = await getClaims(ecsSchemas, { id }, logTag)
+    claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
   }
   const integrityData = generateDigestSRI(JSON.stringify(claims))
   const metadata = didRecord.metadata.get(logTag)
@@ -168,8 +173,8 @@ async function generateVerifiableCredential(
     type,
     issuer: agent.did,
     credentialSubject: {
-      id,
-      claims: presentation ? claims : await addDigestSRI(id, claims, ecsSchemas),
+      id: subjectId,
+      claims: presentation ? claims : await addDigestSRI(subjectId, claims, ecsSchemas),
     },
   })
 
@@ -296,6 +301,7 @@ export async function generateVerifiablePresentation(
   })
   const result = await generateVerifiableCredential(
     agent,
+    agent.did,
     ecsSchemas,
     logTag,
     type,
