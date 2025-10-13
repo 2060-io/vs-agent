@@ -10,6 +10,7 @@ import {
   W3cJsonLdVerifiablePresentation,
   W3cCredentialOptions,
   DidRecord,
+  W3cPresentationOptions,
 } from '@credo-ts/core'
 // No type definitions available for this library
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -168,7 +169,7 @@ async function generateVerifiableCredential(
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
-  const unsignedCredential = await createCredential({
+  const unsignedCredential = createCredential({
     id,
     type,
     issuer: agent.did,
@@ -197,7 +198,7 @@ async function generateVerifiableCredential(
   }
 }
 
-export async function createCredential(options: Partial<W3cCredentialOptions>) {
+export function createCredential(options: Partial<W3cCredentialOptions>) {
   options.context ??= [
     'https://www.w3.org/2018/credentials/v1',
     'https://www.w3.org/2018/credentials/examples/v1',
@@ -292,10 +293,8 @@ export async function generateVerifiablePresentation(
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
-  const presentation = new W3cPresentation({
-    context: ['https://www.w3.org/2018/credentials/v1'],
+  const presentation = createPresentation({
     id: agent.did,
-    type: ['VerifiablePresentation'],
     holder: agent.did,
     verifiableCredential: [],
   })
@@ -312,6 +311,12 @@ export async function generateVerifiablePresentation(
   didRecord.metadata.set(logTag, { ...result, integrityData })
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
   return result
+}
+
+export function createPresentation(options: Partial<W3cPresentationOptions>) {
+  options.context ??= ['https://www.w3.org/2018/credentials/v1']
+  options.type ??= ['VerifiablePresentation']
+  return new W3cPresentation(options as W3cPresentationOptions)
 }
 
 /**
