@@ -83,7 +83,7 @@ export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
 })
 
 export const mapToSelfTr = (url: string, publicApiBaseUrl: string): string =>
-  url.replace('ecosystem', `${publicApiBaseUrl}/self-tr`)
+  url.replace('ecosystem', `${publicApiBaseUrl}/vt`)
 
 export const setupSelfTr = async ({
   agent,
@@ -97,7 +97,7 @@ export const setupSelfTr = async ({
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
-      `${publicApiBaseUrl}/self-tr/${name}-c-vp.json`,
+      `${publicApiBaseUrl}/vt/${name}-c-vp.json`,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],

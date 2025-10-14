@@ -87,7 +87,7 @@ export class TrustService {
         )
       }
       const schemaKey = `schemas-${tagName}`
-      const serviceEndpoint = `${this.publicApiBaseUrl}/self-tr/${schemaKey}-c-vp.json`
+      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaKey}-c-vp.json`
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
         holder: agent.did,
@@ -164,7 +164,7 @@ export class TrustService {
         unsignedCredential.credentialSubject = credentialSubject
       } else {
         unsignedCredential = createCredential({
-          id: `${this.publicApiBaseUrl}/self-tr/schemas-${id}-jsc.json`,
+          id: `${this.publicApiBaseUrl}/vt/schemas-${id}-jsc.json`,
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: agent.did,
           credentialSubject,

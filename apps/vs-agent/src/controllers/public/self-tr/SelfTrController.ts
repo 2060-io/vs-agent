@@ -3,7 +3,6 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { getEcsSchemas } from '../../../utils/data'
-
 import { TrustService } from '../../admin/verifiable/TrustService'
 
 @ApiTags('Self Trust Registry')

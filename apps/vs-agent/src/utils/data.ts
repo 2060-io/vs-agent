@@ -3,7 +3,7 @@ import { AnySchemaObject } from 'ajv'
 export function getEcsSchemas(publicApiBaseUrl: string): AnySchemaObject {
   return {
     'ecs-org': {
-      $id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-org`,
+      $id: `${publicApiBaseUrl}/vt/cs/v1/js/ecs-org`,
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       title: 'OrganizationCredential',
       description: 'OrganizationCredential using JsonSchema',
@@ -56,7 +56,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): AnySchemaObject {
       },
     },
     'ecs-person': {
-      $id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-person`,
+      $id: `${publicApiBaseUrl}/vt/cs/v1/js/ecs-person`,
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       title: 'PersonCredential',
       description: 'PersonCredential using JsonSchema',
@@ -99,7 +99,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): AnySchemaObject {
       },
     },
     'ecs-service': {
-      $id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-service`,
+      $id: `${publicApiBaseUrl}/vt/cs/v1/js/ecs-service`,
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       title: 'ServiceCredential',
       description: 'ServiceCredential using JsonSchema',
@@ -168,7 +168,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): AnySchemaObject {
       },
     },
     'ecs-user-agent': {
-      $id: `${publicApiBaseUrl}/self-tr/cs/v1/js/ecs-user-agent`,
+      $id: `${publicApiBaseUrl}/vt/cs/v1/js/ecs-user-agent`,
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       title: 'UserAgentCredential',
       description: 'UserAgentCredential using JsonSchema',
