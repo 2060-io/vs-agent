@@ -20,6 +20,7 @@ import {
   createPresentation,
   generateDigestSRI,
   getVerificationMethodId,
+  mapToEcosystem,
   signerW3c,
 } from '../../../utils/setupSelfTr'
 
@@ -154,7 +155,7 @@ export class TrustService {
       const { proof: _proof, ...rest } = (didRecord.metadata.get(id) as W3cJsonLdVerifiableCredential) ?? null
       void _proof
       let unsignedCredential = rest
-      const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
+      const { id: subjectId, claims } = createJsonSubjectRef(mapToEcosystem(jsonSchemaRef))
       const credentialSubject = {
         id: subjectId,
         claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),
@@ -185,7 +186,7 @@ export class TrustService {
       )
       didRecord.metadata.set(id, { ...credential, integrityData })
       await this.updateDidRecord(agent, didRecord)
-      return credential
+      return credential.jsonCredential
     } catch (error) {
       this.handleError('updating', id, error, 'Failed to update schema')
     }

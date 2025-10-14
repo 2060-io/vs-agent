@@ -42,7 +42,7 @@ export class TrustController {
       'Accepts a W3C Verifiable Credential following the JSON-LD data model. Supports both organization and service credentials.',
   })
   @ApiBody({
-    schema: { $ref: getSchemaPath(W3cCredentialDto) },
+    type: W3cCredentialDto,
     examples: {
       organization: {
         summary: 'Organization Credential Example',
@@ -126,7 +126,7 @@ export class TrustController {
   @Post('json-schema-credentials')
   @ApiOperation({ summary: 'Add a new JSON schema credential' })
   @ApiBody({
-    schema: { $ref: getSchemaPath(JsonSchemaCredentialDto) },
+    type: JsonSchemaCredentialDto,
     examples: {
       service: {
         summary: 'JsonSchemaCredential Example',
@@ -169,7 +169,7 @@ export class TrustController {
         summary: 'Organization Credential Example',
         value: {
           did: 'did:web:example.com',
-          jsonSchemaCredential: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          jsonSchemaCredential: 'https://example.org/vt/schemas-example-service-jsc.json',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',

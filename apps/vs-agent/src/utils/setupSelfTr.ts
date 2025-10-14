@@ -85,6 +85,22 @@ export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
 export const mapToSelfTr = (url: string, publicApiBaseUrl: string): string =>
   url.replace('ecosystem', `${publicApiBaseUrl}/vt`)
 
+// TODO: Resolve url must be with verre or similar
+const urlMap = new Map<string, string>([
+  ['vpr:verana:vna-mainnet', 'https://api.testnet.verana.network/verana'],
+  ['vpr:verana:vna-testnet', 'https://api.testnet.verana.network/verana'],
+  ['vpr:verana:vna-devnet', 'https://api.testnet.verana.network/verana'],
+])
+
+export function mapToEcosystem(input: string): string {
+  for (const [key, value] of urlMap.entries()) {
+    if (input.includes(key)) {
+      input = input.replace(key, value)
+    }
+  }
+  return input
+}
+
 export const setupSelfTr = async ({
   agent,
   publicApiBaseUrl,
