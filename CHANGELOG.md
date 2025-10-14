@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.3](https://github.com/2060-io/vs-agent/compare/v1.5.2...v1.5.3) (2025-10-08)
+
+
+### Bug Fixes
+
+* selft tr creation multikey support ([#248](https://github.com/2060-io/vs-agent/issues/248)) ([2af6e0f](https://github.com/2060-io/vs-agent/commit/2af6e0fdf775f2941fa282f7704cbbbb667771bc))
+
 ## [1.5.2](https://github.com/2060-io/vs-agent/compare/v1.5.1...v1.5.2) (2025-10-06)
 
 
