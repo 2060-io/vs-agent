@@ -204,7 +204,7 @@ export class TrustService {
         },
       })
       unsignedCredential.credentialSchema = {
-        id: jsonCredschema,
+        id: jsonSchemaCredential,
         type: 'JsonSchemaCredential',
       }
       const verificationMethodId = getVerificationMethodId(didRecord)

@@ -4,10 +4,10 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/
 import { VsAgentService } from '../../../services/VsAgentService'
 import { getEcsSchemas } from '../../../utils/data'
 
-import { TrustService } from './TrustService'
+import { TrustService } from '../../admin/verifiable/TrustService'
 
 @ApiTags('Self Trust Registry')
-@Controller('self-tr')
+@Controller('vt')
 export class SelfTrController {
   private readonly logger = new Logger(SelfTrController.name)
   private ecsSchemas

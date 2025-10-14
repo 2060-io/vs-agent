@@ -169,7 +169,7 @@ export class TrustController {
         summary: 'Organization Credential Example',
         value: {
           did: 'did:web:example.com',
-          jsonCredschema: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          jsonSchemaCredential: 'vpr:verana:mainnet/cs/v1/js/12345678',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',
@@ -187,7 +187,7 @@ export class TrustController {
   @ApiResponse({ status: 201, description: 'Credential issued' })
   async issueCredential(@Body() body: IssueCredentialRequestDto) {
     try {
-      return await this.trustService.issueCredential(body.did, body.jsonCredschema, body.claims)
+      return await this.trustService.issueCredential(body.did, body.jsonSchemaCredential, body.claims)
     } catch (error) {
       this.logger.error(`issueCredential: ${error.message}`)
       throw new HttpException('Failed to issue credential', HttpStatus.INTERNAL_SERVER_ERROR)
