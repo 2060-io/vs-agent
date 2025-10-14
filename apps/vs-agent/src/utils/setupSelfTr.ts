@@ -305,6 +305,8 @@ export async function generateVerifiablePresentation(
 ) {
   if (!agent.did) throw Error('The DID must be set up')
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+  const didDocument = didRecord.didDocument
+  if (!didDocument) throw Error('The DID Document be set up')
   const claims = await getClaims(ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
@@ -326,6 +328,12 @@ export async function generateVerifiablePresentation(
     credentialSchema,
     presentation,
   )
+  // Update linked VP when the presentation has changed
+  didDocument.service = didDocument.service?.map(s => {
+    if (typeof s.serviceEndpoint !== 'string') return s
+    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.id) s.serviceEndpoint = id
+    return s
+  })
   didRecord.metadata.set(logTag, { ...result, integrityData })
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
   return result
