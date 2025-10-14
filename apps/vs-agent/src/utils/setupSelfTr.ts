@@ -42,6 +42,7 @@ import { getEcsSchemas } from './data'
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
+// Helpers
 export const presentations = [
   {
     name: 'ecs-service',
@@ -84,6 +85,10 @@ export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
 
 export const mapToSelfTr = (url: string, publicApiBaseUrl: string): string =>
   url.replace('ecosystem', `${publicApiBaseUrl}/vt`)
+
+const buildIntegrityData = (data: Record<string, unknown>) => {
+  return generateDigestSRI(JSON.stringify(data, Object.keys(data).sort()))
+}
 
 // TODO: Resolve url must be with verre or similar
 const urlMap = new Map<string, string>([
@@ -177,9 +182,9 @@ async function generateVerifiableCredential(
   if (!claims) {
     claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
   }
-  const integrityData = generateDigestSRI(JSON.stringify(claims))
+  const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData && id === metadata?.id) return metadata
+  if (metadata?.integrityData === integrityData) return metadata
 
   const unsignedCredential = createCredential({
     id,
@@ -300,11 +305,11 @@ export async function generateVerifiablePresentation(
 ) {
   if (!agent.did) throw Error('The DID must be set up')
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-  const integrityData = generateDigestSRI(
-    JSON.stringify(await getClaims(ecsSchemas, { id: agent.did }, logTag)),
-  )
+  const claims = await getClaims(ecsSchemas, { id: agent.did }, logTag)
+  // Use full input for integrityData to ensure update detection
+  const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData && metadata?.id === id) return metadata
+  if (metadata?.integrityData === integrityData) return metadata
 
   const presentation = createPresentation({
     id,
