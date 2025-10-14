@@ -191,7 +191,7 @@ export class TrustService {
     }
   }
 
-  public async issueCredential(did: string, jsonCredschema: string, claims: JsonObject) {
+  public async issueCredential(did: string, jsonSchemaCredential: string, claims: JsonObject) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const unsignedCredential = createCredential({
