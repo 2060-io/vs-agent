@@ -275,12 +275,12 @@ export class VsAgent extends Agent<VsAgentModules> {
       ...[
         new DidDocumentService({
           id: `${publicDid}#vpr-schemas-service-c-vp`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/vt/ecs-service-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
         new DidDocumentService({
           id: `${publicDid}#vpr-schemas-org-c-vp`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-org-c-vp.json`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/vt/ecs-org-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
       ],
@@ -303,7 +303,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       ...[
         new DidDocumentService({
           id: `${publicDid}#whois`,
-          serviceEndpoint: `${this.publicApiBaseUrl}/self-tr/ecs-service-c-vp.json`,
+          serviceEndpoint: `${this.publicApiBaseUrl}/vt/ecs-service-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
         new DidDocumentService({

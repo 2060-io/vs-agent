@@ -12,6 +12,8 @@ import {
   PresentationsController,
   QrController,
   RedisMessageService,
+  TrustController,
+  TrustService,
   VCAuthNController,
   VsAgentController,
 } from './controllers'
@@ -36,6 +38,7 @@ export class VsAgentModule {
         InvitationController,
         QrController,
         VCAuthNController,
+        TrustController,
       ],
       providers: [
         {
@@ -52,6 +55,7 @@ export class VsAgentModule {
         RedisMessageService,
         CoreMessageService,
         MessageServiceFactory,
+        TrustService,
       ],
       exports: [VsAgentService],
     }
