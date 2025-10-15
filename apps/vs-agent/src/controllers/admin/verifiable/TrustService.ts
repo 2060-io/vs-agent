@@ -1,6 +1,5 @@
 import { AnonCredsCredentialDefinitionRepository } from '@credo-ts/anoncreds'
 import {
-  AutoAcceptCredential,
   DidDocumentService,
   DidRecord,
   DidRepository,
@@ -14,6 +13,7 @@ import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/c
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
+import { createInvitation } from '../../../utils/agent'
 import { getEcsSchemas } from '../../../utils/data'
 import {
   addDigestSRI,
@@ -256,8 +256,7 @@ export class TrustService {
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
           const credentialDefinitionId = await this.getCredentialDefinition(agent, attrNames)
-          const record = await agent.credentials.offerCredential({
-            connectionId: utils.uuid(), // TODO: what's the connection here?
+          const request = await agent.credentials.createOffer({
             credentialFormats: {
               anoncreds: {
                 attributes: attrNames.map(name => {
@@ -267,9 +266,13 @@ export class TrustService {
               },
             },
             protocolVersion: 'v2',
-            autoAcceptCredential: AutoAcceptCredential.Always,
           })
-          return { status: 200, didcommInvitationUrl: record.threadId, credential: {} as JsonObject }
+          const { url: didcommInvitationUrl } = await createInvitation({
+            agent,
+            messages: [request.message],
+            useLegacyDid: true,
+          })
+          return { status: 200, didcommInvitationUrl, credential: {} as JsonObject }
         default:
           break
       }
