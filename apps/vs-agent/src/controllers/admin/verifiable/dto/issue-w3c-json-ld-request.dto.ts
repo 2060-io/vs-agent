@@ -20,7 +20,7 @@ class KeyValueClaimsValidator {
 /**
  * DTO used to request the issuance of a W3C Verifiable Credential.
  */
-export class IssueCredentialRequestDto {
+export class IssueW3cJsonLdRequestDto {
   @ApiProperty({
     description: 'DID of the credential subject (the holder)',
     example: 'did:example:holder123',

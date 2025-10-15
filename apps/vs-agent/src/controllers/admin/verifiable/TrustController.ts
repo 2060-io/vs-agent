@@ -14,7 +14,13 @@ import {
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody, getSchemaPath } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
-import { IssueCredentialRequestDto, JsonSchemaCredentialDto, W3cCredentialDto } from './dto'
+import {
+  IssueAnonCredsRequestDto,
+  IssueCredentialWrapperDto,
+  IssueW3cJsonLdRequestDto,
+  JsonSchemaCredentialDto,
+  W3cCredentialDto,
+} from './dto'
 
 @ApiTags('Verifiable Trust Credential')
 @Controller('vt')
@@ -163,31 +169,58 @@ export class TrustController {
   @Post('issue-credential')
   @ApiOperation({ summary: 'Issue a new verifiable credential' })
   @ApiBody({
-    schema: { $ref: getSchemaPath(IssueCredentialRequestDto) },
+    schema: { $ref: getSchemaPath(IssueCredentialWrapperDto) },
     examples: {
-      organization: {
-        summary: 'Organization Credential Example',
+      jsonld: {
+        summary: 'W3c Json LD Credential Example',
         value: {
-          did: 'did:web:example.com',
-          jsonSchemaCredential: 'https://example.org/vt/schemas-example-service-jsc.json',
-          claims: {
-            id: 'https://example.org/org/123',
-            name: 'OpenAI Research',
-            logo: 'https://example.com/logo.png',
-            registryId: 'REG-123',
-            registryUrl: 'https://registry.example.org',
-            address: '123 Main St, San Francisco, CA',
-            type: 'PRIVATE',
-            countryCode: 'US',
+          type: 'jsonld',
+          credential: {
+            did: 'did:web:example.com',
+            jsonSchemaCredential: 'https://example.org/vt/schemas-example-service-jsc.json',
+            claims: {
+              id: 'https://example.org/org/123',
+              name: 'OpenAI Research',
+              logo: 'https://example.com/logo.png',
+              registryId: 'REG-123',
+              registryUrl: 'https://registry.example.org',
+              address: '123 Main St, San Francisco, CA',
+              type: 'PRIVATE',
+              countryCode: 'US',
+            },
+          },
+        },
+      },
+      anoncreds: {
+        summary: 'Anoncreds Credential Example',
+        value: {
+          type: 'anoncreds',
+          credential: {
+            did: 'did:web:example.com',
+            jsonSchema: 'https://example.org/vt/schemas-example-service-jsc.json',
           },
         },
       },
     },
   })
   @ApiResponse({ status: 201, description: 'Credential issued' })
-  async issueCredential(@Body() body: IssueCredentialRequestDto) {
+  async issueCredential(@Body() body: IssueCredentialWrapperDto) {
     try {
-      return await this.trustService.issueCredential(body.did, body.jsonSchemaCredential, body.claims)
+      const { type, credential } = body
+      switch (type) {
+        case 'jsonld':
+          const jsonld = credential as IssueW3cJsonLdRequestDto
+          return await this.trustService.issueW3cJsonLd(
+            jsonld.did,
+            jsonld.jsonSchemaCredential,
+            jsonld.claims,
+          )
+        case 'anoncreds':
+          const anoncreds = credential as IssueAnonCredsRequestDto
+          return await this.trustService.issueAnoncreds(anoncreds.did, anoncreds.jsonSchema)
+        default:
+          throw new HttpException(`Unsupported credential type: ${type}`, HttpStatus.BAD_REQUEST)
+      }
     } catch (error) {
       this.logger.error(`issueCredential: ${error.message}`)
       throw new HttpException('Failed to issue credential', HttpStatus.INTERNAL_SERVER_ERROR)
