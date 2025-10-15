@@ -11,6 +11,7 @@ import {
 } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
 
+import { UrlShorteningService } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils/VsAgent'
 import { createInvitation } from '../../../utils/agent'
@@ -35,6 +36,7 @@ export class TrustService {
 
   constructor(
     private readonly agentService: VsAgentService,
+    private readonly urlShortenerService: UrlShorteningService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
@@ -267,11 +269,18 @@ export class TrustService {
             },
             protocolVersion: 'v2',
           })
-          const { url: didcommInvitationUrl } = await createInvitation({
+          const { url } = await createInvitation({
             agent,
             messages: [request.message],
             useLegacyDid: true,
           })
+
+          // TODO: i'm not sure here
+          const shortUrlId = await this.urlShortenerService.createShortUrl({
+            longUrl: url,
+            relatedFlowId: request.message.threadId,
+          })
+          const didcommInvitationUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
           return { status: 200, didcommInvitationUrl, credential: {} as JsonObject }
         default:
           break
