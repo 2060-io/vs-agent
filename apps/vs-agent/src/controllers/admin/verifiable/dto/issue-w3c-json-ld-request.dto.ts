@@ -3,21 +3,6 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, IsString, IsUrl, Matches, IsObject, Validate } from 'class-validator'
 
 /**
- * Custom validator to ensure the "claims" object only contains
- * flat key-value pairs (no nested objects or arrays).
- */
-class KeyValueClaimsValidator {
-  validate(value: any) {
-    if (typeof value !== 'object' || Array.isArray(value) || value === null) return false
-    return Object.values(value).every(v => ['string', 'number', 'boolean'].includes(typeof v))
-  }
-
-  defaultMessage() {
-    return 'claims must be a flat key-value object (string, number, or boolean values only)'
-  }
-}
-
-/**
  * DTO used to request the issuance of a W3C Verifiable Credential.
  */
 export class IssueW3cJsonLdRequestDto {
@@ -42,7 +27,7 @@ export class IssueW3cJsonLdRequestDto {
   jsonSchemaCredential!: string
 
   @ApiProperty({
-    description: 'Credential claims represented as flat key-value pairs (no nested objects)',
+    description: 'Credential claims represented as flat key-value pairs',
     example: {
       serviceName: 'Example Service',
       serviceRole: 'Verifier',
@@ -50,7 +35,6 @@ export class IssueW3cJsonLdRequestDto {
     },
   })
   @IsObject()
-  @Validate(KeyValueClaimsValidator)
   @IsNotEmpty()
   claims!: JsonObject
 }
