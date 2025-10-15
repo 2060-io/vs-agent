@@ -1,4 +1,4 @@
-import type { ServerConfig } from '../utils/ServerConfig'
+import type { ServerConfig, VsAgent } from '../utils'
 import type {
   AgentMessageProcessedEvent,
   ConnectionStateChangedEvent,
@@ -14,8 +14,6 @@ import {
   DiscoverFeaturesEventTypes,
   HangupMessage,
 } from '@credo-ts/core'
-
-import { VsAgent } from '../utils/VsAgent'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'

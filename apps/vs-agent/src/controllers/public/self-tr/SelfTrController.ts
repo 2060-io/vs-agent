@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query, HttpException, HttpStatus, Logger, Injec
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { getEcsSchemas } from '../../../utils/data'
+import { getEcsSchemas } from '../../../utils'
 
 @ApiTags('Self Trust Registry')
 @Controller('self-tr')

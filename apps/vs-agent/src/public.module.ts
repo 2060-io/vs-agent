@@ -2,7 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common'
 
 import { DidWebController, InvitationRoutesController, SelfTrController } from './controllers'
 import { VsAgentService } from './services/VsAgentService'
-import { VsAgent } from './utils/VsAgent'
+import { VsAgent } from './utils'
 
 @Module({})
 export class PublicModule {

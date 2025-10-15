@@ -9,9 +9,7 @@ import { Response } from 'express'
 import * as fs from 'fs'
 
 import { baseFilePath, tailsIndex, VsAgentService } from '../../../services'
-import { VsAgent } from '../../../utils/VsAgent'
-import { getWebDid } from '../../../utils/agent'
-import { getLegacyDidDocument } from '../../../utils/legacyDidWeb'
+import { getLegacyDidDocument, getWebDid, VsAgent } from '../../../utils'
 
 @Controller()
 export class DidWebController {

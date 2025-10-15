@@ -4,7 +4,7 @@ import { Response } from 'express'
 import QRCode from 'qrcode'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { createInvitation } from '../../../utils/agent'
+import { createInvitation } from '../../../utils'
 
 @ApiTags('qr')
 @Controller({

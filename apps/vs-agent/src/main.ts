@@ -1,7 +1,5 @@
 import 'reflect-metadata'
 
-import type { ServerConfig } from './utils/ServerConfig'
-
 import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
@@ -44,12 +42,16 @@ import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
 import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { PublicModule } from './public.module'
-import { HttpInboundTransport } from './utils/HttpInboundTransport'
-import { VsAgent } from './utils/VsAgent'
-import { VsAgentWsInboundTransport } from './utils/VsAgentWsInboundTransport'
-import { TsLogger } from './utils/logger'
-import { commonAppConfig, setupAgent } from './utils/setupAgent'
-import { setupSelfTr } from './utils/setupSelfTr'
+import {
+  commonAppConfig,
+  HttpInboundTransport,
+  type ServerConfig,
+  setupAgent,
+  setupSelfTr,
+  TsLogger,
+  VsAgent,
+  VsAgentWsInboundTransport,
+} from './utils'
 
 export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const { port, cors, endpoints, publicApiBaseUrl } = serverConfig

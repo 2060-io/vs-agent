@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { VsAgent } from '../../../utils/VsAgent'
+import { VsAgent } from '../../../utils'
 
 import { BaseMessageDto } from './dto/base-message.dto'
 import { MessageServiceFactory } from './services/MessageServiceFactory'

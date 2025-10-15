@@ -1,7 +1,7 @@
 import { Claim } from '@2060.io/vs-agent-model'
 import fetch from 'node-fetch'
 
-import { TsLogger } from '../utils/logger'
+import { TsLogger } from '../utils'
 
 export enum PresentationStatus {
   OK = 'ok',

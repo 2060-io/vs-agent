@@ -5,8 +5,7 @@ import QRCode from 'qrcode'
 import { REDIRECT_DEFAULT_URL_TO_INVITATION_URL } from '../../../config/constants'
 import { PresentationStatus, sendPresentationCallbackEvent } from '../../../events/CallbackEvent'
 import { VsAgentService } from '../../../services/VsAgentService'
-import { createInvitation } from '../../../utils/agent'
-import { TsLogger } from '../../../utils/logger'
+import { createInvitation, TsLogger } from '../../../utils'
 
 @Controller()
 export class InvitationRoutesController {
