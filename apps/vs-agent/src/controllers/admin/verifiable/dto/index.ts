@@ -1,5 +1,3 @@
-export * from './issue-w3c-json-ld-request.dto'
-export * from './issue-credential-wrapper.dto'
-export * from './issue-anoncreds-request.dto'
+export * from './issue-credential-request.dto'
 export * from './json-schema-credential.dto'
 export * from './w3c-credential.dto'

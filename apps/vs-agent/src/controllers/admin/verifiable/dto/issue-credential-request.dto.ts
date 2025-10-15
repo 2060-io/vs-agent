@@ -1,11 +1,20 @@
 import { JsonObject } from '@credo-ts/core'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, IsUrl, Matches, IsObject, Validate } from 'class-validator'
+import { IsNotEmpty, IsString, IsUrl, Matches, IsObject } from 'class-validator'
 
 /**
- * DTO used to request the issuance of a W3C Verifiable Credential.
+ * DTO used to request the issuance of a Verifiable Credential.
  */
-export class IssueW3cJsonLdRequestDto {
+export class IssueCredentialRequestDto {
+  @ApiProperty({
+    description: 'Type of credential to issue: "w3c" or "anoncreds"',
+    example: 'jsonld',
+    enum: ['jsonld', 'anoncreds'],
+  })
+  @IsString()
+  @IsNotEmpty()
+  type!: 'jsonld' | 'anoncreds'
+
   @ApiProperty({
     description: 'DID of the credential subject (the holder)',
     example: 'did:example:holder123',

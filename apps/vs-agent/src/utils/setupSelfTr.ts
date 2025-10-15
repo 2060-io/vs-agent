@@ -388,8 +388,18 @@ export async function getClaims(
     throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
   }
 
-  const validate = ajv.compile(ecsSchema.properties?.credentialSubject)
   const credentialSubject = { id, ...claims }
+  validateSchema(ecsSchema, credentialSubject)
+
+  return claims
+}
+
+/**
+ * Validate a validateSchema object against the corresponding AJV schema.
+ * Throws an Error if the schema is missing or validation fails.
+ */
+export function validateSchema(ecsSchema: AnySchemaObject, credentialSubject: Record<string, any>): void {
+  const validate = ajv.compile(ecsSchema.properties?.credentialSubject)
   const isValid = validate(credentialSubject)
 
   if (!isValid) {
@@ -399,11 +409,9 @@ export async function getClaims(
       keyword: e.keyword,
       params: e.params,
     }))
-    console.error(`Validation failed for ${logTag}`, errorDetails)
-    throw new Error(`Invalid claims for ${logTag}: ${JSON.stringify(errorDetails, null, 2)}`)
-  }
 
-  return claims
+    throw new Error(`Invalid claims for ${ecsSchema.id}: ${JSON.stringify(errorDetails, null, 2)}`)
+  }
 }
 
 /**
