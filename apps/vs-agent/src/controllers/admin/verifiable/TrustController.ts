@@ -169,7 +169,7 @@ export class TrustController {
   @Post('issue-credential')
   @ApiOperation({ summary: 'Issue a new verifiable credential' })
   @ApiBody({
-    schema: { $ref: getSchemaPath(IssueCredentialWrapperDto) },
+    type: IssueCredentialWrapperDto,
     examples: {
       jsonld: {
         summary: 'W3c Json LD Credential Example',

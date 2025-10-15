@@ -18,12 +18,6 @@ export class IssueCredentialWrapperDto {
   @IsNotEmpty()
   type!: 'jsonld' | 'anoncreds'
 
-  @ApiProperty({
-    oneOf: [
-      { $ref: getSchemaPath(IssueW3cJsonLdRequestDto) },
-      { $ref: getSchemaPath(IssueAnonCredsRequestDto) },
-    ],
-  })
   @ValidateNested()
   @Type(() => Object)
   @Transform(({ value, obj }) => {
