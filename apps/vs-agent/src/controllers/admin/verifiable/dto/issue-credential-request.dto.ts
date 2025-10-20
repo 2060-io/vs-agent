@@ -1,6 +1,6 @@
 import { JsonObject } from '@credo-ts/core'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, IsUrl, Matches, IsObject } from 'class-validator'
+import { IsNotEmpty, IsString, IsUrl, Matches, IsObject, IsOptional } from 'class-validator'
 
 /**
  * DTO used to request the issuance of a Verifiable Credential.
@@ -20,11 +20,11 @@ export class IssueCredentialRequestDto {
     example: 'did:example:holder123',
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @Matches(/^did:[a-z0-9]+:[a-zA-Z0-9.\-_:/%]+$/, {
     message: 'Invalid DID format',
   })
-  did!: string
+  did?: string
 
   @ApiProperty({
     description: 'URL of the JSON Credential Schema that defines the credential structure',

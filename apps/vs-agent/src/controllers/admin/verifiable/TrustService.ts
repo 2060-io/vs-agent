@@ -229,9 +229,9 @@ export class TrustService {
 
   public async issueCredential(
     type: 'jsonld' | 'anoncreds',
-    did: string,
     jsonSchemaCredential: string,
     claims: JsonObject,
+    did?: string,
   ) {
     try {
       // Check schema for credential
@@ -254,6 +254,8 @@ export class TrustService {
 
       switch (type) {
         case 'jsonld':
+          if (!did)
+            throw new HttpException(`Did must be present for json-ld creential`, HttpStatus.BAD_REQUEST)
           const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredential, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
@@ -283,10 +285,10 @@ export class TrustService {
           const didcommInvitationUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
           return { status: 200, didcommInvitationUrl, credential: {} as JsonObject }
         default:
-          break
+          throw new HttpException(`Invalid credential type: ${type}`, HttpStatus.BAD_REQUEST)
       }
     } catch (error) {
-      this.handleError('issue', did, error, 'Failed to issue credential')
+      this.handleError('issue', did ?? '', error, 'Failed to issue credential')
     }
   }
 

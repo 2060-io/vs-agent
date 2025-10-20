@@ -140,7 +140,7 @@ export class TrustController {
         value: {
           type: 'jsonld',
           did: 'did:web:example.com',
-          jsonSchemaCredential: 'https://example.org/vt/schemas-example-service-jsc.json',
+          jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',
@@ -157,8 +157,7 @@ export class TrustController {
         summary: 'Anoncreds Credential Example',
         value: {
           type: 'anoncreds',
-          did: 'did:web:example.com',
-          jsonSchemaCredential: 'https://example.org/vt/schemas-example-service-jsc.json',
+          jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',
@@ -176,7 +175,7 @@ export class TrustController {
   @ApiResponse({ status: 201, description: 'Credential issued' })
   async issueCredential(@Body() body: IssueCredentialRequestDto) {
     const { type, did, jsonSchemaCredential, claims } = body
-    return await this.trustService.issueCredential(type, did, jsonSchemaCredential, claims)
+    return await this.trustService.issueCredential(type, jsonSchemaCredential, claims, did)
   }
 
   @Post('revoke-credential')
