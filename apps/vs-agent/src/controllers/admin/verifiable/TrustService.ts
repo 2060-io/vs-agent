@@ -274,7 +274,6 @@ export class TrustService {
           const { url: longUrl } = await createInvitation({
             agent,
             messages: [request.message],
-            useLegacyDid: true,
           })
 
           const shortUrlId = await this.urlShortenerService.createShortUrl({
