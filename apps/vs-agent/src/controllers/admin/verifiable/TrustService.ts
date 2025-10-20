@@ -261,29 +261,32 @@ export class TrustService {
         case 'anoncreds':
           const credentialDefinitionId = await this.getCredentialDefinition(agent, attrNames)
           const request = await agent.credentials.createOffer({
+            protocolVersion: 'v2',
             credentialFormats: {
               anoncreds: {
                 attributes: attrNames.map(name => {
-                  return { name, mimeType: 'text', value: JSON.stringify(claims[name]) }
+                  return { name, mimeType: '', value: JSON.stringify(claims[name]) }
                 }),
                 credentialDefinitionId,
               },
             },
-            protocolVersion: 'v2',
           })
-          const { url } = await createInvitation({
+          const { url: longUrl } = await createInvitation({
             agent,
             messages: [request.message],
             useLegacyDid: true,
           })
 
-          // TODO: i'm not sure here
           const shortUrlId = await this.urlShortenerService.createShortUrl({
-            longUrl: url,
-            relatedFlowId: request.message.threadId,
+            longUrl,
+            relatedFlowId: request.credentialRecord.id,
           })
           const didcommInvitationUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
-          return { status: 200, didcommInvitationUrl, credential: {} as JsonObject }
+          return {
+            status: 200,
+            didcommInvitationUrl,
+            credential: { credentialExchangeId: request.credentialRecord.id },
+          }
         default:
           throw new HttpException(`Invalid credential type: ${type}`, HttpStatus.BAD_REQUEST)
       }

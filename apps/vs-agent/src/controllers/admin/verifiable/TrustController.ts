@@ -172,7 +172,11 @@ export class TrustController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Credential issued' })
+  @ApiResponse({
+    status: 201,
+    description:
+      'Credential issued. The response is either a W3C Verifiable Credential (JSON-LD) or a Credential Exchange ID.',
+  })
   async issueCredential(@Body() body: IssueCredentialRequestDto) {
     const { type, did, jsonSchemaCredential, claims } = body
     return await this.trustService.issueCredential(type, jsonSchemaCredential, claims, did)
