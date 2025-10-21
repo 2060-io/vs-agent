@@ -1,8 +1,7 @@
 import { VCAuthnEvent } from '@2060.io/vs-agent-model'
 import { ProofEventTypes, ProofState, ProofStateChangedEvent } from '@credo-ts/core'
 
-import { ServerConfig } from '../utils/ServerConfig'
-import { VsAgent } from '../utils/VsAgent'
+import { ServerConfig, VsAgent } from '../utils'
 
 import { sendWebhookEvent } from './WebhookEvent'
 

@@ -1,4 +1,4 @@
-import type { ServerConfig } from '../utils/ServerConfig'
+import type { ServerConfig } from '../utils'
 import type { MessageReceiptsReceivedEvent, MessageState } from '@2060.io/credo-ts-didcomm-receipts'
 import type { CredentialStateChangedEvent } from '@credo-ts/core'
 
@@ -64,8 +64,7 @@ import {
 } from '@credo-ts/core'
 import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
 
-import { VsAgent } from '../utils/VsAgent'
-import { createDataUrl } from '../utils/parsers'
+import { createDataUrl, VsAgent } from '../utils'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'

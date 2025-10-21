@@ -43,7 +43,7 @@ import {
 } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { VsAgent } from '../../../utils/VsAgent'
+import { VsAgent } from '../../../utils'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
