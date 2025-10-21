@@ -24,7 +24,13 @@ export class TrustController {
   constructor(private readonly trustService: TrustService) {}
 
   @Get('credentials/:schemaId')
-  @ApiOperation({ summary: 'Get all verifiable credentials' })
+  @ApiOperation({
+    summary: 'Get all verifiable credentials',
+    description:
+      'Based on the specification, the schemaId must follow one of the ECS or schema formats: ' +
+      '- For ECS schemas, use ecs-{schemaType} (e.g., ecs-service, ecs-org). ' +
+      '- For regular schemas, use schemas-{schemaType}, where {schemaType} matches the "type" field of the credential.',
+  })
   @ApiResponse({ status: 200, description: 'List of credentials' })
   async getCredential(@Param('schemaId') schemaId: string) {
     return await this.trustService.getSchemaData(schemaId.toLowerCase(), 'Schema not found')
@@ -97,7 +103,13 @@ export class TrustController {
   }
 
   @Get('json-schema-credentials/:schemaId')
-  @ApiOperation({ summary: 'Get all JSON schema credentials' })
+  @ApiOperation({
+    summary: 'Get all JSON schema credentials',
+    description:
+      'The schemaId indicates the schema used to locate the credential in the system. ' +
+      'It typically follows the structure https://schemaurl.com/vt/schemas-{schemaId}-jsc.json, ' +
+      'where {schemaId} corresponds to the schema identifier.',
+  })
   @ApiResponse({ status: 200, description: 'List of JSON schema credentials' })
   async getJsonSchemaCredentials(@Param('schemaId') schemaId: string) {
     return await this.trustService.getJsonCredential(schemaId)

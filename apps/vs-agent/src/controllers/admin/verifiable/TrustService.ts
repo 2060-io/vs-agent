@@ -13,9 +13,7 @@ import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/c
 
 import { UrlShorteningService } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'
-import { VsAgent } from '../../../utils/VsAgent'
-import { createInvitation } from '../../../utils/agent'
-import { getEcsSchemas } from '../../../utils/data'
+import { createInvitation, getEcsSchemas, VsAgent } from '../../../utils'
 import {
   addDigestSRI,
   createCredential,
