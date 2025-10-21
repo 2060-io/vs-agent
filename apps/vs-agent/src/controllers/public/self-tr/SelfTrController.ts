@@ -3,62 +3,40 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { getEcsSchemas } from '../../../utils'
+import { TrustService } from '../../admin/verifiable/TrustService'
 
 @ApiTags('Self Trust Registry')
-@Controller('self-tr')
+@Controller('vt')
 export class SelfTrController {
   private readonly logger = new Logger(SelfTrController.name)
   private ecsSchemas
 
   constructor(
     private readonly agentService: VsAgentService,
+    private readonly trustService: TrustService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
-  @Get('ecs-service-c-vp.json')
-  @ApiOperation({ summary: 'Get verifiable presentation for service' })
+  @Get(':type-c-vp.json')
+  @ApiOperation({ summary: 'Get verifiable presentation by type' })
   @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
-  async getServiceVerifiablePresentation() {
+  async getVerifiablePresentation(@Param('type') type: string) {
     try {
-      return this.getSchemaData('ecs-service', 'Verifiable Presentation not found')
+      return this.trustService.getSchemaData(type, 'Verifiable Presentation not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
-  @Get('ecs-org-c-vp.json')
-  @ApiOperation({ summary: 'Get verifiable presentation for organization' })
-  @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
-  async getOrgVerifiablePresentation() {
-    try {
-      return this.getSchemaData('ecs-org', 'Verifiable Presentation not found')
-    } catch (error) {
-      this.logger.error(`Error loading schema file: ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Get('schemas-example-service.json')
+  @Get('schemas-:type-jsc.json')
   @ApiOperation({ summary: 'Get verifiable credential for service' })
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
-  async getServiceVerifiableCredential() {
+  async getServiceVerifiableCredential(@Param('type') type: string) {
     try {
-      return this.getSchemaData('example-service', 'Verifiable Credential not found')
-    } catch (error) {
-      this.logger.error(`Error loading schema file: ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Get('schemas-example-org.json')
-  @ApiOperation({ summary: 'Get verifiable credential for organization' })
-  @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
-  async getOrgVerifiableCredential() {
-    try {
-      return this.getSchemaData('example-org', 'Verifiable Credential not found')
+      return this.trustService.getSchemaData(type, 'Verifiable Credential not found')
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -94,25 +72,5 @@ export class SelfTrController {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
     }
     return { type: 'PERMISSION_TYPE_ISSUER', did }
-  }
-
-  // Helper function to retrieve schema data based on tag name
-  private async getSchemaData(tagName: string, notFoundMessage: string) {
-    try {
-      const agent = await this.agentService.getAgent()
-      const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-
-      const metadata = didRecord.metadata.get(tagName)
-      if (metadata) {
-        const { integrityData, ...rest } = metadata
-        void integrityData
-        return rest
-      }
-
-      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
-    } catch (error) {
-      this.logger.error(`Error loading data "${tagName}": ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
   }
 }

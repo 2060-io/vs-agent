@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import { DidWebController, InvitationRoutesController, SelfTrController } from './controllers'
+import { DidWebController, InvitationRoutesController, SelfTrController, TrustService } from './controllers'
+import { UrlShorteningService } from './services'
 import { VsAgentService } from './services/VsAgentService'
 import { VsAgent } from './utils'
 
@@ -21,6 +22,8 @@ export class PublicModule {
           useValue: publicApiBaseUrl,
         },
         VsAgentService,
+        TrustService,
+        UrlShorteningService,
       ],
       exports: [],
     }
