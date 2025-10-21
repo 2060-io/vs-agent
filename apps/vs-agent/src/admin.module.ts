@@ -20,7 +20,7 @@ import {
 import { HandledRedisModule } from './modules/redis.module'
 import { UrlShorteningService } from './services/UrlShorteningService'
 import { VsAgentService } from './services/VsAgentService'
-import { VsAgent } from './utils/VsAgent'
+import { VsAgent } from './utils'
 
 @Module({})
 export class VsAgentModule {

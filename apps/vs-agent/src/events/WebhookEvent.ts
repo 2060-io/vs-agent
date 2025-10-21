@@ -1,7 +1,7 @@
 import { Event } from '@2060.io/vs-agent-model'
 import fetch from 'node-fetch'
 
-import { TsLogger } from '../utils/logger'
+import { TsLogger } from '../utils'
 
 export const sendWebhookEvent = async (webhookUrl: string, body: Event, logger: TsLogger) => {
   try {

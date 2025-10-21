@@ -16,7 +16,7 @@ import {
 
 import { UrlShorteningService } from '../../../services/UrlShorteningService'
 import { VsAgentService } from '../../../services/VsAgentService'
-import { createInvitation } from '../../../utils/agent'
+import { createInvitation } from '../../../utils'
 
 import { CreateCredentialOfferDto, CreatePresentationRequestDto } from './InvitationDto'
 
