@@ -259,7 +259,11 @@ export class TrustService {
           const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredential, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
-          const credentialDefinitionId = await this.getCredentialDefinition(agent, attrNames)
+          const credentialDefinitionId = await this.getCredentialDefinition(
+            agent,
+            jsonSchemaCredential,
+            attrNames,
+          )
           const request = await agent.credentials.createOffer({
             protocolVersion: 'v2',
             credentialFormats: {
@@ -294,13 +298,12 @@ export class TrustService {
     }
   }
 
-  public async getCredentialDefinition(agent: VsAgent, attrNames: string[]) {
-    const schemaTag = generateDigestSRI(JSON.stringify(attrNames))
+  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredential: string, attrNames: string[]) {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      schemaTag,
+      jsonSchemaCredential,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
@@ -311,7 +314,7 @@ export class TrustService {
       await agent.modules.anoncreds.registerSchema({
         schema: {
           attrNames,
-          name: schemaTag,
+          name: jsonSchemaCredential,
           version: '1.0',
           issuerId,
         },
@@ -332,12 +335,13 @@ export class TrustService {
     await this.saveAttestedResource(agent, schemaRegistration)
     const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
       await agent.modules.anoncreds.registerCredentialDefinition({
-        credentialDefinition: { issuerId, schemaId, tag: `${schemaTag}:1.0` },
+        credentialDefinition: { issuerId, schemaId, tag: jsonSchemaCredential },
         options: { supportRevocation: false },
       })
     const { attestedResource: credentialRegistration } = credDefMetadata as {
       attestedResource: Record<string, unknown>
     }
+    credentialRegistration.relatedJsonSchemaCredential = jsonSchemaCredential
     await this.saveAttestedResource(agent, credentialRegistration)
 
     const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
@@ -351,7 +355,6 @@ export class TrustService {
       agent.context,
       credentialDefinitionId,
     )
-    credentialDefinitionRecord.setTag('schemaTag', schemaTag)
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
     return credentialDefinitionId
   }
@@ -387,6 +390,7 @@ export class TrustService {
     return services.findIndex(service => service.id.includes(normalizedTag))
   }
 
+  // TODO: Simplify this implementation. The same approach is already used in the Credential Type Controller
   private async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
     if (!resource) return
     return await agent.genericRecords.save({
