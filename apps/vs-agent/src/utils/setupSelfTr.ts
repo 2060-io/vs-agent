@@ -511,7 +511,7 @@ export function getVerificationMethodId(didRecord: DidRecord): string {
   try {
     const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
       method =>
-        method.type === 'Ed25519VerificationKey2020' &&
+        (method.type === 'Ed25519VerificationKey2020' || method.type === 'Ed25519VerificationKey2018') &&
         method.id === didRecord.didDocument?.assertionMethod?.[0],
     )
     if (!verificationMethod) {
