@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, Matches, IsUrl } from 'class-validator'
+import { IsString, Matches } from 'class-validator'
 
 /**
  * Data Transfer Object JsonSchemaCredential.
@@ -24,6 +24,6 @@ export class JsonSchemaCredentialDto {
       '`schemas-example-service.json`).',
     example: 'vpr:verana:mainnet/cs/v1/js/12345678',
   })
-  @IsUrl()
+  @IsString()
   jsonSchemaRef!: string
 }
