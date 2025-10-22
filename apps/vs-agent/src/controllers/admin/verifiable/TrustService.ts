@@ -61,14 +61,12 @@ export class TrustService {
   public async removeSchemaData(tagName: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
+      didRecord.metadata.delete(tagName)
       const linkedServiceIndex = this.findLinkedServiceIndex(didRecord, tagName)
-      const metadata = didRecord.metadata.get(tagName)
-      if (!metadata || linkedServiceIndex === -1) {
-        throw new HttpException(`Not found data with tag ${tagName}`, HttpStatus.NOT_FOUND)
+      if (linkedServiceIndex !== -1) {
+        didRecord.didDocument?.service?.splice(linkedServiceIndex, 1)
       }
 
-      didRecord.didDocument?.service?.splice(linkedServiceIndex, 1)
-      didRecord.metadata.delete(tagName)
       await this.updateDidRecord(agent, didRecord)
 
       this.logger.log(`Metadata ${tagName} successfully removed`)
@@ -138,14 +136,8 @@ export class TrustService {
   public async removeJsonCredential(id: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const metadata = didRecord.metadata.get(id)
-      if (!metadata) {
-        throw new HttpException(`Metadata with tag "${id}" not found`, HttpStatus.NOT_FOUND)
-      }
-
       didRecord.metadata.delete(id)
       await this.updateDidRecord(agent, didRecord)
-
       this.logger.log(`Metadata ${id} successfully removed`)
       return { success: true, message: `Metadata ${id} removed` }
     } catch (error) {

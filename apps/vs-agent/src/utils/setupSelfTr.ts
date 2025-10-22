@@ -92,9 +92,9 @@ const buildIntegrityData = (data: Record<string, unknown>) => {
 
 // TODO: Resolve url must be with verre or similar
 const urlMap = new Map<string, string>([
-  ['vpr:verana:vna-mainnet', 'https://api.testnet.verana.network/verana'],
-  ['vpr:verana:vna-testnet', 'https://api.testnet.verana.network/verana'],
-  ['vpr:verana:vna-devnet', 'https://api.testnet.verana.network/verana'],
+  ['vpr:verana:vna-mainnet-1', 'https://api.testnet.verana.network/verana'],
+  ['vpr:verana:vna-testnet-1', 'https://api.testnet.verana.network/verana'],
+  ['vpr:verana:vna-devnet-1', 'https://api.testnet.verana.network/verana'],
 ])
 
 export function mapToEcosystem(input: string): string {
