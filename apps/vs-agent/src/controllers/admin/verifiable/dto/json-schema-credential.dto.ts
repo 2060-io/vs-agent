@@ -25,5 +25,8 @@ export class JsonSchemaCredentialDto {
     example: 'vpr:verana:mainnet/cs/v1/js/12345678',
   })
   @IsString()
+  @Matches(/^(https?:\/\/[^\s]+|vpr:[^\s]+)$/i, {
+    message: 'jsonSchemaRef must be either a valid HTTP URL or a vpr reference',
+  })
   jsonSchemaRef!: string
 }
