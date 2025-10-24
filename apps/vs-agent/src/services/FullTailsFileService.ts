@@ -25,9 +25,9 @@ export class FullTailsFileService extends BasicTailsFileService {
     const tailsFileId = utils.uuid()
     try {
       await saveTailsFile(localTailsFilePath, tailsFileId, agentContext.config.logger)
-      console.log('Tails file processed successfully!')
+      agentContext.config.logger.info('Tails file processed successfully!')
     } catch (error) {
-      console.error(`Failed to process tails file: ${error.message}`)
+      agentContext.config.logger.error(`Failed to process tails file: ${error.message}`)
     }
     return { tailsFileUrl: `${this.tailsServerBaseUrl}/${encodeURIComponent(tailsFileId)}` }
   }

@@ -154,7 +154,7 @@ const run = async () => {
     try {
       return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'discovery.json'), 'utf-8'))
     } catch (error) {
-      console.warn('Error reading discovery.json file:', error.message)
+      agent.config.logger.warn('Error reading discovery.json file:', error.message)
       return undefined
     }
   })()
@@ -180,7 +180,7 @@ const run = async () => {
   // VCAuthn related events (TODO: make configurable)
   vcAuthnEvents(agent, conf)
 
-  console.log(
+  agent.config.logger.info(
     `VS Agent v${packageJson['version']} running in port ${AGENT_PORT}. Admin interface at port ${conf.port}`,
   )
 }
