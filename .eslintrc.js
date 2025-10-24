@@ -36,4 +36,12 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['apps/**/*.{js,ts,tsx}'],
+      rules: {
+        'no-console': 'error',
+      },
+    },
+  ]
 }
