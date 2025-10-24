@@ -104,7 +104,11 @@ export class TrustService {
           type: 'LinkedVerifiablePresentation',
         }),
       )
-      const presentation = await signerW3c(agent, unsignedPresentation, getVerificationMethodId(didRecord))
+      const presentation = await signerW3c(
+        agent,
+        unsignedPresentation,
+        getVerificationMethodId(agent, didRecord),
+      )
 
       didRecord.metadata.set(schemaKey, { ...presentation, integrityData })
       await this.updateDidRecord(agent, didRecord)
@@ -175,7 +179,7 @@ export class TrustService {
       }
       const integrityData = generateDigestSRI(JSON.stringify(unsignedCredential))
 
-      const verificationMethodId = getVerificationMethodId(didRecord)
+      const verificationMethodId = getVerificationMethodId(agent, didRecord)
       const credential = await signerW3c(
         agent,
         JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
@@ -213,7 +217,7 @@ export class TrustService {
       id: jsonSchemaCredential,
       type: 'JsonSchemaCredential',
     }
-    const verificationMethodId = getVerificationMethodId(didRecord)
+    const verificationMethodId = getVerificationMethodId(agent, didRecord)
     const credential = await signerW3c(
       agent,
       JsonTransformer.fromJSON(unsignedCredential, W3cCredential),

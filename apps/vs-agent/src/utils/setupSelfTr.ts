@@ -180,7 +180,7 @@ async function generateVerifiableCredential(
   let claims = subject.claims
 
   if (!claims) {
-    claims = await getClaims(ecsSchemas, { id: subjectId }, logTag)
+    claims = await getClaims(agent, ecsSchemas, { id: subjectId }, logTag)
   }
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
@@ -202,7 +202,7 @@ async function generateVerifiableCredential(
 
   // Note: this is dependant on DIDComm invitation keys. Not sure if it is fine or we should use a dedicated
   // key for this feature
-  const verificationMethodId = getVerificationMethodId(didRecord)
+  const verificationMethodId = getVerificationMethodId(agent, didRecord)
 
   const signedCredential = await signerW3c(agent, unsignedCredential, verificationMethodId)
   if (presentation) {
@@ -307,7 +307,7 @@ export async function generateVerifiablePresentation(
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
   const didDocument = didRecord.didDocument
   if (!didDocument) throw Error('The DID Document be set up')
-  const claims = await getClaims(ecsSchemas, { id: agent.did }, logTag)
+  const claims = await getClaims(agent, ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
@@ -357,6 +357,7 @@ export function createPresentation(options: Partial<W3cPresentationOptions>) {
  * @throws If claims are invalid or schema is missing.
  */
 export async function getClaims(
+  agent: VsAgent,
   ecsSchemas: Record<string, AnySchemaObject>,
   { id, claims }: W3cCredentialSubject,
   logTag: string,
@@ -368,14 +369,14 @@ export async function getClaims(
           name: claims?.name ?? AGENT_LABEL,
           type: claims?.type ?? SELF_ISSUED_VTC_SERVICE_TYPE,
           description: claims?.description ?? SELF_ISSUED_VTC_SERVICE_DESCRIPTION,
-          logo: await urlToBase64((claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
+          logo: await urlToBase64(agent, (claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
           minimumAgeRequired: claims?.minimumAgeRequired ?? SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED,
           termsAndConditions: claims?.termsAndConditions ?? SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS,
           privacyPolicy: claims?.privacyPolicy ?? SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY,
         }
       : {
           name: claims?.name ?? AGENT_LABEL,
-          logo: await urlToBase64((claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
+          logo: await urlToBase64(agent, (claims?.logo as string) ?? AGENT_INVITATION_IMAGE_URL),
           registryId: claims?.registryId ?? SELF_ISSUED_VTC_ORG_REGISTRYID,
           registryUrl: claims?.registryUrl ?? SELF_ISSUED_VTC_ORG_REGISTRYURL,
           address: claims?.address ?? SELF_ISSUED_VTC_ORG_ADDRESS,
@@ -476,9 +477,9 @@ export function generateDigestSRI(content: string, algorithm: string = 'sha256')
  * @param url - The image URL to convert.
  * @returns A Base64 data URI string, or a fallback placeholder if the image cannot be fetched or is invalid.
  */
-export async function urlToBase64(url?: string): Promise<string> {
+export async function urlToBase64(agent: VsAgent, url?: string): Promise<string> {
   if (!url) {
-    console.warn('No URL provided for image conversion.')
+    agent.config.logger.warn('No URL provided for image conversion.')
     return FALLBACK_BASE64
   }
 
@@ -487,7 +488,7 @@ export async function urlToBase64(url?: string): Promise<string> {
 
     const contentType = response.headers['content-type']
     if (!contentType || !contentType.startsWith('image/')) {
-      console.warn(`The fetched resource is not an image. Content-Type: ${contentType}`)
+      agent.config.logger.warn(`The fetched resource is not an image. Content-Type: ${contentType}`)
       return FALLBACK_BASE64
     }
 
@@ -495,19 +496,19 @@ export async function urlToBase64(url?: string): Promise<string> {
     return `data:${contentType};base64,${base64}`
   } catch (error) {
     if (isAxiosError(error)) {
-      console.error(
+      agent.config.logger.error(
         `Failed to convert URL to Base64. URL: ${url}. ` +
           `Status: ${error.response?.status ?? 'N/A'}. ` +
           `Message: ${error.message}`,
       )
     } else {
-      console.error(`Unexpected error converting URL to Base64: ${error}`)
+      agent.config.logger.error(`Unexpected error converting URL to Base64: ${error}`)
     }
     return FALLBACK_BASE64
   }
 }
 
-export function getVerificationMethodId(didRecord: DidRecord): string {
+export function getVerificationMethodId(agent: VsAgent, didRecord: DidRecord): string {
   try {
     const verificationMethod = didRecord.didDocument?.verificationMethod?.find(
       method =>
@@ -519,7 +520,7 @@ export function getVerificationMethodId(didRecord: DidRecord): string {
     }
     return verificationMethod.id
   } catch (error) {
-    console.error(`Failed to get verification method ID.`, error)
+    agent.config.logger.error(`Failed to get verification method ID.`, error)
     throw error
   }
 }
