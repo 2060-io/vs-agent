@@ -436,7 +436,7 @@ export async function addDigestSRI<T extends object>(
   if (!id || !data) {
     throw new Error(`id and data has requiered`)
   }
-  const response = await fetch(id)
+  const response = await fetch(mapToEcosystem(id))
   const key = id.split('/').pop()
   const fallbackSchema = key && ecsSchemas?.[key]
 
