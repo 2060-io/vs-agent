@@ -153,7 +153,7 @@ export class TrustService {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const savedCredential = didRecord.metadata.get(id)
-      const { id: subjectId, claims } = createJsonSubjectRef(mapToEcosystem(jsonSchemaRef))
+      const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
         claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),

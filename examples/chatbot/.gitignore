@@ -1,0 +1,8 @@
+node_modules
+build
+.yalc
+*.txn
+logs.txt
+examples/**/afj
+tails/
+.env

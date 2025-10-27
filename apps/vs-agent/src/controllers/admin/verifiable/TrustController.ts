@@ -124,7 +124,7 @@ export class TrustController {
         summary: 'JsonSchemaCredential Example',
         value: {
           schemaId: 'example-service',
-          jsonSchemaRef: 'vpr:verana:mainnet/cs/v1/js/12345678',
+          jsonSchemaRef: 'vpr:verana:vna-testnet-1/cs/v1/js/12345678',
         },
       },
     },
