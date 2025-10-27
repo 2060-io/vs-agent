@@ -103,10 +103,9 @@ export class TrustService {
         type: 'LinkedVerifiablePresentation',
       })
 
-      // TODO: review if possible allow duplicate id or endpoint
       if (didRecord.didDocument) {
         didRecord.didDocument.service = (didRecord.didDocument?.service ?? []).filter(
-          s => s.id !== newService.id && s.serviceEndpoint !== newService.serviceEndpoint,
+          s => s.id !== newService.id,
         )
         didRecord.didDocument?.service.push(newService)
       }
