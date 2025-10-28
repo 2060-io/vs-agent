@@ -110,6 +110,12 @@ export class TrustService {
         getVerificationMethodId(agent.config.logger, didRecord),
       )
 
+      // Update #whois with new endpoint
+      const service = didRecord.didDocument?.service?.find(
+        s => s.id === `${agent.did}#whois`
+      )
+      if (service) service.serviceEndpoint = serviceEndpoint
+
       didRecord.metadata.set(schemaKey, { ...presentation, integrityData })
       await this.updateDidRecord(agent, didRecord)
       this.logger.log(`Metadata for "${tagName}" updated successfully.`)
