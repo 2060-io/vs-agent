@@ -260,7 +260,7 @@ export class VsAgent extends Agent<VsAgentModules> {
 
     const didcommServices = this.getDidCommServices(publicDid)
 
-    didDocument.context = [...(didDocument.context ?? []), ...context]
+    didDocument.context = [...new Set([...(didDocument.context ?? []), ...context])]
     didDocument.verificationMethod = [...(didDocument.verificationMethod ?? []), ...verificationMethods]
     didDocument.authentication = [...(didDocument.authentication ?? []), authentication]
     didDocument.assertionMethod = [...(didDocument.assertionMethod ?? []), assertionMethod]

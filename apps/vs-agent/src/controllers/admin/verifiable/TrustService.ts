@@ -97,13 +97,18 @@ export class TrustService {
         verifiableCredential: [credential],
       })
       const integrityData = generateDigestSRI(JSON.stringify(credential.credentialSubject))
-      didRecord.didDocument?.service?.push(
-        new DidDocumentService({
-          id: `${agent.did}#vpr-${schemaKey}-c-vp`,
-          serviceEndpoint,
-          type: 'LinkedVerifiablePresentation',
-        }),
-      )
+      const newService = new DidDocumentService({
+        id: `${agent.did}#vpr-${schemaKey}-c-vp`,
+        serviceEndpoint,
+        type: 'LinkedVerifiablePresentation',
+      })
+
+      if (didRecord.didDocument) {
+        didRecord.didDocument.service = (didRecord.didDocument?.service ?? []).filter(
+          s => s.id !== newService.id,
+        )
+        didRecord.didDocument?.service.push(newService)
+      }
       const presentation = await signerW3c(
         agent,
         unsignedPresentation,
