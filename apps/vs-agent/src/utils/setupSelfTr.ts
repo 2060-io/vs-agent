@@ -46,23 +46,23 @@ addFormats(ajv)
 // Helpers
 export const presentations = [
   {
-    name: 'ecs-service',
+    name: 'ecs-service-c-vp.json',
     schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
-    name: 'ecs-org',
+    name: 'ecs-org-c-vp.json',
     schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
 ]
 
 export const credentials = [
   {
-    name: 'example-service',
+    name: 'schemas-example-service-jsc.json',
     credUrl: `ecosystem/cs/v1/js/ecs-service`,
     schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
-    name: 'example-org',
+    name: 'schemas-example-org-jsc.json',
     credUrl: `ecosystem/cs/v1/js/ecs-org`,
     schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
@@ -211,7 +211,7 @@ async function generateVerifiableCredential(
     presentation.verifiableCredential = [signedCredential]
     return await signerW3c(agent, presentation, verificationMethodId)
   } else {
-    didRecord.metadata.set(logTag, { ...signedCredential.jsonCredential, integrityData })
+    didRecord.metadata.set(logTag, { data: signedCredential.jsonCredential, integrityData })
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
     return signedCredential.jsonCredential
   }
@@ -311,7 +311,8 @@ export async function generateVerifiablePresentation(
   if (!didDocument) throw Error('The DID Document be set up')
   const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
-  const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
+  const serviceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-').replace('.json', '')}`
+  const integrityData = buildIntegrityData({ id, logTag, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
@@ -336,7 +337,7 @@ export async function generateVerifiablePresentation(
     if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.id) s.serviceEndpoint = id
     return s
   })
-  didRecord.metadata.set(logTag, { ...result, integrityData })
+  didRecord.metadata.set(logTag, { data: result, integrityData, serviceId })
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
   return result
 }
@@ -366,7 +367,7 @@ export async function getClaims(
 ) {
   // Default claims fallback
   claims =
-    logTag === 'ecs-service'
+    logTag === 'ecs-service-c-vp.json'
       ? {
           name: claims?.name ?? AGENT_LABEL,
           type: claims?.type ?? SELF_ISSUED_VTC_SERVICE_TYPE,
@@ -386,7 +387,7 @@ export async function getClaims(
           countryCode: claims?.countryCode ?? SELF_ISSUED_VTC_ORG_COUNTRYCODE,
         }
 
-  const ecsSchema = ecsSchemas[logTag]
+  const ecsSchema = ecsSchemas[logTag.replace('-c-vp.json', '')]
   if (!ecsSchema) {
     throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
   }
