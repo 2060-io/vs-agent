@@ -119,7 +119,7 @@ export const setupSelfTr = async ({
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
-      `${publicApiBaseUrl}/vt/${name}-c-vp.json`,
+      `${publicApiBaseUrl}/vt/${name}`,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -312,7 +312,7 @@ export async function generateVerifiablePresentation(
   const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
   const serviceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-').replace('.json', '')}`
-  const integrityData = buildIntegrityData({ id, logTag, type, credentialSchema, claims })
+  const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const metadata = didRecord.metadata.get(logTag)
   if (metadata?.integrityData === integrityData) return metadata
 
@@ -334,7 +334,7 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.id) s.serviceEndpoint = id
+    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.data.id) s.serviceEndpoint = id
     return s
   })
   didRecord.metadata.set(logTag, { data: result, integrityData, serviceId })
