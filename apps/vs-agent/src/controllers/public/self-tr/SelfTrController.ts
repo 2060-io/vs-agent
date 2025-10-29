@@ -19,24 +19,12 @@ export class SelfTrController {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
-  @Get(':type-c-vp.json')
-  @ApiOperation({ summary: 'Get verifiable presentation by type' })
-  @ApiResponse({ status: 200, description: 'Verifiable Presentation returned' })
-  async getVerifiablePresentation(@Param('type') type: string) {
-    try {
-      return this.trustService.getSchemaData(type, 'Verifiable Presentation not found')
-    } catch (error) {
-      this.logger.error(`Error loading schema file: ${error.message}`)
-      throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Get('schemas-:type-jsc.json')
+  @Get(':schemaId')
   @ApiOperation({ summary: 'Get verifiable credential for service' })
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
-  async getServiceVerifiableCredential(@Param('type') type: string) {
+  async getCredentials(@Param('schemaId') schemaId: string) {
     try {
-      return this.trustService.getSchemaData(type, 'Verifiable Credential not found')
+      return await this.trustService.getSchemaData(schemaId)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
