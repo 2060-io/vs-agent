@@ -1,15 +1,5 @@
 import { JsonTransformer, W3cJsonLdVerifiableCredential } from '@credo-ts/core'
-import {
-  Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Logger,
-  Post,
-  Delete,
-  Body,
-  Param,
-} from '@nestjs/common'
+import { Controller, Get, HttpException, HttpStatus, Logger, Post, Delete, Body, Param } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiParam } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
