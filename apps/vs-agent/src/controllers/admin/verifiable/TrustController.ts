@@ -2,7 +2,6 @@ import { JsonTransformer, W3cJsonLdVerifiableCredential } from '@credo-ts/core'
 import {
   Controller,
   Get,
-  Query,
   HttpException,
   HttpStatus,
   Logger,
@@ -80,7 +79,7 @@ export class TrustController {
     },
   })
   @ApiResponse({ status: 200, description: 'Credential schema deleted successfully' })
-  async removeCredential(@Query('schemaId') schemaId: string) {
+  async removeCredential(@Param('schemaId') schemaId: string) {
     // This endpoint removes both JSON Schema credentials and JSON-LD credentials by ID
     return await this.trustService.removeSchemaData(schemaId)
   }
@@ -98,7 +97,7 @@ export class TrustController {
         summary: 'Organization Credential Example',
         description: 'Represents an organization using the "ecs-org" credential schema.',
         value: {
-          schemaId: 'organization',
+          schemaBaseId: 'organization',
           credential: {
             '@context': ['https://www.w3.org/2018/credentials/v1'],
             id: 'https://example.org/credentials/123',
@@ -139,8 +138,8 @@ export class TrustController {
   /**
    * @summary Create or update a JSON Schema credential
    * @description
-   * This endpoint creates or updates a JSON Schema credential identified by a unique `schemaId`.
-   * The `schemaId` follows the convention `schemas-{schemaBaseId}-jsc.json`, where `{id}` represents
+   * This endpoint creates or updates a JSON Schema credential identified by a unique `schemaBaseId`.
+   * The `schemaBaseId` follows the convention `schemas-{schemaBaseId}-jsc.json`, where `{id}` represents
    * the schema's unique identifier.
    *
    * Example: `schemas-1234-jsc.json`
