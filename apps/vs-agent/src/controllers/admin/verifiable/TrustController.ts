@@ -11,7 +11,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common'
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiParam } from '@nestjs/swagger'
 
 import { TrustService } from './TrustService'
 import { IssueCredentialRequestDto, JsonSchemaCredentialDto, W3cCredentialDto } from './dto'
@@ -23,17 +23,66 @@ export class TrustController {
 
   constructor(private readonly trustService: TrustService) {}
 
-  @Get('credentials/:schemaId')
+  @Get(':schemaId')
   @ApiOperation({
-    summary: 'Get all verifiable credentials',
+    summary: 'Get stored credentials (JSON Schema Credential or JSON-LD)',
     description:
-      'Based on the specification, the schemaId must follow one of the ECS or schema formats: ' +
-      '- For ECS schemas, use ecs-{schemaType} (e.g., ecs-service, ecs-org). ' +
-      '- For regular schemas, use schemas-{schemaType}, where {schemaType} matches the "type" field of the credential.',
+      'Retrieves stored credential data by schema ID. This endpoint supports both JSON Schema Credentials and JSON-LD Verifiable Credentials.\n\n' +
+      '- For ECS-based schemas: use IDs like `ecs-org-c-vp.json` or `ecs-service-c-vp.json`.\n' +
+      '- For regular schemas: use IDs like `schemas-example-org-jsc.json`.\n\n' +
+      'The schemaId identifies the schema used to locate the credential in the system.',
   })
-  @ApiResponse({ status: 200, description: 'List of credentials' })
-  async getCredential(@Param('schemaId') schemaId: string) {
-    return await this.trustService.getSchemaData(schemaId.toLowerCase(), 'Schema not found')
+  @ApiParam({
+    name: 'schemaId',
+    required: true,
+    type: String,
+    description:
+      'Identifier of the stored credential schema. Examples: `ecs-org-c-vp.json`, `schemas-example-org-jsc.json`.',
+    examples: {
+      jsonLd: {
+        value: 'ecs-org-c-vp.json',
+        description: 'Example of a JSON-LD Verifiable Credential schema',
+      },
+      jsonSchema: {
+        value: 'schemas-example-org-jsc.json',
+        description: 'Example of a JSON Schema Credential schema',
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'List of credentials for the given schema ID' })
+  @ApiResponse({ status: 404, description: 'Credential schema not found' })
+  async getSchemaCredential(@Param('schemaId') schemaId: string) {
+    // This endpoint retrieves stored data for both JSON Schema and JSON-LD credentials
+    return await this.trustService.getSchemaData(schemaId)
+  }
+
+  @Delete(':schemaId')
+  @ApiOperation({
+    summary: 'Delete a stored credential schema (JSON Schema or JSON-LD)',
+    description:
+      'Removes a stored schema credential, which can be either a JSON Schema Credential or a JSON-LD Credential.',
+  })
+  @ApiParam({
+    name: 'schemaId',
+    required: true,
+    type: String,
+    description:
+      'Identifier of the stored schema credential. For example: `ecs-org-c-vp.json` or `schemas-example-org-jsc.json`.',
+    examples: {
+      jsonSchema: {
+        value: 'schemas-example-org-jsc.json',
+        description: 'Example of a JSON Schema Credential',
+      },
+      jsonLd: {
+        value: 'ecs-org-c-vp.json',
+        description: 'Example of a JSON-LD Credential',
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Credential schema deleted successfully' })
+  async removeCredential(@Query('schemaId') schemaId: string) {
+    // This endpoint removes both JSON Schema credentials and JSON-LD credentials by ID
+    return await this.trustService.removeSchemaData(schemaId)
   }
 
   @Post('credentials')
@@ -49,6 +98,7 @@ export class TrustController {
         summary: 'Organization Credential Example',
         description: 'Represents an organization using the "ecs-org" credential schema.',
         value: {
+          schemaId: 'organization',
           credential: {
             '@context': ['https://www.w3.org/2018/credentials/v1'],
             id: 'https://example.org/credentials/123',
@@ -80,41 +130,23 @@ export class TrustController {
   @ApiResponse({ status: 201, description: 'Credential created successfully' })
   async updateCredential(@Body() body: W3cCredentialDto) {
     const data = await this.trustService.updateSchemaData(
+      body.schemaBaseId,
       JsonTransformer.fromJSON(body.credential, W3cJsonLdVerifiableCredential),
     )
     return { message: 'Credential updated', data }
   }
 
-  @Delete('credentials')
-  @ApiOperation({ summary: 'Delete a verifiable credential' })
-  @ApiQuery({
-    name: 'id',
-    required: true,
-    type: String,
-    description: 'ID of the credential to delete',
-    examples: {
-      service: { value: 'ecs-service', description: 'Example for ECS Service credential' },
-      org: { value: 'ecs-org', description: 'Example for ECS Organization credential' },
-    },
-  })
-  @ApiResponse({ status: 200, description: 'Credential deleted' })
-  async removeCredential(@Query('id') id: string) {
-    return await this.trustService.removeSchemaData(id.toLowerCase())
-  }
-
-  @Get('json-schema-credentials/:schemaId')
-  @ApiOperation({
-    summary: 'Get all JSON schema credentials',
-    description:
-      'The schemaId indicates the schema used to locate the credential in the system. ' +
-      'It typically follows the structure https://schemaurl.com/vt/schemas-{schemaId}-jsc.json, ' +
-      'where {schemaId} corresponds to the schema identifier.',
-  })
-  @ApiResponse({ status: 200, description: 'List of JSON schema credentials' })
-  async getJsonSchemaCredentials(@Param('schemaId') schemaId: string) {
-    return await this.trustService.getJsonCredential(schemaId)
-  }
-
+  /**
+   * @summary Create or update a JSON Schema credential
+   * @description
+   * This endpoint creates or updates a JSON Schema credential identified by a unique `schemaId`.
+   * The `schemaId` follows the convention `schemas-{schemaBaseId}-jsc.json`, where `{id}` represents
+   * the schema's unique identifier.
+   *
+   * Example: `schemas-1234-jsc.json`
+   *
+   * The endpoint stores or updates the corresponding JSON Schema reference (`jsonSchemaRef`)
+   */
   @Post('json-schema-credentials')
   @ApiOperation({ summary: 'Add a new JSON schema credential' })
   @ApiBody({
@@ -123,7 +155,7 @@ export class TrustController {
       service: {
         summary: 'JsonSchemaCredential Example',
         value: {
-          schemaId: 'example-service',
+          schemaBaseId: 'example-service',
           jsonSchemaRef: 'vpr:verana:vna-testnet-1/cs/v1/js/12345678',
         },
       },
@@ -131,15 +163,7 @@ export class TrustController {
   })
   @ApiResponse({ status: 201, description: 'JSON schema credential updated' })
   async updateJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
-    return await this.trustService.updateJsonCredential(body.schemaId, body.jsonSchemaRef)
-  }
-
-  @Delete('json-schema-credentials/:schemaId')
-  @ApiOperation({ summary: 'Delete a JSON schema credential' })
-  @ApiQuery({ name: 'id', required: true, type: String })
-  @ApiResponse({ status: 200, description: 'JSON schema credential deleted' })
-  async removeJsonSchemaCredential(@Param('schemaId') schemaId: string) {
-    return await this.trustService.removeJsonCredential(schemaId)
+    return await this.trustService.updateJsonCredential(body.schemaBaseId, body.jsonSchemaRef)
   }
 
   @Post('issue-credential')
