@@ -331,7 +331,7 @@ export async function generateVerifiablePresentation(
   })
   const verifiablePresentation = await generateVerifiableCredential(
     agent,
-    id,
+    agent.did,
     ecsSchemas,
     logTag,
     type,

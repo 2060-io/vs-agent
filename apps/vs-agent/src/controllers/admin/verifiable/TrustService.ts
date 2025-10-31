@@ -215,11 +215,7 @@ export class TrustService {
   ) {
     const unsignedCredential = createCredential({
       id: did,
-      type: [
-        'VerifiableCredential',
-        'VerifiableTrustCredential',
-        this.buildCredentialKey(jsonSchemaCredential),
-      ],
+      type: ['VerifiableCredential', 'VerifiableTrustCredential'],
       issuer: agent.did,
       credentialSubject: {
         id: did,
@@ -415,30 +411,6 @@ export class TrustService {
       throw new HttpException(`Missing credentialSubject.id in credential`, HttpStatus.BAD_REQUEST)
     }
     return id
-  }
-
-  /**
-   * Derives a standardized credential type key from a JSON Schema file URL or path.
-   * Examples:
-   *  - "https://example.com/schemas-person-identity.json" → "PersonIdentityCredential"
-   *
-   * @param schemaUrl - The URL or local path of the JSON schema file.
-   * @todo Review whether this approach is the best way to derive and store keys
-   *       for GenericRecord entities. Consider future schema naming conventions
-   *       or other potential conflicts.
-   */
-  private buildCredentialKey(schemaUrl: string): string {
-    if (!schemaUrl) {
-      throw new Error('Schema URL or path cannot be empty')
-    }
-    const fileName = schemaUrl.split('/').pop() ?? ''
-    const baseName = fileName
-      .replace(/^schemas[-_]?/, '')
-      .replace(/\jsc.json$/i, '')
-      .trim()
-    const words = baseName.split(/[-_]/).filter(Boolean)
-    const pascalCaseName = words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
-    return `${pascalCaseName}Credential`
   }
 
   private findMetadataEntry(id: string, didRecord: DidRecord, key: '_vt/vtc' | '_vt/jsc') {
