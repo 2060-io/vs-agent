@@ -27,8 +27,13 @@ export class SelfTrController {
       const baseUrl = `${this.publicApiBaseUrl}/vt/${schemaId}`
       if (schemaId.endsWith('-c-vp.json'))
         return await this.trustService.getVerifiableTrustCredential(baseUrl)
-      if (schemaId.endsWith('-jsc-vp.json') || schemaId.endsWith('-jsc.json'))
+      else if (schemaId.endsWith('-jsc-vp.json') || schemaId.endsWith('-jsc.json'))
         return await this.trustService.getJsonSchemaCredential(baseUrl)
+      else
+        throw new HttpException(
+          'Invalid schemaId: must end with -c-vp.json, -jsc-vp.json, or -jsc.json',
+          HttpStatus.BAD_REQUEST,
+        )
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)

@@ -61,7 +61,7 @@ export class VsAgentController {
       'The identifier of the stored credential schema. This ID specifies which Verifiable Credential schema should be used to generate or retrieve the corresponding Verifiable Trust Credential (VTC).',
     examples: {
       verifiableTrustCredential: {
-        summary: 'JSON Schema Credential example',
+        summary: 'Verifiable Trust Credential example',
         description: 'A full URL to the Verifiable Trust Credential.',
         value: 'https://p2801.ovpndev.mobiera.io/vt/ecs-service-c-vp.json',
       },
