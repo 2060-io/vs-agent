@@ -13,9 +13,9 @@ export class JsonSchemaCredentialDto {
   })
   @IsString()
   @Matches(/^[a-z0-9\-]+$/i, {
-    message: 'schemaId must contain only letters, numbers, or hyphens.',
+    message: 'schemaBaseId must contain only letters, numbers, or hyphens.',
   })
-  schemaId!: string
+  schemaBaseId!: string
 
   @ApiProperty({
     description:
