@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.6.0](https://github.com/2060-io/vs-agent/compare/v1.5.3...v1.6.0) (2025-10-31)
+
+
+### Features
+
+* create verifiable trust endpoint for VTC ([#249](https://github.com/2060-io/vs-agent/issues/249)) ([4bf0e32](https://github.com/2060-io/vs-agent/commit/4bf0e329e8e66697e42a9816dec980c06b9cbaf2))
+
+
+### Bug Fixes
+
+* add support to legacy Ed25519VerificationKey2018 ([#258](https://github.com/2060-io/vs-agent/issues/258)) ([84d8183](https://github.com/2060-io/vs-agent/commit/84d8183256d4722d470d14ce23c427b748fe6723))
+* credential key generation logic and improve naming clarity ([#254](https://github.com/2060-io/vs-agent/issues/254)) ([048bb92](https://github.com/2060-io/vs-agent/commit/048bb926a58e7b468524044bee69af3aad4855f5))
+* improvement remove credential and jsonschema ([#257](https://github.com/2060-io/vs-agent/issues/257)) ([87ab904](https://github.com/2060-io/vs-agent/commit/87ab904707651520bf7d8fe6d314e7a31d89c0e0))
+* remove duplicate context at did creation ([#261](https://github.com/2060-io/vs-agent/issues/261)) ([f266626](https://github.com/2060-io/vs-agent/commit/f266626d3029be4a3bd0886d2f46404002af970a))
+* simplify and strengthen credential and JSON Schema credential management ([#264](https://github.com/2060-io/vs-agent/issues/264)) ([f6cc927](https://github.com/2060-io/vs-agent/commit/f6cc9271f9b04324cb9e887630c4b7b231d098e7))
+* use vpr:verana:vna-testnet in place api ([#262](https://github.com/2060-io/vs-agent/issues/262)) ([7314b2a](https://github.com/2060-io/vs-agent/commit/7314b2a5c850ad74819f9baefa9482ce3c53fd83))
+
 ## [1.5.3](https://github.com/2060-io/vs-agent/compare/v1.5.2...v1.5.3) (2025-10-08)
 
 
