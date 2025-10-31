@@ -171,7 +171,7 @@ export class VsAgentController {
     description: 'Invalid credential format or missing required fields.',
   })
   async createCredential(@Body() body: W3cCredentialDto) {
-    const data = await this.trustService.createSchemaData(
+    const data = await this.trustService.createVtc(
       body.schemaBaseId,
       JsonTransformer.fromJSON(body.credential, W3cJsonLdVerifiableCredential),
     )
@@ -285,6 +285,6 @@ export class VsAgentController {
     description: 'Invalid schema input or missing required parameters.',
   })
   async createJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
-    return await this.trustService.createJsonCredential(body.schemaBaseId, body.jsonSchemaRef)
+    return await this.trustService.createJsc(body.schemaBaseId, body.jsonSchemaRef)
   }
 }

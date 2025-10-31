@@ -49,7 +49,7 @@ export class TrustService {
       }
       return metadata.data
     } catch (error) {
-      this.handleError('loading', schemaId, error, 'Failed to load schema')
+      this.handleError(error, 'Failed to load schema')
     }
   }
 
@@ -77,7 +77,7 @@ export class TrustService {
       this.logger.log(`Metadata ${schemaId} successfully removed`)
       return { success: true, message: `Metadata ${schemaId} removed` }
     } catch (error) {
-      this.handleError('removing', schemaId, error, 'Failed to remove schema data')
+      this.handleError(error, 'Failed to remove schema data')
     }
   }
 
@@ -89,7 +89,7 @@ export class TrustService {
     return await this.removeTrustCredential(schemaId, '_vt/jsc')
   }
 
-  public async createSchemaData(id: string, credential: W3cJsonLdVerifiableCredential) {
+  public async createVtc(id: string, credential: W3cJsonLdVerifiableCredential) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const schemaId = `schemas-${id}-c-vp.json`
@@ -128,11 +128,11 @@ export class TrustService {
       this.logger.log(`Metadata for "${schemaId}" updated successfully.`)
       return verifiablePresentation
     } catch (error) {
-      this.handleError('updating', credential.id ?? '', error, 'Error updating credential')
+      this.handleError(error, 'Error create credential')
     }
   }
 
-  public async createJsonCredential(id: string, jsonSchemaRef: string) {
+  public async createJsc(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const record = this.findMetadataEntry(jsonSchemaRef, didRecord, '_vt/jsc')
@@ -202,7 +202,7 @@ export class TrustService {
       )
       return credential.jsonCredential
     } catch (error) {
-      this.handleError('updating', id, error, 'Failed to update schema')
+      this.handleError(error, 'Failed to create schema')
     }
   }
 
@@ -306,7 +306,7 @@ export class TrustService {
           throw new HttpException(`Invalid credential type: ${type}`, HttpStatus.BAD_REQUEST)
       }
     } catch (error) {
-      this.handleError('issue', did ?? '', error, 'Failed to issue credential')
+      this.handleError(error, 'Failed to issue credential')
     }
   }
 
@@ -383,11 +383,11 @@ export class TrustService {
     await repo.update(agent.context, didRecord)
   }
 
-  private handleError(action: string, tagName: string, error: any, defaultMsg: string) {
+  private handleError(error: any, defaultMsg: string) {
     const message = error?.message ?? String(error)
-    this.logger.error(`Error ${action} metadata "${tagName}": ${message}`)
+    this.logger.error(`Error: ${message}`)
     if (error instanceof HttpException) throw error
-    throw new HttpException(message || defaultMsg, HttpStatus.BAD_REQUEST)
+    throw new HttpException(message || defaultMsg, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 
   // TODO: Simplify this implementation. The same approach is already used in the Credential Type Controller
