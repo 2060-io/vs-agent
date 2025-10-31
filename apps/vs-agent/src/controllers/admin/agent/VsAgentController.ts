@@ -47,7 +47,7 @@ export class VsAgentController {
 
   @Get('vtc')
   @ApiOperation({
-    summary: 'Retrieve a Verifiable Trust Credential (VTC)',
+    summary: 'Retrieve one or multiple Verifiable Trust Credentials (VTC)',
     description:
       'Retrieves a Verifiable Trust Credential (VTC) based on the provided credential schema ID. ' +
       'The schema defines the structure and semantics of the verifiable credential. ' +
@@ -67,14 +67,30 @@ export class VsAgentController {
       },
     },
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Number of items per page (default: 10)',
+  })
   @ApiResponse({
     status: 200,
-    description:
-      'Successfully retrieved the Verifiable Trust Credential (VTC) defined by the given JSON Schema URL.',
+    description: 'Returns one or all Verifiable Trust Credentials with pagination if applicable.',
   })
-  @ApiResponse({ status: 404, description: 'Schema not found.' })
-  async getVerifiableTrustCredential(@Query('schemaId') schemaId: string) {
-    return await this.trustService.getVerifiableTrustCredential(schemaId)
+  async getVerifiableTrustCredential(
+    @Query('schemaId') schemaId?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return await this.trustService.getVerifiableTrustCredential(schemaId, page, limit)
   }
 
   @Delete('vtc')
@@ -180,7 +196,7 @@ export class VsAgentController {
 
   @Get('jsc')
   @ApiOperation({
-    summary: 'Retrieve a JSON Schema Credential (JSC)',
+    summary: 'Retrieve one or multiple JSON Schema Credential (JSC)',
     description:
       'Retrieves a JSON Schema Credential (JSC) associated with the given schema identifier (`schemaId`). ' +
       'A JSON Schema Credential defines the structure, types, and validation rules for a corresponding Verifiable Trust Credential (VTC). ' +
@@ -188,7 +204,7 @@ export class VsAgentController {
   })
   @ApiQuery({
     name: 'schemaId',
-    required: true,
+    required: false,
     type: String,
     description:
       'The identifier or URL of the JSON Schema Credential (JSC) to retrieve. ' +
@@ -201,17 +217,30 @@ export class VsAgentController {
       },
     },
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Number of items per page (default: 10)',
+  })
   @ApiResponse({
     status: 200,
-    description:
-      'Successfully retrieved the JSON Schema Credential (JSC) associated with the given schema ID.',
+    description: 'Returns one or all Verifiable Trust Credentials with pagination if applicable.',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'No JSON Schema Credential (JSC) was found for the provided schema ID.',
-  })
-  async getJsonSchemaCredential(@Query('schemaId') schemaId: string) {
-    return await this.trustService.getJsonSchemaCredential(schemaId)
+  async getJsonSchemaCredential(
+    @Query('schemaId') schemaId: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return await this.trustService.getJsonSchemaCredential(schemaId, page, limit)
   }
 
   @Delete('jsc')
