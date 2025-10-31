@@ -47,76 +47,89 @@ export class VsAgentController {
 
   @Get('vtc')
   @ApiOperation({
-    summary: 'Get stored credentials (JSON Schema Credential or JSON-LD)',
+    summary: 'Retrieve a Verifiable Trust Credential (VTC)',
     description:
-      'Retrieves stored credential data by schema ID. This endpoint supports both JSON Schema Credentials and JSON-LD Verifiable Credentials.\n\n' +
-      '- For ECS-based schemas: use IDs like `ecs-org-c-vp.json` or `ecs-service-c-vp.json`.\n' +
-      '- For regular schemas: use IDs like `schemas-example-org-jsc.json`.\n\n' +
-      'The schemaId identifies the schema used to locate the credential in the system.',
+      'Retrieves a Verifiable Trust Credential (VTC) based on the provided credential schema ID. ' +
+      'The schema defines the structure and semantics of the verifiable credential. ' +
+      'This endpoint follows the [Verifiable Trust Specification](https://verana-labs.github.io/verifiable-trust-spec/#vt-linked-vp-verifiable-trust-credential-linked-vp).',
   })
   @ApiQuery({
     name: 'schemaId',
     required: true,
     type: String,
     description:
-      'Identifier of the stored credential schema. Examples: `ecs-org-c-vp.json`, `schemas-example-org-jsc.json`.',
+      'The identifier of the stored credential schema. This ID specifies which Verifiable Credential schema should be used to generate or retrieve the corresponding Verifiable Trust Credential (VTC).',
     examples: {
-      jsonLd: {
-        value: 'ecs-org-c-vp.json',
-        description: 'Example of a JSON-LD Verifiable Credential schema',
-      },
-      jsonSchema: {
-        value: 'schemas-example-org-jsc.json',
-        description: 'Example of a JSON Schema Credential schema',
+      verifiableTrustCredential: {
+        summary: 'JSON Schema Credential example',
+        description: 'A full URL to the Verifiable Trust Credential.',
+        value: 'https://p2801.ovpndev.mobiera.io/vt/ecs-service-c-vp.json',
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'List of credentials for the given schema ID' })
-  @ApiResponse({ status: 404, description: 'Credential schema not found' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Successfully retrieved the Verifiable Trust Credential (VTC) defined by the given JSON Schema URL.',
+  })
+  @ApiResponse({ status: 404, description: 'Schema not found.' })
   async getSchemaCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.getVerifiableTrustCredential(schemaId)
   }
 
   @Delete('vtc')
   @ApiOperation({
-    summary: 'Delete a stored credential schema (JSON Schema or JSON-LD)',
+    summary: 'Delete a Verifiable Trust Credential (VTC)',
     description:
-      'Removes a stored schema credential, which can be either a JSON Schema Credential or a JSON-LD Credential.',
+      'Deletes a stored Verifiable Trust Credential (VTC) associated with the specified JSON Schema credential. ' +
+      'This operation removes the credential definition or cached data linked to the provided schema. ' +
+      'The operation aligns with the [Verifiable Trust Specification](https://verana-labs.github.io/verifiable-trust-spec/#vt-linked-vp-verifiable-trust-credential-linked-vp).',
   })
   @ApiQuery({
     name: 'schemaId',
     required: true,
     type: String,
     description:
-      'Identifier of the stored schema credential. For example: `ecs-org-c-vp.json` or `schemas-example-org-jsc.json`.',
+      'The URL of the Verifiable Trust Credential (VTC) to be deleted. ' +
+      'This identifier must match an existing stored credential schema.',
     examples: {
-      jsonSchema: {
-        value: 'schemas-example-org-jsc.json',
-        description: 'Example of a JSON Schema Credential',
-      },
-      jsonLd: {
-        value: 'ecs-org-c-vp.json',
-        description: 'Example of a JSON-LD Credential',
+      verifiableTrustCredential: {
+        summary: 'JSON Schema Credential example',
+        description: 'A full URL identifying the Verifiable Trust Credential to be deleted.',
+        value: 'https://p2801.ovpndev.mobiera.io/vt/ecs-service-c-vp.json',
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Credential schema deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'The Verifiable Trust Credential (VTC) was successfully deleted for the given schema ID.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No Verifiable Trust Credential (VTC) was found for the provided schema ID.',
+  })
   async removeCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.removeVerifiableTrustCredential(schemaId)
   }
 
   @Post('vtc')
   @ApiOperation({
-    summary: 'Add a new W3C Verifiable Credential (organization or service)',
+    summary: 'Create a new Verifiable Trust Credential (VTC)',
     description:
-      'Accepts a W3C Verifiable Credential following the JSON-LD data model. Supports both organization and service credentials.',
+      'The `schemaBaseId` defines the base name used to construct the resulting credential schema URL. ' +
+      'This operation supports creating credentials for both organizations and services following the Verifiable Trust model.',
   })
   @ApiBody({
     type: W3cCredentialDto,
+    description:
+      'Defines the Verifiable Credential (VTC) to be created. ' +
+      'The `schemaBaseId` determines the schema URL structure, and the `credential` field contains the W3C Verifiable Credential data.',
     examples: {
       organization: {
         summary: 'Organization Credential Example',
-        description: 'Represents an organization using the "ecs-org" credential schema.',
+        description:
+          'Creates a Verifiable Trust Credential (VTC) for an organization. ' +
+          'The `schemaBaseId` is used to generate the schema URL (e.g., `https://p2801.ovpndev.mobiera.io/vt/schemas-organization-c-vp.json`).',
         value: {
           schemaBaseId: 'organization',
           credential: {
@@ -147,101 +160,130 @@ export class VsAgentController {
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Credential created successfully' })
+  @ApiResponse({
+    status: 201,
+    description:
+      'The Verifiable Trust Credential (VTC) was successfully created and stored. ' +
+      'The resulting schema URL is derived from the provided `schemaBaseId`.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid credential format or missing required fields.',
+  })
   async createCredential(@Body() body: W3cCredentialDto) {
     const data = await this.trustService.createSchemaData(
       body.schemaBaseId,
       JsonTransformer.fromJSON(body.credential, W3cJsonLdVerifiableCredential),
     )
-    return { message: 'Credential updated', data }
+    return { message: 'Credential created successfully', data }
   }
 
   @Get('jsc')
   @ApiOperation({
-    summary: 'Get stored credentials (JSON Schema Credential or JSON-LD)',
+    summary: 'Retrieve a JSON Schema Credential (JSC)',
     description:
-      'Retrieves stored credential data by schema ID. This endpoint supports both JSON Schema Credentials and JSON-LD Verifiable Credentials.\n\n' +
-      '- For ECS-based schemas: use IDs like `ecs-org-c-vp.json` or `ecs-service-c-vp.json`.\n' +
-      '- For regular schemas: use IDs like `schemas-example-org-jsc.json`.\n\n' +
-      'The schemaId identifies the schema used to locate the credential in the system.',
+      'Retrieves a JSON Schema Credential (JSC) associated with the given schema identifier (`schemaId`). ' +
+      'A JSON Schema Credential defines the structure, types, and validation rules for a corresponding Verifiable Trust Credential (VTC). ' +
+      'This endpoint follows the [Verifiable Trust Specification](https://verana-labs.github.io/verifiable-trust-spec/#json-schema-credentials).',
   })
   @ApiQuery({
     name: 'schemaId',
     required: true,
     type: String,
     description:
-      'Identifier of the stored credential schema. Examples: `ecs-org-c-vp.json`, `schemas-example-org-jsc.json`.',
+      'The identifier or URL of the JSON Schema Credential (JSC) to retrieve. ' +
+      'This schema describes the structure of the Verifiable Trust Credential (VTC) it governs.',
     examples: {
-      jsonLd: {
-        value: 'ecs-org-c-vp.json',
-        description: 'Example of a JSON-LD Verifiable Credential schema',
-      },
-      jsonSchema: {
-        value: 'schemas-example-org-jsc.json',
-        description: 'Example of a JSON Schema Credential schema',
+      jsonSchemaCredential: {
+        summary: 'JSON Schema Credential example',
+        description: 'A full URL referencing the JSON Schema Credential to be retrieved.',
+        value: 'https://ecosystem/shemas-example-jsc.json',
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'List of credentials for the given schema ID' })
-  @ApiResponse({ status: 404, description: 'Credential schema not found' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Successfully retrieved the JSON Schema Credential (JSC) associated with the given schema ID.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No JSON Schema Credential (JSC) was found for the provided schema ID.',
+  })
   async getJsonSchemaCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.getJsonSchemaCredential(schemaId)
   }
 
   @Delete('jsc')
   @ApiOperation({
-    summary: 'Delete a stored credential schema (JSON Schema or JSON-LD)',
+    summary: 'Delete a JSON Schema Credential (JSC)',
     description:
-      'Removes a stored schema credential, which can be either a JSON Schema Credential or a JSON-LD Credential.',
+      'Deletes a stored JSON Schema Credential (JSC) associated with the specified schema identifier (`schemaId`). ' +
+      'A JSON Schema Credential defines the structure and validation rules for a Verifiable Trust Credential (VTC). ' +
+      'Removing a JSC also invalidates any Verifiable Trust Credentials that rely on it. ' +
+      'This operation follows the [Verifiable Trust Specification](https://verana-labs.github.io/verifiable-trust-spec/#json-schema-credentials).',
   })
   @ApiQuery({
     name: 'schemaId',
     required: true,
     type: String,
     description:
-      'Identifier of the stored schema credential. For example: `ecs-org-c-vp.json` or `schemas-example-org-jsc.json`.',
+      'The identifier or URL of the JSON Schema Credential (JSC) to delete. ' +
+      'This must correspond to an existing stored schema definition.',
     examples: {
-      jsonSchema: {
-        value: 'schemas-example-org-jsc.json',
-        description: 'Example of a JSON Schema Credential',
-      },
-      jsonLd: {
-        value: 'ecs-org-c-vp.json',
-        description: 'Example of a JSON-LD Credential',
+      jsonSchemaCredential: {
+        summary: 'JSON Schema Credential example',
+        description: 'A full URL identifying the JSON Schema Credential (JSC) to be deleted.',
+        value: 'https://ecosystem/shemas-example-jsc.json',
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Credential schema deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'The JSON Schema Credential (JSC) was successfully deleted for the given schema ID.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No JSON Schema Credential (JSC) was found for the provided schema ID.',
+  })
   async removeJsonSchemaCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.removeJsonSchemaCredential(schemaId)
   }
 
-  /**
-   * @summary Create or update a JSON Schema credential
-   * @description
-   * This endpoint creates or updates a JSON Schema credential identified by a unique `schemaBaseId`.
-   * The `schemaBaseId` follows the convention `schemas-{schemaBaseId}-jsc.json`, where `{id}` represents
-   * the schema's unique identifier.
-   *
-   * Example: `schemas-1234-jsc.json`
-   *
-   * The endpoint stores or updates the corresponding JSON Schema reference (`jsonSchemaRef`)
-   */
   @Post('jsc')
-  @ApiOperation({ summary: 'Add a new JSON schema credential' })
+  @ApiOperation({
+    summary: 'Create or update a JSON Schema Credential (JSC)',
+    description:
+      'Creates or updates a JSON Schema Credential (JSC) based on the provided schema base identifier (`schemaBaseId`) and JSON Schema reference (`jsonSchemaRef`). ' +
+      'A JSON Schema Credential defines the structure, data types, and validation rules for a corresponding Verifiable Trust Credential (VTC). ' +
+      'This operation follows the [Verifiable Trust Specification](https://verana-labs.github.io/verifiable-trust-spec/#json-schema-credentials).',
+  })
   @ApiBody({
     type: JsonSchemaCredentialDto,
+    description:
+      'Defines the base schema identifier and the JSON Schema reference used to create or update the JSON Schema Credential (JSC).',
     examples: {
       service: {
-        summary: 'JsonSchemaCredential Example',
+        summary: 'JSON Schema Credential Example',
+        description:
+          'Creates a JSON Schema Credential (JSC) for an organization or service. ' +
+          'The `schemaBaseId` determines the base schema name, and the `jsonSchemaRef` provides the reference to the JSON Schema definition.',
         value: {
-          schemaBaseId: 'example-service',
+          schemaBaseId: 'organization',
           jsonSchemaRef: 'vpr:verana:vna-testnet-1/cs/v1/js/12345678',
         },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'JSON schema credential updated' })
+  @ApiResponse({
+    status: 201,
+    description:
+      'The JSON Schema Credential (JSC) was successfully created or updated based on the provided schema base ID and reference.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid schema input or missing required parameters.',
+  })
   async createJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
     return await this.trustService.createJsonCredential(body.schemaBaseId, body.jsonSchemaRef)
   }
