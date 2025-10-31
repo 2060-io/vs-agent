@@ -8,6 +8,7 @@ import {
   utils,
   W3cCredential,
   W3cJsonLdVerifiableCredential,
+  W3cJsonLdVerifiablePresentation,
 } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
 
@@ -39,10 +40,10 @@ export class TrustService {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
-  public async getSchemaData(schemaId: string) {
+  private async getTrustCredential(schemaId: string, key: '_vt/vtc' | '_vt/jsc') {
     try {
       const { didRecord } = await this.getDidRecord()
-      const metadata = didRecord.metadata.get(schemaId)
+      const metadata = this.findMetadataEntry(schemaId, didRecord, key)
       if (!metadata) {
         throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
       }
@@ -52,19 +53,27 @@ export class TrustService {
     }
   }
 
-  public async removeSchemaData(schemaId: string) {
+  public async getVerifiableTrustCredential(schemaId: string) {
+    return await this.getTrustCredential(schemaId, '_vt/vtc')
+  }
+
+  public async getJsonSchemaCredential(schemaId: string) {
+    return await this.getTrustCredential(schemaId, '_vt/jsc')
+  }
+
+  private async removeTrustCredential(schemaId: string, key: '_vt/vtc' | '_vt/jsc') {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const record = didRecord.metadata.get(schemaId)
+      const record = this.findMetadataEntry(schemaId, didRecord, key)
       // Currently, we only use one serviceEndpoint per ID.
       // In the future, if multiple serviceEndpoints exist for the same ID,
       // we should review the serviceEndpoint content and remove only the specific one.
-      if (record?.serviceId && didRecord.didDocument?.service) {
-        didRecord.didDocument.service = didRecord.didDocument.service.filter(s => s.id !== record.serviceId)
+      if (record?.didDocumentServiceId && didRecord.didDocument?.service) {
+        didRecord.didDocument.service = didRecord.didDocument.service.filter(
+          s => s.id !== record.didDocumentServiceId,
+        )
       }
-      didRecord.metadata.delete(schemaId)
-      await this.updateDidRecord(agent, didRecord)
-
+      await this.deleteMetadataEntry(agent, schemaId, didRecord, key)
       this.logger.log(`Metadata ${schemaId} successfully removed`)
       return { success: true, message: `Metadata ${schemaId} removed` }
     } catch (error) {
@@ -72,12 +81,20 @@ export class TrustService {
     }
   }
 
-  public async updateSchemaData(id: string, credential: W3cJsonLdVerifiableCredential) {
+  public async removeVerifiableTrustCredential(schemaId: string) {
+    return await this.removeTrustCredential(schemaId, '_vt/vtc')
+  }
+
+  public async removeJsonSchemaCredential(schemaId: string) {
+    return await this.removeTrustCredential(schemaId, '_vt/jsc')
+  }
+
+  public async createSchemaData(id: string, credential: W3cJsonLdVerifiableCredential) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const schemaId = `schemas-${id}-c-vp.json`
-      const record = didRecord.metadata.get(schemaId)
-      const serviceId = `${agent.did}#vpr-${schemaId.replace('.json', '')}`
+      const record = this.findMetadataEntry(schemaId, didRecord, '_vt/vtc')
+      const didDocumentServiceId = `${agent.did}#vpr-${schemaId.replace('.json', '')}`
       const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaId}`
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
@@ -88,46 +105,53 @@ export class TrustService {
       if (!record) {
         didRecord.didDocument?.service?.push(
           new DidDocumentService({
-            id: serviceId,
+            id: didDocumentServiceId,
             serviceEndpoint,
             type: 'LinkedVerifiablePresentation',
           }),
         )
       }
-      const presentation = await signerW3c(
+      const verifiablePresentation = await signerW3c(
         agent,
         unsignedPresentation,
         getVerificationMethodId(agent.config.logger, didRecord),
       )
 
-      didRecord.metadata.set(schemaId, { data: presentation, serviceId })
-      await this.updateDidRecord(agent, didRecord)
+      await this.saveMetadataEntry(
+        agent,
+        didRecord,
+        credential,
+        verifiablePresentation,
+        didDocumentServiceId,
+        '_vt/vtc',
+      )
       this.logger.log(`Metadata for "${schemaId}" updated successfully.`)
-      return presentation
+      return verifiablePresentation
     } catch (error) {
       this.handleError('updating', credential.id ?? '', error, 'Error updating credential')
     }
   }
 
-  public async updateJsonCredential(id: string, jsonSchemaRef: string) {
+  public async createJsonCredential(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const savedCredential = didRecord.metadata.get(id)
+      const record = this.findMetadataEntry(jsonSchemaRef, didRecord, '_vt/jsc')
       const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
         claims: await addDigestSRI(subjectId, claims, this.ecsSchemas),
       }
-      const schemaId = `schemas-${id}-jsc.json`
+      const schemaPresentation = `schemas-${id}-jsc-vp.json`
+      const schemaCredential = `schemas-${id}-jsc.json`
       let unsignedCredential
-      if (savedCredential) unsignedCredential = savedCredential as W3cJsonLdVerifiableCredential
+      if (record) unsignedCredential = record.credential as W3cJsonLdVerifiableCredential
 
       if (unsignedCredential) {
         delete (unsignedCredential as any).proof
         unsignedCredential.credentialSubject = credentialSubject
       } else {
         unsignedCredential = createCredential({
-          id: `${this.publicApiBaseUrl}/vt/${schemaId}`,
+          id: `${this.publicApiBaseUrl}/vt/${schemaCredential}`,
           type: ['VerifiableCredential', 'JsonSchemaCredential'],
           issuer: agent.did,
           credentialSubject,
@@ -145,8 +169,37 @@ export class TrustService {
         JsonTransformer.fromJSON(unsignedCredential, W3cCredential),
         verificationMethodId,
       )
-      didRecord.metadata.set(schemaId, { data: credential })
-      await this.updateDidRecord(agent, didRecord)
+
+      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
+      const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
+      const unsignedPresentation = createPresentation({
+        id: serviceEndpoint,
+        holder: agent.did,
+        verifiableCredential: [credential],
+      })
+      const verifiablePresentation = await signerW3c(
+        agent,
+        unsignedPresentation,
+        getVerificationMethodId(agent.config.logger, didRecord),
+      )
+
+      if (!record) {
+        didRecord.didDocument?.service?.push(
+          new DidDocumentService({
+            id: didDocumentServiceId,
+            serviceEndpoint,
+            type: 'LinkedVerifiablePresentation',
+          }),
+        )
+      }
+      await this.saveMetadataEntry(
+        agent,
+        didRecord,
+        credential,
+        verifiablePresentation,
+        didDocumentServiceId,
+        '_vt/jsc',
+      )
       return credential.jsonCredential
     } catch (error) {
       this.handleError('updating', id, error, 'Failed to update schema')
@@ -386,5 +439,68 @@ export class TrustService {
     const words = baseName.split(/[-_]/).filter(Boolean)
     const pascalCaseName = words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
     return `${pascalCaseName}Credential`
+  }
+
+  private findMetadataEntry(id: string, didRecord: DidRecord, key: '_vt/vtc' | '_vt/jsc') {
+    const metadata = didRecord.metadata.get(key)
+    if (!metadata) return null
+    for (const [schemaId, entry] of Object.entries(metadata)) {
+      const credId = entry.credential?.id
+      const presId = entry.verifiablePresentation?.id
+
+      if (credId === id) {
+        return { schemaId, ...entry, data: entry.credential }
+      }
+
+      if (presId === id) {
+        return { schemaId, ...entry, data: entry.verifiablePresentation }
+      }
+    }
+    return null
+  }
+
+  private async saveMetadataEntry(
+    agent: VsAgent,
+    didRecord: DidRecord,
+    credential: W3cJsonLdVerifiableCredential,
+    verifiablePresentation: W3cJsonLdVerifiablePresentation,
+    didDocumentServiceId: string,
+    key: '_vt/vtc' | '_vt/jsc',
+  ) {
+    const schema = key === '_vt/vtc' ? credential.credentialSchema : credential.credentialSubject
+    const ref = Array.isArray(schema) ? schema[0]?.id : schema?.id
+
+    if (!ref) {
+      throw new HttpException('No ID was found in credentialSubject', HttpStatus.NOT_FOUND)
+    }
+
+    const record = didRecord.metadata.get(key) ?? {}
+    record[ref] = {
+      credential,
+      verifiablePresentation,
+      didDocumentServiceId,
+    }
+    didRecord.metadata.set(key, record)
+    await this.updateDidRecord(agent, didRecord)
+  }
+
+  private async deleteMetadataEntry(
+    agent: VsAgent,
+    id: string,
+    didRecord: DidRecord,
+    key: '_vt/vtc' | '_vt/jsc',
+  ) {
+    const found = this.findMetadataEntry(id, didRecord, key)
+    if (!found) return null
+
+    const metadata = didRecord.metadata.get(key)
+    if (!metadata) return null
+
+    delete metadata[found.schemaId]
+    didRecord.metadata.set(key, metadata)
+    await this.updateDidRecord(agent, didRecord)
+    return {
+      schemaId: found.schemaId,
+    }
   }
 }

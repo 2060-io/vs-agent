@@ -24,7 +24,11 @@ export class SelfTrController {
   @ApiResponse({ status: 200, description: 'Verifiable Credential returned' })
   async getCredentials(@Param('schemaId') schemaId: string) {
     try {
-      return await this.trustService.getSchemaData(schemaId)
+      const baseUrl = `${this.publicApiBaseUrl}/vt/${schemaId}`
+      if (schemaId.endsWith('-c-vp.json'))
+        return await this.trustService.getVerifiableTrustCredential(baseUrl)
+      if (schemaId.endsWith('-jsc-vp.json') || schemaId.endsWith('-jsc.json'))
+        return await this.trustService.getJsonSchemaCredential(baseUrl)
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)
@@ -60,5 +64,15 @@ export class SelfTrController {
       throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
     }
     return { type: 'PERMISSION_TYPE_ISSUER', did }
+  }
+
+  private resolveSchemaKey(schemaId: string): '_vt/vtc' | '_vt/jsc' {
+    const normalized = schemaId.toLowerCase()
+    if (normalized.endsWith('-c-vp.json')) return '_vt/vtc'
+    if (normalized.endsWith('-jsc-vp.json') || normalized.endsWith('.jsc.json')) return '_vt/jsc'
+    throw new HttpException(
+      `Schema type could not be determined from id: ${schemaId}`,
+      HttpStatus.BAD_REQUEST,
+    )
   }
 }

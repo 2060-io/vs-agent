@@ -185,8 +185,9 @@ async function generateVerifiableCredential(
     claims = await getClaims(logger, ecsSchemas, { id: subjectId }, logTag)
   }
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
-  const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData) return metadata
+  const record = didRecord.metadata.get('_vt/jsc') ?? {}
+  const metadata = record[subjectId!]
+  if (metadata?.integrityData === integrityData) return metadata.credential
 
   const unsignedCredential = createCredential({
     id,
@@ -211,7 +212,13 @@ async function generateVerifiableCredential(
     presentation.verifiableCredential = [signedCredential]
     return await signerW3c(agent, presentation, verificationMethodId)
   } else {
-    didRecord.metadata.set(logTag, { data: signedCredential.jsonCredential, integrityData })
+    record[subjectId!] = {
+      credential: signedCredential.jsonCredential,
+      verifiablePresentation: {},
+      didDocumentServiceId: '',
+      integrityData,
+    }
+    didRecord.metadata.set('_vt/jsc', record)
     await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
     return signedCredential.jsonCredential
   }
@@ -311,17 +318,18 @@ export async function generateVerifiablePresentation(
   if (!didDocument) throw Error('The DID Document be set up')
   const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
-  const serviceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-').replace('.json', '')}`
+  const didDocumentServiceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-').replace('.json', '')}`
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
-  const metadata = didRecord.metadata.get(logTag)
-  if (metadata?.integrityData === integrityData) return metadata
+  const record = didRecord.metadata.get('_vt/vtc') ?? {}
+  const metadata = record[credentialSchema.id]
+  if (metadata?.integrityData === integrityData) return metadata.verifiablePresentation
 
   const presentation = createPresentation({
     id,
     holder: agent.did,
     verifiableCredential: [],
   })
-  const result = await generateVerifiableCredential(
+  const verifiablePresentation = await generateVerifiableCredential(
     agent,
     id,
     ecsSchemas,
@@ -334,12 +342,20 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.data.id) s.serviceEndpoint = id
+    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.verifiablePresentation.id)
+      s.serviceEndpoint = id
     return s
   })
-  didRecord.metadata.set(logTag, { data: result, integrityData, serviceId })
+  const credential = verifiablePresentation.verifiableCredential[0]
+  record[credentialSchema.id] = {
+    credential,
+    verifiablePresentation,
+    didDocumentServiceId,
+    integrityData,
+  }
+  didRecord.metadata.set('_vt/vtc', record)
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
-  return result
+  return verifiablePresentation
 }
 
 export function createPresentation(options: Partial<W3cPresentationOptions>) {
