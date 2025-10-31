@@ -65,14 +65,4 @@ export class SelfTrController {
     }
     return { type: 'PERMISSION_TYPE_ISSUER', did }
   }
-
-  private resolveSchemaKey(schemaId: string): '_vt/vtc' | '_vt/jsc' {
-    const normalized = schemaId.toLowerCase()
-    if (normalized.endsWith('-c-vp.json')) return '_vt/vtc'
-    if (normalized.endsWith('-jsc-vp.json') || normalized.endsWith('.jsc.json')) return '_vt/jsc'
-    throw new HttpException(
-      `Schema type could not be determined from id: ${schemaId}`,
-      HttpStatus.BAD_REQUEST,
-    )
-  }
 }

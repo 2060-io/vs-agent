@@ -73,7 +73,7 @@ export class VsAgentController {
       'Successfully retrieved the Verifiable Trust Credential (VTC) defined by the given JSON Schema URL.',
   })
   @ApiResponse({ status: 404, description: 'Schema not found.' })
-  async getSchemaCredential(@Query('schemaId') schemaId: string) {
+  async getVerifiableTrustCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.getVerifiableTrustCredential(schemaId)
   }
 
@@ -108,7 +108,7 @@ export class VsAgentController {
     status: 404,
     description: 'No Verifiable Trust Credential (VTC) was found for the provided schema ID.',
   })
-  async removeCredential(@Query('schemaId') schemaId: string) {
+  async removeVerifiableTrustCredential(@Query('schemaId') schemaId: string) {
     return await this.trustService.removeVerifiableTrustCredential(schemaId)
   }
 
@@ -170,9 +170,9 @@ export class VsAgentController {
     status: 400,
     description: 'Invalid credential format or missing required fields.',
   })
-  async createCredential(@Body() body: W3cCredentialDto) {
+  async createVtc(@Body() body: W3cCredentialDto) {
     const data = await this.trustService.createVtc(
-      body.schemaBaseId,
+      body.schemaBaseId.toLocaleLowerCase(),
       JsonTransformer.fromJSON(body.credential, W3cJsonLdVerifiableCredential),
     )
     return { message: 'Credential created successfully', data }
@@ -284,7 +284,7 @@ export class VsAgentController {
     status: 400,
     description: 'Invalid schema input or missing required parameters.',
   })
-  async createJsonSchemaCredential(@Body() body: JsonSchemaCredentialDto) {
-    return await this.trustService.createJsc(body.schemaBaseId, body.jsonSchemaRef)
+  async createJsc(@Body() body: JsonSchemaCredentialDto) {
+    return await this.trustService.createJsc(body.schemaBaseId.toLocaleLowerCase(), body.jsonSchemaRef)
   }
 }

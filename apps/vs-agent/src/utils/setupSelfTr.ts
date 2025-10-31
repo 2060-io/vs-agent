@@ -46,23 +46,23 @@ addFormats(ajv)
 // Helpers
 export const presentations = [
   {
-    name: 'ecs-service-c-vp.json',
+    name: 'ecs-service',
     schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
-    name: 'ecs-org-c-vp.json',
+    name: 'ecs-org',
     schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
 ]
 
 export const credentials = [
   {
-    name: 'schemas-example-service-jsc.json',
+    name: 'example-service',
     credUrl: `ecosystem/cs/v1/js/ecs-service`,
     schemaUrl: `ecosystem/schemas-example-service-jsc.json`,
   },
   {
-    name: 'schemas-example-org-jsc.json',
+    name: 'example-org',
     credUrl: `ecosystem/cs/v1/js/ecs-org`,
     schemaUrl: `ecosystem/schemas-example-org-jsc.json`,
   },
@@ -119,7 +119,7 @@ export const setupSelfTr = async ({
   for (const { name, schemaUrl } of presentations) {
     await generateVerifiablePresentation(
       agent,
-      `${publicApiBaseUrl}/vt/${name}`,
+      `${publicApiBaseUrl}/vt/${name}-c-vp.json`,
       ecsSchemas,
       name,
       ['VerifiableCredential', 'VerifiableTrustCredential'],
@@ -318,7 +318,7 @@ export async function generateVerifiablePresentation(
   if (!didDocument) throw Error('The DID Document be set up')
   const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, logTag)
   // Use full input for integrityData to ensure update detection
-  const didDocumentServiceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-').replace('.json', '')}`
+  const didDocumentServiceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-')}-c-vp`
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/vtc') ?? {}
   const metadata = record[credentialSchema.id]
@@ -383,7 +383,7 @@ export async function getClaims(
 ) {
   // Default claims fallback
   claims =
-    logTag === 'ecs-service-c-vp.json'
+    logTag === 'ecs-service'
       ? {
           name: claims?.name ?? AGENT_LABEL,
           type: claims?.type ?? SELF_ISSUED_VTC_SERVICE_TYPE,
@@ -403,7 +403,7 @@ export async function getClaims(
           countryCode: claims?.countryCode ?? SELF_ISSUED_VTC_ORG_COUNTRYCODE,
         }
 
-  const ecsSchema = ecsSchemas[logTag.replace('-c-vp.json', '')]
+  const ecsSchema = ecsSchemas[logTag]
   if (!ecsSchema) {
     throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
   }
