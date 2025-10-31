@@ -158,7 +158,7 @@ export const setupSelfTr = async ({
  * @param agent - The VsAgent instance used for signing and DID management.
  * @param logger - Logger instance for logging operations.
  * @param ecsSchemas - Map of ECS schemas for validation.
- * @param logTag - Unique identifier for the credential type and metadata key.
+ * @param schemaKey - Unique identifier for the credential type and metadata key.
  * @param type - Array of credential types (e.g., ['VerifiableCredential']).
  * @param subject - Subject information, including ID and optional claims.
  * @param credentialSchema - Schema definition for the credential.
@@ -169,7 +169,7 @@ async function generateVerifiableCredential(
   agent: VsAgent,
   id: string,
   ecsSchemas: Record<string, AnySchemaObject>,
-  logTag: string,
+  schemaKey: string,
   type: string[],
   subject: W3cCredentialSubject,
   credentialSchema: W3cCredentialSchema,
@@ -182,7 +182,7 @@ async function generateVerifiableCredential(
   let claims = subject.claims
 
   if (!claims) {
-    claims = await getClaims(logger, ecsSchemas, { id: subjectId }, logTag)
+    claims = await getClaims(logger, ecsSchemas, { id: subjectId }, schemaKey)
   }
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/jsc') ?? {}
@@ -299,7 +299,7 @@ export async function signerW3c(
  * @param agent - The VsAgent instance used for signing and DID management.
  * @param logger - Logger instance for logging operations.
  * @param ecsSchemas - Map of ECS schemas for validation.
- * @param logTag - Unique identifier for the presentation type and metadata key.
+ * @param schemaKey - Unique identifier for the presentation type and metadata key.
  * @param type - Array of credential types to include.
  * @param credentialSchema - Schema definition for the credential.
  * @returns The signed verifiable presentation, with integrity metadata.
@@ -308,7 +308,7 @@ export async function generateVerifiablePresentation(
   agent: VsAgent,
   id: string,
   ecsSchemas: Record<string, AnySchemaObject>,
-  logTag: string,
+  schemaKey: string,
   type: string[],
   credentialSchema: W3cCredentialSchema,
 ) {
@@ -316,9 +316,9 @@ export async function generateVerifiablePresentation(
   const [didRecord] = await agent.dids.getCreatedDids({ did: agent.did })
   const didDocument = didRecord.didDocument
   if (!didDocument) throw Error('The DID Document be set up')
-  const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, logTag)
+  const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, schemaKey)
   // Use full input for integrityData to ensure update detection
-  const didDocumentServiceId = `${agent.did}#vpr-${logTag.replace('ecs-', 'schemas-')}-c-vp`
+  const didDocumentServiceId = `${agent.did}#vpr-${schemaKey.replace('ecs-', 'schemas-')}-c-vp`
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/vtc') ?? {}
   const metadata = record[credentialSchema.id]
@@ -333,7 +333,7 @@ export async function generateVerifiablePresentation(
     agent,
     agent.did,
     ecsSchemas,
-    logTag,
+    schemaKey,
     type,
     { id: agent.did },
     credentialSchema,
@@ -342,7 +342,7 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(logTag) && s.serviceEndpoint !== metadata?.verifiablePresentation.id)
+    if (s.serviceEndpoint.includes(schemaKey) && s.serviceEndpoint !== metadata?.verifiablePresentation.id)
       s.serviceEndpoint = id
     return s
   })
@@ -366,12 +366,12 @@ export function createPresentation(options: Partial<W3cPresentationOptions>) {
 
 /**
  * Retrieves and validates claims for a credential subject.
- * If claims are not found, builds default claims based on the logTag.
- * Validates claims against the ECS schema for the given logTag.
+ * If claims are not found, builds default claims based on the schemaKey.
+ * Validates claims against the ECS schema for the given schemaKey.
  *
  * @param ecsSchemas - Map of ECS schemas for validation.
  * @param subject - Credential subject, including ID.
- * @param logTag - Unique identifier for the credential type.
+ * @param schemaKey - Unique identifier for the credential type.
  * @returns The validated claims object.
  * @throws If claims are invalid or schema is missing.
  */
@@ -379,11 +379,11 @@ export async function getClaims(
   logger: Logger,
   ecsSchemas: Record<string, AnySchemaObject>,
   { id, claims }: W3cCredentialSubject,
-  logTag: string,
+  schemaKey: string,
 ) {
   // Default claims fallback
   claims =
-    logTag === 'ecs-service'
+    schemaKey === 'ecs-service'
       ? {
           name: claims?.name ?? AGENT_LABEL,
           type: claims?.type ?? SELF_ISSUED_VTC_SERVICE_TYPE,
@@ -403,9 +403,9 @@ export async function getClaims(
           countryCode: claims?.countryCode ?? SELF_ISSUED_VTC_ORG_COUNTRYCODE,
         }
 
-  const ecsSchema = ecsSchemas[logTag]
+  const ecsSchema = ecsSchemas[schemaKey]
   if (!ecsSchema) {
-    throw new Error(`Schema not defined in data schemas for logTag: ${logTag}`)
+    throw new Error(`Schema not defined in data schemas for schemaKey: ${schemaKey}`)
   }
 
   const credentialSubject = { id, ...claims }
