@@ -54,16 +54,15 @@ export class TrustService {
   }
 
   public async getVerifiableTrustCredential(schemaId?: string, page = 1, limit = 10) {
-    return await this.getTrustCredentialPaginated('_vt/vtc', 'No credentials found', schemaId, page, limit)
+    return await this.getTrustCredentialPaginated('_vt/vtc', schemaId, page, limit)
   }
 
   public async getJsonSchemaCredential(schemaId?: string, page = 1, limit = 10) {
-    return await this.getTrustCredentialPaginated('_vt/jsc', 'No JSON Schemas found', schemaId, page, limit)
+    return await this.getTrustCredentialPaginated('_vt/jsc', schemaId, page, limit)
   }
 
   private async getTrustCredentialPaginated(
     key: '_vt/vtc' | '_vt/jsc',
-    notFoundMessage: string,
     schemaId?: string,
     page = 1,
     limit = 10,
@@ -71,7 +70,7 @@ export class TrustService {
     const allMetadata = await this.getTrustCredential(key, schemaId)
     if (schemaId) return allMetadata
     if (!allMetadata || Object.keys(allMetadata).length === 0) {
-      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
+      throw new HttpException('Trust registry not found', HttpStatus.NOT_FOUND)
     }
 
     const items = Object.entries(allMetadata).map(([schemaId, entry]) => ({
