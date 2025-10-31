@@ -37,7 +37,6 @@ import {
   MASTER_LIST_CSCA_LOCATION,
   AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
   AGENT_BACKUP_BEFORE_STORAGE_UPDATE,
-  ENABLE_SELF_ISSUED_VTC,
 } from './config'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -172,7 +171,7 @@ const run = async () => {
   await startServers(agent, conf)
 
   // Initialize Self-Trust Registry
-  if (agent.did && ENABLE_SELF_ISSUED_VTC) await setupSelfTr({ agent, publicApiBaseUrl })
+  if (agent.did) await setupSelfTr({ agent, publicApiBaseUrl })
 
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
