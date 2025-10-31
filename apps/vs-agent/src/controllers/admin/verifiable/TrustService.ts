@@ -40,10 +40,10 @@ export class TrustService {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
   }
 
-  private async getTrustCredential(schemaId: string, key: '_vt/vtc' | '_vt/jsc') {
+  private async getTrustCredential(key: '_vt/vtc' | '_vt/jsc', schemaId?: string) {
     try {
       const { didRecord } = await this.getDidRecord()
-      const metadata = this.findMetadataEntry(schemaId, didRecord, key)
+      const metadata = this.findMetadataEntry(didRecord, key, schemaId)
       if (!metadata) {
         throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
       }
@@ -53,18 +53,57 @@ export class TrustService {
     }
   }
 
-  public async getVerifiableTrustCredential(schemaId: string) {
-    return await this.getTrustCredential(schemaId, '_vt/vtc')
+  public async getVerifiableTrustCredential(schemaId?: string, page = 1, limit = 10) {
+    return await this.getTrustCredentialPaginated('_vt/vtc', 'No credentials found', schemaId, page, limit)
   }
 
-  public async getJsonSchemaCredential(schemaId: string) {
-    return await this.getTrustCredential(schemaId, '_vt/jsc')
+  public async getJsonSchemaCredential(schemaId?: string, page = 1, limit = 10) {
+    return await this.getTrustCredentialPaginated('_vt/jsc', 'No JSON Schemas found', schemaId, page, limit)
+  }
+
+  private async getTrustCredentialPaginated(
+    key: '_vt/vtc' | '_vt/jsc',
+    notFoundMessage: string,
+    schemaId?: string,
+    page = 1,
+    limit = 10,
+  ) {
+    const allMetadata = await this.getTrustCredential(key, schemaId)
+    if (schemaId) return allMetadata
+    if (!allMetadata || Object.keys(allMetadata).length === 0) {
+      throw new HttpException(notFoundMessage, HttpStatus.NOT_FOUND)
+    }
+
+    const items = Object.entries(allMetadata).map(([schemaId, entry]) => ({
+      schemaId,
+      ...(entry as Record<string, any>),
+    }))
+    return this.paginate(items, page, limit)
+  }
+
+  private paginate<T>(items: T[], page = 1, limit = 10) {
+    const totalItems = items.length
+    const totalPages = Math.ceil(totalItems / limit)
+    const start = (page - 1) * limit
+    const end = start + limit
+
+    return {
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      data: items.slice(start, end),
+    }
   }
 
   private async removeTrustCredential(schemaId: string, key: '_vt/vtc' | '_vt/jsc') {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const record = this.findMetadataEntry(schemaId, didRecord, key)
+      const record = this.findMetadataEntry(didRecord, key, schemaId)
       // Currently, we only use one serviceEndpoint per ID.
       // In the future, if multiple serviceEndpoints exist for the same ID,
       // we should review the serviceEndpoint content and remove only the specific one.
@@ -93,7 +132,7 @@ export class TrustService {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const schemaId = `schemas-${id}-c-vp.json`
-      const record = this.findMetadataEntry(schemaId, didRecord, '_vt/vtc')
+      const record = this.findMetadataEntry(didRecord, '_vt/vtc', schemaId)
       const didDocumentServiceId = `${agent.did}#vpr-${schemaId.replace('.json', '')}`
       const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaId}`
       const unsignedPresentation = createPresentation({
@@ -116,12 +155,9 @@ export class TrustService {
         unsignedPresentation,
         getVerificationMethodId(agent.config.logger, didRecord),
       )
-      
-      
+
       // Update #whois with new endpoint
-      const service = didRecord.didDocument?.service?.find(
-        s => s.id === `${agent.did}#whois`
-      )
+      const service = didRecord.didDocument?.service?.find(s => s.id === `${agent.did}#whois`)
       if (service) service.serviceEndpoint = serviceEndpoint
 
       await this.saveMetadataEntry(
@@ -142,7 +178,7 @@ export class TrustService {
   public async createJsc(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const record = this.findMetadataEntry(jsonSchemaRef, didRecord, '_vt/jsc')
+      const record = this.findMetadataEntry(didRecord, '_vt/jsc', jsonSchemaRef)
       const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
@@ -420,9 +456,10 @@ export class TrustService {
     return id
   }
 
-  private findMetadataEntry(id: string, didRecord: DidRecord, key: '_vt/vtc' | '_vt/jsc') {
+  private findMetadataEntry(didRecord: DidRecord, key: '_vt/vtc' | '_vt/jsc', id?: string) {
     const metadata = didRecord.metadata.get(key)
     if (!metadata) return null
+    if (!id) return { data: metadata }
     for (const [schemaId, entry] of Object.entries(metadata)) {
       const credId = entry.credential?.id
       const presId = entry.verifiablePresentation?.id
@@ -469,7 +506,7 @@ export class TrustService {
     didRecord: DidRecord,
     key: '_vt/vtc' | '_vt/jsc',
   ) {
-    const found = this.findMetadataEntry(id, didRecord, key)
+    const found = this.findMetadataEntry(didRecord, key, id)
     if (!found) return null
 
     const metadata = didRecord.metadata.get(key)
