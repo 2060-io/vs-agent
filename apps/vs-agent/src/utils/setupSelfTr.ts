@@ -343,7 +343,7 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(schemaKey)) {
+    if (s.serviceEndpoint.includes(schemaKey) && s.id !== `${agent.did}#whois`) {
       s.id = didDocumentServiceId
       s.serviceEndpoint = id
     }
