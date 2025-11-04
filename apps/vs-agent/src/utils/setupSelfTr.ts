@@ -322,7 +322,7 @@ export async function generateVerifiablePresentation(
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/vtc') ?? {}
   const metadata = record[credentialSchema.id]
-  if (metadata?.integrityData === integrityData) return metadata.verifiablePresentation
+  if (metadata?.integrityData === integrityData && metadata.attached) return metadata.verifiablePresentation
 
   const presentation = createPresentation({
     id,
@@ -342,7 +342,7 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(schemaKey) && s.serviceEndpoint !== metadata?.verifiablePresentation.id) {
+    if (s.serviceEndpoint.includes(schemaKey)) {
       s.id = didDocumentServiceId
       s.serviceEndpoint = id
     }
