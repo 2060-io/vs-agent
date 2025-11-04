@@ -274,12 +274,12 @@ export class VsAgent extends Agent<VsAgentModules> {
       ...(didDocument.service ?? []),
       ...[
         new DidDocumentService({
-          id: `${publicDid}#vpr-schemas-service-c-vp`,
+          id: `${publicDid}#vpr-ecs-service-c-vp`,
           serviceEndpoint: `${this.publicApiBaseUrl}/vt/ecs-service-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),
         new DidDocumentService({
-          id: `${publicDid}#vpr-schemas-org-c-vp`,
+          id: `${publicDid}#vpr-ecs-org-c-vp`,
           serviceEndpoint: `${this.publicApiBaseUrl}/vt/ecs-org-c-vp.json`,
           type: 'LinkedVerifiablePresentation',
         }),

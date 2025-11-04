@@ -318,7 +318,7 @@ export async function generateVerifiablePresentation(
   if (!didDocument) throw Error('The DID Document be set up')
   const claims = await getClaims(agent.config.logger, ecsSchemas, { id: agent.did }, schemaKey)
   // Use full input for integrityData to ensure update detection
-  const didDocumentServiceId = `${agent.did}#vpr-${schemaKey.replace('ecs-', 'schemas-')}-c-vp`
+  const didDocumentServiceId = `${agent.did}#vpr-${schemaKey}-c-vp`
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/vtc') ?? {}
   const metadata = record[credentialSchema.id]
@@ -342,8 +342,10 @@ export async function generateVerifiablePresentation(
   // Update linked VP when the presentation has changed
   didDocument.service = didDocument.service?.map(s => {
     if (typeof s.serviceEndpoint !== 'string') return s
-    if (s.serviceEndpoint.includes(schemaKey) && s.serviceEndpoint !== metadata?.verifiablePresentation.id)
+    if (s.serviceEndpoint.includes(schemaKey) && s.serviceEndpoint !== metadata?.verifiablePresentation.id) {
+      s.id = didDocumentServiceId
       s.serviceEndpoint = id
+    }
     return s
   })
   const credential = verifiablePresentation.verifiableCredential[0]
@@ -352,6 +354,7 @@ export async function generateVerifiablePresentation(
     verifiablePresentation,
     didDocumentServiceId,
     integrityData,
+    attached: true,
   }
   didRecord.metadata.set('_vt/vtc', record)
   await agent.context.dependencyManager.resolve(DidRepository).update(agent.context, didRecord)
