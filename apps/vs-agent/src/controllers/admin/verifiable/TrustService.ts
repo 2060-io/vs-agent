@@ -177,7 +177,6 @@ export class TrustService {
   public async createJsc(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const record = this.findMetadataEntry(didRecord, '_vt/jsc', jsonSchemaRef)
       const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
@@ -185,6 +184,9 @@ export class TrustService {
       }
       const schemaPresentation = `schemas-${id}-jsc-vp.json`
       const schemaCredential = `schemas-${id}-jsc.json`
+      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
+      const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
+      const record = this.findMetadataEntry(didRecord, '_vt/jsc', serviceEndpoint)
       let unsignedCredential
       if (record) unsignedCredential = record.credential as W3cJsonLdVerifiableCredential
 
@@ -212,8 +214,6 @@ export class TrustService {
         verificationMethodId,
       )
 
-      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
-      const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
         holder: agent.did,

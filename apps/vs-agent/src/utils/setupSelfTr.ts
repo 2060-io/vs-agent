@@ -322,7 +322,8 @@ export async function generateVerifiablePresentation(
   const integrityData = buildIntegrityData({ id, type, credentialSchema, claims })
   const record = didRecord.metadata.get('_vt/vtc') ?? {}
   const metadata = record[credentialSchema.id]
-  if (metadata?.integrityData === integrityData && metadata.attached) return metadata.verifiablePresentation
+  const attached = metadata.attached
+  if (metadata?.integrityData === integrityData && attached) return metadata.verifiablePresentation
 
   const presentation = createPresentation({
     id,
