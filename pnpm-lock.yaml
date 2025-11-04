@@ -86,8 +86,8 @@ importers:
         specifier: 0.0.2
         version: 0.0.2(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       '@2060.io/credo-ts-didcomm-mrtd':
-        specifier: 0.0.17
-        version: 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)
+        specifier: 0.0.18
+        version: 0.0.18(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)
       '@2060.io/credo-ts-didcomm-receipts':
         specifier: 0.0.7
         version: 0.0.7(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -584,6 +584,11 @@ packages:
 
   '@2060.io/credo-ts-didcomm-mrtd@0.0.17':
     resolution: {integrity: sha512-4uXTue5m7a4oAQzWRkcu6Olivu+MNE7rKHDlDeO6z01t5I3UbFKgCmzSrh8WRs+zfPfL2tKWURZJRAhA86MWsA==}
+    peerDependencies:
+      '@credo-ts/core': 0.5.18-alpha-20250930143725
+
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.18':
+    resolution: {integrity: sha512-56v/I2e86VcUfDq1PgSoYCsa/nPt1U9XVbMC+Ns9y6Zp8FcA2YQnTprdv/k6mhtpGaY8LqWnDr5PiR+FXPCKBw==}
     peerDependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725
 
@@ -6825,10 +6830,10 @@ snapshots:
       - supports-color
       - web-streams-polyfill
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)':
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.8.3)':
     dependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
-      '@li0ard/tsemrtd': 0.2.2(typescript@5.7.2)
+      '@li0ard/tsemrtd': 0.2.2(typescript@5.8.3)
       '@peculiar/x509': 1.13.0
       '@types/pkijs': 3.0.1
       asn1js: 3.0.6
@@ -6843,10 +6848,10 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.8.3)':
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.18(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.7.2)':
     dependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
-      '@li0ard/tsemrtd': 0.2.2(typescript@5.8.3)
+      '@li0ard/tsemrtd': 0.2.2(typescript@5.7.2)
       '@peculiar/x509': 1.13.0
       '@types/pkijs': 3.0.1
       asn1js: 3.0.6
