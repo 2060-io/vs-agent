@@ -135,9 +135,9 @@ export class TrustService {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const schemaId = `schemas-${id}-c-vp.json`
-      const record = this.findMetadataEntry(didRecord, '_vt/vtc', schemaId)
       const didDocumentServiceId = `${agent.did}#vpr-${schemaId.replace('.json', '')}`
       const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaId}`
+      const record = this.findMetadataEntry(didRecord, '_vt/vtc', serviceEndpoint)
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
         holder: agent.did,
