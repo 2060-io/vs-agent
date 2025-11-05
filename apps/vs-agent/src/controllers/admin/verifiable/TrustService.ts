@@ -419,6 +419,7 @@ export class TrustService {
   private async updateDidRecord(agent: VsAgent, didRecord: DidRecord) {
     const repo = agent.context.dependencyManager.resolve(DidRepository)
     await repo.update(agent.context, didRecord)
+    await agent.dids.update({ did: didRecord.did, didDocument: didRecord.didDocument! })
   }
 
   private handleError(error: any, defaultMsg: string) {
