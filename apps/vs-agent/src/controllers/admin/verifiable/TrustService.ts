@@ -14,18 +14,22 @@ import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/c
 
 import { UrlShorteningService } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'
-import { createInvitation, getEcsSchemas, VsAgent } from '../../../utils'
 import {
   addDigestSRI,
   createCredential,
+  createInvitation,
   createJsonSchema,
   createJsonSubjectRef,
   createPresentation,
+  getEcsSchemas,
   getVerificationMethodId,
   mapToEcosystem,
+  mapToSelfTr,
+  presentations,
   signerW3c,
   validateSchema,
-} from '../../../utils/setupSelfTr'
+  VsAgent,
+} from '../../../utils'
 
 @Injectable()
 export class TrustService {
@@ -131,9 +135,9 @@ export class TrustService {
     try {
       const { agent, didRecord } = await this.getDidRecord()
       const schemaId = `schemas-${id}-c-vp.json`
-      const record = this.findMetadataEntry(didRecord, '_vt/vtc', schemaId)
       const didDocumentServiceId = `${agent.did}#vpr-${schemaId.replace('.json', '')}`
       const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaId}`
+      const record = this.findMetadataEntry(didRecord, '_vt/vtc', serviceEndpoint)
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
         holder: agent.did,
@@ -155,10 +159,6 @@ export class TrustService {
         getVerificationMethodId(agent.config.logger, didRecord),
       )
 
-      // Update #whois with new endpoint
-      const service = didRecord.didDocument?.service?.find(s => s.id === `${agent.did}#whois`)
-      if (service) service.serviceEndpoint = serviceEndpoint
-
       await this.saveMetadataEntry(
         agent,
         didRecord,
@@ -177,7 +177,6 @@ export class TrustService {
   public async createJsc(id: string, jsonSchemaRef: string) {
     try {
       const { agent, didRecord } = await this.getDidRecord()
-      const record = this.findMetadataEntry(didRecord, '_vt/jsc', jsonSchemaRef)
       const { id: subjectId, claims } = createJsonSubjectRef(jsonSchemaRef)
       const credentialSubject = {
         id: subjectId,
@@ -185,6 +184,9 @@ export class TrustService {
       }
       const schemaPresentation = `schemas-${id}-jsc-vp.json`
       const schemaCredential = `schemas-${id}-jsc.json`
+      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
+      const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
+      const record = this.findMetadataEntry(didRecord, '_vt/jsc', serviceEndpoint)
       let unsignedCredential
       if (record) unsignedCredential = record.credential as W3cJsonLdVerifiableCredential
 
@@ -212,8 +214,6 @@ export class TrustService {
         verificationMethodId,
       )
 
-      const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
-      const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
       const unsignedPresentation = createPresentation({
         id: serviceEndpoint,
         holder: agent.did,
@@ -496,6 +496,13 @@ export class TrustService {
       didDocumentServiceId,
     }
     didRecord.metadata.set(key, record)
+
+    // Update #whois with new endpoint
+    const service = didRecord.didDocument?.service?.find(s => s.id === `${agent.did}#whois`)
+    if (service) service.serviceEndpoint = verifiablePresentation.id!
+
+    // When a new VTC has been added, remove the self VTCs
+    this.updateVtcEntries(didRecord, false)
     await this.updateDidRecord(agent, didRecord)
   }
 
@@ -513,9 +520,52 @@ export class TrustService {
 
     delete metadata[found.schemaId]
     didRecord.metadata.set(key, metadata)
+
+    // If the last entry is removed, restore defaults
+    this.restoreDefaultVtcEntries(didRecord)
     await this.updateDidRecord(agent, didRecord)
     return {
       schemaId: found.schemaId,
     }
+  }
+
+  private restoreDefaultVtcEntries(didRecord: DidRecord) {
+    const record = didRecord.metadata.get('_vt/vtc') ?? {}
+    if (!record || Object.keys(record).length <= 2) {
+      this.updateVtcEntries(didRecord, true)
+    }
+  }
+
+  private updateVtcEntries(didRecord: DidRecord, attach: boolean) {
+    const record = didRecord.metadata.get('_vt/vtc') ?? {}
+
+    presentations.forEach(p => {
+      const schemaId = mapToSelfTr(p.schemaUrl, this.publicApiBaseUrl)
+      const current = record[schemaId]
+      if (current?.attached === attach) return
+      record[schemaId] = {
+        ...current,
+        attached: attach,
+      }
+
+      const serviceId = current?.didDocumentServiceId
+      const serviceEndpoint = current?.verifiablePresentation?.id
+      if (!didRecord.didDocument?.service) return
+      if (attach) {
+        const alreadyExists = didRecord.didDocument.service.some(s => s.id === serviceId)
+        if (!alreadyExists && serviceId && serviceEndpoint) {
+          didRecord.didDocument.service.push(
+            new DidDocumentService({
+              id: serviceId,
+              serviceEndpoint,
+              type: 'LinkedVerifiablePresentation',
+            }),
+          )
+        }
+      } else {
+        didRecord.didDocument.service = didRecord.didDocument.service.filter(s => s.id !== serviceId)
+      }
+    })
+    didRecord.metadata.set('_vt/vtc', record)
   }
 }
