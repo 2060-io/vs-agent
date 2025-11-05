@@ -36,7 +36,8 @@ export class Claim {
 }
 
 export interface CredentialIssuanceMessageOptions extends BaseMessageOptions {
-  credentialDefinitionId: string
+  credentialDefinitionId?: string
+  credentialSchemaId: string
   revocationRegistryDefinitionId?: string
   revocationRegistryIndex?: number
   claims?: Claim[]
@@ -52,6 +53,7 @@ export class CredentialIssuanceMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.credentialDefinitionId = options.credentialDefinitionId
+      this.credentialSchemaId = options.credentialSchemaId
       this.revocationRegistryDefinitionId = options.revocationRegistryDefinitionId
       this.revocationRegistryIndex = options.revocationRegistryIndex
       this.claims = options.claims?.map(item => new Claim(item))
@@ -63,6 +65,9 @@ export class CredentialIssuanceMessage extends BaseMessage {
 
   @IsString()
   public credentialDefinitionId?: string
+
+  @IsString()
+  public credentialSchemaId?: string
 
   @IsString()
   @IsOptional()

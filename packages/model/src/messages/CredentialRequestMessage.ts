@@ -6,7 +6,8 @@ import { Claim, ClaimOptions } from './CredentialIssuanceMessage'
 import { MessageType } from './MessageType'
 
 export interface CredentialRequestMessageOptions extends BaseMessageOptions {
-  credentialDefinitionId: string
+  credentialDefinitionId?: string
+  credentialSchemaId: string
   claims: ClaimOptions[]
 }
 
@@ -20,6 +21,7 @@ export class CredentialRequestMessage extends BaseMessage {
       this.timestamp = options.timestamp ?? new Date()
       this.connectionId = options.connectionId
       this.credentialDefinitionId = options.credentialDefinitionId
+      this.credentialSchemaId = options.credentialSchemaId
       this.claims = options.claims.map(item => new Claim(item))
     }
   }
@@ -29,7 +31,11 @@ export class CredentialRequestMessage extends BaseMessage {
 
   @Expose()
   @IsString()
-  public credentialDefinitionId!: string
+  public credentialDefinitionId?: string
+
+  @Expose()
+  @IsString()
+  public credentialSchemaId?: string
 
   @Expose()
   @Type(() => Claim)
