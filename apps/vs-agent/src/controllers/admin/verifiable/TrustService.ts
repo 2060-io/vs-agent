@@ -531,7 +531,7 @@ export class TrustService {
 
   private restoreDefaultVtcEntries(didRecord: DidRecord) {
     const record = didRecord.metadata.get('_vt/vtc') ?? {}
-    if (!record || Object.keys(record).length === 0) {
+    if (!record || Object.keys(record).length <= 2) {
       this.updateVtcEntries(didRecord, true)
     }
   }
