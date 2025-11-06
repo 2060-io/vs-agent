@@ -175,20 +175,15 @@ export class VsAgent extends Agent<VsAgentModules> {
       // DID Already exists: update it in case that agent parameters have been changed. At the moment, we can only update
       //  DIDComm endpoints, so we'll only replace the service (if different from previous)
       const didDocument = existingRecord.didDocument!
-
+      const hasLegacyMethods = (didDocument.verificationMethod ?? []).some(vm =>
+        ['Ed25519VerificationKey2018', 'X25519KeyAgreementKey2019'].includes(vm.type),
+      )
       if (
         JSON.stringify(didDocument.didCommServices) !==
-        JSON.stringify(
-          new DidDocument({ id: existingRecord.id, service: this.getDidCommServices(existingRecord.id) }),
-        )
+          JSON.stringify(this.getDidCommServices(existingRecord.id)) ||
+        hasLegacyMethods
       ) {
-        // Replace all DIDComm services by the new ones
-        didDocument.service = [
-          ...(didDocument.service
-            ? didDocument.service.filter(service => ![DidCommV1Service.type].includes(service.type))
-            : []),
-          ...this.getDidCommServices(existingRecord.id),
-        ]
+        await this.createAndAddDidCommKeysAndServices(didDocument)
         await this.dids.update({ did: parsedDid.did, didDocument })
         this.logger?.debug('Public did record updated')
       } else {
@@ -239,6 +234,17 @@ export class VsAgent extends Agent<VsAgentModules> {
     const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey)
     const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
 
+    const legacyAuthId = (didDocument.verificationMethod ?? []).find(vm =>
+      ['Ed25519VerificationKey2018'].includes(vm.type),
+    )?.id
+    if (legacyAuthId) {
+      didDocument.authentication = (didDocument.authentication ?? []).filter(id => id !== legacyAuthId)
+      didDocument.assertionMethod = (didDocument.assertionMethod ?? []).filter(id => id !== legacyAuthId)
+    }
+    const filteredMethods = (didDocument.verificationMethod ?? []).filter(
+      vm => !['Ed25519VerificationKey2018', 'X25519KeyAgreementKey2019'].includes(vm.type),
+    )
+
     const verificationMethods = [
       {
         controller: publicDid,
@@ -261,11 +267,16 @@ export class VsAgent extends Agent<VsAgentModules> {
     const didcommServices = this.getDidCommServices(publicDid)
 
     didDocument.context = [...new Set([...(didDocument.context ?? []), ...context])]
-    didDocument.verificationMethod = [...(didDocument.verificationMethod ?? []), ...verificationMethods]
-    didDocument.authentication = [...(didDocument.authentication ?? []), authentication]
-    didDocument.assertionMethod = [...(didDocument.assertionMethod ?? []), assertionMethod]
-    didDocument.keyAgreement = [...(didDocument.keyAgreement ?? []), keyAgreement]
-    didDocument.service = [...(didDocument.service ?? []), ...didcommServices]
+    didDocument.verificationMethod = [...filteredMethods, ...verificationMethods]
+    didDocument.authentication = [...new Set([...(didDocument.authentication ?? []), authentication])]
+    didDocument.assertionMethod = [...new Set([...(didDocument.assertionMethod ?? []), assertionMethod])]
+    didDocument.keyAgreement = [...new Set([...(didDocument.keyAgreement ?? []), keyAgreement])]
+    didDocument.service = [
+      ...(didDocument.service
+        ? didDocument.service.filter(service => ![DidCommV1Service.type].includes(service.type))
+        : []),
+      ...didcommServices,
+    ]
   }
 
   private async createAndAddLinkedVpServices(didDocument: DidDocument) {

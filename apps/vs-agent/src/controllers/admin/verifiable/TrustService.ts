@@ -504,24 +504,7 @@ export class TrustService {
 
     // When a new VTC has been added, remove the self VTCs
     this.updateVtcEntries(didRecord, false)
-    const proofs = new Set([credential.proofTypes, verifiablePresentation.proofTypes])
-    this.setDidContext(didRecord, proofs)
     await this.updateDidRecord(agent, didRecord)
-  }
-
-  // Add credential-based context to enable signature resolution
-  private async setDidContext(didRecord: DidRecord, proofs: Set<string[]>): Promise<void> {
-    if (!didRecord?.didDocument) return
-    const proofContextMap: Record<string, string> = {
-      Ed25519Signature2018: 'https://w3id.org/security/suites/ed25519-2018/v1',
-      Ed25519Signature2020: 'https://w3id.org/security/suites/ed25519-2020/v1',
-    }
-
-    const contextFromProofs = Array.from(proofs)
-      .flat()
-      .map(proofType => proofContextMap[proofType])
-      .filter((ctx): ctx is string => Boolean(ctx))
-    didRecord.didDocument.context = [...new Set([...didRecord.didDocument.context, ...contextFromProofs])]
   }
 
   private async deleteMetadataEntry(
