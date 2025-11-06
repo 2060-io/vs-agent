@@ -184,7 +184,7 @@ export class VsAgent extends Agent<VsAgentModules> {
         hasLegacyMethods
       ) {
         await this.createAndAddDidCommKeysAndServices(didDocument)
-        await this.dids.update({ did: parsedDid.did, didDocument })
+        await this.dids.update({ did: didDocument.id, didDocument })
         this.logger?.debug('Public did record updated')
       } else {
         this.logger?.debug('Existing DID record found. No updates')
@@ -234,6 +234,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey)
     const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
 
+    // Remove legacy if exist
     const legacyAuthId = (didDocument.verificationMethod ?? []).find(vm =>
       ['Ed25519VerificationKey2018'].includes(vm.type),
     )?.id
@@ -275,8 +276,8 @@ export class VsAgent extends Agent<VsAgentModules> {
       ...(didDocument.service
         ? didDocument.service.filter(service => ![DidCommV1Service.type].includes(service.type))
         : []),
-      ...didcommServices,
-    ]
+        ...didcommServices,
+      ]
   }
 
   private async createAndAddLinkedVpServices(didDocument: DidDocument) {
