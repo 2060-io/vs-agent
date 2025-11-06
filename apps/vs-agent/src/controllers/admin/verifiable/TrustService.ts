@@ -492,7 +492,7 @@ export class TrustService {
 
     const record = didRecord.metadata.get(key) ?? {}
     record[ref] = {
-      credential,
+      credential: credential.jsonCredential,
       verifiablePresentation,
       didDocumentServiceId,
     }
