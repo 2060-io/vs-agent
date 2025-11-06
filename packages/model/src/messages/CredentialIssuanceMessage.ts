@@ -37,7 +37,7 @@ export class Claim {
 
 export interface CredentialIssuanceMessageOptions extends BaseMessageOptions {
   credentialDefinitionId?: string
-  credentialSchemaId: string
+  credentialSchemaId?: string
   revocationRegistryDefinitionId?: string
   revocationRegistryIndex?: number
   claims?: Claim[]

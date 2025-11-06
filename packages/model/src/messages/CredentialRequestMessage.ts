@@ -7,7 +7,7 @@ import { MessageType } from './MessageType'
 
 export interface CredentialRequestMessageOptions extends BaseMessageOptions {
   credentialDefinitionId?: string
-  credentialSchemaId: string
+  credentialSchemaId?: string
   claims: ClaimOptions[]
 }
 
