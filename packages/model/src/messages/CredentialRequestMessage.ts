@@ -29,7 +29,7 @@ export class CredentialRequestMessage extends BaseMessage {
 
   @Expose()
   @IsString()
-  public credentialDefinitionId?: string
+  public credentialDefinitionId!: string
 
   @Expose()
   @Type(() => Claim)
