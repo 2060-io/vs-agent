@@ -208,8 +208,9 @@ export class MessageService {
         throw new Error(`Identity proof Result not supported`)
       } else if (messageType === CredentialIssuanceMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialIssuanceMessage)
-        const allCredentials = await agent.credentials.getAll()
-        const credential = allCredentials.find(item => item.threadId === message.threadId)
+        let credential
+        if (message.threadId)
+          [credential] = await agent.credentials.findAllByQuery({ threadId: message.threadId })
 
         if (credential) {
           await agent.credentials.acceptProposal({
@@ -232,7 +233,7 @@ export class MessageService {
             revocationRegistryDefinitionId = msg.revocationRegistryDefinitionId
             revocationRegistryIndex = msg.revocationRegistryIndex
           } else if (msg.credentialSchemaId) {
-            const existingCred = allCredentials.find(item => item.id === msg.credentialSchemaId)
+            const existingCred = await agent.credentials.findById(msg.credentialSchemaId)
             attributes = existingCred?.credentialAttributes ?? []
             credentialDefinitionId =
               existingCred?.metadata.get('_anoncreds/credential')?.credentialDefinitionId
