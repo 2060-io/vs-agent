@@ -319,7 +319,7 @@ export class TrustService {
             credentialFormats: {
               anoncreds: {
                 attributes: attrNames.map(name => {
-                  return { name, mimeType: '', value: JSON.stringify(claims[name]) }
+                  return { name, mimeType: 'text/plain', value: JSON.stringify(claims[name]) }
                 }),
                 credentialDefinitionId,
               },
@@ -364,7 +364,7 @@ export class TrustService {
       await agent.modules.anoncreds.registerSchema({
         schema: {
           attrNames,
-          name: jsonSchemaCredential,
+          name: jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential',
           version: '1.0',
           issuerId,
         },
