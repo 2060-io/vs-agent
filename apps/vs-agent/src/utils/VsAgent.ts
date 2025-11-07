@@ -235,6 +235,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
 
     // Remove legacy if exist
+    const legacyContexts = ['https://w3id.org/security/suites/ed25519-2018/v1']
     const legacyAuthId = (didDocument.verificationMethod ?? []).find(vm =>
       ['Ed25519VerificationKey2018'].includes(vm.type),
     )?.id
@@ -267,7 +268,14 @@ export class VsAgent extends Agent<VsAgentModules> {
 
     const didcommServices = this.getDidCommServices(publicDid)
 
-    didDocument.context = [...new Set([...(didDocument.context ?? []), ...context])]
+    const currentContexts = Array.isArray(didDocument.context)
+      ? didDocument.context
+      : didDocument.context
+        ? [didDocument.context]
+        : []
+    didDocument.context = [
+      ...new Set([...currentContexts.filter(ctx => !legacyContexts.includes(ctx)), ...context]),
+    ]
     didDocument.verificationMethod = [...filteredMethods, ...verificationMethods]
     didDocument.authentication = [...new Set([...(didDocument.authentication ?? []), authentication])]
     didDocument.assertionMethod = [...new Set([...(didDocument.assertionMethod ?? []), assertionMethod])]
@@ -276,8 +284,8 @@ export class VsAgent extends Agent<VsAgentModules> {
       ...(didDocument.service
         ? didDocument.service.filter(service => ![DidCommV1Service.type].includes(service.type))
         : []),
-        ...didcommServices,
-      ]
+      ...didcommServices,
+    ]
   }
 
   private async createAndAddLinkedVpServices(didDocument: DidDocument) {
