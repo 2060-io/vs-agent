@@ -31,10 +31,12 @@ export class CredentialRequestMessage extends BaseMessage {
 
   @Expose()
   @IsString()
+  @IsOptional()
   public credentialDefinitionId?: string
 
   @Expose()
   @IsString()
+  @IsOptional()
   public credentialSchemaId?: string
 
   @Expose()

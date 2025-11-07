@@ -31,6 +31,7 @@ import {
   OutOfBandRepository,
   OutOfBandInvitation,
   ConnectionRecord,
+  CredentialPreviewAttributeOptions,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Injectable, Logger } from '@nestjs/common'
@@ -207,25 +208,45 @@ export class MessageService {
         throw new Error(`Identity proof Result not supported`)
       } else if (messageType === CredentialIssuanceMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialIssuanceMessage)
+        const allCredentials = await agent.credentials.getAll()
+        const credential = allCredentials.find(item => item.threadId === message.threadId)
 
-        const credential = (await agent.credentials.getAll()).find(item => item.threadId === message.threadId)
         if (credential) {
           await agent.credentials.acceptProposal({
             credentialRecordId: credential.id,
             autoAcceptCredential: AutoAcceptCredential.Always,
           })
         } else {
+          let attributes: CredentialPreviewAttributeOptions[] = []
+          let credentialDefinitionId: string | undefined
+          let revocationRegistryDefinitionId: string | undefined
+          let revocationRegistryIndex: number | undefined
+
           if (msg.claims && msg.credentialDefinitionId) {
+            attributes = msg.claims.map(item => ({
+              name: item.name,
+              mimeType: item.mimeType,
+              value: item.value,
+            }))
+            credentialDefinitionId = msg.credentialDefinitionId
+            revocationRegistryDefinitionId = msg.revocationRegistryDefinitionId
+            revocationRegistryIndex = msg.revocationRegistryIndex
+          } else if (msg.credentialSchemaId) {
+            const existingCred = allCredentials.find(item => item.id === msg.credentialSchemaId)
+            attributes = existingCred?.credentialAttributes ?? []
+            credentialDefinitionId =
+              existingCred?.metadata.get('_anoncreds/credential')?.credentialDefinitionId
+          }
+
+          if (attributes.length && credentialDefinitionId) {
             const record = await agent.credentials.offerCredential({
               connectionId: msg.connectionId,
               credentialFormats: {
                 anoncreds: {
-                  attributes: msg.claims.map(item => {
-                    return { name: item.name, mimeType: item.mimeType, value: item.value }
-                  }),
-                  credentialDefinitionId: msg.credentialDefinitionId,
-                  revocationRegistryDefinitionId: msg.revocationRegistryDefinitionId,
-                  revocationRegistryIndex: msg.revocationRegistryIndex,
+                  attributes,
+                  credentialDefinitionId,
+                  revocationRegistryDefinitionId,
+                  revocationRegistryIndex,
                 },
               },
               protocolVersion: 'v2',

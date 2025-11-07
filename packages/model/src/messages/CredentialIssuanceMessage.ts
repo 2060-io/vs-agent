@@ -64,9 +64,11 @@ export class CredentialIssuanceMessage extends BaseMessage {
   public static readonly type = MessageType.CredentialIssuanceMessage
 
   @IsString()
+  @IsOptional()
   public credentialDefinitionId?: string
 
   @IsString()
+  @IsOptional()
   public credentialSchemaId?: string
 
   @IsString()
