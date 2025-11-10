@@ -130,7 +130,7 @@ export class CredentialTypesController {
         name: options.name,
         schemaId,
         issuerId,
-        supportRevocation: true,
+        supportRevocation: options.supportRevocation,
       })
 
       return {
