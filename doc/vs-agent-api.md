@@ -152,12 +152,12 @@ This message could be sent as a response to a Credential Request. In such case, 
 Parameters:
 
 - (optional) Credential Definition ID
+- (optional) Credential Schema ID
 - (optional) Revocation Definition ID
 - (optional) Revocation Index
 - (optional) Claims
 
 **Note:** When using revocation parameters (`revocationRegistryDefinitionId` and `revocationRegistryIndex`), it is crucial to preserve both values as they were originally generated with the credential. Each revocation registry has a finite capacity for credentials (default is 1000), and the `revocationRegistryIndex` uniquely identifies the specific credential within the registry. Failing to maintain these parameters correctly may lead to issues during the credential revocation process.
-
 ```json
 {
   "type": "credential-issuance",
@@ -166,6 +166,43 @@ Parameters:
   "revocationRegistryIndex": 1,
   "claims": [{ "name": "claim-name", "mimeType": "mime-type", "value": "claim-value" }]
 }
+```
+Another configuration mode is available when a `credentialSchemaId` is provided instead of a `credentialDefinitionId`. This option can only be used if the credential was initially issued through the VS Agent, and it is required when offering credentials to DIDComm connections that do not involve any chatbot.
+
+##### Creating and Using a Credential Schema
+- Step 1: Create a credential schema
+Use the following `curl` command to create a new credential schema.
+```bash
+curl -X 'POST' \
+  'http://localhost:3000/vt/issue-credential' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "type": "anoncreds",
+  "jsonSchemaCredential": "https://localhost:3001/vt/schemas-organization-jsc.json",
+  "claims": {
+    "id": "https://example.org/org/123",
+    ...
+  }
+}'
+```
+This request returns a schema identifier, for example:
+```bash
+{
+  ...,
+  "credential": {
+    "credentialExchangeId": "0e7e54ca-b71a-41d9-8a64-2e67270f0311"
+  }
+}
+```
+- Use the created credential schema in a DIDComm message
+```bash
+{
+  "type": "credential-issuance",
+  "connectionId": "6813b904-6f34-4ba1-b7dc-68548b689f57",
+  "credentialSchemaId": "0e7e54ca-b71a-41d9-8a64-2e67270f0311"
+}
+
 ```
 
 #### Credential Revocation
