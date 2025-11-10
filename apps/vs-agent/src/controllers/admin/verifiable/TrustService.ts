@@ -319,7 +319,7 @@ export class TrustService {
             credentialFormats: {
               anoncreds: {
                 attributes: attrNames.map(name => {
-                  return { name, mimeType: 'text/plain', value: JSON.stringify(claims[name]) }
+                  return { name, mimeType: 'text/plain', value: String(claims[name]) }
                 }),
                 credentialDefinitionId,
               },
