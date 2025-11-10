@@ -353,7 +353,7 @@ export class TrustService {
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      jsonSchemaCredential,
+      relatedJsonSchemaCredential: jsonSchemaCredential,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
