@@ -360,12 +360,14 @@ export class TrustService {
     }
 
     const issuerId = agent.did!
+    const name = jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
+    const version = '1.0'
     const { schemaState, registrationMetadata: schemaMetadata } =
       await agent.modules.anoncreds.registerSchema({
         schema: {
           attrNames,
-          name: jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential',
-          version: '1.0',
+          name,
+          version,
           issuerId,
         },
         options: {},
@@ -385,13 +387,12 @@ export class TrustService {
     await this.saveAttestedResource(agent, schemaRegistration)
     const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
       await agent.modules.anoncreds.registerCredentialDefinition({
-        credentialDefinition: { issuerId, schemaId, tag: jsonSchemaCredential },
+        credentialDefinition: { issuerId, schemaId, tag: `${name}.${version}` },
         options: { supportRevocation: false },
       })
     const { attestedResource: credentialRegistration } = credDefMetadata as {
       attestedResource: Record<string, unknown>
     }
-    credentialRegistration.relatedJsonSchemaCredential = jsonSchemaCredential
     await this.saveAttestedResource(agent, credentialRegistration)
 
     const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
@@ -405,6 +406,9 @@ export class TrustService {
       agent.context,
       credentialDefinitionId,
     )
+    credentialDefinitionRecord.setTag('name', name)
+    credentialDefinitionRecord.setTag('version', version)
+    credentialDefinitionRecord.setTag('relatedJsonSchemaCredential', jsonSchemaCredential)
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
     return credentialDefinitionId
   }
