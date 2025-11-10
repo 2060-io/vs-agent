@@ -1,6 +1,12 @@
 import { DynamicModule, Module } from '@nestjs/common'
 
-import { DidWebController, InvitationRoutesController, SelfTrController, TrustService } from './controllers'
+import {
+  CredentialTypesService,
+  DidWebController,
+  InvitationRoutesController,
+  SelfTrController,
+  TrustService,
+} from './controllers'
 import { UrlShorteningService } from './services'
 import { VsAgentService } from './services/VsAgentService'
 import { VsAgent } from './utils'
@@ -24,6 +30,7 @@ export class PublicModule {
         VsAgentService,
         TrustService,
         UrlShorteningService,
+        CredentialTypesService,
       ],
       exports: [],
     }

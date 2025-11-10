@@ -43,10 +43,10 @@ import {
 } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { VsAgent } from '../../../utils'
 
 import { CreateRevocationRegistryDto } from './CreateRevocationRegistryDto'
 import { CreateCredentialTypeDto } from './CredentialTypeDto'
+import { CredentialTypesService } from './CredentialTypeService'
 
 @ApiTags('credential-types')
 @Controller({
@@ -56,7 +56,10 @@ import { CreateCredentialTypeDto } from './CredentialTypeDto'
 export class CredentialTypesController {
   private readonly logger = new Logger(CredentialTypesController.name)
 
-  constructor(private readonly agentService: VsAgentService) {}
+  constructor(
+    private readonly agentService: VsAgentService,
+    private readonly service: CredentialTypesService,
+  ) {}
 
   /**
    * Get all created credential types
@@ -122,81 +125,13 @@ export class CredentialTypesController {
   @ApiBadRequestResponse({ description: 'Invalid request payload' })
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
-      const agent = await this.agentService.getAgent()
-
-      let schemaId: string | undefined
-      let schema: AnonCredsSchema | undefined
-
-      const issuerId = options.issuerId ?? agent.did
-      if (!issuerId) {
-        throw new Error('Agent does not have any defined public DID')
-      }
-
-      if (options.schemaId) {
-        const schemaState = await agent.modules.anoncreds.getSchema(options.schemaId)
-
-        if (!schemaState.schema) {
-          throw new Error('Specified schema has not been found')
-        }
-        schemaId = schemaState.schemaId
-        schema = schemaState.schema
-      } else {
-        // No schema specified. A new one will be created
-        const { schemaState, registrationMetadata: schemaMetadata } =
-          await agent.modules.anoncreds.registerSchema({
-            schema: {
-              attrNames: options.attributes,
-              name: options.name,
-              version: options.version,
-              issuerId,
-            },
-            options: {},
-          })
-        const { attestedResource: schemaRegistration } = schemaMetadata as {
-          attestedResource: Record<string, unknown>
-        }
-
-        this.logger.debug!(`schemaState: ${JSON.stringify(schemaState)}`)
-        schemaId = schemaState.schemaId
-        schema = schemaState.schema
-
-        if (!schemaId || !schema) {
-          throw new Error('Schema for the credential definition could not be created')
-        }
-        await this.saveAttestedResource(agent, schemaRegistration)
-      }
-
-      const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
-        await agent.modules.anoncreds.registerCredentialDefinition({
-          credentialDefinition: { issuerId, schemaId, tag: `${options.name}.${options.version}` },
-          options: { supportRevocation: options.supportRevocation },
-        })
-      const { attestedResource: credentialRegistration } = credDefMetadata as {
-        attestedResource: Record<string, unknown>
-      }
-
-      const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
-      this.logger.debug!(`credentialDefinitionState: ${JSON.stringify(credentialDefinitionState)}`)
-
-      if (!credentialDefinitionId) {
-        throw new Error(`Cannot create credential definition: ${JSON.stringify(credentialRegistration)}`)
-      }
-
-      this.logger.log(`Credential Definition Id: ${credentialDefinitionId}`)
-
-      // Apply name and version as tags
-      const credentialDefinitionRepository = agent.dependencyManager.resolve(
-        AnonCredsCredentialDefinitionRepository,
-      )
-      const credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
-        agent.context,
-        credentialDefinitionId,
-      )
-      credentialDefinitionRecord.setTag('name', options.name)
-      credentialDefinitionRecord.setTag('version', options.version)
-
-      await this.saveAttestedResource(agent, credentialRegistration)
-      await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
+      const { issuerId, schemaId, schema } = await this.service.getOrRegisterSchema({ ...options })
+      const { credentialDefinitionId } = await this.service.getOrRegisterCredentialDefinition({
+        name: options.name,
+        schemaId,
+        issuerId,
+        supportRevocation: options.supportRevocation,
+      })
 
       return {
         id: credentialDefinitionId,
@@ -531,7 +466,7 @@ export class CredentialTypesController {
       )
 
       // save registration metadata for webvh
-      const revocationRecord = await this.saveAttestedResource(agent, revocationRegistration)
+      const revocationRecord = await this.service.saveAttestedResource(agent, revocationRegistration)
 
       const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
@@ -573,7 +508,7 @@ export class CredentialTypesController {
             ],
           },
         )
-        await this.saveAttestedResource(agent, statusRegistration)
+        await this.service.saveAttestedResource(agent, statusRegistration)
 
         revocationRecord.content = registrationMetadata
         await agent.genericRecords.update(revocationRecord)
@@ -642,14 +577,5 @@ export class CredentialTypesController {
     )
 
     return revocationRegistryDefinitionIds
-  }
-
-  private async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
-    if (!resource) return
-    return await agent.genericRecords.save({
-      id: utils.uuid(),
-      content: resource,
-      tags: { attestedResourceId: resource.id as string, type: 'AttestedResource' },
-    })
   }
 }

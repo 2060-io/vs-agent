@@ -4,6 +4,7 @@ import {
   ConnectionController,
   CoreMessageService,
   CredentialTypesController,
+  CredentialTypesService,
   HealthController,
   InvitationController,
   MessageController,
@@ -56,6 +57,7 @@ export class VsAgentModule {
         CoreMessageService,
         MessageServiceFactory,
         TrustService,
+        CredentialTypesService,
       ],
       exports: [VsAgentService],
     }

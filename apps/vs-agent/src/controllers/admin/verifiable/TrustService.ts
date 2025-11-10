@@ -5,7 +5,6 @@ import {
   DidRepository,
   JsonObject,
   JsonTransformer,
-  utils,
   W3cCredential,
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
@@ -30,6 +29,7 @@ import {
   validateSchema,
   VsAgent,
 } from '../../../utils'
+import { CredentialTypesService } from '../credentials'
 
 @Injectable()
 export class TrustService {
@@ -39,6 +39,7 @@ export class TrustService {
   constructor(
     private readonly agentService: VsAgentService,
     private readonly urlShortenerService: UrlShorteningService,
+    private readonly credentialService: CredentialTypesService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
@@ -319,7 +320,7 @@ export class TrustService {
             credentialFormats: {
               anoncreds: {
                 attributes: attrNames.map(name => {
-                  return { name, mimeType: '', value: JSON.stringify(claims[name]) }
+                  return { name, mimeType: 'text/plain', value: String(claims[name]) }
                 }),
                 credentialDefinitionId,
               },
@@ -348,64 +349,31 @@ export class TrustService {
     }
   }
 
-  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredential: string, attrNames: string[]) {
+  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredential: string, attributes: string[]) {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      jsonSchemaCredential,
+      relatedJsonSchemaCredential: jsonSchemaCredential,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
     }
 
     const issuerId = agent.did!
-    const { schemaState, registrationMetadata: schemaMetadata } =
-      await agent.modules.anoncreds.registerSchema({
-        schema: {
-          attrNames,
-          name: jsonSchemaCredential,
-          version: '1.0',
-          issuerId,
-        },
-        options: {},
-      })
-    const { attestedResource: schemaRegistration } = schemaMetadata as {
-      attestedResource: Record<string, unknown>
-    }
-    const schemaId = schemaState.schemaId
-    const schema = schemaState.schema
-
-    if (!schemaId || !schema) {
-      throw new HttpException(
-        `Schema for the credential definition could not be created`,
-        HttpStatus.EXPECTATION_FAILED,
-      )
-    }
-    await this.saveAttestedResource(agent, schemaRegistration)
-    const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
-      await agent.modules.anoncreds.registerCredentialDefinition({
-        credentialDefinition: { issuerId, schemaId, tag: jsonSchemaCredential },
-        options: { supportRevocation: false },
-      })
-    const { attestedResource: credentialRegistration } = credDefMetadata as {
-      attestedResource: Record<string, unknown>
-    }
-    credentialRegistration.relatedJsonSchemaCredential = jsonSchemaCredential
-    await this.saveAttestedResource(agent, credentialRegistration)
-
-    const credentialDefinitionId = credentialDefinitionState.credentialDefinitionId
-    if (!credentialDefinitionId) {
-      throw new HttpException(
-        `Cannot create credential definition: ${JSON.stringify(credentialDefinitionState)}`,
-        HttpStatus.EXPECTATION_FAILED,
-      )
-    }
-    const credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
-      agent.context,
-      credentialDefinitionId,
-    )
-    await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
+    const name = jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
+    const { schemaId } = await this.credentialService.getOrRegisterSchema({
+      attributes,
+      name,
+      issuerId,
+      jsonSchemaCredential,
+    })
+    const { credentialDefinitionId } = await this.credentialService.getOrRegisterCredentialDefinition({
+      name,
+      schemaId,
+      issuerId,
+      jsonSchemaCredential,
+    })
     return credentialDefinitionId
   }
 
@@ -427,16 +395,6 @@ export class TrustService {
     this.logger.error(`Error: ${message}`)
     if (error instanceof HttpException) throw error
     throw new HttpException(message || defaultMsg, HttpStatus.INTERNAL_SERVER_ERROR)
-  }
-
-  // TODO: Simplify this implementation. The same approach is already used in the Credential Type Controller
-  private async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
-    if (!resource) return
-    return await agent.genericRecords.save({
-      id: utils.uuid(),
-      content: resource,
-      tags: { attestedResourceId: resource.id as string, type: 'AttestedResource' },
-    })
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
