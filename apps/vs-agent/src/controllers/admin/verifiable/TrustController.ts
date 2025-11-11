@@ -60,7 +60,7 @@ export class TrustController {
   })
   async issueCredential(@Body() body: IssueCredentialRequestDto) {
     const { type, did, jsonSchemaCredential, claims } = body
-    return await this.trustService.issueCredential(type, jsonSchemaCredential, claims, did)
+    return await this.trustService.issueCredential({ type, jsonSchemaCredential, claims, did })
   }
 
   @Post('revoke-credential')

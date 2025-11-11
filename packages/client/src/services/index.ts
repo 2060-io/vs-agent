@@ -1,3 +1,5 @@
 export * from './CredentialTypeService'
+export * from './InvitationService'
 export * from './MessageService'
 export * from './RevocationRegistryService'
+export * from './TrustCredentialService'

@@ -1,3 +1,4 @@
+import { CredentialIssuanceRequest, CredentialIssuanceResponse } from '@2060.io/vs-agent-model'
 import { AnonCredsCredentialDefinitionRepository } from '@credo-ts/anoncreds'
 import {
   DidDocumentService,
@@ -278,12 +279,12 @@ export class TrustService {
     return credential.jsonCredential
   }
 
-  public async issueCredential(
-    type: 'jsonld' | 'anoncreds',
-    jsonSchemaCredential: string,
-    claims: JsonObject,
-    did?: string,
-  ) {
+  public async issueCredential({
+    type,
+    jsonSchemaCredential,
+    claims,
+    did,
+  }: CredentialIssuanceRequest): Promise<CredentialIssuanceResponse> {
     try {
       // Check schema for credential
       const { agent, didRecord } = await this.getDidRecord()
@@ -390,7 +391,7 @@ export class TrustService {
     await agent.dids.update({ did: didRecord.did, didDocument: didRecord.didDocument! })
   }
 
-  private handleError(error: any, defaultMsg: string) {
+  private handleError(error: any, defaultMsg: string): never {
     const message = error?.message ?? String(error)
     this.logger.error(`Error: ${message}`)
     if (error instanceof HttpException) throw error

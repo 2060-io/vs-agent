@@ -1,10 +1,13 @@
 // src/ApiClient.ts
 
-import { RevocationRegistryService } from './services'
-import { CredentialTypeService } from './services/CredentialTypeService'
-import { InvitationService } from './services/InvitationService'
-import { MessageService } from './services/MessageService'
-import { ApiVersion } from './types/enums'
+import {
+  CredentialTypeService,
+  InvitationService,
+  MessageService,
+  RevocationRegistryService,
+  TrustCredentialService,
+} from './services'
+import { ApiVersion } from './types'
 
 /**
  * `ApiClient` class for easy access to the available endpoints in the Agent Service.
@@ -40,6 +43,7 @@ export class ApiClient {
   public readonly credentialTypes: CredentialTypeService
   public readonly revocationRegistries: RevocationRegistryService
   public readonly invitations: InvitationService
+  public readonly trustCredentials: TrustCredentialService
 
   constructor(
     private baseURL: string,
@@ -49,5 +53,6 @@ export class ApiClient {
     this.messages = new MessageService(baseURL, version)
     this.credentialTypes = new CredentialTypeService(baseURL, version)
     this.revocationRegistries = new RevocationRegistryService(baseURL, version)
+    this.trustCredentials = new TrustCredentialService(baseURL, version)
   }
 }
