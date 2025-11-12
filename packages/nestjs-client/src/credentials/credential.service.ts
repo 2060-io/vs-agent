@@ -3,7 +3,7 @@ import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@
 import { Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, FindOneOptions, IsNull, Not, Repository } from 'typeorm'
+import { FindOneOptions, IsNull, Not, Repository } from 'typeorm'
 
 import { CredentialOptions, CredentialStatus } from '../types'
 
@@ -25,7 +25,6 @@ export class CredentialService {
     @InjectRepository(RevocationRegistryEntity)
     private readonly revocationRepository: Repository<RevocationRegistryEntity>,
     @Inject('GLOBAL_MODULE_OPTIONS') private options: CredentialOptions,
-    private readonly entityManager: EntityManager,
   ) {
     if (!options.url) throw new Error(`For this module to be used the value url must be added`)
     this.url = options.url
@@ -156,7 +155,7 @@ export class CredentialService {
     }
 
     // Begin a transaction to save new credentials and handle revocation logic if supported
-    const cred: CredentialEntity = await this.entityManager.transaction(async transaction => {
+    const cred: CredentialEntity = await this.credentialRepository.manager.transaction(async transaction => {
       if (!revocationSupported) {
         return await transaction.save(CredentialEntity, {
           connectionId,
