@@ -1,6 +1,6 @@
 import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
 import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/vs-agent-model'
-import { Sha256, utils } from '@credo-ts/core'
+import { JsonObject, Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { FindOneOptions, IsNull, Not, Repository } from 'typeorm'
@@ -120,20 +120,35 @@ export class CredentialService {
    */
   async issue(
     connectionId: string,
-    claims: Claim[],
+    claims: JsonObject,
     options?: {
       refId?: string
       credentialDefinitionId?: string
       revokeIfAlreadyIssued?: boolean
+      jsonSchemaCredential?: string
     },
   ): Promise<void> {
-    const { revokeIfAlreadyIssued = false } = options ?? {}
+    const { revokeIfAlreadyIssued = false, jsonSchemaCredential } = options ?? {}
     const refIdHash = options?.refId ? this.hash(options.refId) : null
+    let credentialSchemaId: string | undefined
 
-    // Find a specific credential type based on provided definition ID or default to first available
+    if (jsonSchemaCredential) {
+      const { credential } = await this.apiClient.trustCredentials.issuance({
+        type: 'anoncreds',
+        jsonSchemaCredential,
+        claims,
+      })
+      credentialSchemaId = credential.credentialExchangeId as string
+    }
+
+    // Select the appropriate credential type based on definition or schema
     const credentialTypes = await this.apiClient.credentialTypes.getAll()
     const credentialType =
-      credentialTypes.find(credType => credType.id === options?.credentialDefinitionId) ?? credentialTypes[0]
+      credentialTypes.find(type =>
+        options?.credentialDefinitionId
+          ? type.id === options.credentialDefinitionId
+          : type.relatedJsonSchemaCredential === jsonSchemaCredential,
+      ) ?? credentialTypes[0]
     if (!credentialType) {
       throw new Error(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
@@ -185,15 +200,20 @@ export class CredentialService {
     })
 
     // Send a message containing the newly issued credential details via API client
-    const thread = await this.apiClient.messages.send(
-      new CredentialIssuanceMessage({
-        connectionId,
-        credentialDefinitionId,
-        revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
-        revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
-        claims: claims,
-      }),
-    )
+    const payload = new CredentialIssuanceMessage({
+      connectionId,
+      revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
+      revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
+    })
+    if (credentialSchemaId) payload.credentialSchemaId = credentialSchemaId
+    else {
+      payload.credentialDefinitionId = credentialDefinitionId
+      payload.claims = Object.entries(claims).map(
+        ([name, value]) => new Claim({ name, value: String(value) }),
+      )
+    }
+
+    const thread = await this.apiClient.messages.send(payload)
     cred.threadId = thread.id
     cred.status = CredentialStatus.OFFERED
     await this.credentialRepository.save(cred)

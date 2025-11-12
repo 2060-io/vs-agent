@@ -60,6 +60,7 @@ export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
 
 export interface CredentialTypeResult extends Omit<CredentialTypeInfo, 'supportRevocation'> {
   revocationSupported: boolean
+  relatedJsonSchemaCredential: string
 }
 
 export interface RevocationRegistryInfo {

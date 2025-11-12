@@ -90,6 +90,7 @@ export class CredentialTypesController {
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
           revocationSupported,
+          relatedJsonSchemaCredential: (record.getTag('relatedJsonSchemaCredential') as string) ?? '',
         }
       }),
     )
