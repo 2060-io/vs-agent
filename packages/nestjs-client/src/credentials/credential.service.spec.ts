@@ -1,7 +1,6 @@
-import { Claim } from '@2060.io/vs-agent-model'
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { Repository, EntityManager } from 'typeorm'
+import { Repository } from 'typeorm'
 
 import { CredentialStatus } from '../types'
 
@@ -47,7 +46,6 @@ describe('CredentialService', () => {
   let service: CredentialService
   let credentialRepository: Repository<CredentialEntity>
   let revocationRepository: Repository<RevocationRegistryEntity>
-  let entityManager: EntityManager
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,17 +53,18 @@ describe('CredentialService', () => {
         CredentialService,
         {
           provide: getRepositoryToken(CredentialEntity),
-          useClass: Repository,
+          useValue: {
+            find: jest.fn(),
+            save: jest.fn(),
+            findOne: jest.fn(),
+            manager: {
+              transaction: jest.fn(),
+            },
+          },
         },
         {
           provide: getRepositoryToken(RevocationRegistryEntity),
           useClass: Repository,
-        },
-        {
-          provide: EntityManager,
-          useValue: {
-            transaction: jest.fn(),
-          },
         },
         {
           provide: 'GLOBAL_MODULE_OPTIONS',
@@ -77,7 +76,6 @@ describe('CredentialService', () => {
     service = module.get<CredentialService>(CredentialService)
     credentialRepository = module.get(getRepositoryToken(CredentialEntity))
     revocationRepository = module.get(getRepositoryToken(RevocationRegistryEntity))
-    entityManager = module.get(EntityManager)
   })
 
   describe('createType', () => {
@@ -129,7 +127,7 @@ describe('CredentialService', () => {
   })
 
   describe('issue', () => {
-    const mockClaims = [{ name: 'name', value: 'John Doe' } as Claim]
+    const mockClaims = { name: 'John Doe' }
     const mockRevocationRegistry = {
       revocationDefinitionId: 'rev-def-id',
       currentIndex: 0,
@@ -168,7 +166,7 @@ describe('CredentialService', () => {
       service['apiClient'].credentialTypes.getAll = getAllMock
 
       jest.spyOn(credentialRepository, 'find').mockResolvedValue([])
-      jest.spyOn(entityManager, 'transaction').mockResolvedValue(mockFindCredential)
+      jest.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
 
       jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
       jest.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)
@@ -186,7 +184,7 @@ describe('CredentialService', () => {
     it('should throw an error if no credential definitions are found', async () => {
       service['apiClient'].credentialTypes.getAll = jest.fn().mockResolvedValue([])
 
-      await expect(service.issue('conn-123', [], { credentialDefinitionId: 'def-id' })).rejects.toThrow(
+      await expect(service.issue('conn-123', {}, { credentialDefinitionId: 'def-id' })).rejects.toThrow(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
       )
     })
@@ -205,7 +203,7 @@ describe('CredentialService', () => {
 
       service['apiClient'].credentialTypes.getAll = getAllMock
       jest.spyOn(credentialRepository, 'find').mockResolvedValue(existingCreds)
-      jest.spyOn(entityManager, 'transaction').mockResolvedValue(mockFindCredential)
+      jest.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
 
       jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
       jest.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)

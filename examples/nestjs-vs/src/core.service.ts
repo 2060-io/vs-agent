@@ -187,12 +187,13 @@ export class CoreService implements EventHandler, OnModuleInit {
     switch (session.state) {
       case StateStep.START:
         if (selectionId === Cmd.CREDENTIAL) {
-          const claims = [
-            new Claim({ name: 'fullName', value: 'example' }),
-            new Claim({ name: 'issuanceDate', value: new Date().toISOString().split('T')[0] }),
-          ]
+          const claims = {
+            fullName: 'example',
+            issuanceDate: new Date().toISOString().split('T')[0],
+          }
+
           await this.credentialService.issue(session.connectionId, claims, {
-            refId: claims[0].value,
+            refId: claims.fullName,
             revokeIfAlreadyIssued: true,
           })
         }

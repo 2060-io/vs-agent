@@ -3,6 +3,7 @@ import type {
   ReceiveOutOfBandInvitationConfig,
   OutOfBandDidCommService,
   ProofState,
+  JsonObject,
 } from '@credo-ts/core'
 
 import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
@@ -28,9 +29,19 @@ export interface CreateCredentialTypeOptions {
   supportRevocation?: boolean
 }
 
-type JsonObject = {
-  [key: string]: unknown
+export interface CredentialIssuanceRequest {
+  type: 'jsonld' | 'anoncreds'
+  jsonSchemaCredential: string
+  claims: JsonObject
+  did?: string
 }
+
+export interface CredentialIssuanceResponse {
+  status: number
+  didcommInvitationUrl: string
+  credential: Record<string, unknown>
+}
+
 export interface ImportCredentialTypeOptions {
   id: string
   data: {
@@ -49,6 +60,7 @@ export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
 
 export interface CredentialTypeResult extends Omit<CredentialTypeInfo, 'supportRevocation'> {
   revocationSupported: boolean
+  relatedJsonSchemaCredential?: string
 }
 
 export interface RevocationRegistryInfo {
