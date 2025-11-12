@@ -64,7 +64,12 @@ export class TrustCredentialService {
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to issue credential: ${response.statusText}`)
+        const responseText = await response.text()
+        throw new Error(
+          `Failed to issue credential.\n` +
+            `Status: ${response.status} ${response.statusText}\n` +
+            `Response body: ${responseText || 'No response body returned'}`,
+        )
       }
 
       const data = (await response.json()) as CredentialIssuanceResponse

@@ -5,7 +5,7 @@ import { TrustService } from './TrustService'
 import { IssueCredentialRequestDto } from './dto'
 
 @ApiTags('Verifiable Trust Credential')
-@Controller('vt')
+@Controller({ path: 'vt', version: '1' })
 export class TrustController {
   private readonly logger = new Logger(TrustController.name)
 
