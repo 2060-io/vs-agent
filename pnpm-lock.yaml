@@ -158,8 +158,8 @@ importers:
         specifier: ^0.0.1-alpha.10
         version: 0.0.1-alpha.14(@credo-ts/anoncreds@0.5.18-alpha-20250930143725(@hyperledger/anoncreds-shared@0.2.4)(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(@hyperledger/anoncreds-shared@0.2.4)
       didwebvh-ts:
-        specifier: 2.5.4
-        version: 2.5.4
+        specifier: ^2.5.6
+        version: 2.5.6
       express:
         specifier: ^4.18.1
         version: 4.21.2
@@ -3402,8 +3402,8 @@ packages:
   did-resolver@4.1.0:
     resolution: {integrity: sha512-S6fWHvCXkZg2IhS4RcVHxwuyVejPR7c+a4Go0xbQ9ps5kILa8viiYQgrM4gfTyeTjJ0ekgJH9gk/BawTpmkbZA==}
 
-  didwebvh-ts@2.5.4:
-    resolution: {integrity: sha512-dgvIl5PPfob6RG7q9tfaSI9Q++eWOotr6uobsexNJPrUo9mD6fgAaY7/TaltMRtLn5XaHmNH0gQHmLXYYOyzoQ==}
+  didwebvh-ts@2.5.6:
+    resolution: {integrity: sha512-O9H6ZSrO1za+ot65ybfRU5FAOKuWZN5HzEJG9GFhNK7M3zV6SY3kfibAj1TJGKwzBnWocUXYfq2F7HNX0MC9Yg==}
     hasBin: true
 
   diff-sequences@29.6.3:
@@ -7824,7 +7824,7 @@ snapshots:
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
-      didwebvh-ts: 2.5.4
+      didwebvh-ts: 2.5.6
       json-canonicalize: 1.2.0
       tsyringe: 4.8.0
     transitivePeerDependencies:
@@ -10844,7 +10844,7 @@ snapshots:
 
   did-resolver@4.1.0: {}
 
-  didwebvh-ts@2.5.4:
+  didwebvh-ts@2.5.6:
     dependencies:
       '@noble/hashes': 1.8.0
       json-canonicalize: 1.2.0
