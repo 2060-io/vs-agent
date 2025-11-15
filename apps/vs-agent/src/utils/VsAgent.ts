@@ -180,7 +180,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       )
       if (
         JSON.stringify(didDocument.didCommServices) !==
-          JSON.stringify(this.getDidCommServices(existingRecord.id)) ||
+          JSON.stringify(this.getDidCommServices(didDocument.id)) ||
         hasLegacyMethods
       ) {
         await this.createAndAddDidCommKeysAndServices(didDocument)
@@ -234,17 +234,29 @@ export class VsAgent extends Agent<VsAgentModules> {
     const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey)
     const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
 
-    // Remove legacy if exist
+    // Remove legacy if it exists, and remove old if the DID has been updated
     const legacyContexts = ['https://w3id.org/security/suites/ed25519-2018/v1']
-    const legacyAuthId = (didDocument.verificationMethod ?? []).find(vm =>
-      ['Ed25519VerificationKey2018'].includes(vm.type),
-    )?.id
-    if (legacyAuthId) {
-      didDocument.authentication = (didDocument.authentication ?? []).filter(id => id !== legacyAuthId)
-      didDocument.assertionMethod = (didDocument.assertionMethod ?? []).filter(id => id !== legacyAuthId)
-    }
+    const removeTypes = [
+      'Ed25519VerificationKey2018',
+      'X25519KeyAgreementKey2019',
+      'Ed25519VerificationKey2020',
+      'Multikey',
+    ]
+    const idsToRemove = (didDocument.verificationMethod ?? [])
+      .filter(vm => removeTypes.includes(vm.type))
+      .map(vm => vm.id)
+    didDocument.authentication = (didDocument.authentication ?? []).filter(
+      id => !idsToRemove.includes(id as string),
+    )
+    didDocument.assertionMethod = (didDocument.assertionMethod ?? []).filter(
+      id => !idsToRemove.includes(id as string),
+    )
+    didDocument.keyAgreement = (didDocument.keyAgreement ?? []).filter(
+      id => !idsToRemove.includes(id as string),
+    )
+
     const filteredMethods = (didDocument.verificationMethod ?? []).filter(
-      vm => !['Ed25519VerificationKey2018', 'X25519KeyAgreementKey2019'].includes(vm.type),
+      vm => !removeTypes.includes(vm.type),
     )
 
     const verificationMethods = [
