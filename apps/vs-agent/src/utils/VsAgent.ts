@@ -251,7 +251,6 @@ export class VsAgent extends Agent<VsAgentModules> {
       didDocument.authentication = (didDocument.authentication ?? []).filter(id => id !== legacyAuthId)
       didDocument.assertionMethod = (didDocument.assertionMethod ?? []).filter(id => id !== legacyAuthId)
     }
-
     const filteredMethods = (didDocument.verificationMethod ?? []).filter(
       vm => !['Ed25519VerificationKey2018', 'X25519KeyAgreementKey2019'].includes(vm.type),
     )
