@@ -178,12 +178,20 @@ export class VsAgent extends Agent<VsAgentModules> {
       const hasLegacyMethods = (didDocument.verificationMethod ?? []).some(vm =>
         ['Ed25519VerificationKey2018', 'X25519KeyAgreementKey2019'].includes(vm.type),
       )
-      if (
+      const servicesChanged =
         JSON.stringify(didDocument.didCommServices) !==
-          JSON.stringify(this.getDidCommServices(existingRecord.id)) ||
-        hasLegacyMethods
-      ) {
-        await this.createAndAddDidCommKeysAndServices(didDocument)
+        JSON.stringify(this.getDidCommServices(didDocument.id))
+      if (hasLegacyMethods || servicesChanged) {
+        if (servicesChanged) {
+          didDocument.service = [
+            ...(didDocument.service
+              ? didDocument.service.filter(service => ![DidCommV1Service.type].includes(service.type))
+              : []),
+            ...this.getDidCommServices(didDocument.id),
+          ]
+        }
+        if (hasLegacyMethods) await this.createAndAddDidCommKeysAndServices(didDocument)
+
         await this.dids.update({ did: didDocument.id, didDocument })
         this.logger?.debug('Public did record updated')
       } else {
