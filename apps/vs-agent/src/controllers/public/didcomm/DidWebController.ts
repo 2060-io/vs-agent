@@ -205,6 +205,12 @@ export class DidWebController {
   async getWebVhResources(@Param('resourceId') resourceId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
     const resourcePath = `${agent.did}/resources/${resourceId}`
+    const validResourceTypes: string[] = [
+      'anonCredsSchema',
+      'anonCredsCredDef',
+      'anonCredsRevocRegDef',
+      'anonCredsStatusList',
+    ]
 
     agent.config.logger.debug(`requested resource ${resourceId}`)
 
@@ -215,15 +221,21 @@ export class DidWebController {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
-    const [record] = await agent.genericRecords.findAllByQuery({
-      attestedResourceId: resourcePath,
-      type: 'AttestedResource',
-    })
-    if (!record) {
+    const records = validResourceTypes.includes(resourceId)
+      ? await agent.genericRecords.findAllByQuery({
+          type: 'AttestedResource',
+          resourceType: resourceId,
+        })
+      : await agent.genericRecords.findAllByQuery({
+          attestedResourceId: resourcePath,
+          type: 'AttestedResource',
+        })
+    if (!records || records.length === 0) {
       throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
     }
 
-    res.send(record.content)
+    if (records.length === 1) return res.send(records[0].content)
+    return res.send(records.map(r => r.content))
   }
 }
 
