@@ -3,7 +3,7 @@ import {
   AnonCredsRevocationRegistryDefinitionRepository,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject } from '@nestjs/common'
+import { Controller, Get, Param, Res, HttpStatus, HttpException, Inject, Query } from '@nestjs/common'
 import { DIDLog } from 'didwebvh-ts'
 import { Response } from 'express'
 import * as fs from 'fs'
@@ -201,16 +201,29 @@ export class DidWebController {
     }
   }
 
+  @Get('/resources')
+  async getWebVhResourcesByType(@Query('resourceType') resourceType: string, @Res() res: Response) {
+    if (!resourceType) {
+      throw new HttpException('resourceType query param is required', HttpStatus.BAD_REQUEST)
+    }
+    const agent = await this.agentService.getAgent()
+    const records = await agent.genericRecords.findAllByQuery({
+      type: 'AttestedResource',
+      resourceType,
+    })
+
+    if (!records || records.length === 0) {
+      throw new HttpException('No entries found for resourceType', HttpStatus.NOT_FOUND)
+    }
+
+    if (records.length === 1) return res.send(records[0].content)
+    return res.send(records.map(r => r.content))
+  }
+
   @Get('/resources/:resourceId')
   async getWebVhResources(@Param('resourceId') resourceId: string, @Res() res: Response) {
     const agent = await this.agentService.getAgent()
     const resourcePath = `${agent.did}/resources/${resourceId}`
-    const validResourceTypes: string[] = [
-      'anonCredsSchema',
-      'anonCredsCredDef',
-      'anonCredsRevocRegDef',
-      'anonCredsStatusList',
-    ]
 
     agent.config.logger.debug(`requested resource ${resourceId}`)
 
@@ -221,21 +234,11 @@ export class DidWebController {
       throw new HttpException('Agent does not have any defined public DID', HttpStatus.NOT_FOUND)
     }
 
-    const records = validResourceTypes.includes(resourceId)
-      ? await agent.genericRecords.findAllByQuery({
-          type: 'AttestedResource',
-          resourceType: resourceId,
-        })
-      : await agent.genericRecords.findAllByQuery({
-          attestedResourceId: resourcePath,
-          type: 'AttestedResource',
-        })
-    if (!records || records.length === 0) {
-      throw new HttpException('no entry found for resource', HttpStatus.NOT_FOUND)
-    }
-
-    if (records.length === 1) return res.send(records[0].content)
-    return res.send(records.map(r => r.content))
+    const [record] = await agent.genericRecords.findAllByQuery({
+      attestedResourceId: resourcePath,
+      type: 'AttestedResource',
+    })
+    res.send(record.content)
   }
 }
 
