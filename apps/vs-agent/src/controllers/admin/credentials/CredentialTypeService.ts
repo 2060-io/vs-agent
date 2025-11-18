@@ -16,12 +16,16 @@ export class CredentialTypesService {
 
   constructor(private readonly agentService: VsAgentService) {}
 
-  public async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>) {
+  public async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>, resourceType: string) {
     if (!resource) return
     return await agent.genericRecords.save({
       id: utils.uuid(),
       content: resource,
-      tags: { attestedResourceId: resource.id as string, type: 'AttestedResource' },
+      tags: {
+        attestedResourceId: resource.id as string,
+        type: 'AttestedResource',
+        resourceType,
+      },
     })
   }
 
@@ -77,7 +81,7 @@ export class CredentialTypesService {
       if (!schemaId || !schema) {
         throw new Error('Schema for the credential definition could not be created')
       }
-      await this.saveAttestedResource(agent, schemaRegistration)
+      await this.saveAttestedResource(agent, schemaRegistration, 'anonCredsSchema')
     }
     return { issuerId, schemaId, schema }
   }
@@ -129,7 +133,7 @@ export class CredentialTypesService {
     if (jsonSchemaCredential)
       credentialDefinitionRecord.setTag('relatedJsonSchemaCredential', jsonSchemaCredential)
 
-    await this.saveAttestedResource(agent, credentialRegistration)
+    await this.saveAttestedResource(agent, credentialRegistration, 'anonCredsCredDef')
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
     return { credentialDefinitionId }
   }

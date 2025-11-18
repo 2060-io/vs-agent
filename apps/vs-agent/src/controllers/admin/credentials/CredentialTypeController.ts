@@ -467,7 +467,11 @@ export class CredentialTypesController {
       )
 
       // save registration metadata for webvh
-      const revocationRecord = await this.service.saveAttestedResource(agent, revocationRegistration)
+      const revocationRecord = await this.service.saveAttestedResource(
+        agent,
+        revocationRegistration,
+        'anonCredsRevocRegDef',
+      )
 
       const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
@@ -509,7 +513,7 @@ export class CredentialTypesController {
             ],
           },
         )
-        await this.service.saveAttestedResource(agent, statusRegistration)
+        await this.service.saveAttestedResource(agent, statusRegistration, 'anonCredsStatusList')
 
         revocationRecord.content = registrationMetadata
         await agent.genericRecords.update(revocationRecord)
