@@ -216,7 +216,6 @@ export class DidWebController {
       throw new HttpException('No entries found for resourceType', HttpStatus.NOT_FOUND)
     }
 
-    if (records.length === 1) return res.send(records[0].content)
     return res.send(records.map(r => r.content))
   }
 
