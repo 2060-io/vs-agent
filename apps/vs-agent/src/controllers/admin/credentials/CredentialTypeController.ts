@@ -163,14 +163,14 @@ export class CredentialTypesController {
    */
   @Delete('/:credentialTypeId')
   @ApiOperation({ summary: 'Delete a credential type and all its crypto data' })
-  @ApiParam({
+  @ApiQuery({
     name: 'credentialTypeId',
     description: 'Identifier of the credential definition to delete',
     example: 'VcDef:issuer:1234:TAG:1',
   })
   @ApiOkResponse({ description: 'Credential type deleted successfully (204 No Content)' })
   @ApiBadRequestResponse({ description: 'Invalid credentialTypeId' })
-  public async deleteCredentialTypeById(@Param('credentialTypeId') credentialTypeId: string) {
+  public async deleteCredentialTypeById(@Query('credentialTypeId') credentialTypeId: string) {
     const agent = await this.agentService.getAgent()
 
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
