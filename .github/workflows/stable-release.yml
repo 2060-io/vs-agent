@@ -46,7 +46,7 @@ jobs:
         id: release-please
         run: |
           # Always generate outputs, even if one of the steps didn't run
-          echo "release_created=${{ steps.rp_main.outputs.release_created || steps.rp_branch.outputs.release_created }}" >> $GITHUB_OUTPUT
+          echo "releases_created=${{ steps.rp_main.outputs.releases_created || steps.rp_branch.outputs.release_created }}" >> $GITHUB_OUTPUT
           echo "tag_name=${{ steps.rp_main.outputs.tag_name || steps.rp_branch.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
       - name: Print release outputs for debugging
