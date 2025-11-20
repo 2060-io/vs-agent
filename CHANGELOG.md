@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.5](https://github.com/2060-io/vs-agent/compare/v1.5.4...v1.5.5) (2025-11-20)
+
+
+### Bug Fixes
+
+* update didwebvh ts dependency to lastest version ([#272](https://github.com/2060-io/vs-agent/issues/272)) ([3a1df9a](https://github.com/2060-io/vs-agent/commit/3a1df9af854aca377dec2bca5ab25085045b693e))
+
 ## [1.5.4](https://github.com/2060-io/vs-agent/compare/v1.5.3...v1.5.4) (2025-11-20)
 
 
