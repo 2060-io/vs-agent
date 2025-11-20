@@ -1,7 +1,7 @@
 name: Stable release
 on:
   push:
-    branches: [ main, v1.5 ]
+    branches: [ main, 'v*.*' ]
 
 permissions:
   issues: write
@@ -21,15 +21,6 @@ jobs:
     steps:
       - name: Checkout vs-agent
         uses: actions/checkout@v4
-
-      - name: Process Release Please (main)
-        if: github.ref_name == 'main'
-        uses: googleapis/release-please-action@v4
-        id: release-please
-        with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release Please (main)
         id: rp_main
