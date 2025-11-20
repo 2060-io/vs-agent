@@ -1,7 +1,7 @@
 name: Stable release
 on:
   push:
-    branches: [ main, 'v*.*' ]
+    branches: [ main, v1.5 ]
 
 permissions:
   issues: write
