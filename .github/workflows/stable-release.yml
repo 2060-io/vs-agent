@@ -1,7 +1,7 @@
 name: Stable release
 on:
   push:
-    branches: [ main, v1.5 ]
+    branches: [ main, 'v*.*' ]
 
 permissions:
   issues: write
@@ -22,14 +22,41 @@ jobs:
       - name: Checkout vs-agent
         uses: actions/checkout@v4
 
-      - name: Process Release Please
+      - name: Process Release Please (main)
+        if: github.ref_name == 'main'
         uses: googleapis/release-please-action@v4
         id: release-please
         with:
-          target-branch-pattern: ^(main|v[0-9]+(\.[0-9]+)?)$
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Please (main)
+        id: rp_main
+        if: github.ref_name == 'main'
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+          default-branch: main
+
+      - name: Release Please (vX.Y)
+        id: rp_branch
+        if: startsWith(github.ref_name, 'v')
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.GITHUB_TOKEN }}
+          default-branch: ${{ github.ref_name }}
+
+      - name: Release Please outputs
+        id: release-please
+        run: |
+          # Always generate outputs, even if one of the steps didn't run
+          echo "release_created=${{ steps.rp_main.outputs.release_created || steps.rp_branch.outputs.release_created }}" >> $GITHUB_OUTPUT
+          echo "tag_name=${{ steps.rp_main.outputs.tag_name || steps.rp_branch.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
       - name: Print release outputs for debugging
         continue-on-error: true
