@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.4](https://github.com/2060-io/vs-agent/compare/v1.5.3...v1.5.4) (2025-11-20)
+
+
+### Bug Fixes
+
+* add support to legacy Ed25519VerificationKey2018 ([#258](https://github.com/2060-io/vs-agent/issues/258)) ([bf9975f](https://github.com/2060-io/vs-agent/commit/bf9975f9518f1fed4286f54668fbec8cb08a636f))
+
 ## [1.5.3](https://github.com/2060-io/vs-agent/compare/v1.5.2...v1.5.3) (2025-10-08)
 
 
