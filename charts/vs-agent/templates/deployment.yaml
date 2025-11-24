@@ -183,6 +183,8 @@ spec:
               value: "{{ tpl .Values.didcommInvitationImageUrl . }}"
             - name: EVENTS_BASE_URL
               value: "{{ tpl .Values.eventsBaseUrl . }}"
+            - name: ENABLE_SWAGGER
+              value: "{{ .Values.enableSwagger | quote }}"
             - name: AGENT_PUBLIC_DID
               value: "did:{{ default "webvh" .Values.publicDidMethod }}:{{ tpl .Values.ingress.host . }}"
 {{- with .Values.extraEnv }}
