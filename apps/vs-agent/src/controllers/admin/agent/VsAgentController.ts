@@ -55,7 +55,7 @@ export class VsAgentController {
   })
   @ApiQuery({
     name: 'schemaId',
-    required: true,
+    required: false,
     type: String,
     description:
       'The identifier of the stored credential schema. This ID specifies which Verifiable Credential schema should be used to generate or retrieve the corresponding Verifiable Trust Credential (VTC).',

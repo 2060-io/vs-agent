@@ -189,25 +189,17 @@ export class TrustService {
       const serviceEndpoint = `${this.publicApiBaseUrl}/vt/${schemaPresentation}`
       const didDocumentServiceId = `${agent.did}#vpr-${schemaPresentation.replace('.json', '')}`
       const record = this.findMetadataEntry(didRecord, '_vt/jsc', serviceEndpoint)
-      let unsignedCredential
-      if (record) unsignedCredential = record.credential as W3cJsonLdVerifiableCredential
-
-      if (unsignedCredential) {
-        delete (unsignedCredential as any).proof
-        unsignedCredential.credentialSubject = credentialSubject
-      } else {
-        unsignedCredential = createCredential({
-          id: `${this.publicApiBaseUrl}/vt/${schemaCredential}`,
-          type: ['VerifiableCredential', 'JsonSchemaCredential'],
-          issuer: agent.did,
-          credentialSubject,
-        })
-        unsignedCredential.credentialSchema = await addDigestSRI(
-          createJsonSchema.id,
-          createJsonSchema,
-          this.ecsSchemas,
-        )
-      }
+      const unsignedCredential = createCredential({
+        id: `${this.publicApiBaseUrl}/vt/${schemaCredential}`,
+        type: ['VerifiableCredential', 'JsonSchemaCredential'],
+        issuer: agent.did,
+        credentialSubject,
+      })
+      unsignedCredential.credentialSchema = await addDigestSRI(
+        createJsonSchema.id,
+        createJsonSchema,
+        this.ecsSchemas,
+      )
 
       const verificationMethodId = getVerificationMethodId(agent.config.logger, didRecord)
       const credential = await signerW3c(
@@ -450,6 +442,11 @@ export class TrustService {
     }
 
     const record = didRecord.metadata.get(key) ?? {}
+    // Remove previous entry for this credential ID (if exists)
+    const found = this.findMetadataEntry(didRecord, key, credential.id)
+    if (found) delete record[found.schemaId]
+
+    // Save new entry
     record[ref] = {
       credential: credential.jsonCredential,
       verifiablePresentation,
