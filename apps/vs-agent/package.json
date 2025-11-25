@@ -52,7 +52,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "version": "pnpm version",
-    "test": "jest --passWithNoTests"
+    "test": "vitest"
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-calls": "^0.0.10",
