@@ -1,13 +1,7 @@
-## Summary
-<!-- Provide a brief summary of your changes and why they are needed. Be specific and describe the purpose and impact. -->
-
-## Changes
+**Changes**
 - <!-- Describe the main changes made in this PR. List them point-by-point. -->
 
-## Related Issues
-<!-- Reference any open issues this PR addresses (e.g., "Fixes #123" or "Fixed problem with ..."). -->
-
-## Testing
+**Testing**
 <!-- Describe the tests that were run to ensure the changes are working as expected. Include any specific commands or steps needed to reproduce. -->
 
 ## Checklist
