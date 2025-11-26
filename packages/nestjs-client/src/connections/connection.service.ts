@@ -15,7 +15,7 @@ export class ConnectionsEventService {
 
   constructor(
     @Inject('GLOBAL_MODULE_OPTIONS') private options: ConnectionEventOptions,
-    @Inject() private readonly repository: ConnectionsRepository,
+    @Inject(ConnectionsRepository) private readonly repository: ConnectionsRepository,
     @Optional() @Inject('CONNECTIONS_EVENT') private eventHandler?: EventHandler,
   ) {
     this.messageEvent = options.useMessages ?? false

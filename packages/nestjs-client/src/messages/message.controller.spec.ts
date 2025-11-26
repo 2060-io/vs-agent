@@ -3,13 +3,14 @@ import { HttpUtils } from '@2060.io/vs-agent-client'
 import { MessageReceived, MessageStateUpdated, TextMessage } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { MessageEventController } from './message.controller'
 import { MessageEventService } from './message.service'
 
-jest.mock('@2060.io/vs-agent-client', () => ({
+vi.mock('@2060.io/vs-agent-client', () => ({
   HttpUtils: {
-    handleException: jest.fn(),
+    handleException: vi.fn(),
   },
 }))
 
@@ -24,8 +25,8 @@ describe('MessageEventController', () => {
         {
           provide: MessageEventService,
           useValue: {
-            received: jest.fn(),
-            updated: jest.fn(),
+            received: vi.fn(),
+            updated: vi.fn(),
           },
         },
       ],
@@ -53,7 +54,7 @@ describe('MessageEventController', () => {
 
     it('should handle error in received message processing', async () => {
       const error = new Error('Test error')
-      jest.spyOn(messageService, 'received').mockRejectedValue(error)
+      vi.spyOn(messageService, 'received').mockRejectedValue(error)
       await controller.received(mockBody)
 
       expect(HttpUtils.handleException).toHaveBeenCalledWith(
@@ -80,8 +81,8 @@ describe('MessageEventController', () => {
 
     it('should handle error in message state update', async () => {
       const error = new Error('Test error')
-      jest.spyOn(messageService, 'updated').mockRejectedValue(error)
-      jest.spyOn(HttpUtils, 'handleException')
+      vi.spyOn(messageService, 'updated').mockRejectedValue(error)
+      vi.spyOn(HttpUtils, 'handleException')
 
       const mockBody = new MessageStateUpdated({
         connectionId: 'conn-1',

@@ -1,5 +1,6 @@
 import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Test, TestingModule } from '@nestjs/testing'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { ConnectionsRepository, EventHandler, ConnectionsEventService } from '../../src'
 
@@ -9,18 +10,18 @@ describe('ConnectionsEventService', () => {
   let mockRepository: Partial<ConnectionsRepository>
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     mockEventHandler = {
-      closeConnection: jest.fn(),
-      newConnection: jest.fn(),
+      closeConnection: vi.fn(),
+      newConnection: vi.fn(),
     }
 
     mockRepository = {
-      updateMetadata: jest.fn(),
-      create: jest.fn(),
-      updateStatus: jest.fn(),
-      isCompleted: jest.fn().mockResolvedValue(false),
+      updateMetadata: vi.fn(),
+      create: vi.fn(),
+      updateStatus: vi.fn(),
+      isCompleted: vi.fn().mockResolvedValue(false),
     }
 
     const module: TestingModule = await Test.createTestingModule({
@@ -86,7 +87,7 @@ describe('ConnectionsEventService', () => {
         metadata: { key: 'value' },
       })
 
-      jest.spyOn(service, 'handleNewConnection').mockImplementation(jest.fn())
+      vi.spyOn(service, 'handleNewConnection').mockImplementation(vi.fn())
 
       await service.update(event)
 
@@ -96,14 +97,14 @@ describe('ConnectionsEventService', () => {
 
   describe('handleNewConnection', () => {
     it('should not call newConnection when isCompleted returns false', async () => {
-      mockRepository.isCompleted = jest.fn().mockResolvedValue(false)
+      mockRepository.isCompleted = vi.fn().mockResolvedValue(false)
       await service.handleNewConnection('123')
       expect(mockRepository.isCompleted).toHaveBeenCalledWith('123', false)
       expect(mockEventHandler.newConnection).not.toHaveBeenCalled()
     })
 
     it('should call newConnection when isCompleted returns true', async () => {
-      mockRepository.isCompleted = jest.fn().mockResolvedValue(true)
+      mockRepository.isCompleted = vi.fn().mockResolvedValue(true)
       await service.handleNewConnection('123')
       expect(mockRepository.isCompleted).toHaveBeenCalledWith('123', false)
       expect(mockEventHandler.newConnection).toHaveBeenCalledWith('123')

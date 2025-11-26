@@ -24,9 +24,9 @@ export class MessageEventService {
   constructor(
     @Inject('GLOBAL_MODULE_OPTIONS') private options: MessageEventOptions,
     @Optional() @Inject('MESSAGE_EVENT') private eventHandler?: EventHandler,
-    @Optional() @Inject() private credentialService?: CredentialService,
-    @Optional() @Inject() private connectionRepository?: ConnectionsRepository,
-    @Optional() @Inject() private connectionsEventService?: ConnectionsEventService,
+    @Optional() @Inject(CredentialService) private credentialService?: CredentialService,
+    @Optional() @Inject(ConnectionsRepository) private connectionRepository?: ConnectionsRepository,
+    @Optional() @Inject(ConnectionsEventService) private connectionsEventService?: ConnectionsEventService,
   ) {
     if (!options.url) throw new Error(`For this module to be used the value url must be added`)
     this.url = options.url
