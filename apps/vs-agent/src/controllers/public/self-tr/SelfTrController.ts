@@ -60,14 +60,27 @@ export class SelfTrController {
     }
   }
 
-  @Get('perm/v1/find_with_did')
-  @ApiOperation({ summary: 'Get type by DID' })
+  @Get('perm/v1/list')
+  @ApiOperation({ summary: 'Get permissions by DID and type' })
   @ApiQuery({ name: 'did', required: true, description: 'DID to query' })
-  @ApiResponse({ status: 200, description: 'Type returned' })
-  findWithDid(@Query('did') did: string) {
-    if (!did) {
-      throw new HttpException('Missing required "did" query parameter.', HttpStatus.BAD_REQUEST)
+  @ApiQuery({ name: 'type', required: true, description: 'Permission type' })
+  @ApiQuery({ name: 'response_max_size', required: false })
+  @ApiQuery({ name: 'schema_id', required: false })
+  @ApiResponse({ status: 200, description: 'Permission list returned' })
+  findWithDid(@Query('did') did: string, @Query('type') type: string) {
+    try {
+      if (!did || type !== 'ISSUER') return { permissions: [] }
+      return {
+        permissions: [
+          {
+            type: 'ISSUER',
+            did,
+            created: '2000-11-18T15:26:01.487Z',
+          },
+        ],
+      }
+    } catch {
+      return { permissions: [] }
     }
-    return { type: 'PERMISSION_TYPE_ISSUER', did }
   }
 }
