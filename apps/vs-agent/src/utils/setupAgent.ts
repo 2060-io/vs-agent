@@ -85,22 +85,20 @@ export const setupAgent = async ({
   return { agent }
 }
 
-export function commonAppConfig(app: INestApplication, cors?: boolean) {
+export function commonAppConfig(app: INestApplication, cors?: boolean, publicApp: boolean = false) {
   // Versioning
   app.enableVersioning({
     type: VersioningType.URI,
   })
 
   // Swagger
-  if (ENABLE_SWAGGER) {
-    const config = new DocumentBuilder()
-      .setTitle('API Documentation')
-      .setDescription('API Documentation')
-      .setVersion('1.0')
-      .build()
-    const document = SwaggerModule.createDocument(app, config)
-    SwaggerModule.setup('api', app, document)
-  }
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('API Documentation')
+    .setVersion('1.0')
+    .build()
+  const document = SwaggerModule.createDocument(app, config)
+  if (!publicApp || (publicApp && ENABLE_SWAGGER)) SwaggerModule.setup('api', app, document)
 
   // Pipes
   app.useGlobalPipes(new ValidationPipe())
