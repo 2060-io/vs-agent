@@ -55,19 +55,21 @@ describe('DidValidator', () => {
 
     it('should allow Alice and Faber to exchange a structured conversational flow with VsAgent', async () => {
       const helloRecord = await aliceAgent.basicMessages.sendMessage(aliceConnection.id, 'Hello')
-      expect(helloRecord.content).toBe('Hello')
-
       const msgToFaber = await waitForBasicMessage(faberAgent, {
         content: 'Hello',
       })
-      expect(msgToFaber.content).toBe('Hello')
 
       const replyRecord = await faberAgent.basicMessages.sendMessage(faberConnection.id, 'How are you?')
-      expect(replyRecord.content).toBe('How are you?')
-
       const msgToAlice = await waitForBasicMessage(aliceAgent, {
         content: 'How are you?',
       })
+
+      // Sending messages
+      expect(helloRecord.content).toBe('Hello')
+      expect(replyRecord.content).toBe('How are you?')
+
+      // Receiving messages
+      expect(msgToFaber.content).toBe('Hello')
       expect(msgToAlice.content).toBe('How are you?')
     })
   })
