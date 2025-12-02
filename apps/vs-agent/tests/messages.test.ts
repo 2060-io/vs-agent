@@ -3,7 +3,7 @@ import { ConnectionRecord } from '@credo-ts/core'
 import { Subject } from 'rxjs'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
-import { VsAgent } from '../src/utils'
+import { HttpInboundTransport, VsAgent } from '../src/utils'
 
 import {
   actionMenu,
@@ -16,7 +16,7 @@ import {
   waitForBasicMessage,
 } from './__mocks__'
 
-describe('DidValidator', () => {
+describe('Messages', () => {
   const faberMessages = new Subject<SubjectMessage>()
   const aliceMessages = new Subject<SubjectMessage>()
   const subjectMap = {
@@ -30,18 +30,12 @@ describe('DidValidator', () => {
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
-      faberAgent = await startAgent({
-        label: 'DID Faber Test',
-        domain: 'faber',
-      })
+      faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
       faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
       faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
 
-      aliceAgent = await startAgent({
-        label: 'DID Alice Test',
-        domain: 'alice',
-      })
+      aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
       aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
       aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
@@ -53,7 +47,6 @@ describe('DidValidator', () => {
       await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
       await aliceAgent.wallet.delete()
-      vi.clearAllMocks()
     })
 
     it('should allow Alice and Faber to exchange a structured conversational flow.', async () => {
