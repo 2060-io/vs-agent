@@ -36,9 +36,4 @@ export const contextCredentialExamples = JSON.parse(
 export const mockResponses: { [key: string]: any } = {
   'https://example.org/vt/schemas-example-org-jsc.json': jsonSchemaCredentialMock,
   'https://dm.chatbot.demos.dev.2060.io/vt/cs/v1/js/ecs-org': jsonSchemaOrgMock,
-  'https://www.w3.org/2025/credentials/vcdi/multikey/context/v1.jsonld': contextW3cV1Jsonld,
-  'https://digitalbazaar.github.io/ed25519-signature-2020-context/contexts/ed25519-signature-2020-v1.jsonld':
-    contextSignature2020V1Jsonld,
-  'https://identity.foundation/linked-vp/contexts/v1': contextLinkedVp,
-  'https://www.w3.org/2018/credentials/examples/v1': contextCredentialExamples,
 }

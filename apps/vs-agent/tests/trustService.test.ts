@@ -2,6 +2,7 @@ import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord, CredentialEventTypes, CredentialState } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
+import { RequestInfo } from 'node-fetch'
 import { Subject } from 'rxjs'
 import request from 'supertest'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
@@ -25,8 +26,10 @@ import {
   ;(globalThis as any).__realFetch = globalThis.fetch
 }
 
-vi.stubGlobal('fetch', async (url: string, options?: RequestInit) => {
-  console.log("FETCH →", url)
+vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) => {
+  const url =
+    typeof input === 'string' ? input : ((input as any)?.url ?? input?.toString?.() ?? String(input))
+
   if (mockResponses[url]) {
     return {
       ok: true,
