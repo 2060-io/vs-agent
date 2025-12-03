@@ -10,8 +10,11 @@ import {
   BasicMessageStateChangedEvent,
   HandshakeProtocol,
 } from '@credo-ts/core'
+import { INestApplication } from '@nestjs/common'
+import { Test } from '@nestjs/testing'
 import { catchError, filter, firstValueFrom, map, timeout } from 'rxjs'
 
+import { VsAgentModule } from '../../src/admin.module'
 import { VsAgent } from '../../src/utils'
 
 export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
@@ -92,4 +95,13 @@ export async function waitForActionMenuRecord(
       map(e => e.payload.actionMenuRecord),
     ),
   )
+}
+
+export const startServersTesting = async (agent: VsAgent): Promise<INestApplication> => {
+  const moduleRef = await Test.createTestingModule({
+    imports: [VsAgentModule.register(agent, 'http://localhost:3000')],
+  }).compile()
+  const app = moduleRef.createNestApplication()
+  await app.init()
+  return app
 }
