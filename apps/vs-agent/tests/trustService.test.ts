@@ -26,6 +26,7 @@ import {
 }
 
 vi.stubGlobal('fetch', async (url: string, options?: RequestInit) => {
+  console.log("FETCH →", url)
   if (mockResponses[url]) {
     return {
       ok: true,
