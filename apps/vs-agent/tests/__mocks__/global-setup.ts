@@ -2,7 +2,7 @@ import { vi } from 'vitest'
 
 const fetchOriginal = global.fetch
 
-global.fetch = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+global.fetch = vi.fn(async (url: any | URL, init?: RequestInit) => {
   const urlToString = url.toString()
 
   if (urlToString.includes('witness')) {
@@ -23,8 +23,8 @@ vi.mock('didwebvh-ts', async () => {
     fetchWitnessProofs: vi.fn().mockResolvedValue([]),
     resolveDIDFromLog2: vi.fn().mockImplementation(async (log: any) => {
       return {
-        didDocument: actual.resolveDIDFromLog2
-          ? await actual.resolveDIDFromLog2(log).catch(() => ({ id: 'did:mock' }))
+        didDocument: actual.resolveDIDFromLog
+          ? await actual.resolveDIDFromLog(log).catch(() => ({ id: 'did:mock' }))
           : { id: 'did:mock' },
         metadata: {},
       }
