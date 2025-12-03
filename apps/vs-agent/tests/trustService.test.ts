@@ -1,17 +1,23 @@
+import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
+import { ConnectionRecord, CredentialEventTypes, CredentialState } from '@credo-ts/core'
+import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
+import request from 'supertest'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
 
-import { TrustService } from '../src/controllers'
+import { MessageService, TrustService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
+  makeConnection,
   mockResponses,
   startAgent,
   startServersTesting,
   SubjectInboundTransport,
   SubjectMessage,
   SubjectOutboundTransport,
+  waitForCredentialRecordSubject,
 } from './__mocks__'
 
 // Mock Fetch
@@ -32,11 +38,17 @@ vi.stubGlobal('fetch', async (url: string, options?: RequestInit) => {
 describe('TrustService', () => {
   let faberApp: INestApplication
   let faberService: TrustService
+  let faberMsgService: MessageService
   const faberMessages = new Subject<SubjectMessage>()
+  const aliceMessages = new Subject<SubjectMessage>()
   const subjectMap = {
     'rxjs:faber': faberMessages,
+    'rxjs:alice': aliceMessages,
   }
   let faberAgent: VsAgent
+  let aliceAgent: VsAgent
+  let faberConnection: ConnectionRecord
+  let aliceConnection: ConnectionRecord
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
@@ -45,7 +57,14 @@ describe('TrustService', () => {
       await faberAgent.initialize()
       faberApp = await startServersTesting(faberAgent)
 
+      aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
+      aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
+      aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
+      await aliceAgent.initialize()
+      ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
+
       faberService = faberApp.get<TrustService>(TrustService)
+      faberMsgService = faberApp.get<MessageService>(MessageService)
     })
 
     afterEach(async () => {
@@ -80,5 +99,85 @@ describe('TrustService', () => {
         }),
       )
     })
+
+    it('should issue a valid anoncreds credential', async () => {
+      const original = WebVhAnonCredsRegistry.prototype['_resolveAndValidateAttestedResource']
+      vi.spyOn(
+        WebVhAnonCredsRegistry.prototype as any,
+        '_resolveAndValidateAttestedResource',
+      ).mockImplementation(async function (...args: any[]) {
+        const resourceId = args[1]
+        if (resourceId.includes(':faber/')) {
+          const cid = resourceId.split('/').pop()
+          const res = await request(faberApp.getHttpServer()).get(`/resources/${cid}`)
+          if (res.status !== 200) {
+            throw new Error(`resource ${cid} not found in test server`)
+          }
+
+          return {
+            resolutionResult: {
+              content: res.body,
+            },
+            resourceObject: res.body,
+          }
+        }
+
+        return original.call(this, ...args)
+      })
+
+      const credentialResponse = await faberService.issueCredential({
+        type: 'anoncreds',
+        jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+        claims: {
+          id: 'https://example.org/org/123',
+          name: 'OpenAI Research',
+          logo: 'https://example.com/logo.png',
+          registryId: 'REG-123',
+          registryUrl: 'https://registry.example.org',
+          address: '123 Main St, San Francisco, CA',
+          type: 'PRIVATE',
+          countryCode: 'US',
+        },
+      })
+
+      const record = await faberMsgService.sendMessage(
+        {
+          type: 'credential-issuance',
+          connectionId: faberConnection.id,
+          credentialSchemaId: credentialResponse.credential.credentialExchangeId,
+        } as CredentialIssuanceMessage,
+        faberConnection,
+      )
+      const aliceCredentialRecord = await waitForCredentialRecordSubject(
+        aliceAgent.events.observable(CredentialEventTypes.CredentialStateChanged),
+        {
+          threadId: record.id,
+          state: CredentialState.OfferReceived,
+        },
+      )
+
+      expect(aliceCredentialRecord).toEqual(
+        expect.objectContaining({
+          state: 'offer-received',
+          connectionId: aliceConnection.id,
+          type: 'CredentialRecord',
+          role: 'holder',
+          protocolVersion: 'v2',
+          id: expect.any(String),
+          threadId: expect.any(String),
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+      )
+      expect(credentialResponse).toEqual(
+        expect.objectContaining({
+          status: 200,
+          didcommInvitationUrl: expect.any(String),
+          credential: expect.objectContaining({
+            credentialExchangeId: expect.any(String),
+          }),
+        }),
+      )
+    }, 20000)
   })
 })
