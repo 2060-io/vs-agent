@@ -20,7 +20,7 @@ import {
   waitForBasicMessage,
 } from './__mocks__'
 
-describe('Messages', () => {
+describe('MessageService', () => {
   let faberApp: INestApplication
   let aliceApp: INestApplication
   let faberService: MessageService
