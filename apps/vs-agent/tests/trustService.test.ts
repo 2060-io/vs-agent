@@ -71,6 +71,8 @@ describe('TrustService', () => {
       await faberApp.close()
       await faberAgent.shutdown()
       await faberAgent.wallet.delete()
+      await aliceAgent.shutdown()
+      await aliceAgent.wallet.delete()
     })
 
     it('should issue a JSON-LD credential with a valid Ed25519 proof', async () => {
