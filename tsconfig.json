@@ -10,7 +10,7 @@
     "paths": {
       "@2060.io/*": ["packages/*/src"]
     },
-    "types": ["jest", "node"]
+    "types": ["vitest", "node"]
   },
   "exclude": ["node_modules", "build"]
 }
