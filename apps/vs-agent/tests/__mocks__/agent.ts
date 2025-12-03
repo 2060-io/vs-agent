@@ -11,6 +11,7 @@ export const startAgent = async ({ label, domain }: { label: string; domain: str
       label,
       logger: new TsLogger(LogLevel.off, label),
     },
+    did: `did:webvh:${domain}`,
     dependencies: agentDependencies,
     publicApiBaseUrl: `https://${domain}`,
   })
