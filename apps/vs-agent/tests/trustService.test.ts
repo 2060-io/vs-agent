@@ -38,6 +38,7 @@ vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) =
       ok: true,
       headers,
       json: async () => mockResponses[url],
+      text: async () => JSON.stringify(mockResponses[url]),
     }
   }
   return (globalThis as any).__realFetch(url, options)
