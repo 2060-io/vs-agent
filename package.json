@@ -62,10 +62,5 @@
     "@credo-ts/askar": "0.5.18-alpha-20250930143725",
     "@credo-ts/anoncreds": "0.5.18-alpha-20250930143725"
   },
-  "packageManager": "pnpm@9.15.3",
-  "pnpm": {
-    "patchedDependencies": {
-      "@credo-ts/core": "patches/@credo-ts__core.patch"
-    }
-  }
+  "packageManager": "pnpm@9.15.3"
 }
