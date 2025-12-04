@@ -2,6 +2,7 @@ import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord, CredentialEventTypes, CredentialState } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
+import { RequestInfo } from 'node-fetch'
 import { Subject } from 'rxjs'
 import request from 'supertest'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
@@ -10,10 +11,8 @@ import { MessageService, TrustService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
-  fetchMocker,
-  jsonSchemaCredentialMock,
-  jsonSchemaOrgMock,
   makeConnection,
+  mockResponses,
   startAgent,
   startServersTesting,
   SubjectInboundTransport,
@@ -21,6 +20,28 @@ import {
   SubjectOutboundTransport,
   waitForCredentialRecordSubject,
 } from './__mocks__'
+
+// Mock Fetch
+{
+  ;(globalThis as any).__realFetch = globalThis.fetch
+}
+
+vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) => {
+  const url =
+    typeof input === 'string' ? input : ((input as any)?.url ?? input?.toString?.() ?? String(input))
+
+  if (mockResponses[url]) {
+    const headers = new Headers()
+    headers.set('content-type', 'application/ld+json')
+    headers.set('access-control-allow-origin', '*')
+    return {
+      ok: true,
+      headers,
+      json: async () => mockResponses[url],
+    }
+  }
+  return (globalThis as any).__realFetch(url, options)
+})
 
 describe('TrustService', () => {
   let faberApp: INestApplication
@@ -38,9 +59,6 @@ describe('TrustService', () => {
   let aliceConnection: ConnectionRecord
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
-      // Mock global fetch
-      fetchMocker.enable()
-
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
       faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
       faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
@@ -55,20 +73,6 @@ describe('TrustService', () => {
 
       faberService = faberApp.get<TrustService>(TrustService)
       faberMsgService = faberApp.get<MessageService>(MessageService)
-
-      // Global fetch mocks
-      fetchMocker.setMockResponses({
-        'https://example.org/vt/schemas-example-org-jsc.json': {
-          ok: true,
-          status: 200,
-          data: jsonSchemaCredentialMock,
-        },
-        'https://dm.chatbot.demos.dev.2060.io/vt/cs/v1/js/ecs-org': {
-          ok: true,
-          status: 200,
-          data: jsonSchemaOrgMock,
-        },
-      })
     })
 
     afterEach(async () => {
@@ -77,8 +81,6 @@ describe('TrustService', () => {
       await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
       await aliceAgent.wallet.delete()
-      fetchMocker.reset()
-      fetchMocker.disable()
     })
 
     it('should issue a JSON-LD credential with a valid Ed25519 proof', async () => {
