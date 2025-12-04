@@ -18,8 +18,3 @@ export const jsonSchemaOrgMock = {
   schema:
     '{"$id":"https://dm.chatbot.demos.dev.2060.io/vt/cs/v1/js/ecs-org","$schema":"https://json-schema.org/draft/2020-12/schema","title":"OrganizationCredential","description":"OrganizationCredential using JsonSchema","type":"object","properties":{"credentialSubject":{"type":"object","properties":{"id":{"type":"string","format":"uri"},"name":{"type":"string","minLength":0,"maxLength":256},"logo":{"type":"string","contentEncoding":"base64","contentMediaType":"image/png"},"registryId":{"type":"string","minLength":0,"maxLength":256},"registryUrl":{"type":"string","minLength":0,"maxLength":256},"address":{"type":"string","minLength":0,"maxLength":1024},"type":{"type":"string","enum":["PUBLIC","PRIVATE","FOUNDATION"]},"countryCode":{"type":"string","minLength":2,"maxLength":2}},"required":["id","name","logo","registryId","registryUrl","address","type","countryCode"]}}}',
 }
-
-export const mockResponses: { [key: string]: any } = {
-  'https://example.org/vt/schemas-example-org-jsc.json': jsonSchemaCredentialMock,
-  'https://dm.chatbot.demos.dev.2060.io/vt/cs/v1/js/ecs-org': jsonSchemaOrgMock,
-}

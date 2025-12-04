@@ -32,7 +32,7 @@ export class FetchMocker {
 
   // Enable the mock
   enable() {
-    global.fetch = vi.fn(this.mockImplementation.bind(this))
+    global.fetch = vi.fn(this.mockImplementation.bind(this)) as any
   }
 
   // Disable the mock and restore the original fetch
