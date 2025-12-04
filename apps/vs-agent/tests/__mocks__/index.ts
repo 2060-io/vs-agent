@@ -1,5 +1,6 @@
 export * from './SubjectInboundTransport'
 export * from './SubjectOutboundTransport'
 export * from './agent'
+export * from './fetch'
 export * from './helpers'
 export * from './object'
