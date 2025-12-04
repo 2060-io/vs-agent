@@ -98,10 +98,8 @@
     "@types/multer": "^1.4.7",
     "@types/node-fetch": "^2.6.4",
     "@types/uuid": "^8.3.4",
-    "@vitest/coverage-v8": "^4.0.14",
     "postinstall-postinstall": "^2.1.0",
     "rxjs": "^7.8.1",
-    "ts-node-dev": "^2.0.0",
-    "vitest": "^4.0.14"
+    "ts-node-dev": "^2.0.0"
   }
 }
