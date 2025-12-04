@@ -2,7 +2,6 @@ import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord, CredentialEventTypes, CredentialState } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
-import { RequestInfo } from 'node-fetch'
 import { Subject } from 'rxjs'
 import request from 'supertest'
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest'
@@ -12,7 +11,6 @@ import { VsAgent } from '../src/utils'
 
 import {
   makeConnection,
-  mockResponses,
   startAgent,
   startServersTesting,
   SubjectInboundTransport,
@@ -20,32 +18,6 @@ import {
   SubjectOutboundTransport,
   waitForCredentialRecordSubject,
 } from './__mocks__'
-
-// Mock Fetch
-const fetchOriginal = global.fetch
-vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) => {
-  const url =
-    typeof input === 'string' ? input : ((input as any)?.url ?? input?.toString?.() ?? String(input))
-
-  if (url.includes('witness')) {
-    return new Response(JSON.stringify([]), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-  if (mockResponses[url]) {
-    const headers = new Headers()
-    headers.set('content-type', 'application/ld+json')
-    headers.set('access-control-allow-origin', '*')
-    return {
-      ok: true,
-      headers,
-      json: async () => mockResponses[url],
-      text: async () => JSON.stringify(mockResponses[url]),
-    }
-  }
-  return fetchOriginal(url, options)
-})
 
 describe('TrustService', () => {
   let faberApp: INestApplication
