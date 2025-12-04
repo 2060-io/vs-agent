@@ -22,14 +22,17 @@ import {
 } from './__mocks__'
 
 // Mock Fetch
-{
-  ;(globalThis as any).__realFetch = globalThis.fetch
-}
-
+const fetchOriginal = global.fetch
 vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) => {
   const url =
     typeof input === 'string' ? input : ((input as any)?.url ?? input?.toString?.() ?? String(input))
 
+  if (url.includes('witness')) {
+    return new Response(JSON.stringify([]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
   if (mockResponses[url]) {
     const headers = new Headers()
     headers.set('content-type', 'application/ld+json')
@@ -41,7 +44,7 @@ vi.stubGlobal('fetch', async (input: RequestInfo | URL, options?: RequestInit) =
       text: async () => JSON.stringify(mockResponses[url]),
     }
   }
-  return (globalThis as any).__realFetch(url, options)
+  return fetchOriginal(url, options)
 })
 
 describe('TrustService', () => {
