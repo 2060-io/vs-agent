@@ -43,6 +43,11 @@ import { getEcsSchemas } from './data'
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
+const FIXED_W3C_DIGESTS: Record<string, string> = {
+  'https://www.w3.org/ns/credentials/json-schema/v2.json':
+    'sha384-S57yQDg1MTzF56Oi9DbSQ14u7jBy0RDdx0YbeV7shwhCS88G8SCXeFq82PafhCrW',
+}
+
 // Helpers
 export const presentations = [
   {
@@ -476,7 +481,7 @@ export async function addDigestSRI<T extends object>(
 
   return {
     ...data,
-    digestSRI: generateDigestSRI(schemaContent),
+    digestSRI: id in FIXED_W3C_DIGESTS ? FIXED_W3C_DIGESTS[id] : generateDigestSRI(schemaContent),
   }
 }
 
@@ -486,10 +491,8 @@ export async function addDigestSRI<T extends object>(
  * @param algorithm - The hash algorithm to use (default: sha256).
  * @returns The SRI digest string.
  */
-export function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
-  const hash = createHash(algorithm)
-    .update(JSON.stringify(JSON.parse(content)), 'utf8')
-    .digest('base64')
+export function generateDigestSRI(content: string, algorithm: string = 'sha384'): string {
+  const hash = createHash(algorithm).update(content, 'utf8').digest('base64')
   return `${algorithm}-${hash}`
 }
 

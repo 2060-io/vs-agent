@@ -34,6 +34,7 @@ import {
   ProofsModule,
   V2CredentialProtocol,
   V2ProofProtocol,
+  W3cCredentialsModule,
 } from '@credo-ts/core'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
 import { WebvhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
@@ -43,6 +44,7 @@ import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
+import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
 import { WebDidRegistrar } from './WebDidRegistrar'
 
@@ -62,6 +64,7 @@ type VsAgentModules = {
   questionAnswer: QuestionAnswerModule
   receipts: ReceiptsModule
   userProfile: UserProfileModule
+  w3cCredentials: W3cCredentialsModule
 }
 
 interface AgentOptions<VsAgentModules> {
@@ -418,6 +421,9 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       receipts: new ReceiptsModule(),
       // Disable module's auto disclose feature, since we are going to manage it in MessageEvents
       userProfile: new UserProfileModule(new UserProfileModuleConfig({ autoSendProfile: false })),
+      w3cCredentials: new W3cCredentialsModule({
+        documentLoader: defaultDocumentLoader,
+      }),
     },
     did: options.did,
     autoDiscloseUserProfile: options.autoDiscloseUserProfile,
