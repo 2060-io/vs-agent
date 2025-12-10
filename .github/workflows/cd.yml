@@ -9,8 +9,6 @@ permissions:
   contents: write   # Required for updating npm versions
 
 env:
-  DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
-  DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 
@@ -23,7 +21,7 @@ jobs:
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
       RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
       RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
       RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
@@ -32,41 +30,49 @@ jobs:
     steps:
       - name: Checkout vs-agent
         uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
+      
+      - name: Set IMAGE_TAG based on release type
         run: |
-          echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
-
-      - name: Build Docker image
-        run: |
-          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
- 
-      - name: Add tags to Docker image and push to Docker Hub
-        run: |
-          if [ "$IMAGE_TAG" = "latest" ]; then
-            TAGS=("${RELEASE_VERSION}")
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "SUFFIX=" >> $GITHUB_ENV
           else
-            TAGS=(
-              "v${RELEASE_MAJOR}-${IMAGE_TAG}"
-              "v${RELEASE_MAJOR}.${RELEASE_MINOR}-${IMAGE_TAG}"
-              "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
-              "${RELEASE_VERSION}"
-            )
+            echo "IMAGE_TAG=dev" >> $GITHUB_ENV
+            echo "SUFFIX=-dev" >> $GITHUB_ENV
           fi
 
-          docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+      
+      - name: Build & push Docker image (VS Agent)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./app/vs-agent/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${IMAGE_NAME}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${IMAGE_NAME}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${IMAGE_NAME}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${IMAGE_NAME}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${IMAGE_NAME}:${RELEASE_VERSION}
+      
+      - name: Build & push Docker image (Chatbot Demo)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./examples/chatbot/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${DEMO_CHATBOT_IMAGE_NAME}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${DEMO_CHATBOT_IMAGE_NAME}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${DEMO_CHATBOT_IMAGE_NAME}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${DEMO_CHATBOT_IMAGE_NAME}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${DEMO_CHATBOT_IMAGE_NAME}:${RELEASE_VERSION}
 
-          for tag in "${TAGS[@]}"; do
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:$tag
-            docker push $DH_USERNAME/$IMAGE_NAME:$tag
-          done
-
-      - name: Build and push Chatbot Demo Docker image
-        run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
-          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$RELEASE_VERSION
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$RELEASE_VERSION
 
   helm:
     needs: [resolve-version, docker]
