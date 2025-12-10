@@ -2,17 +2,13 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**']
+    branches: [main, 'release/**', 'fix/testing-cd']
 
 permissions:
   id-token: write   # Required for OIDC
   contents: write   # Required for updating npm versions
   issues: write
   pull-requests: write
-
-env:
-  IMAGE_NAME: 'vs-agent'      
-  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 
 jobs:
   resolve-version:
@@ -30,11 +26,11 @@ jobs:
           - id: agent
             context: .
             file: ./apps/vs-agent/Dockerfile
-            image_name: ${{ env.IMAGE_NAME }}
+            image_name: vs-agent
           - id: chatbot
             context: .
             file: ./examples/chatbot/Dockerfile
-            image_name: ${{ env.DEMO_CHATBOT_IMAGE_NAME }}
+            image_name: demo-chatbot-backend
 
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
