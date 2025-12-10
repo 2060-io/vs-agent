@@ -373,7 +373,7 @@ async function addDigestSRI<T extends object>(
  * @param algorithm - The hash algorithm to use (default: sha256).
  * @returns The SRI digest string.
  */
-function generateDigestSRI(content: string, algorithm: string = 'sha256'): string {
+export function generateDigestSRI(content: string, algorithm: string = 'sha384'): string {
   const hash = createHash(algorithm)
     .update(JSON.stringify(JSON.parse(content)), 'utf8')
     .digest('base64')
