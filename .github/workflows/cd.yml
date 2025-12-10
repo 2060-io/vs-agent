@@ -29,7 +29,7 @@ jobs:
         service:
           - id: agent
             context: .
-            file: ./app/vs-agent/Dockerfile
+            file: ./apps/vs-agent/Dockerfile
             image_name: $IMAGE_NAME
           - id: chatbot
             context: .
