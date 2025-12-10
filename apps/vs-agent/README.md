@@ -78,7 +78,7 @@ Here is a couple of variables that you may want to take care in case of troubles
 | AGENT_LOG_LEVEL | Credo Agent Log level                                                | 4 (warn)      |
 | ADMIN_LOG_LEVEL | Admin interface Log level                                            | 2 (debug)     |
 | USE_CORS        | Enable Cross-Origin Resource Sharing (only for development purposes) | false         |
-| ENABLE_SWAGGER  | Enable Swagger documentation (recommended only for development environments) | false |
+| ENABLE_PUBLIC_API_SWAGGER  | Enable Swagger documentation for public API (recommended only for development environments) | false |
 
 
 Possible log levels:
