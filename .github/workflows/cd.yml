@@ -4,99 +4,55 @@ on:
   push:
     branches: [main, 'release/**']
 
+permissions:
+  id-token: write   # Required for OIDC
+  contents: write   # Required for updating npm versions
+
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
-  IMAGE_TAG: dev
 
 jobs:
-  build:
+  resolve-version:
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
+
+  docker:
+    needs: resolve-version
+    if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
 
     steps:
       - name: Checkout vs-agent
         uses: actions/checkout@v4
 
-      - name: Setup node v22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Corepack pnpm
-        run: |
-          corepack enable
-
-      - name: Install dependencies
-        run: |
-          pnpm install
-      
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - uses: codfish/semantic-release-action@v3
-        id: semantic
-        with:
-          branches: |
-            [
-              'release',
-              { 
-                name: 'main',
-                prerelease: 'dev'
-              }
-            ]
-          plugins: |
-            [
-              [
-                "@semantic-release/commit-analyzer",
-                {
-                  "preset": "angular",
-                  "releaseRules": [
-                    {
-                      "type": "refactor",
-                      "release": "patch"
-                    },
-                    {
-                      "type": "build",
-                      "release": "patch"
-                    }                    
-                  ]
-                }
-              ],
-              [
-                "@semantic-release/npm",
-                {
-                  "npmPublish": false
-                }
-              ],
-              "@semantic-release/release-notes-generator",
-            ]
-
-      - name: Set version for apps and packages
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          pnpm -r --topological version "$RELEASE_VERSION"
-
       - name: Log in to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
 
       - name: Build Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
  
       - name: Add tags to Docker image and push to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          TAGS=(
-            "v${RELEASE_MAJOR}-${IMAGE_TAG}"
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}-${IMAGE_TAG}"
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
-            "v${RELEASE_VERSION}"
-          )
+          if [ "$IMAGE_TAG" = "latest" ]; then
+            TAGS=("${RELEASE_VERSION}")
+          else
+            TAGS=(
+              "v${RELEASE_MAJOR}-${IMAGE_TAG}"
+              "v${RELEASE_MAJOR}.${RELEASE_MINOR}-${IMAGE_TAG}"
+              "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
+              "${RELEASE_VERSION}"
+            )
+          fi
 
           docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
 
@@ -106,52 +62,62 @@ jobs:
           done
 
       - name: Build and push Chatbot Demo Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
-          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
+          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$RELEASE_VERSION
           docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
+          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$RELEASE_VERSION
 
-      - name: Log in to Docker Hub Helm Registry
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
+  helm:
+    needs: [resolve-version, docker]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Push Helm chart to Docker Hub OCI repo
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          TAGS=(
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
-            "v${RELEASE_VERSION}"
-          )
-          for tag in "${TAGS[@]}"; do
-            docker push $DH_USERNAME/$IMAGE_NAME:$tag
-            sed -i "s/^version:.*/version: $tag/" ./charts/vs-agent/Chart.yaml
-            CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
-            helm dependency update ./charts/vs-agent
-            helm package ./charts/vs-agent -d ./charts
-            helm push ./charts/${CHART_NAME}-$tag.tgz oci://docker.io/$DH_USERNAME
-          done
+      - name: Run publish-helm action
+        id: publish-helm
+        uses: 2060-io/devops/actions/publish-helm@main
+        with:
+          dh-username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          dh-token: ${{ secrets.DOCKER_HUB_PWD }}
+          release-version: ${{ needs.resolve-version.outputs.release-version }}
+          dependent-charts: "./charts/chatbot"
 
-      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
-        if: steps.semantic.outputs.new-release-published == 'true'
+  npm-publish:
+    needs: [resolve-version, docker, helm]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pnpm version has been pinned in package.json
+      - name: Setup node v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Corepack pnpm
         run: |
-          sed -i "s/^version:.*/version: v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
-          # update the dependencies version in the Chart.yaml
-          sed -i "s/^\([[:space:]]*version:\).*/\1 v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
-          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
-          helm dependency update ./charts/chatbot
-          helm package ./charts/chatbot -d ./charts
-          helm push ./charts/${CHART_NAME}-v$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
-  
+          corepack enable
+          
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Set version for apps and packages
+        run: |
+          pnpm -r --topological version "$RELEASE_VERSION"
+
+      # --no-git-checks is used due to topological version updating.
       - name: Publish NPM packages
-        if: steps.semantic.outputs.new-release-published == 'true'
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm -r publish --no-git-checks --access public
 
 
