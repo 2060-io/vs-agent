@@ -10,10 +10,6 @@ permissions:
   issues: write
   pull-requests: write
 
-env:
-  IMAGE_NAME: 'vs-agent'      
-  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
-
 jobs:
   resolve-version:
     uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
@@ -30,11 +26,11 @@ jobs:
           - id: agent
             context: .
             file: ./apps/vs-agent/Dockerfile
-            image_name: ${{ env.IMAGE_NAME }}
+            image_name: vs-agent
           - id: chatbot
             context: .
             file: ./examples/chatbot/Dockerfile
-            image_name: ${{ env.DEMO_CHATBOT_IMAGE_NAME }}
+            image_name: demo-chatbot-backend
 
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
@@ -55,6 +51,7 @@ jobs:
           else
             echo "IMAGE_TAG=dev" >> $GITHUB_ENV
             echo "SUFFIX=-dev" >> $GITHUB_ENV
+            echo "RELEASE_PATCH_SHORT=${RELEASE_PATCH:0:1}" >> $GITHUB_ENV
           fi
 
       - name: Docker login
@@ -72,11 +69,11 @@ jobs:
           file: ${{ matrix.service.file }}
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}${SUFFIX}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH_SHORT }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
       # Split stable and dev tag builds custom tags for each release type.
       - name: Build & push ${{ matrix.service.id }} stable release tags
@@ -87,10 +84,10 @@ jobs:
           file: ${{ matrix.service.file }}
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
   helm:
     needs: [resolve-version, docker]
@@ -143,5 +140,4 @@ jobs:
       - name: Publish NPM packages
         run: |
           pnpm -r publish --no-git-checks --access public
-
 
