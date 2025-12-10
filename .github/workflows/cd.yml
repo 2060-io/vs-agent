@@ -7,6 +7,8 @@ on:
 permissions:
   id-token: write   # Required for OIDC
   contents: write   # Required for updating npm versions
+  issues: write
+  pull-requests: write
 
 env:
   IMAGE_NAME: 'vs-agent'      
@@ -28,11 +30,11 @@ jobs:
           - id: agent
             context: .
             file: ./app/vs-agent/Dockerfile
-            image_name: ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}
+            image_name: $IMAGE_NAME
           - id: chatbot
             context: .
             file: ./examples/chatbot/Dockerfile
-            image_name: ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}
+            image_name: $DEMO_CHATBOT_IMAGE_NAME
 
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
@@ -69,11 +71,11 @@ jobs:
           file: ${{ matrix.service.file }}
           push: true
           tags: |
-            ${{ matrix.service.image_name }}:${IMAGE_TAG}
-            ${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
-            ${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
-            ${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH}${SUFFIX}
-            ${{ matrix.service.image_name }}:${RELEASE_VERSION}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
 
   helm:
     needs: [resolve-version, docker]
