@@ -14,7 +14,7 @@ didcommPort: 3001 # Port for DIDComm
 didcommLabel: "VS Agent"
 eventsBaseUrl: "https://events.{{ .Values.global.domain }}"
 didcommInvitationImageUrl: "https://image.{{ .Values.global.domain }}/invitation.png"
-# enableSwagger: true # Enable Swagger documentation for the VS Agent service (its recommended only for development environments)
+# enablePublicApiSwagger: true # Enable Swagger documentation for the VS Agent service (its recommended only for development environments)
 publicDidMethod: "webvh"
 resources:
   requests:
