@@ -67,7 +67,7 @@ export const ADMIN_LOG_LEVEL = process.env.ADMIN_LOG_LEVEL
   : LogLevel.debug
 
 export const USE_CORS = Boolean(process.env.USE_CORS || false)
-export const ENABLE_SWAGGER = !(process.env.ENABLE_SWAGGER === 'false')
+export const ENABLE_PUBLIC_API_SWAGGER = !(process.env.ENABLE_PUBLIC_API_SWAGGER === 'false')
 
 // Advanced settings
 export const AGENT_INVITATION_BASE_URL = process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/'
