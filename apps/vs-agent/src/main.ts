@@ -62,7 +62,7 @@ export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) =
 
   // PublicModule-specific config
   const publicApp = await NestFactory.create(PublicModule.register(agent, publicApiBaseUrl))
-  commonAppConfig(publicApp, cors)
+  commonAppConfig(publicApp, cors, true)
   publicApp.use(express.json({ limit: '5mb' }))
   publicApp.use(express.urlencoded({ extended: true, limit: '5mb' }))
   publicApp.getHttpAdapter().getInstance().set('json spaces', 2)
