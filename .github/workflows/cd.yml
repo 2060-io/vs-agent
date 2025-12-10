@@ -10,6 +10,9 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  IMAGE_NAME: 'vs-agent'      
+
 jobs:
   resolve-version:
     uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
@@ -39,11 +42,15 @@ jobs:
       RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
       RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
 
+    outputs:
+      image-tag: ${{ steps.compute-tags.outputs.image-tag }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Compute tags
+        id: compute-tags
         run: |
           if [ "$RELEASE_TYPE" = "stable" ]; then
             echo "IMAGE_TAG=latest" >> $GITHUB_ENV
@@ -53,6 +60,7 @@ jobs:
             echo "SUFFIX=-dev" >> $GITHUB_ENV
             echo "RELEASE_PATCH_SHORT=${RELEASE_PATCH:0:1}" >> $GITHUB_ENV
           fi
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Docker login
         uses: docker/login-action@v2
@@ -93,18 +101,51 @@ jobs:
     needs: [resolve-version, docker]
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
+      IMAGE_TAG: ${{ needs.docker.outputs.image-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run publish-helm action
-        id: publish-helm
-        uses: 2060-io/organization/actions/publish-helm@main
+      - name: Docker login
+        uses: docker/login-action@v2
         with:
-          dh-username: ${{ secrets.DOCKER_HUB_LOGIN }}
-          dh-token: ${{ secrets.DOCKER_HUB_PWD }}
-          release-version: ${{ needs.resolve-version.outputs.release-version }}
-          dependent-charts: "./charts/chatbot"
+          username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Push Helm chart to Docker Hub OCI repo
+        run: |
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            TAGS=("${RELEASE_VERSION}")
+          else
+            TAGS=(
+              "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
+              "${RELEASE_VERSION}"
+            )
+          fi
+          for tag in "${TAGS[@]}"; do
+            docker push ${{ secrets.DOCKER_HUB_LOGIN }}/$IMAGE_NAME:$tag
+            sed -i "s/^version:.*/version: $tag/" ./charts/vs-agent/Chart.yaml
+            CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
+            helm dependency update ./charts/vs-agent
+            helm package ./charts/vs-agent -d ./charts
+            helm push ./charts/${CHART_NAME}-$tag.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
+          done
+
+      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
+        run: |
+          sed -i "s/^version:.*/version: $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          # update the dependencies version in the Chart.yaml
+          sed -i "s/^\([[:space:]]*version:\).*/\1 $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
+          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
+          helm dependency update ./charts/chatbot
+          helm package ./charts/chatbot -d ./charts
+          helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
 
   npm-publish:
     needs: [resolve-version, docker, helm]
