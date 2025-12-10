@@ -12,7 +12,6 @@ permissions:
 
 env:
   IMAGE_NAME: 'vs-agent'      
-  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 
 jobs:
   resolve-version:
@@ -93,20 +92,7 @@ jobs:
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
-  helm:
-    needs: [resolve-version, docker]
-    if: needs.resolve-version.outputs.new-release-published == 'true'
-    runs-on: ubuntu-latest
-    env:
-      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
-      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
-      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
-      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
-      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      # Note: AddiUnify due both to Docker Hub is required for pushing OCI Helm charts.
       - name: Push Helm chart to Docker Hub OCI repo
         run: |
           if [ "$RELEASE_TYPE" = "stable" ]; then
