@@ -30,11 +30,11 @@ jobs:
           - id: agent
             context: .
             file: ./apps/vs-agent/Dockerfile
-            image_name: $IMAGE_NAME
+            image_name: ${{ env.IMAGE_NAME }}
           - id: chatbot
             context: .
             file: ./examples/chatbot/Dockerfile
-            image_name: $DEMO_CHATBOT_IMAGE_NAME
+            image_name: ${{ env.DEMO_CHATBOT_IMAGE_NAME }}
 
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
