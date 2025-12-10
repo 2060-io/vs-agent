@@ -4,154 +4,144 @@ on:
   push:
     branches: [main, 'release/**']
 
+permissions:
+  id-token: write   # Required for OIDC
+  contents: write   # Required for updating npm versions
+  issues: write
+  pull-requests: write
+
 env:
-  DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
-  DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
   IMAGE_NAME: 'vs-agent'      
   DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
-  IMAGE_TAG: dev
 
 jobs:
-  build:
+  resolve-version:
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
+
+  docker:
+    needs: resolve-version
+    if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
 
+    # Define a matrix for building multiple services
+    strategy:
+      matrix:
+        service:
+          - id: agent
+            context: .
+            file: ./apps/vs-agent/Dockerfile
+            image_name: $IMAGE_NAME
+          - id: chatbot
+            context: .
+            file: ./examples/chatbot/Dockerfile
+            image_name: $DEMO_CHATBOT_IMAGE_NAME
+
+    env:
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
+
     steps:
-      - name: Checkout vs-agent
+      - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Compute tags
+        run: |
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+            echo "SUFFIX=" >> $GITHUB_ENV
+          else
+            echo "IMAGE_TAG=dev" >> $GITHUB_ENV
+            echo "SUFFIX=-dev" >> $GITHUB_ENV
+          fi
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      # With only one service, we could avoid using a matrix
+      - name: Build & push ${{ matrix.service.id }} dev tags
+        if: env.RELEASE_TYPE == 'dev'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
+
+      # Split stable and dev tag builds custom tags for each release type.
+      - name: Build & push ${{ matrix.service.id }} stable release tags
+        if: env.RELEASE_TYPE == 'stable'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
+
+  helm:
+    needs: [resolve-version, docker]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run publish-helm action
+        id: publish-helm
+        uses: 2060-io/devops/actions/publish-helm@main
+        with:
+          dh-username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          dh-token: ${{ secrets.DOCKER_HUB_PWD }}
+          release-version: ${{ needs.resolve-version.outputs.release-version }}
+          dependent-charts: "./charts/chatbot"
+
+  npm-publish:
+    needs: [resolve-version, docker, helm]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pnpm version has been pinned in package.json
       - name: Setup node v22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Corepack pnpm
         run: |
           corepack enable
-
+          
       - name: Install dependencies
         run: |
           pnpm install
-      
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - uses: codfish/semantic-release-action@v3
-        id: semantic
-        with:
-          branches: |
-            [
-              'release',
-              { 
-                name: 'main',
-                prerelease: 'dev'
-              }
-            ]
-          plugins: |
-            [
-              [
-                "@semantic-release/commit-analyzer",
-                {
-                  "preset": "angular",
-                  "releaseRules": [
-                    {
-                      "type": "refactor",
-                      "release": "patch"
-                    },
-                    {
-                      "type": "build",
-                      "release": "patch"
-                    }                    
-                  ]
-                }
-              ],
-              [
-                "@semantic-release/npm",
-                {
-                  "npmPublish": false
-                }
-              ],
-              "@semantic-release/release-notes-generator",
-            ]
+          pnpm build
 
       - name: Set version for apps and packages
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           pnpm -r --topological version "$RELEASE_VERSION"
 
-      - name: Log in to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
-
-      - name: Build Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker build -f ./apps/vs-agent/Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
- 
-      - name: Add tags to Docker image and push to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          TAGS=(
-            "v${RELEASE_MAJOR}-${IMAGE_TAG}"
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}-${IMAGE_TAG}"
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
-            "v${RELEASE_VERSION}"
-          )
-
-          docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
-
-          for tag in "${TAGS[@]}"; do
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:$tag
-            docker push $DH_USERNAME/$IMAGE_NAME:$tag
-          done
-
-      - name: Build and push Chatbot Demo Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          docker build -f ./examples/chatbot/Dockerfile -t $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG .
-          docker tag $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:$IMAGE_TAG
-          docker push $DH_USERNAME/$DEMO_CHATBOT_IMAGE_NAME:v$RELEASE_VERSION
-
-      - name: Log in to Docker Hub Helm Registry
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
-
-      - name: Push Helm chart to Docker Hub OCI repo
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          TAGS=(
-            "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-${IMAGE_TAG}"
-            "v${RELEASE_VERSION}"
-          )
-          for tag in "${TAGS[@]}"; do
-            docker push $DH_USERNAME/$IMAGE_NAME:$tag
-            sed -i "s/^version:.*/version: $tag/" ./charts/vs-agent/Chart.yaml
-            CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
-            helm dependency update ./charts/vs-agent
-            helm package ./charts/vs-agent -d ./charts
-            helm push ./charts/${CHART_NAME}-$tag.tgz oci://docker.io/$DH_USERNAME
-          done
-
-      - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
-        if: steps.semantic.outputs.new-release-published == 'true'
-        run: |
-          sed -i "s/^version:.*/version: v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
-          # update the dependencies version in the Chart.yaml
-          sed -i "s/^\([[:space:]]*version:\).*/\1 v$RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
-          CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
-          helm dependency update ./charts/chatbot
-          helm package ./charts/chatbot -d ./charts
-          helm push ./charts/${CHART_NAME}-v$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
-  
+      # --no-git-checks is used due to topological version updating.
       - name: Publish NPM packages
-        if: steps.semantic.outputs.new-release-published == 'true'
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm -r publish --no-git-checks --access public
 
 
