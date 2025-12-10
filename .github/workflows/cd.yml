@@ -61,7 +61,7 @@ jobs:
           file: ${{ matrix.service.file }}
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
 
 
 
