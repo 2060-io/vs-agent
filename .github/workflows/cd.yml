@@ -42,11 +42,15 @@ jobs:
       RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
       RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
 
+    outputs:
+      image-tag: ${{ steps.compute-tags.outputs.image-tag }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Compute tags
+        id: compute-tags
         run: |
           if [ "$RELEASE_TYPE" = "stable" ]; then
             echo "IMAGE_TAG=latest" >> $GITHUB_ENV
@@ -56,6 +60,7 @@ jobs:
             echo "SUFFIX=-dev" >> $GITHUB_ENV
             echo "RELEASE_PATCH_SHORT=${RELEASE_PATCH:0:1}" >> $GITHUB_ENV
           fi
+          echo "image-tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Docker login
         uses: docker/login-action@v2
@@ -92,7 +97,27 @@ jobs:
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
-      # Note: AddiUnify due both to Docker Hub is required for pushing OCI Helm charts.
+  helm:
+    needs: [resolve-version, docker]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
+      IMAGE_TAG: ${{ needs.docker.outputs.image-tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
       - name: Push Helm chart to Docker Hub OCI repo
         run: |
           if [ "$RELEASE_TYPE" = "stable" ]; then
@@ -123,7 +148,7 @@ jobs:
           helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
 
   npm-publish:
-    needs: [resolve-version, docker]
+    needs: [resolve-version, docker, helm]
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
     env:
