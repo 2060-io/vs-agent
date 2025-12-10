@@ -99,7 +99,7 @@ jobs:
 
       - name: Run publish-helm action
         id: publish-helm
-        uses: 2060-io/devops/actions/publish-helm@main
+        uses: 2060-io/organization/actions/publish-helm@main
         with:
           dh-username: ${{ secrets.DOCKER_HUB_LOGIN }}
           dh-token: ${{ secrets.DOCKER_HUB_PWD }}
