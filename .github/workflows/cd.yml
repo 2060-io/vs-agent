@@ -64,7 +64,8 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
       # With only one service, we could avoid using a matrix
-      - name: Build & push ${{ matrix.service.id }}
+      - name: Build & push ${{ matrix.service.id }} dev tags
+        if: env.RELEASE_TYPE == 'dev'
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.service.context }}
@@ -75,6 +76,20 @@ jobs:
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
+
+      # Split stable and dev tag builds custom tags for each release type.
+      - name: Build & push ${{ matrix.service.id }} stable release tags
+        if: env.RELEASE_TYPE == 'stable'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${IMAGE_TAG}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}${SUFFIX}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${RELEASE_VERSION}
 
   helm:
