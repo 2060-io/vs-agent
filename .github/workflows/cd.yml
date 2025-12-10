@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: [main, 'release/**', 'fix/testing-cd']
+    branches: [main, 'release/**']
 
 permissions:
   id-token: write   # Required for OIDC
@@ -11,8 +11,12 @@ permissions:
   pull-requests: write
 
 jobs:
+  resolve-version:
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
 
   docker:
+    needs: resolve-version
+    if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
 
     # Define a matrix for building multiple services
@@ -29,8 +33,11 @@ jobs:
             image_name: demo-chatbot-backend
 
     env:
-      RELEASE_TYPE: dev
-      RELEASE_VERSION: dev
+      RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+      RELEASE_MAJOR: ${{ needs.resolve-version.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.resolve-version.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.resolve-version.outputs.release-patch }}
 
     steps:
       - name: Checkout
@@ -62,7 +69,74 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
+      # Split stable and dev tag builds custom tags for each release type.
+      - name: Build & push ${{ matrix.service.id }} stable release tags
+        if: env.RELEASE_TYPE == 'stable'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
+  helm:
+    needs: [resolve-version, docker]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      - name: Run publish-helm action
+        id: publish-helm
+        uses: 2060-io/devops/actions/publish-helm@main
+        with:
+          dh-username: ${{ secrets.DOCKER_HUB_LOGIN }}
+          dh-token: ${{ secrets.DOCKER_HUB_PWD }}
+          release-version: ${{ needs.resolve-version.outputs.release-version }}
+          dependent-charts: "./charts/chatbot"
+
+  npm-publish:
+    needs: [resolve-version, docker, helm]
+    if: needs.resolve-version.outputs.new-release-published == 'true'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.resolve-version.outputs.release-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pnpm version has been pinned in package.json
+      - name: Setup node v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
+          
+      - name: Install dependencies
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Set version for apps and packages
+        run: |
+          pnpm -r --topological version "$RELEASE_VERSION"
+
+      # --no-git-checks is used due to topological version updating.
+      - name: Publish NPM packages
+        run: |
+          pnpm -r publish --no-git-checks --access public
 
