@@ -51,6 +51,7 @@ jobs:
           else
             echo "IMAGE_TAG=dev" >> $GITHUB_ENV
             echo "SUFFIX=-dev" >> $GITHUB_ENV
+            echo "RELEASE_PATCH_SHORT=${RELEASE_PATCH:0:1}" >> $GITHUB_ENV
           fi
 
       - name: Docker login
@@ -71,7 +72,7 @@ jobs:
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH_SHORT }}${{ env.SUFFIX }}
             ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
 
       # Split stable and dev tag builds custom tags for each release type.
