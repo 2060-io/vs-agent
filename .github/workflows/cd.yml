@@ -123,7 +123,7 @@ jobs:
           helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
 
   npm-publish:
-    needs: [resolve-version, docker, helm]
+    needs: [resolve-version, docker]
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
     env:
