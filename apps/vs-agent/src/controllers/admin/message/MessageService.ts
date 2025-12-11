@@ -34,7 +34,7 @@ import {
   CredentialPreviewAttributeOptions,
 } from '@credo-ts/core'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils'
@@ -43,7 +43,7 @@ import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../uti
 export class MessageService {
   private readonly logger = new Logger(MessageService.name)
 
-  constructor(private readonly agentService: VsAgentService) {}
+  constructor(@Inject(VsAgentService) private readonly agentService: VsAgentService) {}
 
   public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
     try {

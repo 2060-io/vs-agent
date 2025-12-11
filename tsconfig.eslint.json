@@ -9,8 +9,6 @@
     "apps",
     "packages",
     "./.eslintrc.js",
-    "./jest.config.ts",
-    "./jest.config.base.ts",
     "types",
     "tests",
     "samples",

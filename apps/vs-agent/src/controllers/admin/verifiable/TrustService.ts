@@ -38,9 +38,9 @@ export class TrustService {
   private ecsSchemas
 
   constructor(
-    private readonly agentService: VsAgentService,
-    private readonly urlShortenerService: UrlShorteningService,
-    private readonly credentialService: CredentialTypesService,
+    @Inject(VsAgentService) private readonly agentService: VsAgentService,
+    @Inject(UrlShorteningService) private readonly urlShortenerService: UrlShorteningService,
+    @Inject(CredentialTypesService) private readonly credentialService: CredentialTypesService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)

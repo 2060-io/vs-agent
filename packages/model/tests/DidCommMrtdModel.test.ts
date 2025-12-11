@@ -3,6 +3,7 @@ import {
   DecodedImage,
   DecodedSecurtyObjectOfDocument,
 } from '@li0ard/tsemrtd/dist/consts/interfaces'
+import { describe, it, expect } from 'vitest'
 
 import { EMrtdDataSubmitMessage, MrtdSubmitState } from '../src/messages'
 

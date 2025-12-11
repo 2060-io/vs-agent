@@ -8,6 +8,7 @@ import {
 } from '@2060.io/vs-agent-model'
 import { CredentialState } from '@credo-ts/core'
 import { Test, TestingModule } from '@nestjs/testing'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {
   ConnectionsEventService,
@@ -17,17 +18,21 @@ import {
   MessageEventService,
 } from '../../src'
 
-const mockSend = jest.fn().mockResolvedValue({ id: 'mocked-id' })
-jest.mock('@2060.io/vs-agent-client', () => ({
-  ApiClient: jest.fn().mockImplementation(() => ({
-    messages: {
-      send: mockSend,
+const mockSend = vi.fn().mockResolvedValue({ id: 'mocked-id' })
+vi.mock('@2060.io/vs-agent-client', () => {
+  return {
+    ApiClient: vi.fn().mockImplementation(function () {
+      return {
+        messages: {
+          send: mockSend,
+        },
+      }
+    }),
+    ApiVersion: {
+      V1: 'v1',
     },
-  })),
-  ApiVersion: {
-    V1: 'v1',
-  },
-}))
+  }
+})
 
 describe('MessageEventService', () => {
   let service: MessageEventService
@@ -37,22 +42,22 @@ describe('MessageEventService', () => {
   let mockConnectionsEventService: Partial<ConnectionsEventService>
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     mockCredentialService = {
-      handleAcceptance: jest.fn(),
-      handleRejection: jest.fn(),
+      handleAcceptance: vi.fn(),
+      handleRejection: vi.fn(),
     }
 
     mockEventHandler = {
-      inputMessage: jest.fn(),
+      inputMessage: vi.fn(),
     }
 
     mockConnectionsRepository = {
-      updateUserProfile: jest.fn(),
+      updateUserProfile: vi.fn(),
     }
 
     mockConnectionsEventService = {
-      handleNewConnection: jest.fn(),
+      handleNewConnection: vi.fn(),
     }
 
     const module: TestingModule = await Test.createTestingModule({

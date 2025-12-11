@@ -14,7 +14,7 @@ import { getLegacyDidDocument, getWebDid, VsAgent } from '../../../utils'
 @Controller()
 export class DidWebController {
   constructor(
-    private readonly agentService: VsAgentService,
+    @Inject(VsAgentService) private readonly agentService: VsAgentService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {}
 
