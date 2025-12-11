@@ -4,6 +4,8 @@ import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import WebSocket from 'ws'
 
+import { ENABLE_PUBLIC_API_SWAGGER } from '../config'
+
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
@@ -83,7 +85,7 @@ export const setupAgent = async ({
   return { agent }
 }
 
-export function commonAppConfig(app: INestApplication, cors?: boolean) {
+export function commonAppConfig(app: INestApplication, cors?: boolean, publicApp: boolean = false) {
   // Versioning
   app.enableVersioning({
     type: VersioningType.URI,
@@ -96,7 +98,7 @@ export function commonAppConfig(app: INestApplication, cors?: boolean) {
     .setVersion('1.0')
     .build()
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, document)
+  if (!publicApp || (publicApp && ENABLE_PUBLIC_API_SWAGGER)) SwaggerModule.setup('api', app, document)
 
   // Pipes
   app.useGlobalPipes(new ValidationPipe())
