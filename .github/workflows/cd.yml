@@ -11,7 +11,8 @@ permissions:
   pull-requests: write
 
 env:
-  IMAGE_NAME: 'vs-agent'      
+  IMAGE_NAME: 'vs-agent'
+  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
 
 jobs:
   resolve-version:
@@ -21,19 +22,6 @@ jobs:
     needs: resolve-version
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
-
-    # Define a matrix for building multiple services
-    strategy:
-      matrix:
-        service:
-          - id: agent
-            context: .
-            file: ./apps/vs-agent/Dockerfile
-            image_name: vs-agent
-          - id: chatbot
-            context: .
-            file: ./examples/chatbot/Dockerfile
-            image_name: demo-chatbot-backend
 
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
@@ -64,34 +52,63 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_LOGIN }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
-      # With only one service, we could avoid using a matrix
-      - name: Build & push ${{ matrix.service.id }} dev tags
+      # VS Agent
+      - name: Build & push ${{ env.IMAGE_NAME }} dev tags
         if: env.RELEASE_TYPE == 'dev'
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.service.context }}
-          file: ${{ matrix.service.file }}
+          context: .
+          file: ./apps/vs-agent/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH_SHORT }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH_SHORT }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
 
       # Split stable and dev tag builds custom tags for each release type.
-      - name: Build & push ${{ matrix.service.id }} stable release tags
+      - name: Build & push ${{ env.IMAGE_NAME }} stable release tags
         if: env.RELEASE_TYPE == 'stable'
         uses: docker/build-push-action@v5
         with:
-          context: ${{ matrix.service.context }}
-          file: ${{ matrix.service.file }}
+          context: .
+          file: ./apps/vs-agent/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.IMAGE_TAG }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
-            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ matrix.service.image_name }}:${{ env.RELEASE_VERSION }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+
+      # Chatbot Demo (Split container build to vs agent dependency)
+      - name: Build & push ${{ env.DEMO_CHATBOT_IMAGE_NAME }} dev tags
+        if: env.RELEASE_TYPE == 'dev'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./examples/chatbot/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}.${{ env.RELEASE_PATCH_SHORT }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+
+      # Split stable and dev tag builds custom tags for each release type.
+      - name: Build & push ${{ env.DEMO_CHATBOT_IMAGE_NAME }} stable release tags
+        if: env.RELEASE_TYPE == 'stable'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./examples/chatbot/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:v${{ env.RELEASE_MAJOR }}.${{ env.RELEASE_MINOR }}${{ env.SUFFIX }}
+            ${{ secrets.DOCKER_HUB_LOGIN }}/${{ env.DEMO_CHATBOT_IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
 
   helm:
     needs: [resolve-version, docker]
