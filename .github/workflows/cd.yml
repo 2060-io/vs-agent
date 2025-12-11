@@ -20,7 +20,7 @@ jobs:
 
   docker:
     needs: resolve-version
-    if: false
+    if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
 
     env:
@@ -112,7 +112,7 @@ jobs:
 
   helm:
     needs: [resolve-version, docker]
-    if: false
+    if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
