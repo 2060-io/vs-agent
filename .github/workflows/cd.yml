@@ -20,7 +20,7 @@ jobs:
 
   docker:
     needs: resolve-version
-    if: needs.resolve-version.outputs.new-release-published == 'true'
+    if: false
     runs-on: ubuntu-latest
 
     env:
@@ -112,7 +112,7 @@ jobs:
 
   helm:
     needs: [resolve-version, docker]
-    if: needs.resolve-version.outputs.new-release-published == 'true'
+    if: false
     runs-on: ubuntu-latest
     env:
       RELEASE_TYPE: ${{ needs.resolve-version.outputs.release-type }}
@@ -159,7 +159,7 @@ jobs:
           helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
 
   npm-publish:
-    needs: [resolve-version, docker, helm]
+    needs: [resolve-version]
     if: needs.resolve-version.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
     env:
@@ -176,7 +176,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Corepack pnpm
+        # OIDC publishing requires a very up to date npm version
         run: |
+          npm install -g npm@latest
           corepack enable
           
       - name: Install dependencies
