@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.6](https://github.com/2060-io/vs-agent/compare/v1.5.5...v1.5.6) (2025-12-15)
+
+
+### Bug Fixes
+
+* add linked-vp context and update hashing algorithm to SHA-384 ([#293](https://github.com/2060-io/vs-agent/issues/293)) ([779fc3c](https://github.com/2060-io/vs-agent/commit/779fc3c6f364111921ad6d0b24ac31ece666a63e))
+
 ## [1.5.5](https://github.com/2060-io/vs-agent/compare/v1.5.4...v1.5.5) (2025-11-20)
 
 
