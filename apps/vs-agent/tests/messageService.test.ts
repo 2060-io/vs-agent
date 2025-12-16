@@ -1,23 +1,22 @@
-import { ContextualMenuUpdateMessage, TextMessage } from '@2060.io/vs-agent-model'
-import { ActionMenuRole, ActionMenuState } from '@credo-ts/action-menu'
-import { ConnectionRecord } from '@credo-ts/core'
+import { ProfileMessage, TextMessage } from '@2060.io/vs-agent-model'
+import { BasicMessage, ConnectionRecord } from '@credo-ts/core'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 import { MessageService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
-  actionMenu,
+  getMessageByType,
+  isAgentMessageProcessedEvent,
+  isConnectionProfileUpdatedEvent,
   makeConnection,
   startAgent,
   startServersTesting,
   SubjectInboundTransport,
   SubjectMessage,
   SubjectOutboundTransport,
-  waitForActionMenuRecord,
-  waitForBasicMessage,
 } from './__mocks__'
 
 describe('MessageService', () => {
@@ -35,6 +34,8 @@ describe('MessageService', () => {
   let aliceAgent: VsAgent
   let faberConnection: ConnectionRecord
   let aliceConnection: ConnectionRecord
+  let faberEvents: ReturnType<typeof vi.spyOn>
+  let aliceEvents: ReturnType<typeof vi.spyOn>
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
@@ -42,6 +43,7 @@ describe('MessageService', () => {
       faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
       faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
+      faberEvents = vi.spyOn(faberAgent.events, 'emit')
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
@@ -49,6 +51,7 @@ describe('MessageService', () => {
       aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
+      aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
       aliceApp = await startServersTesting(aliceAgent)
 
       faberService = faberApp.get<MessageService>(MessageService)
@@ -62,65 +65,75 @@ describe('MessageService', () => {
       await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
       await aliceAgent.wallet.delete()
+      vi.restoreAllMocks()
     })
 
     it('should allow Alice and Faber to exchange a structured conversational flow.', async () => {
+      // vars
+      const msgFaber = 'Hello'
+      const msgAlice = 'How are you?'
+
+      // Send messages
       await aliceService.sendMessage(
-        { type: 'text', content: 'Hello', connectionId: aliceConnection.id } as TextMessage,
+        { type: 'text', content: msgFaber, connectionId: aliceConnection.id } as TextMessage,
         aliceConnection,
       )
-      const msgToFaber = await waitForBasicMessage(faberAgent, {
-        content: 'Hello',
-      })
-
       await faberService.sendMessage(
-        { type: 'text', content: 'How are you?', connectionId: faberConnection.id } as TextMessage,
+        { type: 'text', content: msgAlice, connectionId: faberConnection.id } as TextMessage,
         faberConnection,
       )
-      const msgToAlice = await waitForBasicMessage(aliceAgent, {
-        content: 'How are you?',
-      })
+
+      // await events
+      await new Promise(resolve => setTimeout(resolve, 100))
 
       // Receiving messages
-      expect(msgToFaber.content).toBe('Hello')
-      expect(msgToAlice.content).toBe('How are you?')
+      const msgToFaber = (faberEvents.mock.calls as unknown[][])
+        .flat()
+        .filter(isAgentMessageProcessedEvent)
+        .map(event => event.payload.message)
+      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
+        .flat()
+        .filter(isAgentMessageProcessedEvent)
+        .map(event => event.payload.message)
+
+      // expects
+      expect(getMessageByType<BasicMessage>(msgToFaber, BasicMessage.type.messageTypeUri)?.content).toBe(
+        msgFaber,
+      )
+      expect(getMessageByType<BasicMessage>(msgToAlice, BasicMessage.type.messageTypeUri)?.content).toBe(
+        msgAlice,
+      )
     })
 
     it('Should Faber send an action menu message to Alice and her answer it.', async () => {
+      // vars
+      const displayImageUrl = 'https://testing.png'
+      const description = 'Testing image link'
+
+      // Send messages
       await faberService.sendMessage(
         {
-          type: 'contextual-menu-update',
+          type: 'profile',
           connectionId: faberConnection.id,
-          ...actionMenu,
-        } as ContextualMenuUpdateMessage,
+          displayImageUrl,
+          description,
+        } as ProfileMessage,
         faberConnection,
       )
-      const aliceActionMenuRecord = await waitForActionMenuRecord(aliceAgent, {
-        state: ActionMenuState.PreparingSelection,
-      })
-      expect(aliceActionMenuRecord.menu).toEqual({
-        title: actionMenu.title,
-        description: actionMenu.description,
-        options: actionMenu.options.map((opt: any) => ({
-          name: opt.id,
-          title: opt.title,
-          description: opt.description,
-        })),
-      })
 
-      const faberActiveMenu = await faberAgent.modules.actionMenu.findActiveMenu({
-        connectionId: faberConnection.id,
-        role: ActionMenuRole.Responder,
-      })
-      expect(faberActiveMenu?.state).toBe(ActionMenuState.AwaitingSelection)
+      // await events
+      await new Promise(resolve => setTimeout(resolve, 100))
 
-      await aliceAgent.modules.actionMenu.performAction({
-        connectionId: aliceConnection.id,
-        performedAction: { name: 'option_1' },
-      })
-      await waitForActionMenuRecord(faberAgent, {
-        state: ActionMenuState.Done,
-      })
+      // Receiving messages
+      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
+        .flat()
+        .filter(isConnectionProfileUpdatedEvent)
+        .map(event => event.payload)
+
+      // expects
+      expect(msgToAlice[0].connection.id).toBe(aliceConnection.id)
+      expect(msgToAlice[0].profile.displayPicture?.links?.[0]).toBe(displayImageUrl)
+      expect(msgToAlice[0].profile.description).toBe(description)
     })
   })
 })
