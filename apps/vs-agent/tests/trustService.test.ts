@@ -1,5 +1,5 @@
 import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
-import { ConnectionRecord, CredentialEventTypes, CredentialState } from '@credo-ts/core'
+import { ConnectionRecord, CredentialExchangeRecord } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
@@ -10,13 +10,14 @@ import { MessageService, TrustService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
+  getMessageByType,
+  isCredentialStateChangedEvent,
   makeConnection,
   startAgent,
   startServersTesting,
   SubjectInboundTransport,
   SubjectMessage,
   SubjectOutboundTransport,
-  waitForCredentialRecordSubject,
 } from './__mocks__'
 
 describe('TrustService', () => {
@@ -33,6 +34,8 @@ describe('TrustService', () => {
   let aliceAgent: VsAgent
   let faberConnection: ConnectionRecord
   let aliceConnection: ConnectionRecord
+  let aliceEvents: ReturnType<typeof vi.spyOn>
+
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
@@ -46,6 +49,8 @@ describe('TrustService', () => {
       aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
+      aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
+      await startServersTesting(aliceAgent)
 
       faberService = faberApp.get<TrustService>(TrustService)
       faberMsgService = faberApp.get<MessageService>(MessageService)
@@ -57,6 +62,7 @@ describe('TrustService', () => {
       await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
       await aliceAgent.wallet.delete()
+      vi.restoreAllMocks()
     })
 
     it('should issue a JSON-LD credential with a valid Ed25519 proof', async () => {
@@ -87,6 +93,7 @@ describe('TrustService', () => {
     })
 
     it('should issue a valid anoncreds credential', async () => {
+      // Mocks
       const original = WebVhAnonCredsRegistry.prototype['_resolveAndValidateAttestedResource']
       vi.spyOn(
         WebVhAnonCredsRegistry.prototype as any,
@@ -99,7 +106,6 @@ describe('TrustService', () => {
           if (res.status !== 200) {
             throw new Error(`resource ${cid} not found in test server`)
           }
-
           return {
             resolutionResult: {
               content: res.body,
@@ -107,7 +113,6 @@ describe('TrustService', () => {
             resourceObject: res.body,
           }
         }
-
         return original.call(this, ...args)
       })
 
@@ -134,15 +139,18 @@ describe('TrustService', () => {
         } as CredentialIssuanceMessage,
         faberConnection,
       )
-      const aliceCredentialRecord = await waitForCredentialRecordSubject(
-        aliceAgent.events.observable(CredentialEventTypes.CredentialStateChanged),
-        {
-          threadId: record.id,
-          state: CredentialState.OfferReceived,
-        },
-      )
 
-      expect(aliceCredentialRecord).toEqual(
+      // await events
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Receiving messages
+      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
+        .flat()
+        .filter(isCredentialStateChangedEvent)
+        .map(event => event.payload.credentialRecord)
+
+      // expects
+      expect(getMessageByType<CredentialExchangeRecord>(msgToAlice, CredentialExchangeRecord.type)).toEqual(
         expect.objectContaining({
           state: 'offer-received',
           connectionId: aliceConnection.id,
@@ -155,6 +163,7 @@ describe('TrustService', () => {
           updatedAt: expect.any(Date),
         }),
       )
+      expect(record.id).toEqual(msgToAlice[0].threadId)
       expect(credentialResponse).toEqual(
         expect.objectContaining({
           status: 200,

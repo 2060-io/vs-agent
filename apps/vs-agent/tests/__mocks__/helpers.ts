@@ -1,17 +1,12 @@
 import { ConnectionProfileUpdatedEvent } from '@2060.io/credo-ts-didcomm-user-profile'
 import {
-  AgentMessage,
   AgentMessageProcessedEvent,
-  BaseEvent,
-  CredentialEventTypes,
-  CredentialState,
   CredentialStateChangedEvent,
   HandshakeProtocol,
   LogLevel,
 } from '@credo-ts/core'
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { catchError, filter, firstValueFrom, map, Observable, ReplaySubject, timeout } from 'rxjs'
 
 import { VsAgentModule } from '../../src/admin.module'
 import { messageEvents } from '../../src/events/MessageEvents'
@@ -34,8 +29,14 @@ export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
   return [agentAConnection, agentBConnection]
 }
 
-const isCredentialStateChangedEvent = (e: BaseEvent): e is CredentialStateChangedEvent =>
-  e.type === CredentialEventTypes.CredentialStateChanged
+export function isCredentialStateChangedEvent(arg: unknown): arg is CredentialStateChangedEvent {
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    (arg as any).type === 'CredentialStateChanged' &&
+    !!(arg as any).payload?.credentialRecord
+  )
+}
 
 export function isAgentMessageProcessedEvent(arg: unknown): arg is AgentMessageProcessedEvent {
   return (
@@ -57,43 +58,8 @@ export function isConnectionProfileUpdatedEvent(arg: unknown): arg is Connection
   )
 }
 
-export const getMessageByType = <T extends AgentMessage>(messages: AgentMessage[], type: string) =>
+export const getMessageByType = <T extends { type: string }>(messages: { type: string }[], type: string) =>
   messages.find(msg => msg.type === type) as T | undefined
-
-export function waitForCredentialRecordSubject(
-  subject: ReplaySubject<BaseEvent> | Observable<BaseEvent>,
-  {
-    threadId,
-    state,
-    previousState,
-    timeoutMs = 15000,
-  }: {
-    threadId?: string
-    state?: CredentialState
-    previousState?: CredentialState | null
-    timeoutMs?: number
-  },
-) {
-  const observable = subject instanceof ReplaySubject ? subject.asObservable() : subject
-
-  return firstValueFrom(
-    observable.pipe(
-      filter(isCredentialStateChangedEvent),
-      filter(e => previousState === undefined || e.payload.previousState === previousState),
-      filter(e => threadId === undefined || e.payload.credentialRecord.threadId === threadId),
-      filter(e => state === undefined || e.payload.credentialRecord.state === state),
-      timeout(timeoutMs),
-      catchError(() => {
-        throw new Error(`CredentialStateChanged event not emitted within specified timeout: {
-  previousState: ${previousState},
-  threadId: ${threadId},
-  state: ${state}
-}`)
-      }),
-      map(e => e.payload.credentialRecord),
-    ),
-  )
-}
 
 export const startServersTesting = async (agent: VsAgent): Promise<INestApplication> => {
   const moduleRef = await Test.createTestingModule({
