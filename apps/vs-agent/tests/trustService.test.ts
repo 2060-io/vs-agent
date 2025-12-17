@@ -1,5 +1,5 @@
 import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
-import { ConnectionRecord, CredentialExchangeRecord } from '@credo-ts/core'
+import { ConnectionRecord } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
@@ -10,7 +10,6 @@ import { MessageService, TrustService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
-  getMessageByType,
   isCredentialStateChangedEvent,
   makeConnection,
   startAgent,
@@ -18,6 +17,7 @@ import {
   SubjectInboundTransport,
   SubjectMessage,
   SubjectOutboundTransport,
+  waitForEvent,
 } from './__mocks__'
 
 describe('TrustService', () => {
@@ -131,6 +131,9 @@ describe('TrustService', () => {
         },
       })
 
+      // Create wait event
+      const alicePromise = waitForEvent(aliceEvents, isCredentialStateChangedEvent)
+
       const record = await faberMsgService.sendMessage(
         {
           type: 'credential-issuance',
@@ -140,17 +143,13 @@ describe('TrustService', () => {
         faberConnection,
       )
 
-      // await events
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       // Receiving messages
-      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
-        .flat()
-        .filter(isCredentialStateChangedEvent)
-        .map(event => event.payload.credentialRecord)
+      const {
+        payload: { credentialRecord },
+      } = await alicePromise
 
       // expects
-      expect(getMessageByType<CredentialExchangeRecord>(msgToAlice, CredentialExchangeRecord.type)).toEqual(
+      expect(credentialRecord).toEqual(
         expect.objectContaining({
           state: 'offer-received',
           connectionId: aliceConnection.id,
@@ -163,7 +162,7 @@ describe('TrustService', () => {
           updatedAt: expect.any(Date),
         }),
       )
-      expect(record.id).toEqual(msgToAlice[0].threadId)
+      expect(record.id).toEqual(credentialRecord.threadId)
       expect(credentialResponse).toEqual(
         expect.objectContaining({
           status: 200,

@@ -8,7 +8,6 @@ import { MessageService } from '../src/controllers'
 import { VsAgent } from '../src/utils'
 
 import {
-  getMessageByType,
   isAgentMessageProcessedEvent,
   isConnectionProfileUpdatedEvent,
   makeConnection,
@@ -17,6 +16,7 @@ import {
   SubjectInboundTransport,
   SubjectMessage,
   SubjectOutboundTransport,
+  waitForEvent,
 } from './__mocks__'
 
 describe('MessageService', () => {
@@ -73,6 +73,10 @@ describe('MessageService', () => {
       const msgFaber = 'Hello'
       const msgAlice = 'How are you?'
 
+      // Create wait event
+      const faberPromise = waitForEvent(faberEvents, isAgentMessageProcessedEvent)
+      const alicePromise = waitForEvent(aliceEvents, isAgentMessageProcessedEvent)
+
       // Send messages
       await aliceService.sendMessage(
         { type: 'text', content: msgFaber, connectionId: aliceConnection.id } as TextMessage,
@@ -83,32 +87,22 @@ describe('MessageService', () => {
         faberConnection,
       )
 
-      // await events
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       // Receiving messages
-      const msgToFaber = (faberEvents.mock.calls as unknown[][])
-        .flat()
-        .filter(isAgentMessageProcessedEvent)
-        .map(event => event.payload.message)
-      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
-        .flat()
-        .filter(isAgentMessageProcessedEvent)
-        .map(event => event.payload.message)
+      const msgToFaber = await faberPromise
+      const msgToAlice = await alicePromise
 
       // expects
-      expect(getMessageByType<BasicMessage>(msgToFaber, BasicMessage.type.messageTypeUri)?.content).toBe(
-        msgFaber,
-      )
-      expect(getMessageByType<BasicMessage>(msgToAlice, BasicMessage.type.messageTypeUri)?.content).toBe(
-        msgAlice,
-      )
+      expect((msgToFaber.payload.message as BasicMessage)?.content).toBe(msgFaber)
+      expect((msgToAlice.payload.message as BasicMessage)?.content).toBe(msgAlice)
     })
 
     it('Should Faber send a profile update message to Alice.', async () => {
       // vars
       const displayImageUrl = 'https://testing.png'
       const description = 'Testing image link'
+
+      // Create wait event
+      const alicePromise = waitForEvent(aliceEvents, isConnectionProfileUpdatedEvent)
 
       // Send messages
       await faberService.sendMessage(
@@ -121,19 +115,15 @@ describe('MessageService', () => {
         faberConnection,
       )
 
-      // await events
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       // Receiving messages
-      const msgToAlice = (aliceEvents.mock.calls as unknown[][])
-        .flat()
-        .filter(isConnectionProfileUpdatedEvent)
-        .map(event => event.payload)
+      const {
+        payload: { connection, profile },
+      } = await alicePromise
 
       // expects
-      expect(msgToAlice[0].connection.id).toBe(aliceConnection.id)
-      expect(msgToAlice[0].profile.displayPicture?.links?.[0]).toBe(displayImageUrl)
-      expect(msgToAlice[0].profile.description).toBe(description)
+      expect(connection.id).toBe(aliceConnection.id)
+      expect(profile.displayPicture?.links?.[0]).toBe(displayImageUrl)
+      expect(profile.description).toBe(description)
     })
   })
 })
