@@ -105,7 +105,7 @@ describe('MessageService', () => {
       )
     })
 
-    it('Should Faber send an action menu message to Alice and her answer it.', async () => {
+    it('Should Faber send a profile update message to Alice.', async () => {
       // vars
       const displayImageUrl = 'https://testing.png'
       const description = 'Testing image link'
