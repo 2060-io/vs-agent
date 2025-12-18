@@ -1,6 +1,6 @@
 import { HttpUtils } from '@2060.io/vs-agent-client'
 import { EventType, MessageReceived, MessageStateUpdated } from '@2060.io/vs-agent-model'
-import { Body, Controller, HttpStatus, Logger, Post } from '@nestjs/common'
+import { Body, Controller, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { MessageEventService } from './message.service'
@@ -10,7 +10,7 @@ import { MessageEventService } from './message.service'
 export class MessageEventController {
   private readonly logger = new Logger(MessageEventController.name)
 
-  constructor(private readonly message: MessageEventService) {}
+  constructor(@Inject(MessageEventService) private readonly message: MessageEventService) {}
 
   @Post(`/${EventType.MessageReceived}`)
   @ApiOperation({

@@ -1,4 +1,5 @@
 import { ApiVersion } from '@2060.io/vs-agent-client'
+import { describe, it, expect, vi } from 'vitest'
 
 import { ConnectionsEventModule, EventsModule, MessageEventModule } from '../src'
 
@@ -7,7 +8,7 @@ describe('EventsModule', () => {
     const module = EventsModule.register({
       modules: { messages: true, connections: true, credentials: false },
       options: {
-        eventHandler: jest.fn(),
+        eventHandler: vi.fn(),
         url: 'http://example.com',
         version: ApiVersion.V1,
       },
