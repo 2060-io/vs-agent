@@ -9,7 +9,7 @@
       "@2060.io/vs-agent-model": ["packages/model/src"],
       "@2060.io/vs-agent-nestjs-client": ["packages/nestjs-client/src"],
     },
-    "types": ["jest", "node"]
+    "types": ["vitest", "node"]
   },
   "include": ["tests", "samples", "**/tests", "**/samples"],
   "exclude": ["node_modules", "build", "**/build/**"]

@@ -26,7 +26,7 @@ export class CredentialEntity {
   @Column({ type: 'varchar', nullable: true })
   refIdHash?: string
 
-  @Column({ nullable: true })
+  @Column({ type: 'enum', enum: CredentialStatus, nullable: true })
   status?: CredentialStatus
 
   @Column({ type: 'integer', nullable: true })

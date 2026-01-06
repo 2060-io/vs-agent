@@ -2,13 +2,14 @@ import { HttpUtils } from '@2060.io/vs-agent-client'
 import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { ConnectionsEventController } from './connection.controller'
 import { ConnectionsEventService } from './connection.service'
 
-jest.mock('@2060.io/vs-agent-client', () => ({
+vi.mock('@2060.io/vs-agent-client', () => ({
   HttpUtils: {
-    handleException: jest.fn(),
+    handleException: vi.fn(),
   },
 }))
 
@@ -23,7 +24,7 @@ describe('ConnectionsEventController', () => {
         {
           provide: ConnectionsEventService,
           useValue: {
-            update: jest.fn(),
+            update: vi.fn(),
           },
         },
       ],
@@ -45,7 +46,7 @@ describe('ConnectionsEventController', () => {
     })
 
     it('should call service.update and return success message', async () => {
-      jest.spyOn(service, 'update').mockResolvedValue(undefined)
+      vi.spyOn(service, 'update').mockResolvedValue(undefined)
 
       const response = await controller.update(mockBody)
 
@@ -55,7 +56,7 @@ describe('ConnectionsEventController', () => {
 
     it('should handle exceptions and call HttpUtils.handleException', async () => {
       const error = new Error('Test error')
-      jest.spyOn(service, 'update').mockRejectedValue(error)
+      vi.spyOn(service, 'update').mockRejectedValue(error)
 
       await controller.update(mockBody)
 

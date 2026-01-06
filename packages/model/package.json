@@ -20,7 +20,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm run build",
     "version": "pnpm version",
-    "test": "jest"
+    "test": "vitest"
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-mrtd": "0.0.17",

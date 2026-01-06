@@ -1,20 +1,14 @@
 import { AnonCredsCredentialDefinitionRepository, AnonCredsSchema } from '@credo-ts/anoncreds'
 import { utils } from '@credo-ts/core'
-import { Controller, Logger } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
+import { Inject, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils'
 
-@ApiTags('credential-types')
-@Controller({
-  path: 'credential-types',
-  version: '1',
-})
 export class CredentialTypesService {
   private readonly logger = new Logger(CredentialTypesService.name)
 
-  constructor(private readonly agentService: VsAgentService) {}
+  constructor(@Inject(VsAgentService) private readonly agentService: VsAgentService) {}
 
   public async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>, resourceType: string) {
     if (!resource) return
