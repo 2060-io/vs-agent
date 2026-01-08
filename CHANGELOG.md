@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.8](https://github.com/2060-io/vs-agent/compare/v1.5.7...v1.5.8) (2026-01-08)
+
+
+### Bug Fixes
+
+* implicit invitation to legacy did:web won't autorespond ([1ad51be](https://github.com/2060-io/vs-agent/commit/1ad51beab21c8a4d431122a64b0b0298e71e1aa7))
+
 ## [1.5.7](https://github.com/2060-io/vs-agent/compare/v1.5.6...v1.5.7) (2026-01-08)
 
 
