@@ -36,7 +36,7 @@ export class CreateCredentialTypeDto {
 
   @ApiProperty({
     description: 'Base Verifiable Trust JSON Schema Credential the credential type is based on.',
-    example: 'did:web:issuer#anoncreds?relativeRef=/schema/1234',
+    example: 'https://example.2060.io/vt/schemas-example-service-jsc.json',
   })
   @IsString()
   @IsOptional()
