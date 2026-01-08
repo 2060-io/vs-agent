@@ -4,6 +4,12 @@ on:
   push:
     branches: [main, 'release/**']
 
+permissions:
+  id-token: write   # Required for OIDC
+  contents: write   # Required for updating npm versions
+  issues: write
+  pull-requests: write
+    
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
@@ -25,9 +31,11 @@ jobs:
           node-version: 22
 
       - name: Corepack pnpm
+        # OIDC publishing requires a very up to date npm version
         run: |
+          npm install -g npm@latest
           corepack enable
-
+          
       - name: Install dependencies
         run: |
           pnpm install
@@ -140,11 +148,7 @@ jobs:
   
       - name: Publish NPM packages
         if: steps.semantic.outputs.new-release-published == 'true'
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm -r publish --no-git-checks --access public
 
 
