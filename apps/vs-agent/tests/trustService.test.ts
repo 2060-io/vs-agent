@@ -167,9 +167,7 @@ describe('TrustService', () => {
         expect.objectContaining({
           status: 200,
           didcommInvitationUrl: expect.any(String),
-          credential: expect.objectContaining({
-            credentialExchangeId: expect.any(String),
-          }),
+          didcommCredentialExchangeId: expect.any(String),
         }),
       )
     }, 20000)
