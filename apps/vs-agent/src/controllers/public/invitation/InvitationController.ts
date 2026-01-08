@@ -30,11 +30,11 @@ export class InvitationRoutesController {
 
         // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
         if (connRecord) {
-          const proofRecord = await agent.proofs.getById(connRecord)
-          const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
+          const proofRecord = await agent.proofs.findById(connRecord)
+          const callbackParameters = proofRecord?.metadata.get('_2060/callbackParameters') as
             | { ref?: string; callbackUrl?: string }
             | undefined
-          if (callbackParameters && callbackParameters.callbackUrl) {
+          if (proofRecord && callbackParameters && callbackParameters.callbackUrl) {
             await sendPresentationCallbackEvent({
               proofExchangeId: proofRecord.id,
               callbackUrl: callbackParameters.callbackUrl,
@@ -50,6 +50,7 @@ export class InvitationRoutesController {
         res.status(302).location(longUrl).end()
       }
     } catch (error) {
+      agent.config.logger.error(`Error executing short url: ${error}`)
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
