@@ -45,7 +45,7 @@ export class TrustCredentialService {
    *          or the issued verifiable credential, depending on the credential type.
    */
   public async issuance({
-    type,
+    format,
     jsonSchemaCredential,
     claims,
     did,
@@ -56,7 +56,7 @@ export class TrustCredentialService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type,
+          format,
           jsonSchemaCredential,
           claims,
           did,

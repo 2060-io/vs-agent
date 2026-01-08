@@ -86,14 +86,14 @@ export class CredentialTypesService {
     issuerId,
     supportRevocation = false,
     version = '1.0',
-    jsonSchemaCredential,
+    jsonSchemaCredentialId,
   }: {
     name: string
     schemaId: string
     issuerId: string
     supportRevocation?: boolean
     version?: string
-    jsonSchemaCredential?: string
+    jsonSchemaCredentialId?: string
   }) {
     const agent = await this.agentService.getAgent()
     const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
@@ -124,8 +124,9 @@ export class CredentialTypesService {
     )
     credentialDefinitionRecord.setTag('name', name)
     credentialDefinitionRecord.setTag('version', version)
-    if (jsonSchemaCredential)
-      credentialDefinitionRecord.setTag('relatedJsonSchemaCredential', jsonSchemaCredential)
+    if (jsonSchemaCredentialId) {
+      credentialDefinitionRecord.setTag('relatedJsonSchemaCredentialId', jsonSchemaCredentialId)
+    }
 
     await this.saveAttestedResource(agent, credentialRegistration, 'anonCredsCredDef')
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)

@@ -272,7 +272,7 @@ export class TrustService {
   }
 
   public async issueCredential({
-    type,
+    format,
     jsonSchemaCredential,
     claims,
     did,
@@ -296,10 +296,10 @@ export class TrustService {
       }
       validateSchema(parsedSchema, claims)
 
-      switch (type) {
+      switch (format) {
         case 'jsonld':
           if (!did)
-            throw new HttpException(`Did must be present for json-ld creential`, HttpStatus.BAD_REQUEST)
+            throw new HttpException('did must be present for JSON-LD credentials', HttpStatus.BAD_REQUEST)
           const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredential, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
@@ -308,6 +308,15 @@ export class TrustService {
             jsonSchemaCredential,
             attrNames,
           )
+
+          // TODO: if a DID is specified, we can directly start the exchange: if we are already connected, start the offer
+          // and if not, do the DID Exchange and then the offer
+          if (did) {
+            throw new HttpException(
+              'Specifying did not supported for AnonCreds credentials',
+              HttpStatus.BAD_REQUEST,
+            )
+          }
           const request = await agent.credentials.createOffer({
             protocolVersion: 'v2',
             credentialFormats: {
@@ -332,10 +341,10 @@ export class TrustService {
           return {
             status: 200,
             didcommInvitationUrl,
-            credential: { credentialExchangeId: request.credentialRecord.id },
+            didcommCredentialExchangeId: request.credentialRecord.id,
           }
         default:
-          throw new HttpException(`Invalid credential type: ${type}`, HttpStatus.BAD_REQUEST)
+          throw new HttpException(`Invalid credential type: ${format}`, HttpStatus.BAD_REQUEST)
       }
     } catch (error) {
       this.handleError(error, 'Failed to issue credential')
@@ -347,7 +356,7 @@ export class TrustService {
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      relatedJsonSchemaCredential: jsonSchemaCredential,
+      relatedJsonSchemaCredentialId: jsonSchemaCredential,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
@@ -365,7 +374,7 @@ export class TrustService {
       name,
       schemaId,
       issuerId,
-      jsonSchemaCredential,
+      jsonSchemaCredentialId: jsonSchemaCredential,
     })
     return credentialDefinitionId
   }

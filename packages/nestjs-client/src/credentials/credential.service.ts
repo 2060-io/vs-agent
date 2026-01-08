@@ -133,12 +133,12 @@ export class CredentialService {
     let credentialSchemaId: string | undefined
 
     if (jsonSchemaCredential) {
-      const { credential } = await this.apiClient.trustCredentials.issuance({
-        type: 'anoncreds',
+      const { didcommCredentialExchangeId } = await this.apiClient.trustCredentials.issuance({
+        format: 'anoncreds',
         jsonSchemaCredential,
         claims,
       })
-      credentialSchemaId = credential.credentialExchangeId as string
+      credentialSchemaId = didcommCredentialExchangeId as string
     }
 
     // Select the appropriate credential type based on definition or schema
@@ -147,7 +147,7 @@ export class CredentialService {
       credentialTypes.find(type =>
         options?.credentialDefinitionId
           ? type.id === options.credentialDefinitionId
-          : type.relatedJsonSchemaCredential === jsonSchemaCredential,
+          : type.relatedJsonSchemaCredentialId === jsonSchemaCredential,
       ) ?? credentialTypes[0]
     if (!credentialType) {
       throw new Error(

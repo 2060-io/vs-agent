@@ -1,26 +1,26 @@
 import { JsonObject } from '@credo-ts/core'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty, IsString, IsUrl, Matches, IsObject, IsOptional } from 'class-validator'
+import { IsNotEmpty, IsString, IsUrl, Matches, IsObject } from 'class-validator'
 
 /**
  * DTO used to request the issuance of a Verifiable Credential.
  */
 export class IssueCredentialRequestDto {
   @ApiProperty({
-    description: 'Type of credential to issue: "w3c" or "anoncreds"',
+    description:
+      'Format of credential to issue: json-ld (for public entities) or "anoncreds" (for best privacy, usually for end-users)',
     example: 'jsonld',
     enum: ['jsonld', 'anoncreds'],
   })
   @IsString()
   @IsNotEmpty()
-  type!: 'jsonld' | 'anoncreds'
+  format!: 'jsonld' | 'anoncreds'
 
   @ApiProperty({
     description: 'DID of the credential subject (the holder)',
     example: 'did:example:holder123',
   })
   @IsString()
-  @IsOptional()
   @Matches(/^did:[a-z0-9]+:[a-zA-Z0-9.\-_:/%]+$/, {
     message: 'Invalid DID format',
   })

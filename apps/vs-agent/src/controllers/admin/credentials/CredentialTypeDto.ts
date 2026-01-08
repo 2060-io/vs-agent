@@ -25,13 +25,23 @@ export class CreateCredentialTypeDto {
   attributes!: string[]
 
   @ApiProperty({
-    description: 'Base schema id in case you want to',
+    description:
+      'Base AnonCreds schema id in case you want to. Note: Deprecated, will be removed in next releases',
     example: 'did:web:issuer#anoncreds?relativeRef=/schema/1234',
   })
   @IsString()
   @IsOptional()
   @IsNotEmpty()
   schemaId?: string
+
+  @ApiProperty({
+    description: 'Base Verifiable Trust JSON Schema Credential the credential type is based on.',
+    example: 'did:web:issuer#anoncreds?relativeRef=/schema/1234',
+  })
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  relatedJsonSchemaCredentialId?: string
 
   @ApiProperty({
     description: 'New issuer id in case you want to',

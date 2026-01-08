@@ -27,10 +27,11 @@ export interface CreateCredentialTypeOptions {
   attributes: string[]
   schemaId?: string
   supportRevocation?: boolean
+  relatedJsonSchemaCredentialId?: string
 }
 
 export interface CredentialIssuanceRequest {
-  type: 'jsonld' | 'anoncreds'
+  format: 'jsonld' | 'anoncreds'
   jsonSchemaCredential: string
   claims: JsonObject
   did?: string
@@ -38,8 +39,9 @@ export interface CredentialIssuanceRequest {
 
 export interface CredentialIssuanceResponse {
   status: number
-  didcommInvitationUrl: string
-  credential: Record<string, unknown>
+  didcommInvitationUrl?: string
+  didcommCredentialExchangeId?: string
+  credential?: Record<string, unknown>
 }
 
 export interface ImportCredentialTypeOptions {
@@ -60,7 +62,7 @@ export interface CredentialTypeInfo extends CreateCredentialTypeOptions {
 
 export interface CredentialTypeResult extends Omit<CredentialTypeInfo, 'supportRevocation'> {
   revocationSupported: boolean
-  relatedJsonSchemaCredential?: string
+  relatedJsonSchemaCredentialId?: string
 }
 
 export interface RevocationRegistryInfo {
