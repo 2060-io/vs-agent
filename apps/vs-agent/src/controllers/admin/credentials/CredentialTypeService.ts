@@ -29,7 +29,7 @@ export class CredentialTypesService {
     name?: string
     version?: string
     issuerId?: string
-    jsonSchemaCredential?: string
+    jsonSchemaCredentialId?: string
   }) {
     const agent = await this.agentService.getAgent()
 

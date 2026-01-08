@@ -37,7 +37,7 @@ export class TrustCredentialService {
    * optionally linked to a DID.
    *
    * @param type - The credential format. Accepted values: `'jsonld' | 'anoncreds'`.
-   * @param jsonSchemaCredential - The URL of the credential JSON schema definition.
+   * @param jsonSchemaCredentialId - The URL of the credential JSON schema definition.
    * @param claims - A JSON object containing the credential claims.
    * @param did - (Optional) A decentralized identifier (DID) associated with the holder.
    *
@@ -46,18 +46,18 @@ export class TrustCredentialService {
    */
   public async issuance({
     format,
-    jsonSchemaCredential,
+    jsonSchemaCredentialId,
     claims,
     did,
   }: CredentialIssuanceRequest): Promise<CredentialIssuanceResponse> {
     try {
-      logger.info(`issue credential with schema: ${jsonSchemaCredential}`)
+      logger.info(`issue credential with schema: ${jsonSchemaCredentialId}`)
       const response = await fetch(`${this.url}/issue-credential`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           format,
-          jsonSchemaCredential,
+          jsonSchemaCredentialId,
           claims,
           did,
         }),

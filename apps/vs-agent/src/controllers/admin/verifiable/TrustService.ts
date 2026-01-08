@@ -246,7 +246,7 @@ export class TrustService {
     agent: VsAgent,
     didRecord: DidRecord,
     did: string,
-    jsonSchemaCredential: string,
+    jsonSchemaCredentialId: string,
     claims: JsonObject,
   ) {
     const unsignedCredential = createCredential({
@@ -259,7 +259,7 @@ export class TrustService {
       },
     })
     unsignedCredential.credentialSchema = {
-      id: jsonSchemaCredential,
+      id: jsonSchemaCredentialId,
       type: 'JsonSchemaCredential',
     }
     const verificationMethodId = getVerificationMethodId(agent.config.logger, didRecord)
@@ -273,14 +273,14 @@ export class TrustService {
 
   public async issueCredential({
     format,
-    jsonSchemaCredential,
+    jsonSchemaCredentialId,
     claims,
     did,
   }: CredentialIssuanceRequest): Promise<CredentialIssuanceResponse> {
     try {
       // Check schema for credential
       const { agent, didRecord } = await this.getDidRecord()
-      const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredential)
+      const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
       const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
       const schemaData = await this.fetchJson<JsonObject>(mapToEcosystem(subjectId))
       const parsedSchema =
@@ -290,7 +290,7 @@ export class TrustService {
       const attrNames = Object.keys(subjectProps).map(String)
       if (attrNames.length === 0) {
         throw new HttpException(
-          `No properties found in credentialSubject of schema from ${jsonSchemaCredential}`,
+          `No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`,
           HttpStatus.BAD_REQUEST,
         )
       }
@@ -300,12 +300,12 @@ export class TrustService {
         case 'jsonld':
           if (!did)
             throw new HttpException('did must be present for JSON-LD credentials', HttpStatus.BAD_REQUEST)
-          const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredential, claims)
+          const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredentialId, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
           const credentialDefinitionId = await this.getCredentialDefinition(
             agent,
-            jsonSchemaCredential,
+            jsonSchemaCredentialId,
             attrNames,
           )
 
@@ -351,30 +351,30 @@ export class TrustService {
     }
   }
 
-  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredential: string, attributes: string[]) {
+  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredentialId: string, attributes: string[]) {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      relatedJsonSchemaCredentialId: jsonSchemaCredential,
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
     }
 
     const issuerId = agent.did!
-    const name = jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
+    const name = jsonSchemaCredentialId.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
     const { schemaId } = await this.credentialService.getOrRegisterSchema({
       attributes,
       name,
       issuerId,
-      jsonSchemaCredential,
+      jsonSchemaCredentialId,
     })
     const { credentialDefinitionId } = await this.credentialService.getOrRegisterCredentialDefinition({
       name,
       schemaId,
       issuerId,
-      jsonSchemaCredentialId: jsonSchemaCredential,
+      jsonSchemaCredentialId: jsonSchemaCredentialId,
     })
     return credentialDefinitionId
   }

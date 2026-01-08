@@ -32,7 +32,7 @@ export interface CreateCredentialTypeOptions {
 
 export interface CredentialIssuanceRequest {
   format: 'jsonld' | 'anoncreds'
-  jsonSchemaCredential: string
+  jsonSchemaCredentialId: string
   claims: JsonObject
   did?: string
 }

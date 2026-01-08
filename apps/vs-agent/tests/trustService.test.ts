@@ -67,9 +67,9 @@ describe('TrustService', () => {
 
     it('should issue a JSON-LD credential with a valid Ed25519 proof', async () => {
       const credentialResponse = await faberService.issueCredential({
-        type: 'jsonld',
+        format: 'jsonld',
         did: 'did:web:example.com',
-        jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+        jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
         claims: {
           id: 'https://example.org/org/123',
           name: 'OpenAI Research',
@@ -81,7 +81,7 @@ describe('TrustService', () => {
           countryCode: 'US',
         },
       })
-      expect(credentialResponse.credential.proof).toEqual(
+      expect(credentialResponse.credential!.proof).toEqual(
         expect.objectContaining({
           type: 'Ed25519Signature2020',
           verificationMethod: expect.any(String),
@@ -117,8 +117,8 @@ describe('TrustService', () => {
       })
 
       const credentialResponse = await faberService.issueCredential({
-        type: 'anoncreds',
-        jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+        format: 'anoncreds',
+        jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
         claims: {
           id: 'https://example.org/org/123',
           name: 'OpenAI Research',
@@ -138,7 +138,7 @@ describe('TrustService', () => {
         {
           type: 'credential-issuance',
           connectionId: faberConnection.id,
-          credentialSchemaId: credentialResponse.credential.credentialExchangeId,
+          credentialSchemaId: credentialResponse.didcommCredentialExchangeId,
         } as CredentialIssuanceMessage,
         faberConnection,
       )

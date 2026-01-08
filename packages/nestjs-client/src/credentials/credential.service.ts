@@ -125,17 +125,17 @@ export class CredentialService {
       refId?: string
       credentialDefinitionId?: string
       revokeIfAlreadyIssued?: boolean
-      jsonSchemaCredential?: string
+      jsonSchemaCredentialId?: string
     },
   ): Promise<void> {
-    const { revokeIfAlreadyIssued = false, jsonSchemaCredential } = options ?? {}
+    const { revokeIfAlreadyIssued = false, jsonSchemaCredentialId } = options ?? {}
     const refIdHash = options?.refId ? this.hash(options.refId) : null
     let credentialSchemaId: string | undefined
 
-    if (jsonSchemaCredential) {
+    if (jsonSchemaCredentialId) {
       const { didcommCredentialExchangeId } = await this.apiClient.trustCredentials.issuance({
         format: 'anoncreds',
-        jsonSchemaCredential,
+        jsonSchemaCredentialId,
         claims,
       })
       credentialSchemaId = didcommCredentialExchangeId as string
@@ -147,7 +147,7 @@ export class CredentialService {
       credentialTypes.find(type =>
         options?.credentialDefinitionId
           ? type.id === options.credentialDefinitionId
-          : type.relatedJsonSchemaCredentialId === jsonSchemaCredential,
+          : type.relatedJsonSchemaCredentialId === jsonSchemaCredentialId,
       ) ?? credentialTypes[0]
     if (!credentialType) {
       throw new Error(

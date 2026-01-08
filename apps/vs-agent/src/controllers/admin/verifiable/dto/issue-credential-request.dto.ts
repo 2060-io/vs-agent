@@ -33,7 +33,7 @@ export class IssueCredentialRequestDto {
   @IsString()
   @IsUrl({}, { message: 'json credential schema must be a valid URL' })
   @IsNotEmpty()
-  jsonSchemaCredential!: string
+  jsonSchemaCredentialId!: string
 
   @ApiProperty({
     description: 'Credential claims represented as flat key-value pairs',

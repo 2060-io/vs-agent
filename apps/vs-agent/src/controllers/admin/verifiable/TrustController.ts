@@ -25,7 +25,7 @@ export class TrustController {
         value: {
           format: 'jsonld',
           did: 'did:web:example.com',
-          jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+          jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',
@@ -42,7 +42,7 @@ export class TrustController {
         summary: 'Anoncreds Credential Example',
         value: {
           type: 'anoncreds',
-          jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+          jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
           claims: {
             id: 'https://example.org/org/123',
             name: 'OpenAI Research',
@@ -63,8 +63,8 @@ export class TrustController {
       'The response includes either the JSON-LD W3C Credential contents, directly to transmit to the recipient, or the DIDComm Invitation and Credential Exchange ID associated in case of AnonCreds for further tracking through events interface.',
   })
   async issueCredential(@Body() body: IssueCredentialRequestDto) {
-    const { format, did, jsonSchemaCredential, claims } = body
-    return await this.trustService.issueCredential({ format, jsonSchemaCredential, claims, did })
+    const { format, did, jsonSchemaCredentialId, claims } = body
+    return await this.trustService.issueCredential({ format, jsonSchemaCredentialId, claims, did })
   }
 
   @Post('revoke-credential')
@@ -240,7 +240,7 @@ export class TrustController {
       'The identifier or URL of the JSON Schema Credential (JSC) to retrieve. ' +
       'This schema describes the structure of the Verifiable Trust Credential (VTC) it governs.',
     examples: {
-      jsonSchemaCredential: {
+      jsonSchemaCredentialId: {
         summary: 'JSON Schema Credential example',
         description: 'A full URL referencing the JSON Schema Credential to be retrieved.',
         value: 'https://ecosystem/shemas-example-jsc.json',
@@ -290,7 +290,7 @@ export class TrustController {
       'The identifier or URL of the JSON Schema Credential (JSC) to delete. ' +
       'This must correspond to an existing stored schema definition.',
     examples: {
-      jsonSchemaCredential: {
+      jsonSchemaCredentialId: {
         summary: 'JSON Schema Credential example',
         description: 'A full URL identifying the JSON Schema Credential (JSC) to be deleted.',
         value: 'https://ecosystem/shemas-example-jsc.json',
