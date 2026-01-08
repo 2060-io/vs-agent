@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.7](https://github.com/2060-io/vs-agent/compare/v1.5.6...v1.5.7) (2026-01-08)
+
+
+### Bug Fixes
+
+* add did:web as alternativeDid for implicit invitations ([#305](https://github.com/2060-io/vs-agent/issues/305) backport) ([#306](https://github.com/2060-io/vs-agent/issues/306)) ([2f1b5a4](https://github.com/2060-io/vs-agent/commit/2f1b5a4b791f3acf2cb7db220e9d3a5ef4dea0f2))
+* short URL processing for credential offer invitations ([#308](https://github.com/2060-io/vs-agent/issues/308) backport) ([#309](https://github.com/2060-io/vs-agent/issues/309)) ([e466f64](https://github.com/2060-io/vs-agent/commit/e466f644ea95befb9dd6ca53de71efdcbfdc2ad5))
+
 ## [1.5.6](https://github.com/2060-io/vs-agent/compare/v1.5.5...v1.5.6) (2025-12-15)
 
 
