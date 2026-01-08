@@ -1,18 +1,18 @@
 import { VCAuthnEvent } from '@2060.io/vs-agent-model'
-import { ProofEventTypes, ProofState, ProofStateChangedEvent } from '@credo-ts/core'
 
 import { ServerConfig, VsAgent } from '../utils'
 
 import { sendWebhookEvent } from './WebhookEvent'
+import { DidCommProofEventTypes, DidCommProofStateChangedEvent, DidCommProofState } from '@credo-ts/didcomm'
 
 export const vcAuthnEvents = async (agent: VsAgent, config: ServerConfig) => {
-  agent.events.on(ProofEventTypes.ProofStateChanged, async ({ payload }: ProofStateChangedEvent) => {
+  agent.events.on(DidCommProofEventTypes.ProofStateChanged, async ({ payload }: DidCommProofStateChangedEvent) => {
     const record = payload.proofRecord
 
     // TODO: Convert all states from Credo to ACA-Py
-    const stateMap = (state: ProofState): string => {
-      if (state === ProofState.PresentationReceived) return 'presentation_received'
-      if (state === ProofState.Done) return 'verified'
+    const stateMap = (state: DidCommProofState): string => {
+      if (state === DidCommProofState.PresentationReceived) return 'presentation_received'
+      if (state === DidCommProofState.Done) return 'verified'
 
       return state
     }

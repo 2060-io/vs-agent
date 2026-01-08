@@ -1,6 +1,5 @@
 import type { ServerConfig } from '../utils'
 import type { MessageReceiptsReceivedEvent, MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import type { CredentialStateChangedEvent } from '@credo-ts/core'
 
 import {
   CallAcceptMessage,
@@ -9,10 +8,10 @@ import {
   CallRejectMessage,
 } from '@2060.io/credo-ts-didcomm-calls'
 import {
-  MediaSharingEventTypes,
-  MediaSharingRole,
-  MediaSharingState,
-  MediaSharingStateChangedEvent,
+  DidCommMediaSharingEventTypes,
+  DidCommMediaSharingRole,
+  DidCommMediaSharingState,
+  DidCommMediaSharingStateChangedEvent,
 } from '@2060.io/credo-ts-didcomm-media-sharing'
 import {
   EMrtdDataReceivedEvent,
@@ -51,29 +50,21 @@ import {
   CallAcceptRequestMessage,
 } from '@2060.io/vs-agent-model'
 import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
-import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
+import { DidCommPresentationV1Message, DidCommPresentationV1ProblemReportMessage } from '@credo-ts/anoncreds'
 import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
-import {
-  CredentialEventTypes,
-  CredentialState,
-  V2PresentationProblemReportMessage,
-  AgentEventTypes,
-  AgentMessageProcessedEvent,
-  BasicMessage,
-  V2PresentationMessage,
-} from '@credo-ts/core'
 import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
 
 import { createDataUrl, VsAgent } from '../utils'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
+import { DidCommBasicMessage, DidCommCredentialEventTypes, DidCommCredentialState, DidCommCredentialStateChangedEvent, DidCommEventTypes, DidCommMessageProcessedEvent, DidCommPresentationV2Message, DidCommPresentationV2ProblemReportMessage } from '@credo-ts/didcomm'
 
 // FIXME: timestamps are currently taken from reception date. They should be get from the originating DIDComm message
 // as soon as the corresponding extension is added to them
 export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
-  agent.events.on(AgentEventTypes.AgentMessageProcessed, async ({ payload }: AgentMessageProcessedEvent) => {
-    config.logger.debug(`AgentMessageProcessedEvent received: ${JSON.stringify(payload.message)}`)
+  agent.events.on(DidCommEventTypes.DidCommMessageProcessed, async ({ payload }: DidCommMessageProcessedEvent) => {
+    config.logger.debug(`DidCommMessageProcessedEvent received: ${JSON.stringify(payload.message)}`)
     const { message, connection } = payload
 
     if (!connection) {
@@ -84,10 +75,10 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
     }
 
     // Basic Message protocol messages
-    if (message.type === BasicMessage.type.messageTypeUri) {
+    if (message.type === DidCommBasicMessage.type.messageTypeUri) {
       const msg = new TextMessage({
         connectionId: connection.id,
-        content: (payload.message as BasicMessage).content,
+        content: (payload.message as DidCommBasicMessage).content,
         id: payload.message.id,
         threadId: payload.message.thread?.parentThreadId,
         timestamp: new Date(), // It can take also 'sentTime' to be related to the origin
@@ -200,16 +191,16 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
 
     if (
       [
-        V2PresentationProblemReportMessage.type.messageTypeUri,
-        V1PresentationProblemReportMessage.type.messageTypeUri,
+        DidCommPresentationV2ProblemReportMessage.type.messageTypeUri,
+        DidCommPresentationV1ProblemReportMessage.type.messageTypeUri,
       ].includes(message.type)
     ) {
       config.logger.info('Presentation problem report received')
       try {
         const record = await agent.proofs.getByThreadAndConnectionId(message.threadId, connection.id)
         const errorCode =
-          (message as V2PresentationProblemReportMessage).description.en ??
-          (message as V2PresentationProblemReportMessage).description.code
+          (message as DidCommPresentationV2ProblemReportMessage).description.en ??
+          (message as DidCommPresentationV2ProblemReportMessage).description.code
 
         const msg = new IdentityProofSubmitMessage({
           submittedProofItems: [
@@ -251,7 +242,7 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
     }
     // Proofs protocol messages
     if (
-      [V1PresentationMessage.type.messageTypeUri, V2PresentationMessage.type.messageTypeUri].includes(
+      [DidCommPresentationV1Message.type.messageTypeUri, DidCommPresentationV2Message.type.messageTypeUri].includes(
         message.type,
       )
     ) {
@@ -325,13 +316,13 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
 
   // Credential events
   agent.events.on(
-    CredentialEventTypes.CredentialStateChanged,
-    async ({ payload }: CredentialStateChangedEvent) => {
-      config.logger.debug(`CredentialStateChangedEvent received. Record id: 
-      ${JSON.stringify(payload.credentialRecord.id)}, state: ${JSON.stringify(payload.credentialRecord.state)}`)
-      const record = payload.credentialRecord
+    DidCommCredentialEventTypes.DidCommCredentialStateChanged,
+    async ({ payload }: DidCommCredentialStateChangedEvent) => {
+      config.logger.debug(`DidCommCredentialStateChangedEvent received. Record id: 
+      ${JSON.stringify(payload.credentialExchangeRecord.id)}, state: ${JSON.stringify(payload.credentialExchangeRecord.state)}`)
+      const record = payload.credentialExchangeRecord
 
-      if (record.state === CredentialState.ProposalReceived) {
+      if (record.state === DidCommCredentialState.ProposalReceived) {
         const credentialProposalMessage = await agent.credentials.findProposalMessage(record.id)
         const message = new CredentialRequestMessage({
           connectionId: record.connectionId!,
@@ -350,7 +341,7 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
         if (message.threadId) message.threadId = await getRecordId(agent, message.threadId)
         await sendMessageReceivedEvent(agent, message, message.timestamp, config)
       } else if (
-        [CredentialState.Declined, CredentialState.Done, CredentialState.Abandoned].includes(record.state)
+        [DidCommCredentialState.Declined, DidCommCredentialState.Done, DidCommCredentialState.Abandoned].includes(record.state)
       ) {
         const message = new CredentialReceptionMessage({
           connectionId: record.connectionId!,
@@ -358,7 +349,7 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
           threadId: await getRecordId(agent, record.threadId),
           state:
             record.errorMessage === 'issuance-abandoned: e.msg.refused'
-              ? CredentialState.Declined
+              ? DidCommCredentialState.Declined
               : record.state,
         })
         await sendMessageReceivedEvent(agent, message, message.timestamp, config)
@@ -367,14 +358,14 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
   )
 
   // Media protocol events
-  agent.events.on(MediaSharingEventTypes.StateChanged, async ({ payload }: MediaSharingStateChangedEvent) => {
+  agent.events.on(DidCommMediaSharingEventTypes.StateChanged, async ({ payload }: DidCommMediaSharingStateChangedEvent) => {
     const record = payload.mediaSharingRecord
 
     config.logger
       .debug(`MediaSharingStateChangedEvent received. Role: ${record.role} Connection id: ${record.connectionId}. 
     Items: ${JSON.stringify(record.items)} `)
 
-    if (record.state === MediaSharingState.MediaShared && record.role === MediaSharingRole.Receiver) {
+    if (record.state === DidCommMediaSharingState.MediaShared && record.role === DidCommMediaSharingRole.Receiver) {
       if (record.items) {
         const message = new MediaMessage({
           connectionId: record.connectionId!,

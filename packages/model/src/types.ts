@@ -1,12 +1,6 @@
-import type {
-  HandshakeProtocol,
-  ReceiveOutOfBandInvitationConfig,
-  OutOfBandDidCommService,
-  ProofState,
-  JsonObject,
-} from '@credo-ts/core'
-
+import { JsonObject } from '@credo-ts/core'
 import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
+import { DidCommHandshakeProtocol, DidCommProofState, OutOfBandDidCommService, ReceiveOutOfBandInvitationConfig } from '@credo-ts/didcomm'
 
 export interface VsAgentInfo {
   label: string
@@ -93,7 +87,7 @@ export interface PresentationData {
   requestedCredentials: RequestedCredential[]
   claims: Claim[]
   verified: boolean
-  state: ProofState
+  state: DidCommProofState
   proofExchangeId: string
   threadId: string
   updatedAt: Date | undefined
@@ -136,7 +130,7 @@ export interface OutOfBandInvitationSchema {
   goalCode?: string
   goal?: string
   accept?: string[]
-  handshake_protocols?: HandshakeProtocol[]
+  handshake_protocols?: DidCommHandshakeProtocol[]
   services: Array<OutOfBandDidCommService | string>
   imageUrl?: string
 }

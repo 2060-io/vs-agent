@@ -1,9 +1,9 @@
-import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Transform } from 'class-transformer'
 import { IsOptional, IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
+import { DateParser } from '../../utils'
 
 export interface CallOfferRequestMessageOptions extends BaseMessageOptions {
   offerExpirationTime?: Date

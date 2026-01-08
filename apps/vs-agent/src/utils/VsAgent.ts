@@ -1,25 +1,21 @@
 import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
-import { MediaSharingModule } from '@2060.io/credo-ts-didcomm-media-sharing'
+import { DidCommMediaSharingModule } from '@2060.io/credo-ts-didcomm-media-sharing'
 import { DidCommMrtdModule } from '@2060.io/credo-ts-didcomm-mrtd'
-import { ReceiptsModule } from '@2060.io/credo-ts-didcomm-receipts'
-import { UserProfileModule, UserProfileModuleConfig } from '@2060.io/credo-ts-didcomm-user-profile'
+import { DidCommReceiptsModule } from '@2060.io/credo-ts-didcomm-receipts'
+import { DidCommUserProfileModule, UserProfileModuleConfig } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
-  AnonCredsCredentialFormatService,
+  AnonCredsDidCommCredentialFormatService,
   AnonCredsModule,
-  AnonCredsProofFormatService,
-  LegacyIndyCredentialFormatService,
-  LegacyIndyProofFormatService,
+  AnonCredsDidCommProofFormatService,
+  LegacyIndyDidCommCredentialFormatService,
+  LegacyIndyDidCommProofFormatService,
 } from '@credo-ts/anoncreds'
 import { AskarModule } from '@credo-ts/askar'
 import {
   Agent,
   AgentDependencies,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  ConnectionsModule,
   convertPublicKeyToX25519,
-  CredentialsModule,
   CredoError,
   DidCommV1Service,
   DidDocument,
@@ -31,13 +27,10 @@ import {
   KeyType,
   ParsedDid,
   parseDid,
-  ProofsModule,
-  V2CredentialProtocol,
-  V2ProofProtocol,
   W3cCredentialsModule,
 } from '@credo-ts/core'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
-import { WebvhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
+import { WebVhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
@@ -47,23 +40,24 @@ import { FullTailsFileService } from '../services/FullTailsFileService'
 import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
 import { WebDidRegistrar } from './WebDidRegistrar'
+import { DidCommAutoAcceptCredential, DidCommAutoAcceptProof, DidCommConnectionsModule, DidCommCredentialsModule, DidCommCredentialV2Protocol, DidCommProofsModule, DidCommProofV2Protocol } from '@credo-ts/didcomm'
 
 type VsAgentModules = {
   askar: AskarModule
   anoncreds: AnonCredsModule
   actionMenu: ActionMenuModule
   dids: DidsModule
-  connections: ConnectionsModule
+  connections: DidCommConnectionsModule
   calls: DidCommCallsModule
-  credentials: CredentialsModule<
-    [V2CredentialProtocol<[LegacyIndyCredentialFormatService, AnonCredsCredentialFormatService]>]
+  credentials: DidCommCredentialsModule<
+    [DidCommCredentialV2Protocol<[LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]>]
   >
-  proofs: ProofsModule<[V2ProofProtocol<[LegacyIndyProofFormatService, AnonCredsProofFormatService]>]>
-  media: MediaSharingModule
+  proofs: DidCommProofsModule<[DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]>
+  media: DidCommMediaSharingModule
   mrtd: DidCommMrtdModule
   questionAnswer: QuestionAnswerModule
-  receipts: ReceiptsModule
-  userProfile: UserProfileModule
+  receipts: DidCommReceiptsModule
+  userProfile: DidCommUserProfileModule
   w3cCredentials: W3cCredentialsModule
 }
 
@@ -388,14 +382,14 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       }),
       actionMenu: new ActionMenuModule(),
       calls: new DidCommCallsModule(),
-      connections: new ConnectionsModule({ autoAcceptConnections: true }),
-      credentials: new CredentialsModule({
-        autoAcceptCredentials: AutoAcceptCredential.ContentApproved,
+      connections: new DidCommConnectionsModule({ autoAcceptConnections: true }),
+      credentials: new DidCommCredentialsModule({
+        autoAcceptCredentials: DidCommAutoAcceptCredential.ContentApproved,
         credentialProtocols: [
-          new V2CredentialProtocol({
+          new DidCommCredentialV2Protocol({
             credentialFormats: [
-              new LegacyIndyCredentialFormatService(),
-              new AnonCredsCredentialFormatService(),
+              new LegacyIndyDidCommCredentialFormatService(),
+              new AnonCredsDidCommCredentialFormatService(),
             ],
           }),
         ],
@@ -403,24 +397,24 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       dids: new DidsModule({
         resolvers: [
           new CachedWebDidResolver({ publicApiBaseUrl: options.publicApiBaseUrl }),
-          new WebvhDidResolver(),
+          new WebVhDidResolver(),
         ],
         registrars: [new WebDidRegistrar(), new WebVhDidRegistrar()],
       }),
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
-      proofs: new ProofsModule({
-        autoAcceptProofs: AutoAcceptProof.ContentApproved,
+      proofs: new DidCommProofsModule({
+        autoAcceptProofs: DidCommAutoAcceptProof.ContentApproved,
         proofProtocols: [
-          new V2ProofProtocol({
-            proofFormats: [new LegacyIndyProofFormatService(), new AnonCredsProofFormatService()],
+          new DidCommProofV2Protocol({
+            proofFormats: [new LegacyIndyDidCommProofFormatService(), new AnonCredsDidCommProofFormatService()],
           }),
         ],
       }),
-      media: new MediaSharingModule(),
+      media: new DidCommMediaSharingModule(),
       questionAnswer: new QuestionAnswerModule(),
-      receipts: new ReceiptsModule(),
+      receipts: new DidCommReceiptsModule(),
       // Disable module's auto disclose feature, since we are going to manage it in MessageEvents
-      userProfile: new UserProfileModule(new UserProfileModuleConfig({ autoSendProfile: false })),
+      userProfile: new DidCommUserProfileModule(new UserProfileModuleConfig({ autoSendProfile: false })),
       w3cCredentials: new W3cCredentialsModule({
         documentLoader: defaultDocumentLoader,
       }),

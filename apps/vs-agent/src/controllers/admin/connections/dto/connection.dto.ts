@@ -1,4 +1,4 @@
-import { DidExchangeState } from '@credo-ts/core'
+import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 import { ApiProperty } from '@nestjs/swagger'
 
 /**
@@ -37,11 +37,11 @@ export class ConnectionDto {
   theirLabel!: string
 
   @ApiProperty({
-    enum: DidExchangeState,
+    enum: DidCommDidExchangeState,
     description: 'Current state of the DID exchange',
-    example: DidExchangeState.Completed,
+    example: DidCommDidExchangeState.Completed,
   })
-  state!: DidExchangeState
+  state!: DidCommDidExchangeState
 
   @ApiProperty({ description: 'Role in the DID exchange', example: 'invitee' })
   role!: string

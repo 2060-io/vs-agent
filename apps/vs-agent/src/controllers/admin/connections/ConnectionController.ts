@@ -1,4 +1,4 @@
-import { DidExchangeState, RecordNotFoundError } from '@credo-ts/core'
+import { RecordNotFoundError } from '@credo-ts/core'
 import {
   Controller,
   Delete,
@@ -27,6 +27,7 @@ import { Response } from 'express'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { ConnectionDto } from './dto/connection.dto'
+import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 
 @ApiTags('connections')
 @ApiExtraModels(ConnectionDto)
@@ -56,7 +57,7 @@ export class ConnectionController {
     name: 'state',
     required: false,
     description: 'Filter by connection state',
-    enum: Object.values(DidExchangeState),
+    enum: Object.values(DidCommDidExchangeState),
   })
   @ApiQuery({ name: 'did', required: false, type: String, description: 'Filter by my DID' })
   @ApiQuery({ name: 'theirDid', required: false, type: String, description: 'Filter by their DID' })
@@ -67,7 +68,7 @@ export class ConnectionController {
   })
   public async getAllConnections(
     @Query('outOfBandId') outOfBandId?: string,
-    @Query('state') state?: DidExchangeState,
+    @Query('state') state?: DidCommDidExchangeState,
     @Query('did') did?: string,
     @Query('theirDid') theirDid?: string,
     @Query('threadId') threadId?: string,

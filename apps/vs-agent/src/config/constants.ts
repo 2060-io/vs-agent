@@ -1,6 +1,7 @@
 import type { AskarWalletPostgresStorageConfig } from '@credo-ts/askar'
 
-import { LogLevel, KeyDerivationMethod } from '@credo-ts/core'
+import { LogLevel } from '@credo-ts/core'
+import { KdfMethod } from '@hyperledger/aries-askar-nodejs'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -49,10 +50,10 @@ export const askarPostgresConfig: AskarWalletPostgresStorageConfig = {
   },
 }
 
-export const keyDerivationMethodMap: { [key: string]: KeyDerivationMethod } = {
-  ARGON2I_INT: KeyDerivationMethod.Argon2IInt,
-  ARGON2I_MOD: KeyDerivationMethod.Argon2IMod,
-  RAW: KeyDerivationMethod.Raw,
+export const keyDerivationMethodMap: { [key: string]: KdfMethod } = {
+  ARGON2I_INT: KdfMethod.Argon2IInt,
+  ARGON2I_MOD: KdfMethod.Argon2IMod,
+  RAW: KdfMethod.Raw,
 }
 
 export const REDIS_HOST = process.env.REDIS_HOST

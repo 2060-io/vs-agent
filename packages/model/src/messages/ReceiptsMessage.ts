@@ -1,10 +1,10 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Type, Transform } from 'class-transformer'
 import { IsInstance, IsArray, IsDate, IsString, ValidateNested } from 'class-validator'
 
 import { BaseMessage } from './BaseMessage'
 import { MessageType } from './MessageType'
+import { DateParser } from '../utils'
 
 // FIXME: Do a better conversion between DIDComm protocol and VS Agent protocol constants
 export const didcommMessageState: Record<string, MessageState> = {

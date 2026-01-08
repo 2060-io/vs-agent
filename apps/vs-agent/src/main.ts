@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 
-import { KeyDerivationMethod, parseDid, utils } from '@credo-ts/core'
+import { parseDid, utils } from '@credo-ts/core'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
@@ -52,6 +52,7 @@ import {
   VsAgent,
   VsAgentWsInboundTransport,
 } from './utils'
+import { KdfMethod } from '@hyperledger/aries-askar-nodejs'
 
 export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
@@ -136,7 +137,7 @@ const run = async () => {
       id: AGENT_WALLET_ID || 'test-vs-agent',
       key: AGENT_WALLET_KEY || 'test-vs-agent',
       keyDerivationMethod:
-        keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KeyDerivationMethod.Argon2IMod],
+        keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KdfMethod.Argon2IMod],
       storage: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
     label: AGENT_LABEL || 'Test VS Agent',

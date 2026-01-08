@@ -23,8 +23,6 @@ import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import {
   JsonTransformer,
-  AutoAcceptCredential,
-  AutoAcceptProof,
   utils,
   MessageSender,
   OutboundMessageContext,
@@ -38,6 +36,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils'
+import { DidCommAutoAcceptCredential, DidCommAutoAcceptProof } from '@credo-ts/didcomm'
 
 @Injectable()
 export class MessageService {
@@ -194,7 +193,7 @@ export class MessageService {
               },
               protocolVersion: 'v2',
               parentThreadId: msg.threadId,
-              autoAcceptProof: AutoAcceptProof.Never,
+              DidCommAutoAcceptProof: DidCommAutoAcceptProof.Never,
             })
             messageId = record.threadId
             record.metadata.set('_2060/requestedCredentials', {
@@ -215,7 +214,7 @@ export class MessageService {
         if (credential) {
           await agent.credentials.acceptProposal({
             credentialRecordId: credential.id,
-            autoAcceptCredential: AutoAcceptCredential.Always,
+            DidCommAutoAcceptCredential: DidCommAutoAcceptCredential.Always,
           })
         } else {
           let attributes: CredentialPreviewAttributeOptions[] = []
@@ -251,7 +250,7 @@ export class MessageService {
                 },
               },
               protocolVersion: 'v2',
-              autoAcceptCredential: AutoAcceptCredential.Always,
+              DidCommAutoAcceptCredential: DidCommAutoAcceptCredential.Always,
             })
             messageId = record.threadId
           } else {
