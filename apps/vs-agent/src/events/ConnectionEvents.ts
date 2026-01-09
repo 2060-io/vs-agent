@@ -23,7 +23,8 @@ import { sendWebhookEvent } from './WebhookEvent'
 export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
   // Get the first recordm atching agent's DID and obtain all alternatives for it
   const [agentPublicDidRecord] = await agent.dids.getCreatedDids({ did: agent.did })
-  const agentPublicDids = [agent.did, ...(agentPublicDidRecord.getTag('alternativeDids') as string[])]
+  const alternativeDids = agentPublicDidRecord.getTag('alternativeDids')
+  const agentPublicDids = [agent.did, ...(Array.isArray(alternativeDids) ? alternativeDids : [])]
 
   agent.events.on(
     ConnectionEventTypes.ConnectionStateChanged,
