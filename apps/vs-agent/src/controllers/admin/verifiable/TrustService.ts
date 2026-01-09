@@ -6,6 +6,7 @@ import {
   DidRepository,
   JsonObject,
   JsonTransformer,
+  utils,
   W3cCredential,
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
@@ -250,7 +251,7 @@ export class TrustService {
     claims: JsonObject,
   ) {
     const unsignedCredential = createCredential({
-      id: did,
+      id: `${did}#${utils.uuid()}`,
       type: ['VerifiableCredential', 'VerifiableTrustCredential'],
       issuer: agent.did,
       credentialSubject: {
