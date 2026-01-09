@@ -19,7 +19,7 @@ import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEve
 import { sendWebhookEvent } from './WebhookEvent'
 
 export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
-  // Get the first recordm atching agent's DID and obtain all alternatives for it
+  // Get the first record matching agent's DID and obtain all alternatives for it
   const [agentPublicDidRecord] = await agent.dids.getCreatedDids({ did: agent.did })
   const agentPublicDids = [agent.did, ...(agentPublicDidRecord.getTag('alternativeDids') as string[])]
 
