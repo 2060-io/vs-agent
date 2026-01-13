@@ -11,6 +11,7 @@ import {
   DidRecord,
   W3cPresentationOptions,
   Logger,
+  utils,
 } from '@credo-ts/core'
 // No type definitions available for this library
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -332,7 +333,7 @@ export async function generateVerifiablePresentation(
   })
   const verifiablePresentation = await generateVerifiableCredential(
     agent,
-    agent.did,
+    `${agent.did}#${utils.uuid()}`,
     ecsSchemas,
     schemaKey,
     type,
