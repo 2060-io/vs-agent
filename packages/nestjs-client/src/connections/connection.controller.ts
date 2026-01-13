@@ -1,6 +1,6 @@
 import { HttpUtils } from '@2060.io/vs-agent-client'
 import { ConnectionStateUpdated, EventType } from '@2060.io/vs-agent-model'
-import { Body, Controller, HttpStatus, Logger, Post } from '@nestjs/common'
+import { Body, Controller, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { ConnectionsEventService } from './connection.service'
@@ -10,7 +10,7 @@ import { ConnectionsEventService } from './connection.service'
 export class ConnectionsEventController {
   private readonly logger = new Logger(ConnectionsEventController.name)
 
-  constructor(private readonly service: ConnectionsEventService) {}
+  constructor(@Inject(ConnectionsEventService) private readonly service: ConnectionsEventService) {}
 
   @Post(`/${EventType.ConnectionState}`)
   @ApiOperation({

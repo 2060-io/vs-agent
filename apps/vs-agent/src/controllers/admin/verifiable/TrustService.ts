@@ -6,6 +6,7 @@ import {
   DidRepository,
   JsonObject,
   JsonTransformer,
+  utils,
   W3cCredential,
   W3cJsonLdVerifiableCredential,
   W3cJsonLdVerifiablePresentation,
@@ -38,9 +39,9 @@ export class TrustService {
   private ecsSchemas
 
   constructor(
-    private readonly agentService: VsAgentService,
-    private readonly urlShortenerService: UrlShorteningService,
-    private readonly credentialService: CredentialTypesService,
+    @Inject(VsAgentService) private readonly agentService: VsAgentService,
+    @Inject(UrlShorteningService) private readonly urlShortenerService: UrlShorteningService,
+    @Inject(CredentialTypesService) private readonly credentialService: CredentialTypesService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
@@ -246,11 +247,11 @@ export class TrustService {
     agent: VsAgent,
     didRecord: DidRecord,
     did: string,
-    jsonSchemaCredential: string,
+    jsonSchemaCredentialId: string,
     claims: JsonObject,
   ) {
     const unsignedCredential = createCredential({
-      id: did,
+      id: `${did}#${utils.uuid()}`,
       type: ['VerifiableCredential', 'VerifiableTrustCredential'],
       issuer: agent.did,
       credentialSubject: {
@@ -259,7 +260,7 @@ export class TrustService {
       },
     })
     unsignedCredential.credentialSchema = {
-      id: jsonSchemaCredential,
+      id: jsonSchemaCredentialId,
       type: 'JsonSchemaCredential',
     }
     const verificationMethodId = getVerificationMethodId(agent.config.logger, didRecord)
@@ -272,15 +273,15 @@ export class TrustService {
   }
 
   public async issueCredential({
-    type,
-    jsonSchemaCredential,
+    format,
+    jsonSchemaCredentialId,
     claims,
     did,
   }: CredentialIssuanceRequest): Promise<CredentialIssuanceResponse> {
     try {
       // Check schema for credential
       const { agent, didRecord } = await this.getDidRecord()
-      const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredential)
+      const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
       const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
       const schemaData = await this.fetchJson<JsonObject>(mapToEcosystem(subjectId))
       const parsedSchema =
@@ -290,24 +291,33 @@ export class TrustService {
       const attrNames = Object.keys(subjectProps).map(String)
       if (attrNames.length === 0) {
         throw new HttpException(
-          `No properties found in credentialSubject of schema from ${jsonSchemaCredential}`,
+          `No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`,
           HttpStatus.BAD_REQUEST,
         )
       }
       validateSchema(parsedSchema, claims)
 
-      switch (type) {
+      switch (format) {
         case 'jsonld':
           if (!did)
-            throw new HttpException(`Did must be present for json-ld creential`, HttpStatus.BAD_REQUEST)
-          const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredential, claims)
+            throw new HttpException('did must be present for JSON-LD credentials', HttpStatus.BAD_REQUEST)
+          const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredentialId, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
           const credentialDefinitionId = await this.getCredentialDefinition(
             agent,
-            jsonSchemaCredential,
+            jsonSchemaCredentialId,
             attrNames,
           )
+
+          // TODO: if a DID is specified, we can directly start the exchange: if we are already connected, start the offer
+          // and if not, do the DID Exchange and then the offer
+          if (did) {
+            throw new HttpException(
+              'Specifying did not supported for AnonCreds credentials',
+              HttpStatus.BAD_REQUEST,
+            )
+          }
           const request = await agent.credentials.createOffer({
             protocolVersion: 'v2',
             credentialFormats: {
@@ -332,40 +342,40 @@ export class TrustService {
           return {
             status: 200,
             didcommInvitationUrl,
-            credential: { credentialExchangeId: request.credentialRecord.id },
+            jsonSchemaCredentialId,
           }
         default:
-          throw new HttpException(`Invalid credential type: ${type}`, HttpStatus.BAD_REQUEST)
+          throw new HttpException(`Invalid credential type: ${format}`, HttpStatus.BAD_REQUEST)
       }
     } catch (error) {
       this.handleError(error, 'Failed to issue credential')
     }
   }
 
-  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredential: string, attributes: string[]) {
+  public async getCredentialDefinition(agent: VsAgent, jsonSchemaCredentialId: string, attributes: string[]) {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
     const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
-      relatedJsonSchemaCredential: jsonSchemaCredential,
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
     })
     if (existCredential) {
       return existCredential.credentialDefinitionId
     }
 
     const issuerId = agent.did!
-    const name = jsonSchemaCredential.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
+    const name = jsonSchemaCredentialId.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
     const { schemaId } = await this.credentialService.getOrRegisterSchema({
       attributes,
       name,
       issuerId,
-      jsonSchemaCredential,
+      jsonSchemaCredentialId,
     })
     const { credentialDefinitionId } = await this.credentialService.getOrRegisterCredentialDefinition({
       name,
       schemaId,
       issuerId,
-      jsonSchemaCredential,
+      jsonSchemaCredentialId: jsonSchemaCredentialId,
     })
     return credentialDefinitionId
   }
@@ -456,7 +466,8 @@ export class TrustService {
 
     // Update #whois with new endpoint
     const service = didRecord.didDocument?.service?.find(s => s.id === `${agent.did}#whois`)
-    if (service) service.serviceEndpoint = verifiablePresentation.id!
+    if (service && verifiablePresentation.id?.includes('service'))
+      service.serviceEndpoint = verifiablePresentation.id!
 
     // When a new VTC has been added, remove the self VTCs
     this.updateVtcEntries(didRecord, false)
@@ -487,8 +498,10 @@ export class TrustService {
   }
 
   private restoreDefaultVtcEntries(didRecord: DidRecord) {
-    const record = didRecord.metadata.get('_vt/vtc') ?? {}
-    if (!record || Object.keys(record).length <= 2) {
+    const vtc = didRecord.metadata.get('_vt/vtc') ?? {}
+    const jsc = didRecord.metadata.get('_vt/jsc') ?? {}
+    // By default we have 2 Self-trusted VTCs
+    if (Object.keys(vtc).length < 3 && Object.keys(jsc).length < 3) {
       this.updateVtcEntries(didRecord, true)
     }
   }
@@ -519,6 +532,10 @@ export class TrustService {
             }),
           )
         }
+
+        // Return to self-trusted VTC in #whois endpoint
+        const service = didRecord.didDocument?.service?.find(s => s.id === `${didRecord.did}#whois`)
+        if (service && serviceEndpoint.includes('service')) service.serviceEndpoint = serviceEndpoint
       } else {
         didRecord.didDocument.service = didRecord.didDocument.service.filter(s => s.id !== serviceId)
       }

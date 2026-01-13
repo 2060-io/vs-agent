@@ -67,6 +67,7 @@ export const ADMIN_LOG_LEVEL = process.env.ADMIN_LOG_LEVEL
   : LogLevel.debug
 
 export const USE_CORS = Boolean(process.env.USE_CORS || false)
+export const ENABLE_PUBLIC_API_SWAGGER = !(process.env.ENABLE_PUBLIC_API_SWAGGER === 'false')
 
 // Advanced settings
 export const AGENT_INVITATION_BASE_URL = process.env.AGENT_INVITATION_BASE_URL ?? 'https://hologram.zone/'
@@ -76,7 +77,7 @@ export const USER_PROFILE_AUTODISCLOSE = process.env.USER_PROFILE_AUTODISCLOSE =
 
 // Values for Organization credential
 export const SELF_ISSUED_VTC_ORG_TYPE = process.env.SELF_ISSUED_VTC_ORG_TYPE ?? 'PUBLIC'
-export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'CO'
+export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'EE'
 export const SELF_ISSUED_VTC_ORG_REGISTRYID = process.env.SELF_ISSUED_VTC_ORG_REGISTRYID ?? 'ID-123'
 export const SELF_ISSUED_VTC_ORG_REGISTRYURL =
   process.env.SELF_ISSUED_VTC_ORG_REGISTRYURL ?? 'https://example.com/registry'

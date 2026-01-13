@@ -78,6 +78,8 @@ Here is a couple of variables that you may want to take care in case of troubles
 | AGENT_LOG_LEVEL | Credo Agent Log level                                                | 4 (warn)      |
 | ADMIN_LOG_LEVEL | Admin interface Log level                                            | 2 (debug)     |
 | USE_CORS        | Enable Cross-Origin Resource Sharing (only for development purposes) | false         |
+| ENABLE_PUBLIC_API_SWAGGER  | Enable Swagger documentation for public API (recommended only for development environments) | false |
+
 
 Possible log levels:
 
@@ -123,15 +125,15 @@ To enable the Self-Verifiable Trust Registry API endpoints, you must set the fol
 | Variable                                     | Description                              | Example Value                               |
 | -------------------------------------------- | ---------------------------------------- | ------------------------------------------- |
 | `SELF_ISSUED_VTC_ORG_TYPE`                   | Organization type for example credential | `PRIVATE`                                   |
-| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`            | Organization country code                | `CO`                                        |
+| `SELF_ISSUED_VTC_ORG_COUNTRYCODE`            | Organization country code                | `EE`                                        |
 | `SELF_ISSUED_VTC_ORG_REGISTRYID`             | Organization registry ID                 | `1234567890`                                |
-| `SELF_ISSUED_VTC_ORG_REGISTRYURL`            | Organization registry URL                | `https://registro-empresas.ejemplo.com`     |
-| `SELF_ISSUED_VTC_ORG_ADDRESS`                | Organization address                     | `Calle Falsa 123, Bogotá, Colombia`         |
+| `SELF_ISSUED_VTC_ORG_REGISTRYURL`            | Organization registry URL                | `https://registry.example.com`     |
+| `SELF_ISSUED_VTC_ORG_ADDRESS`                | Organization address                     | `Ahtri tn 12 10151 Tallinn, Estonia`         |
 | `SELF_ISSUED_VTC_SERVICE_TYPE`               | Service type for example credential      | `HealthCheckService`                        |
-| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`        | Service description                      | `Servicio de verificación de salud digital` |
+| `SELF_ISSUED_VTC_SERVICE_DESCRIPTION`        | Service description                      | `Health Verification Service` |
 | `SELF_ISSUED_VTC_SERVICE_MINIMUMAGEREQUIRED` | Minimum age required for service         | `18`                                        |
-| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                 | `https://servicio.ejemplo.com/terminos`     |
-| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`      | Privacy policy URL                       | `https://servicio.ejemplo.com/privacidad`   |
+| `SELF_ISSUED_VTC_SERVICE_TERMSANDCONDITIONS` | Terms and conditions URL                 | `https://service.example.com/terminos`     |
+| `SELF_ISSUED_VTC_SERVICE_PRIVACYPOLICY`      | Privacy policy URL                       | `https://service.example.com/privacidad`   |
 
 > **Note:**  
 > This Self-Verifiable Trust Registry API and its configuration are **unstable** and intended for testing and development only. These endpoints and related environment variables may be removed or changed in future releases **without prior notice**.

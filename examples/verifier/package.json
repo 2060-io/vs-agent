@@ -9,7 +9,7 @@
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.json",
     "start": "node build/index.js",
-    "test": "jest --passWithNoTests"
+    "test": "vitest"
   },
   "author": "",
   "license": "ISC",

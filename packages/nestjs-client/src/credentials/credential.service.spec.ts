@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { CredentialStatus } from '../types'
 
@@ -9,14 +10,14 @@ import { CredentialService } from './credential.service'
 import { RevocationRegistryEntity } from './revocation-registry.entity'
 
 // Mock for external API client
-const mockSend = jest.fn().mockResolvedValue({ id: 'mocked-id' })
-const mockCreate = jest.fn().mockResolvedValue({
+const mockSend = vi.fn().mockResolvedValue({ id: 'mocked-id' })
+const mockCreate = vi.fn().mockResolvedValue({
   id: 'test-id',
   name: 'TestCred',
   version: '1.0',
   revocationSupported: true,
 })
-const mockGetAll = jest.fn().mockResolvedValue([
+const mockGetAll = vi.fn().mockResolvedValue([
   {
     id: 'test-def-id',
     name: 'TestCred',
@@ -24,23 +25,27 @@ const mockGetAll = jest.fn().mockResolvedValue([
     revocationSupported: true,
   },
 ])
-jest.mock('@2060.io/vs-agent-client', () => ({
-  ApiClient: jest.fn().mockImplementation(() => ({
-    credentialTypes: {
-      getAll: mockGetAll,
-      create: mockCreate,
+vi.mock('@2060.io/vs-agent-client', () => {
+  return {
+    ApiClient: vi.fn().mockImplementation(function () {
+      return {
+        credentialTypes: {
+          getAll: mockGetAll,
+          create: mockCreate,
+        },
+        messages: {
+          send: mockSend,
+        },
+        revocationRegistries: {
+          create: vi.fn().mockResolvedValue('rev-registry-id'),
+        },
+      }
+    }),
+    ApiVersion: {
+      V1: 'v1',
     },
-    messages: {
-      send: mockSend,
-    },
-    revocationRegistries: {
-      create: jest.fn().mockResolvedValue('rev-registry-id'),
-    },
-  })),
-  ApiVersion: {
-    V1: 'v1',
-  },
-}))
+  }
+})
 
 describe('CredentialService', () => {
   let service: CredentialService
@@ -54,11 +59,11 @@ describe('CredentialService', () => {
         {
           provide: getRepositoryToken(CredentialEntity),
           useValue: {
-            find: jest.fn(),
-            save: jest.fn(),
-            findOne: jest.fn(),
+            find: vi.fn(),
+            save: vi.fn(),
+            findOne: vi.fn(),
             manager: {
-              transaction: jest.fn(),
+              transaction: vi.fn(),
             },
           },
         },
@@ -80,13 +85,13 @@ describe('CredentialService', () => {
 
   describe('createType', () => {
     it('should create a credential type when getAll returns empty array', async () => {
-      const getAllMock = jest.fn().mockResolvedValue([])
+      const getAllMock = vi.fn().mockResolvedValue([])
       service['apiClient'].credentialTypes.getAll = getAllMock
-      const createRevocationRegistryMock = jest
+      const createRevocationRegistryMock = vi
         .spyOn(service as any, 'createRevocationRegistry')
         .mockResolvedValue({})
 
-      jest.spyOn(service as any, 'createRevocationRegistry').mockResolvedValue({})
+      vi.spyOn(service as any, 'createRevocationRegistry').mockResolvedValue({})
 
       await service.createType('TestCred', '1.0', ['email'], { supportRevocation: true })
 
@@ -103,7 +108,7 @@ describe('CredentialService', () => {
     })
 
     it('should not create a credential type when it already exists', async () => {
-      const getAllMock = jest.fn().mockResolvedValue([
+      const getAllMock = vi.fn().mockResolvedValue([
         {
           name: 'TestCred',
           version: '1.0',
@@ -111,8 +116,8 @@ describe('CredentialService', () => {
           revocationSupported: true,
         },
       ])
-      const createMock = jest.fn()
-      const createRevocationRegistryMock = jest
+      const createMock = vi.fn()
+      const createRevocationRegistryMock = vi
         .spyOn(service as any, 'createRevocationRegistry')
         .mockResolvedValue({})
 
@@ -153,7 +158,7 @@ describe('CredentialService', () => {
       },
     } as CredentialEntity
     it('should issue a credential successfully', async () => {
-      const getAllMock = jest.fn().mockResolvedValue([
+      const getAllMock = vi.fn().mockResolvedValue([
         {
           id: 'def-id',
           name: 'TestCred',
@@ -165,12 +170,12 @@ describe('CredentialService', () => {
 
       service['apiClient'].credentialTypes.getAll = getAllMock
 
-      jest.spyOn(credentialRepository, 'find').mockResolvedValue([])
-      jest.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
+      vi.spyOn(credentialRepository, 'find').mockResolvedValue([])
+      vi.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
 
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
-      jest.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)
-      jest.spyOn(service, 'revoke').mockResolvedValue(undefined)
+      vi.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
+      vi.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)
+      vi.spyOn(service, 'revoke').mockResolvedValue(undefined)
 
       await service.issue('conn-123', mockClaims, { credentialDefinitionId: 'def-id' })
 
@@ -182,7 +187,7 @@ describe('CredentialService', () => {
     })
 
     it('should throw an error if no credential definitions are found', async () => {
-      service['apiClient'].credentialTypes.getAll = jest.fn().mockResolvedValue([])
+      service['apiClient'].credentialTypes.getAll = vi.fn().mockResolvedValue([])
 
       await expect(service.issue('conn-123', {}, { credentialDefinitionId: 'def-id' })).rejects.toThrow(
         'No credential definitions found. Please configure a credential using the create method before proceeding.',
@@ -191,7 +196,7 @@ describe('CredentialService', () => {
 
     it('should revoke existing credentials if revokeIfAlreadyIssued is true', async () => {
       const existingCreds = [{ threadId: 'thread-123' } as CredentialEntity]
-      const getAllMock = jest.fn().mockResolvedValue([
+      const getAllMock = vi.fn().mockResolvedValue([
         {
           id: 'def-id',
           name: 'TestCred',
@@ -202,12 +207,12 @@ describe('CredentialService', () => {
       ])
 
       service['apiClient'].credentialTypes.getAll = getAllMock
-      jest.spyOn(credentialRepository, 'find').mockResolvedValue(existingCreds)
-      jest.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
+      vi.spyOn(credentialRepository, 'find').mockResolvedValue(existingCreds)
+      vi.spyOn(credentialRepository.manager, 'transaction').mockResolvedValue(mockFindCredential)
 
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
-      jest.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)
-      jest.spyOn(service, 'revoke').mockResolvedValue(undefined)
+      vi.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
+      vi.spyOn(revocationRepository, 'save').mockResolvedValue(mockRevocationRegistry)
+      vi.spyOn(service, 'revoke').mockResolvedValue(undefined)
 
       await service.issue('conn-123', mockClaims, {
         credentialDefinitionId: 'def-id',
@@ -225,8 +230,8 @@ describe('CredentialService', () => {
         status: CredentialStatus.OFFERED,
       } as CredentialEntity
 
-      jest.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
 
       await service.handleAcceptance('thread-123')
 
@@ -243,8 +248,8 @@ describe('CredentialService', () => {
         status: CredentialStatus.OFFERED,
       } as CredentialEntity
 
-      jest.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
 
       await service.handleRejection('thread-123')
 
@@ -266,8 +271,8 @@ describe('CredentialService', () => {
         },
       } as CredentialEntity
 
-      jest.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
-      jest.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'findOne').mockResolvedValue(mockCredential)
+      vi.spyOn(credentialRepository, 'save').mockResolvedValue(mockCredential)
 
       await service.revoke('conn-123', 'thread-123')
 
@@ -278,7 +283,7 @@ describe('CredentialService', () => {
     })
 
     it('should throw an error if credential is not found', async () => {
-      jest.spyOn(credentialRepository, 'findOne').mockResolvedValue(null)
+      vi.spyOn(credentialRepository, 'findOne').mockResolvedValue(null)
 
       await expect(service.revoke('conn-123', 'thread-123')).rejects.toThrow(
         'Credential not found with threadId "thread-123" or connectionId "conn-123".',
