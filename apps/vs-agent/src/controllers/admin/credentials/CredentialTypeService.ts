@@ -88,14 +88,24 @@ export class CredentialTypesService {
     version = '1.0',
     jsonSchemaCredentialId,
   }: {
-    name: string
-    schemaId: string
-    issuerId: string
+    name?: string
+    schemaId?: string
+    issuerId?: string
     supportRevocation?: boolean
     version?: string
     jsonSchemaCredentialId?: string
   }) {
     const agent = await this.agentService.getAgent()
+    let [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
+      schemaId,
+      issuerId,
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
+    })
+    if (credentialDefinitionRecord)
+      return { credentialDefinitionId: credentialDefinitionRecord.credentialDefinitionId }
+    if (!schemaId || !name || !issuerId)
+      throw new Error(`Missing required parameters to create credential definition`)
+
     const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
       await agent.modules.anoncreds.registerCredentialDefinition({
         credentialDefinition: { issuerId, schemaId, tag: `${name}.${version}` },
@@ -118,7 +128,7 @@ export class CredentialTypesService {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
-    const credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
+    credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
       agent.context,
       credentialDefinitionId,
     )

@@ -38,12 +38,16 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils'
+import { CredentialTypesService } from '../credentials'
 
 @Injectable()
 export class MessageService {
   private readonly logger = new Logger(MessageService.name)
 
-  constructor(@Inject(VsAgentService) private readonly agentService: VsAgentService) {}
+  constructor(
+    @Inject(VsAgentService) private readonly agentService: VsAgentService,
+    @Inject(CredentialTypesService) private readonly credentialService: CredentialTypesService,
+  ) {}
 
   public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
     try {
@@ -219,27 +223,26 @@ export class MessageService {
           })
         } else {
           let attributes: CredentialPreviewAttributeOptions[] = []
-          let credentialDefinitionId: string | undefined
-          let revocationRegistryDefinitionId: string | undefined
-          let revocationRegistryIndex: number | undefined
+          const revocationRegistryDefinitionId = msg.revocationRegistryDefinitionId
+          const revocationRegistryIndex = msg.revocationRegistryIndex
+          let credentialDefinitionId = msg.credentialDefinitionId
+          if (!credentialDefinitionId) {
+            const cred = await this.credentialService.getOrRegisterCredentialDefinition({
+              issuerId: agent.did,
+              jsonSchemaCredentialId: msg.jsonSchemaCredentialId,
+            })
+            credentialDefinitionId = cred.credentialDefinitionId
+          }
 
-          if (msg.claims && msg.credentialDefinitionId) {
+          if (msg.claims) {
             attributes = msg.claims.map(item => ({
               name: item.name,
               mimeType: item.mimeType,
               value: item.value,
             }))
-            credentialDefinitionId = msg.credentialDefinitionId
-            revocationRegistryDefinitionId = msg.revocationRegistryDefinitionId
-            revocationRegistryIndex = msg.revocationRegistryIndex
-          } else if (msg.credentialSchemaId) {
-            const existingCred = await agent.credentials.findById(msg.credentialSchemaId)
-            attributes = existingCred?.credentialAttributes ?? []
-            credentialDefinitionId =
-              existingCred?.metadata.get('_anoncreds/credential')?.credentialDefinitionId
           }
 
-          if (attributes.length && credentialDefinitionId) {
+          if (attributes.length) {
             const record = await agent.credentials.offerCredential({
               connectionId: msg.connectionId,
               credentialFormats: {
