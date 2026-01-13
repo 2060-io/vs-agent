@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.9](https://github.com/2060-io/vs-agent/compare/v1.5.8...v1.5.9) (2026-01-13)
+
+
+### Bug Fixes
+
+* crash when user scans credential offer invitation ([#314](https://github.com/2060-io/vs-agent/issues/314)) ([b6cd3f3](https://github.com/2060-io/vs-agent/commit/b6cd3f316f0b8ed6db36a167a8ed6823d84d90d8))
+* problem when alternativeDids not exists (backport [#312](https://github.com/2060-io/vs-agent/issues/312)) ([8a1f8e7](https://github.com/2060-io/vs-agent/commit/8a1f8e79ef4debaf364ba6db252e4681269e5382))
+
 ## [1.5.8](https://github.com/2060-io/vs-agent/compare/v1.5.7...v1.5.8) (2026-01-08)
 
 
