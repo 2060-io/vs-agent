@@ -4,10 +4,10 @@ on:
     branches: 
       - main
       - v1.5
-
 permissions:
+  id-token: write   # Required for OIDC  
   issues: write
-  contents: write
+  contents: write   # Required for updating npm versions
   pull-requests: write
 
 env:
@@ -65,9 +65,11 @@ jobs:
 
       - name: Corepack pnpm
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
+        # OIDC publishing requires a very up to date npm version
         run: |
-          corepack enable
-          
+          npm install -g npm@latest
+          corepack enable          
+
       - name: Install dependencies
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
         run: |
@@ -138,9 +140,5 @@ jobs:
 
       - name: Publish NPM packages
         if: ${{ steps.release-please.outputs.releases_created == 'true' }}
-        env:
-          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
-          pnpm config set npmAuthToken ${NPM_AUTH_TOKEN}
           pnpm -r publish --no-git-checks --access public
