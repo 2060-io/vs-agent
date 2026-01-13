@@ -43,11 +43,6 @@ import { getEcsSchemas } from './data'
 const ajv = new Ajv({ strict: false })
 addFormats(ajv)
 
-const FIXED_W3C_DIGESTS: Record<string, string> = {
-  'https://www.w3.org/ns/credentials/json-schema/v2.json':
-    'sha384-S57yQDg1MTzF56Oi9DbSQ14u7jBy0RDdx0YbeV7shwhCS88G8SCXeFq82PafhCrW',
-}
-
 // Helpers
 export const presentations = [
   {
@@ -92,8 +87,9 @@ export const createJsonSubjectRef = (id: string): W3cCredentialSubject => ({
 export const mapToSelfTr = (url: string, publicApiBaseUrl: string): string =>
   url.replace('ecosystem', `${publicApiBaseUrl}/vt`)
 
-const buildIntegrityData = (data: Record<string, unknown>) => {
-  return generateDigestSRI(JSON.stringify(data, Object.keys(data).sort()))
+const buildIntegrityData = async (data: Record<string, unknown>) => {
+  const res = new TextEncoder().encode(JSON.stringify(data, Object.keys(data as object).sort()))
+  return await generateDigestSRI(res)
 }
 
 // TODO: Resolve url must be with verre or similar
@@ -471,17 +467,11 @@ export async function addDigestSRI<T extends object>(
     )
   }
 
-  let schemaContent: string
-
-  if (response.ok) {
-    schemaContent = await response.text()
-  } else {
-    schemaContent = JSON.stringify({ schema: JSON.stringify(fallbackSchema) })
-  }
-
+  const schemaText = response.ok ? await response.text() : JSON.stringify({ schema: fallbackSchema })
+  const schemaContent = new TextEncoder().encode(schemaText)
   return {
     ...data,
-    digestSRI: id in FIXED_W3C_DIGESTS ? FIXED_W3C_DIGESTS[id] : generateDigestSRI(schemaContent),
+    digestSRI: await generateDigestSRI(schemaContent),
   }
 }
 
@@ -491,8 +481,8 @@ export async function addDigestSRI<T extends object>(
  * @param algorithm - The hash algorithm to use (default: sha256).
  * @returns The SRI digest string.
  */
-export function generateDigestSRI(content: string, algorithm: string = 'sha384'): string {
-  const hash = createHash(algorithm).update(content, 'utf8').digest('base64')
+export function generateDigestSRI(content: Uint8Array, algorithm: string = 'sha384'): string {
+  const hash = createHash(algorithm).update(content).digest('base64')
   return `${algorithm}-${hash}`
 }
 
