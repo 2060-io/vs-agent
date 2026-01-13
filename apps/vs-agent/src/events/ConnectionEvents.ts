@@ -58,7 +58,8 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
         const invitationRecord = await agent.oob.findById(record.outOfBandId)
         const threadIds = invitationRecord?.getTag('invitationRequestsThreadIds') as string[] | undefined
         threadIds?.map(async threadId => {
-          const proofRecord = await agent.proofs.getByThreadAndConnectionId(threadId)
+          const [proofRecord] = await agent.proofs.findAllByQuery({ threadId })
+          if (!proofRecord) return
           const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
             | { ref?: string; callbackUrl?: string }
             | undefined
