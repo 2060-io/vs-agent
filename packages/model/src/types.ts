@@ -40,7 +40,7 @@ export interface CredentialIssuanceRequest {
 export interface CredentialIssuanceResponse {
   status: number
   didcommInvitationUrl?: string
-  didcommCredentialExchangeId?: string
+  jsonSchemaCredentialId?: string
   credential?: Record<string, unknown>
 }
 

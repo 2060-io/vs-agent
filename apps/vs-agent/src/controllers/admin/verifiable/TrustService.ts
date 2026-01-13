@@ -341,7 +341,7 @@ export class TrustService {
           return {
             status: 200,
             didcommInvitationUrl,
-            didcommCredentialExchangeId: request.credentialRecord.id,
+            jsonSchemaCredentialId,
           }
         default:
           throw new HttpException(`Invalid credential type: ${format}`, HttpStatus.BAD_REQUEST)

@@ -130,15 +130,13 @@ export class CredentialService {
   ): Promise<void> {
     const { revokeIfAlreadyIssued = false, jsonSchemaCredentialId } = options ?? {}
     const refIdHash = options?.refId ? this.hash(options.refId) : null
-    let credentialSchemaId: string | undefined
 
     if (jsonSchemaCredentialId) {
-      const { didcommCredentialExchangeId } = await this.apiClient.trustCredentials.issuance({
+      await this.apiClient.trustCredentials.issuance({
         format: 'anoncreds',
         jsonSchemaCredentialId,
         claims,
       })
-      credentialSchemaId = didcommCredentialExchangeId as string
     }
 
     // Select the appropriate credential type based on definition or schema
@@ -204,13 +202,11 @@ export class CredentialService {
       connectionId,
       revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
       revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
+      claims: Object.entries(claims).map(([name, value]) => new Claim({ name, value: String(value) })),
     })
-    if (credentialSchemaId) payload.credentialSchemaId = credentialSchemaId
+    if (jsonSchemaCredentialId) payload.jsonSchemaCredentialId = jsonSchemaCredentialId
     else {
       payload.credentialDefinitionId = credentialDefinitionId
-      payload.claims = Object.entries(claims).map(
-        ([name, value]) => new Claim({ name, value: String(value) }),
-      )
     }
 
     const thread = await this.apiClient.messages.send(payload)
