@@ -466,7 +466,8 @@ export class TrustService {
 
     // Update #whois with new endpoint
     const service = didRecord.didDocument?.service?.find(s => s.id === `${agent.did}#whois`)
-    if (service) service.serviceEndpoint = verifiablePresentation.id!
+    if (service && verifiablePresentation.id?.includes('service'))
+      service.serviceEndpoint = verifiablePresentation.id!
 
     // When a new VTC has been added, remove the self VTCs
     this.updateVtcEntries(didRecord, false)
@@ -497,8 +498,10 @@ export class TrustService {
   }
 
   private restoreDefaultVtcEntries(didRecord: DidRecord) {
-    const record = didRecord.metadata.get('_vt/vtc') ?? {}
-    if (!record || Object.keys(record).length <= 2) {
+    const vtc = didRecord.metadata.get('_vt/vtc') ?? {}
+    const jsc = didRecord.metadata.get('_vt/jsc') ?? {}
+    // By default we have 2 Self-trusted VTCs
+    if (Object.keys(vtc).length < 3 && Object.keys(jsc).length < 3) {
       this.updateVtcEntries(didRecord, true)
     }
   }
@@ -529,6 +532,10 @@ export class TrustService {
             }),
           )
         }
+
+        // Return to self-trusted VTC in #whois endpoint
+        const service = didRecord.didDocument?.service?.find(s => s.id === `${didRecord.did}#whois`)
+        if (service && serviceEndpoint.includes('service')) service.serviceEndpoint = serviceEndpoint
       } else {
         didRecord.didDocument.service = didRecord.didDocument.service.filter(s => s.id !== serviceId)
       }
