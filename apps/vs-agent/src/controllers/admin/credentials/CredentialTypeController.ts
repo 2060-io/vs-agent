@@ -90,7 +90,7 @@ export class CredentialTypesController {
           version: (record.getTag('version') as string) ?? schema?.version,
           attributes: schema?.attrNames || [],
           revocationSupported,
-          relatedJsonSchemaCredential: record.getTag('relatedJsonSchemaCredential') as string,
+          relatedJsonSchemaCredentialId: record.getTag('relatedJsonSchemaCredentialId') as string,
         }
       }),
     )
@@ -132,6 +132,7 @@ export class CredentialTypesController {
         schemaId,
         issuerId,
         supportRevocation: options.supportRevocation,
+        jsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
       })
 
       return {
@@ -139,7 +140,7 @@ export class CredentialTypesController {
         attributes: schema.attrNames,
         name: options.name,
         version: options.version,
-        schemaId,
+        relatedJsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
       }
     } catch (error) {
       throw new HttpException(

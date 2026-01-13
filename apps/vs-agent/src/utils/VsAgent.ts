@@ -175,6 +175,18 @@ export class VsAgent extends Agent<VsAgentModules> {
         return
       }
 
+      // Make sure did:webvh record has the did:web form as an alternative, in order to support
+      // implicit invitations
+      if (
+        parsedDid.method === 'webvh' &&
+        !(existingRecord?.getTag('alternativeDids') as string[])?.includes(`did:web:${domain}`)
+      ) {
+        this.logger?.debug('Adding did:web form as an alternative DID')
+
+        existingRecord.setTag('alternativeDids', [`did:web:${domain}`])
+        const didRepository = this.dependencyManager.resolve(DidRepository)
+        await didRepository.update(this.agentContext, existingRecord)
+      }
       // DID Already exists: update it in case that agent parameters have been changed. At the moment, we can only update
       //  DIDComm endpoints, so we'll only replace the service (if different from previous)
       const didDocument = existingRecord.didDocument!

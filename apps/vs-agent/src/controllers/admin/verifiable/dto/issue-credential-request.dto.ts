@@ -7,13 +7,14 @@ import { IsNotEmpty, IsString, IsUrl, Matches, IsObject, IsOptional } from 'clas
  */
 export class IssueCredentialRequestDto {
   @ApiProperty({
-    description: 'Type of credential to issue: "w3c" or "anoncreds"',
+    description:
+      'Format of credential to issue: json-ld (for public entities) or "anoncreds" (for best privacy, usually for end-users)',
     example: 'jsonld',
     enum: ['jsonld', 'anoncreds'],
   })
   @IsString()
   @IsNotEmpty()
-  type!: 'jsonld' | 'anoncreds'
+  format!: 'jsonld' | 'anoncreds'
 
   @ApiProperty({
     description: 'DID of the credential subject (the holder)',
@@ -33,7 +34,7 @@ export class IssueCredentialRequestDto {
   @IsString()
   @IsUrl({}, { message: 'json credential schema must be a valid URL' })
   @IsNotEmpty()
-  jsonSchemaCredential!: string
+  jsonSchemaCredentialId!: string
 
   @ApiProperty({
     description: 'Credential claims represented as flat key-value pairs',
