@@ -19,6 +19,11 @@ import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEve
 import { sendWebhookEvent } from './WebhookEvent'
 
 export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
+  // Get the first record matching agent's DID and obtain all alternatives for it
+  const [agentPublicDidRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+  const alternativeDids = agentPublicDidRecord.getTag('alternativeDids')
+  const agentPublicDids = [agent.did, ...(Array.isArray(alternativeDids) ? alternativeDids : [])]
+
   agent.events.on(
     ConnectionEventTypes.ConnectionStateChanged,
     async ({ payload }: ConnectionStateChangedEvent) => {
@@ -135,7 +140,7 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
     config.logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
     const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
     if (
-      oob?.outOfBandInvitation.id === agent.did &&
+      agentPublicDids.includes(oob?.outOfBandInvitation.id) &&
       data.payload.connectionRecord.state === DidExchangeState.RequestReceived
     ) {
       config.logger.debug(`Incoming connection request for ${agent.did}`)
