@@ -30,7 +30,7 @@ export class InvitationRoutesController {
 
         // If a related proof record ID exists, fetch the proof and trigger the callback event if exist.
         if (connRecord) {
-          const proofRecord = await agent.proofs.findById(connRecord)
+          const proofRecord = await agent.didcomm.proofs.findById(connRecord)
           const callbackParameters = proofRecord?.metadata.get('_2060/callbackParameters') as
             | { ref?: string; callbackUrl?: string }
             | undefined
@@ -44,7 +44,7 @@ export class InvitationRoutesController {
             })
           }
         }
-        const invitation = await agent.oob.parseInvitation(longUrl)
+        const invitation = await agent.didcomm.oob.parseInvitation(longUrl)
         res.send(invitation.toJSON()).end()
       } else {
         res.status(302).location(longUrl).end()

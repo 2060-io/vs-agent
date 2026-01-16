@@ -1,7 +1,8 @@
 import type { Express } from 'express'
 
-import { TsLogger } from './logger'
 import { DidCommFeatureQueryOptions } from '@credo-ts/didcomm'
+
+import { TsLogger } from './logger'
 
 export interface ServerConfig {
   port: number

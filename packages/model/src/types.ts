@@ -1,6 +1,12 @@
 import { JsonObject } from '@credo-ts/core'
+import {
+  DidCommHandshakeProtocol,
+  DidCommProofState,
+  OutOfBandDidCommService,
+  ReceiveOutOfBandInvitationConfig,
+} from '@credo-ts/didcomm'
+
 import { Claim, ClaimOptions } from './messages/CredentialIssuanceMessage'
-import { DidCommHandshakeProtocol, DidCommProofState, OutOfBandDidCommService, ReceiveOutOfBandInvitationConfig } from '@credo-ts/didcomm'
 
 export interface VsAgentInfo {
   label: string

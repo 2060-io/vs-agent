@@ -141,7 +141,7 @@ export class InvitationController {
       restrictions: [{ cred_def_id: credentialDefinitionId }],
     }
 
-    const request = await agent.proofs.createRequest({
+    const request = await agent.didcomm.proofs.createRequest({
       protocolVersion: 'v2',
       proofFormats: {
         anoncreds: { name: 'proof-request', version: '1.0', requested_attributes: requestedAttributes },
@@ -150,7 +150,7 @@ export class InvitationController {
 
     request.proofRecord.metadata.set('_2060/requestedCredentials', requestedCredentials)
     request.proofRecord.metadata.set('_2060/callbackParameters', { ref, callbackUrl })
-    await agent.proofs.update(request.proofRecord)
+    await agent.didcomm.proofs.update(request.proofRecord)
 
     const { url } = await createInvitation({
       agent: await this.agentService.getAgent(),
@@ -254,7 +254,7 @@ export class InvitationController {
       )
     }
 
-    const request = await agent.credentials.createOffer({
+    const request = await agent.didcomm.credentials.createOffer({
       protocolVersion: 'v2',
       credentialFormats: {
         anoncreds: {
@@ -274,12 +274,12 @@ export class InvitationController {
 
     const shortUrlId = await this.urlShortenerService.createShortUrl({
       longUrl: url,
-      relatedFlowId: request.credentialRecord.id,
+      relatedFlowId: request.credentialExchangeRecord.id,
     })
     const shortUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
 
     return {
-      credentialExchangeId: request.credentialRecord.id,
+      credentialExchangeId: request.credentialExchangeRecord.id,
       url,
       shortUrl,
     }

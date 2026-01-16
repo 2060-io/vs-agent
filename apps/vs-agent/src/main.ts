@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 
 import { parseDid, utils } from '@credo-ts/core'
+import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
 import { NestFactory } from '@nestjs/core'
 import express from 'express'
 import * as fs from 'fs'
@@ -16,8 +17,6 @@ import {
   ADMIN_PORT,
   AGENT_ENDPOINT,
   AGENT_ENDPOINTS,
-  AGENT_INVITATION_IMAGE_URL,
-  AGENT_LABEL,
   AGENT_LOG_LEVEL,
   AGENT_NAME,
   AGENT_PORT,
@@ -36,7 +35,6 @@ import {
   USER_PROFILE_AUTODISCLOSE,
   MASTER_LIST_CSCA_LOCATION,
   AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
-  AGENT_BACKUP_BEFORE_STORAGE_UPDATE,
 } from './config'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -52,7 +50,6 @@ import {
   VsAgent,
   VsAgentWsInboundTransport,
 } from './utils'
-import { KdfMethod } from '@hyperledger/aries-askar-nodejs'
 
 export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) => {
   const { port, cors, endpoints, publicApiBaseUrl } = serverConfig
@@ -71,10 +68,10 @@ export const startServers = async (agent: VsAgent, serverConfig: ServerConfig) =
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
 
-  const webSocketServer = agent.inboundTransports
+  const webSocketServer = agent.didcomm.inboundTransports
     .find(x => x instanceof VsAgentWsInboundTransport)
     ?.getServer()
-  const httpInboundTransport = agent.inboundTransports.find(x => x instanceof HttpInboundTransport)
+  const httpInboundTransport = agent.didcomm.inboundTransports.find(x => x instanceof HttpInboundTransport)
 
   if (enableHttp) {
     httpInboundTransport?.setApp(publicApp.getHttpAdapter().getInstance())
@@ -136,19 +133,15 @@ const run = async () => {
     walletConfig: {
       id: AGENT_WALLET_ID || 'test-vs-agent',
       key: AGENT_WALLET_KEY || 'test-vs-agent',
-      keyDerivationMethod:
-        keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KdfMethod.Argon2IMod],
-      storage: POSTGRES_HOST ? askarPostgresConfig : undefined,
+      keyDerivationMethod: keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KdfMethod.Argon2IMod],
+      database: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
-    label: AGENT_LABEL || 'Test VS Agent',
-    displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
     parsedDid: parsedDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
     masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
     autoUpdateStorageOnStartup: AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
-    backupBeforeStorageUpdate: AGENT_BACKUP_BEFORE_STORAGE_UPDATE,
   })
 
   const discoveryOptions = (() => {

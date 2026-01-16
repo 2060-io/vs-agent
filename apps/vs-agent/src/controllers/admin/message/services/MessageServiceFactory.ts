@@ -1,5 +1,5 @@
 import { IBaseMessage } from '@2060.io/vs-agent-model'
-import { ConnectionRecord } from '@credo-ts/core'
+import { DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable, Optional } from '@nestjs/common'
 import { Queue } from 'bull'
@@ -15,7 +15,7 @@ export class MessageServiceFactory {
     private readonly coreMessageService: CoreMessageService,
   ) {}
 
-  async processMessage(message: IBaseMessage, connection: ConnectionRecord) {
+  async processMessage(message: IBaseMessage, connection: DidCommConnectionRecord) {
     return REDIS_HOST !== undefined
       ? await this.messageQueue.add({ message, connection })
       : await this.coreMessageService.processMessage(message, connection)

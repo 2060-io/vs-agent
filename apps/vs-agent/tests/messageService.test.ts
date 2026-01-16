@@ -1,5 +1,5 @@
 import { ProfileMessage, TextMessage } from '@2060.io/vs-agent-model'
-import { BasicMessage, ConnectionRecord } from '@credo-ts/core'
+import { DidCommBasicMessage, DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -32,23 +32,19 @@ describe('MessageService', () => {
   }
   let faberAgent: VsAgent
   let aliceAgent: VsAgent
-  let faberConnection: ConnectionRecord
-  let aliceConnection: ConnectionRecord
+  let faberConnection: DidCommConnectionRecord
+  let aliceConnection: DidCommConnectionRecord
   let faberEvents: ReturnType<typeof vi.spyOn>
   let aliceEvents: ReturnType<typeof vi.spyOn>
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
-      faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
-      faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberEvents = vi.spyOn(faberAgent.events, 'emit')
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
-      aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
-      aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
@@ -92,8 +88,8 @@ describe('MessageService', () => {
       const msgToAlice = await alicePromise
 
       // expects
-      expect((msgToFaber.payload.message as BasicMessage)?.content).toBe(msgFaber)
-      expect((msgToAlice.payload.message as BasicMessage)?.content).toBe(msgAlice)
+      expect((msgToFaber.payload.message as DidCommBasicMessage)?.content).toBe(msgFaber)
+      expect((msgToAlice.payload.message as DidCommBasicMessage)?.content).toBe(msgAlice)
     })
 
     it('Should Faber send a profile update message to Alice.', async () => {

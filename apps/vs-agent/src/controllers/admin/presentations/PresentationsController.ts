@@ -1,5 +1,5 @@
 import { PresentationData, RequestedCredential, Claim } from '@2060.io/vs-agent-model'
-import { ProofExchangeRecord } from '@credo-ts/core'
+import { DidCommProofExchangeRecord } from '@credo-ts/didcomm'
 import {
   BadRequestException,
   Controller,
@@ -52,7 +52,7 @@ export class PresentationsController {
   public async getAllPresentations(): Promise<PresentationData[]> {
     const agent = await this.agentService.getAgent()
 
-    const records = await agent.proofs.getAll()
+    const records = await agent.didcomm.proofs.getAll()
 
     return Promise.all(
       records.map(async record => {
@@ -75,7 +75,7 @@ export class PresentationsController {
   @ApiNotFoundResponse({ description: 'Presentation exchange not found' })
   public async deleteProofExchangeById(@Param('proofExchangeId') proofExchangeId: string) {
     const agent = await this.agentService.getAgent()
-    await agent.proofs.deleteById(proofExchangeId, { deleteAssociatedDidCommMessages: true })
+    await agent.didcomm.proofs.deleteById(proofExchangeId, { deleteAssociatedDidCommMessages: true })
   }
 
   /**
@@ -96,7 +96,7 @@ export class PresentationsController {
       throw new BadRequestException({ reason: 'proofExchangeId is required' })
     }
 
-    const record = await agent.proofs.findById(proofExchangeId)
+    const record = await agent.didcomm.proofs.findById(proofExchangeId)
 
     if (!record) {
       throw new NotFoundException({ reason: `proof exchange with id "${proofExchangeId}" not found.` })
@@ -109,10 +109,10 @@ export class PresentationsController {
     }
   }
 
-  private async getPresentationData(proofExchange: ProofExchangeRecord): Promise<PresentationData> {
+  private async getPresentationData(proofExchange: DidCommProofExchangeRecord): Promise<PresentationData> {
     const agent = await this.agentService.getAgent()
 
-    const formatData = await agent.proofs.getFormatData(proofExchange.id)
+    const formatData = await agent.didcomm.proofs.getFormatData(proofExchange.id)
 
     const requestedCredentials = proofExchange.metadata.get(
       '_2060/requestedCredentials',

@@ -1,9 +1,9 @@
+import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 import { Expose } from 'class-transformer'
 import { IsObject, IsOptional, IsString } from 'class-validator'
 
 import { Event } from './Event'
 import { EventType } from './EventType'
-import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 
 export const ExtendedDidExchangeState = {
   ...DidCommDidExchangeState,

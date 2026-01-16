@@ -1,4 +1,5 @@
 import { RecordNotFoundError } from '@credo-ts/core'
+import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 import {
   Controller,
   Delete,
@@ -27,7 +28,6 @@ import { Response } from 'express'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { ConnectionDto } from './dto/connection.dto'
-import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 
 @ApiTags('connections')
 @ApiExtraModels(ConnectionDto)
@@ -75,7 +75,7 @@ export class ConnectionController {
   ) {
     const agent = await this.agentService.getAgent()
 
-    const connections = await agent.connections.findAllByQuery({
+    const connections = await agent.didcomm.connections.findAllByQuery({
       did,
       theirDid,
       threadId,
@@ -124,7 +124,7 @@ export class ConnectionController {
   public async getConnectionById(@Param('connectionId') connectionId: string) {
     const agent = await this.agentService.getAgent()
 
-    const connection = await agent.connections.findById(connectionId)
+    const connection = await agent.didcomm.connections.findById(connectionId)
 
     if (!connection)
       throw new NotFoundException({
@@ -160,7 +160,7 @@ export class ConnectionController {
     const agent = await this.agentService.getAgent()
 
     try {
-      await agent.connections.deleteById(connectionId)
+      await agent.didcomm.connections.deleteById(connectionId)
       response.status(204)
     } catch (error) {
       if (error instanceof RecordNotFoundError) {

@@ -1,5 +1,5 @@
 import { Claim, CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
-import { ConnectionRecord } from '@credo-ts/core'
+import { DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
 import { Subject } from 'rxjs'
@@ -32,21 +32,17 @@ describe('TrustService', () => {
   }
   let faberAgent: VsAgent
   let aliceAgent: VsAgent
-  let faberConnection: ConnectionRecord
-  let aliceConnection: ConnectionRecord
+  let faberConnection: DidCommConnectionRecord
+  let aliceConnection: DidCommConnectionRecord
   let aliceEvents: ReturnType<typeof vi.spyOn>
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
-      faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
-      faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
-      aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
-      aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')

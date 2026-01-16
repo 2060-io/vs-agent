@@ -1,8 +1,8 @@
 import { DidCommMessageReceipt } from '@2060.io/credo-ts-didcomm-receipts'
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
 import { didcommMessageState, VsAgentMessageReceipt } from '@2060.io/vs-agent-model'
-import { isUri } from '@credo-ts/core/build/utils'
 
+export const UriValidator = /\w+:(\/?\/?)[^\s]+/
 export function parseDataUrl(dataUrl: string) {
   const regex = /^data:(.+);base64,(.*)$/
 
@@ -16,7 +16,7 @@ export function parsePictureData(pictureData: string): PictureData | undefined {
   const parsedDataUrl = parseDataUrl(pictureData)
   if (parsedDataUrl) {
     return { base64: parsedDataUrl.data, mimeType: parsedDataUrl.mimeType }
-  } else if (isUri(pictureData)) {
+  } else if (UriValidator.test(pictureData)) {
     return { links: [pictureData] }
   }
 }

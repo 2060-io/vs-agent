@@ -1,7 +1,7 @@
-import type { AskarWalletPostgresStorageConfig } from '@credo-ts/askar'
 
+import { AskarPostgresStorageConfig } from '@credo-ts/askar'
 import { LogLevel } from '@credo-ts/core'
-import { KdfMethod } from '@hyperledger/aries-askar-nodejs'
+import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -36,7 +36,7 @@ export const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD
 export const POSTGRES_ADMIN_USER = process.env.POSTGRES_ADMIN_USER
 export const POSTGRES_ADMIN_PASSWORD = process.env.POSTGRES_ADMIN_PASSWORD
 
-export const askarPostgresConfig: AskarWalletPostgresStorageConfig = {
+export const askarPostgresConfig: AskarPostgresStorageConfig = {
   type: 'postgres',
   config: {
     host: POSTGRES_HOST as string,
@@ -50,7 +50,7 @@ export const askarPostgresConfig: AskarWalletPostgresStorageConfig = {
   },
 }
 
-export const keyDerivationMethodMap: { [key: string]: KdfMethod } = {
+export const keyDerivationMethodMap: { [key: string]: `${KdfMethod.Argon2IInt}` | `${KdfMethod.Argon2IMod}` | `${KdfMethod.Raw}` } = {
   ARGON2I_INT: KdfMethod.Argon2IInt,
   ARGON2I_MOD: KdfMethod.Argon2IMod,
   RAW: KdfMethod.Raw,
@@ -107,4 +107,4 @@ export const MASTER_LIST_CSCA_LOCATION = process.env.MASTER_LIST_CSCA_LOCATION
 export const AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP =
   process.env.AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP !== 'false'
 
-export const AGENT_BACKUP_BEFORE_STORAGE_UPDATE = process.env.AGENT_BACKUP_BEFORE_STORAGE_UPDATE !== 'false'
+export const AGENT_BACKUP_BEFORE_STORAGE_UPDATE = process.env.AGENT_BACKUP_BEFORE_STORAGE_UPDATE !== 'false' // removed on credo-ts v0.6.0

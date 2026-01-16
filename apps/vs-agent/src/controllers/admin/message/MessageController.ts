@@ -1,5 +1,6 @@
 import { BaseMessage } from '@2060.io/vs-agent-model'
 import { utils } from '@credo-ts/core'
+import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import {
   ApiBody,
@@ -14,7 +15,6 @@ import { VsAgent } from '../../../utils'
 
 import { BaseMessageDto } from './dto/base-message.dto'
 import { MessageServiceFactory } from './services/MessageServiceFactory'
-import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 
 @ApiTags('message')
 @Controller({ path: 'message', version: '1' })
@@ -433,10 +433,13 @@ More info about the meaning of each field (and validity) can be found in [MRZ](h
     try {
       const agent = await this.agentService.getAgent()
       await this.checkForDuplicateId(agent, message)
-      const connection = await agent.connections.findById(message.connectionId)
+      const connection = await agent.didcomm.connections.findById(message.connectionId)
 
       if (!connection) throw new Error(`Connection with id ${message.connectionId} not found`)
-      if (connection.state === DidCommDidExchangeState.Completed && (!connection.did || !connection.theirDid)) {
+      if (
+        connection.state === DidCommDidExchangeState.Completed &&
+        (!connection.did || !connection.theirDid)
+      ) {
         throw new Error(`This connection has been terminated. No further messages are possible`)
       }
 

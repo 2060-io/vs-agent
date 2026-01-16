@@ -1,9 +1,9 @@
 import { Expose, Transform } from 'class-transformer'
 import { IsOptional, IsString } from 'class-validator'
 
+import { DateParser } from '../../utils'
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
-import { DateParser } from '../../utils'
 
 export interface CallOfferRequestMessageOptions extends BaseMessageOptions {
   offerExpirationTime?: Date

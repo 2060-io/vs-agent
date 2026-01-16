@@ -1,9 +1,9 @@
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
 
 import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { MessageType } from './MessageType'
-import { DidCommCredentialState } from '@credo-ts/didcomm'
 
 export interface CredentialReceptionMessageOptions extends BaseMessageOptions {
   state: DidCommCredentialState

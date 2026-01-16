@@ -1,4 +1,4 @@
-import { HandshakeProtocol } from '@credo-ts/core'
+import { DidCommHandshakeProtocol } from '@credo-ts/didcomm'
 import {
   BadRequestException,
   Body,
@@ -21,7 +21,7 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger'
 
-import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../../../config/constants'
+import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../../../config/constants'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { OobInvitationDto, OutOfBandInvitationCreateResult } from './OobInvitationDto'
@@ -95,7 +95,7 @@ export class VCAuthNController {
     // TODO: Verify proofRequest
     this.logger.debug(`proofRequest: ${JSON.stringify(options)}`)
 
-    const request = await agent.proofs.createRequest({
+    const request = await agent.didcomm.proofs.createRequest({
       proofFormats: { anoncreds: proofRequest },
       protocolVersion: 'v2',
     })
@@ -172,12 +172,12 @@ export class VCAuthNController {
     const { id, type } = attachments[0]
 
     if (type === 'present-proof') {
-      const requestMessage = await agent.proofs.findRequestMessage(id)
+      const requestMessage = await agent.didcomm.proofs.findRequestMessage(id)
       if (!requestMessage) throw new Error('Cannot find proof request message')
 
-      const invitation = await agent.oob.createInvitation({
-        label: agent.config.label,
-        handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
+      const invitation = await agent.didcomm.oob.createInvitation({
+        label: AGENT_LABEL,
+        handshakeProtocols: [DidCommHandshakeProtocol.DidExchange, DidCommHandshakeProtocol.Connections],
         invitationDid: usePublicDid && agent.did ? agent.did : undefined,
         multiUseInvitation: false,
         imageUrl: AGENT_INVITATION_IMAGE_URL,
@@ -254,14 +254,14 @@ export class VCAuthNController {
       throw new BadRequestException({ reason: 'proofExchangeId is required' })
     }
 
-    const record = await agent.proofs.findById(proofExchangeId)
+    const record = await agent.didcomm.proofs.findById(proofExchangeId)
 
     if (!record) {
       throw new NotFoundException({ reason: `proof exchange with id "${proofExchangeId}" not found.` })
     }
 
     try {
-      const data = await agent.proofs.getFormatData(proofExchangeId)
+      const data = await agent.didcomm.proofs.getFormatData(proofExchangeId)
 
       return {
         presentation: data.presentation?.anoncreds ?? data.presentation?.indy,
@@ -323,14 +323,14 @@ export class VCAuthNController {
       throw new BadRequestException({ reason: 'proofExchangeId is required' })
     }
 
-    const record = await agent.proofs.findById(proofExchangeId)
+    const record = await agent.didcomm.proofs.findById(proofExchangeId)
 
     if (!record) {
       throw new NotFoundException({ reason: `proof exchange with id "${proofExchangeId}" not found.` })
     }
 
     try {
-      const data = await agent.proofs.getFormatData(proofExchangeId)
+      const data = await agent.didcomm.proofs.getFormatData(proofExchangeId)
 
       return {
         presentation: data.presentation?.anoncreds ?? data.presentation?.indy,

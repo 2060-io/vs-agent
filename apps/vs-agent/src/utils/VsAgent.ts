@@ -11,7 +11,7 @@ import {
   LegacyIndyDidCommCredentialFormatService,
   LegacyIndyDidCommProofFormatService,
 } from '@credo-ts/anoncreds'
-import { AskarModule } from '@credo-ts/askar'
+import { AskarModule, AskarModuleConfigStoreOptions } from '@credo-ts/askar'
 import {
   Agent,
   AgentDependencies,
@@ -23,36 +23,41 @@ import {
   DidRepository,
   DidsModule,
   InitConfig,
-  Key,
-  KeyType,
+  Kms,
   ParsedDid,
   parseDid,
   W3cCredentialsModule,
 } from '@credo-ts/core'
+import {
+  DidCommAutoAcceptCredential,
+  DidCommAutoAcceptProof,
+  DidCommCredentialV2Protocol,
+  DidCommHttpOutboundTransport,
+  DidCommInboundTransport,
+  DidCommModule,
+  DidCommProofV2Protocol,
+} from '@credo-ts/didcomm'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
 import { WebVhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
-import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { WebDidRegistrar } from './WebDidRegistrar'
-import { DidCommAutoAcceptCredential, DidCommAutoAcceptProof, DidCommConnectionsModule, DidCommCredentialsModule, DidCommCredentialV2Protocol, DidCommProofsModule, DidCommProofV2Protocol } from '@credo-ts/didcomm'
+import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 
 type VsAgentModules = {
   askar: AskarModule
   anoncreds: AnonCredsModule
   actionMenu: ActionMenuModule
   dids: DidsModule
-  connections: DidCommConnectionsModule
   calls: DidCommCallsModule
-  credentials: DidCommCredentialsModule<
-    [DidCommCredentialV2Protocol<[LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]>]
-  >
-  proofs: DidCommProofsModule<[DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]>
+  didcomm: DidCommModule
   media: DidCommMediaSharingModule
   mrtd: DidCommMrtdModule
   questionAnswer: QuestionAnswerModule
@@ -89,11 +94,11 @@ export class VsAgent extends Agent<VsAgentModules> {
     await super.initialize()
 
     // Make sure default User Profile corresponds to settings in environment variables
-    const imageUrl = this.config.connectionImageUrl
+    const imageUrl = AGENT_INVITATION_IMAGE_URL
     const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
     await this.modules.userProfile.updateUserProfileData({
-      displayName: this.config.label,
+      displayName: AGENT_LABEL,
       displayPicture,
     })
 
@@ -225,7 +230,7 @@ export class VsAgent extends Agent<VsAgentModules> {
   private getDidCommServices(publicDid: string) {
     const keyAgreementId = `${publicDid}#key-agreement-1`
 
-    return this.config.endpoints.map((endpoint, index) => {
+    return this.didcomm.config.endpoints.map((endpoint, index) => {
       return new DidCommV1Service({
         id: `${publicDid}#did-communication`,
         serviceEndpoint: endpoint,
@@ -246,10 +251,12 @@ export class VsAgent extends Agent<VsAgentModules> {
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
     const keyAgreementId = `${publicDid}#key-agreement-1`
-    const ed25519 = await this.wallet.createKey({ keyType: KeyType.Ed25519 })
+    const kms = this.agentContext.dependencyManager.resolve(Kms.KeyManagementApi)
+    const key = await kms.createKey({ type: { kty: 'OKP', crv: 'Ed25519' } })
+    const ed25519 = Kms.PublicJwk.fromPublicJwk(key.publicJwk)
     const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
-    const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey)
-    const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
+    const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey.publicKey)
+    const x25519Key = Kms.PublicJwk.fromPublicKey({kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
 
     // Remove legacy if exist
     const legacyContexts = ['https://w3id.org/security/suites/ed25519-2018/v1']
@@ -372,6 +379,8 @@ export interface VsAgentOptions {
   dependencies: AgentDependencies
   publicApiBaseUrl: string
   masterListCscaLocation?: string
+  endpoints: string[]
+  walletConfig: AskarModuleConfigStoreOptions
 }
 
 export const createVsAgent = (options: VsAgentOptions): VsAgent => {
@@ -379,7 +388,10 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     config: options.config,
     dependencies: options.dependencies,
     modules: {
-      askar: new AskarModule({ ariesAskar }),
+      askar: new AskarModule({ 
+        askar,
+        store: options.walletConfig,
+       }),
       anoncreds: new AnonCredsModule({
         anoncreds,
         tailsFileService: new FullTailsFileService({
@@ -394,18 +406,6 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       }),
       actionMenu: new ActionMenuModule(),
       calls: new DidCommCallsModule(),
-      connections: new DidCommConnectionsModule({ autoAcceptConnections: true }),
-      credentials: new DidCommCredentialsModule({
-        autoAcceptCredentials: DidCommAutoAcceptCredential.ContentApproved,
-        credentialProtocols: [
-          new DidCommCredentialV2Protocol({
-            credentialFormats: [
-              new LegacyIndyDidCommCredentialFormatService(),
-              new AnonCredsDidCommCredentialFormatService(),
-            ],
-          }),
-        ],
-      }),
       dids: new DidsModule({
         resolvers: [
           new CachedWebDidResolver({ publicApiBaseUrl: options.publicApiBaseUrl }),
@@ -414,13 +414,31 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
         registrars: [new WebDidRegistrar(), new WebVhDidRegistrar()],
       }),
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
-      proofs: new DidCommProofsModule({
-        autoAcceptProofs: DidCommAutoAcceptProof.ContentApproved,
-        proofProtocols: [
-          new DidCommProofV2Protocol({
-            proofFormats: [new LegacyIndyDidCommProofFormatService(), new AnonCredsDidCommProofFormatService()],
-          }),
-        ],
+      didcomm: new DidCommModule({
+        endpoints: options.endpoints,
+        connections: { autoAcceptConnections: true },
+        credentials: {
+          autoAcceptCredentials: DidCommAutoAcceptCredential.ContentApproved,
+          credentialProtocols: [
+            new DidCommCredentialV2Protocol({
+              credentialFormats: [
+                new LegacyIndyDidCommCredentialFormatService(),
+                new AnonCredsDidCommCredentialFormatService(),
+              ],
+            }),
+          ],
+        },
+        proofs: {
+          autoAcceptProofs: DidCommAutoAcceptProof.ContentApproved,
+          proofProtocols: [
+            new DidCommProofV2Protocol({
+              proofFormats: [
+                new LegacyIndyDidCommProofFormatService(),
+                new AnonCredsDidCommProofFormatService(),
+              ],
+            }),
+          ],
+        },
       }),
       media: new DidCommMediaSharingModule(),
       questionAnswer: new QuestionAnswerModule(),

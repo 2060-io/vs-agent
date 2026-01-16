@@ -1,5 +1,6 @@
 import { IBaseMessage } from '@2060.io/vs-agent-model'
-import { ConnectionRecord, utils } from '@credo-ts/core'
+import { utils } from '@credo-ts/core'
+import { DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { Process, Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
 import { Job } from 'bull'
@@ -13,7 +14,7 @@ export class RedisMessageService {
 
   @Process()
   async processMessage(
-    job: Job<{ message: IBaseMessage; connection: ConnectionRecord }>,
+    job: Job<{ message: IBaseMessage; connection: DidCommConnectionRecord }>,
   ): Promise<{ id: string }> {
     const { message, connection } = job.data
     this.logger.debug!(`Queuing message with Bull: ${message.id}`)
