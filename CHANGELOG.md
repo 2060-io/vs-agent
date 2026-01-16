@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.6.0](https://github.com/2060-io/vs-agent/compare/v1.5.3...v1.6.0) (2026-01-13)
+
+
+### Features
+
+* add get all VTC/JSON Schema Credentials and dynamic #whois Endpoint Update ([#263](https://github.com/2060-io/vs-agent/issues/263)) ([c500c77](https://github.com/2060-io/vs-agent/commit/c500c7774fbf8c01c3f86190a023ae64e5351368))
+* add related JSON Schema Credential ID to credential type creati… ([#303](https://github.com/2060-io/vs-agent/issues/303)) ([3bb1e2d](https://github.com/2060-io/vs-agent/commit/3bb1e2d1c41a1770faef200670b70573445751d8))
+* add related JSON schema, versioned trust endpoint, and anoncreds support ([#271](https://github.com/2060-io/vs-agent/issues/271)) ([b42fbb0](https://github.com/2060-io/vs-agent/commit/b42fbb0d9577807722eacddd460fa6f15e63d80b))
+* create verifiable trust endpoint for VTC ([#249](https://github.com/2060-io/vs-agent/issues/249)) ([4bf0e32](https://github.com/2060-io/vs-agent/commit/4bf0e329e8e66697e42a9816dec980c06b9cbaf2))
+* support issuance of VTC over DIDComm ([#270](https://github.com/2060-io/vs-agent/issues/270)) ([cbfa878](https://github.com/2060-io/vs-agent/commit/cbfa87863c9daab1d57b7e603b43f11531d7b245))
+* Upgrade [@2060](https://github.com/2060).io/credo-ts-didcomm-mrtd 0.0.18 masterlist cache support ([#265](https://github.com/2060-io/vs-agent/issues/265)) ([c9da927](https://github.com/2060-io/vs-agent/commit/c9da927f48483dea20500da466013e0d1ac20dda))
+
+
+### Bug Fixes
+
+* add did:web as alternativeDid for implicit invitations ([#305](https://github.com/2060-io/vs-agent/issues/305)) ([1c34e5f](https://github.com/2060-io/vs-agent/commit/1c34e5f6bf293f80daeb1a5075330ee3e435a979))
+* add linked-vp context and update hashing algorithm to SHA-384 ([#293](https://github.com/2060-io/vs-agent/issues/293)) ([bccfbcd](https://github.com/2060-io/vs-agent/commit/bccfbcd21d41504c77efb42398ba531d8bbcff8b))
+* add npm latest according trusted publisher ([8f20805](https://github.com/2060-io/vs-agent/commit/8f20805d32987b69f0c928f7130be45917b6e7c3))
+* add support to legacy Ed25519VerificationKey2018 ([#258](https://github.com/2060-io/vs-agent/issues/258)) ([84d8183](https://github.com/2060-io/vs-agent/commit/84d8183256d4722d470d14ce23c427b748fe6723))
+* allow querying anoncreds resources by object type ([#275](https://github.com/2060-io/vs-agent/issues/275)) ([256d3e8](https://github.com/2060-io/vs-agent/commit/256d3e8af127be06d2a4db17da55388308777b2e))
+* crash when user scans credential offer invitation ([#314](https://github.com/2060-io/vs-agent/issues/314)) ([94a3592](https://github.com/2060-io/vs-agent/commit/94a35925bd35fcc27a39601e707b447c86319095))
+* credential key generation logic and improve naming clarity ([#254](https://github.com/2060-io/vs-agent/issues/254)) ([048bb92](https://github.com/2060-io/vs-agent/commit/048bb926a58e7b468524044bee69af3aad4855f5))
+* DID Update Flow to Conditionally Refresh Services and Remove Legacy Verification Methods ([#273](https://github.com/2060-io/vs-agent/issues/273)) ([1bfa58b](https://github.com/2060-io/vs-agent/commit/1bfa58b74792537f18c6345445f2ef0134e05ab1))
+* fixed dev version for vs agent chart ([8694547](https://github.com/2060-io/vs-agent/commit/86945479ce6d527585601cc33640c7a76a14ec0f))
+* handle self credentials lifecycle and prevent duplicate services ([#266](https://github.com/2060-io/vs-agent/issues/266)) ([ba72e45](https://github.com/2060-io/vs-agent/commit/ba72e453ad9aaaed0cdc9e3d19afc9c79f8f2a26))
+* implicit invitation to legacy did:web won't autorespond ([#310](https://github.com/2060-io/vs-agent/issues/310)) ([1b62d88](https://github.com/2060-io/vs-agent/commit/1b62d88b6840dac84a04452f23cced761a2f2d30))
+* improvement remove credential and jsonschema ([#257](https://github.com/2060-io/vs-agent/issues/257)) ([87ab904](https://github.com/2060-io/vs-agent/commit/87ab904707651520bf7d8fe6d314e7a31d89c0e0))
+* include dids update ([#267](https://github.com/2060-io/vs-agent/issues/267)) ([51dc286](https://github.com/2060-io/vs-agent/commit/51dc28678e5f138ca5aae1c9a507dc9af6a564fc))
+* problem when alternativeDids not exists ([#312](https://github.com/2060-io/vs-agent/issues/312)) ([b036c95](https://github.com/2060-io/vs-agent/commit/b036c95bb0501d2acadbd4970a1e3d7bbe5fed92))
+* refactor self permission for testing porpose ([#281](https://github.com/2060-io/vs-agent/issues/281)) ([9b09186](https://github.com/2060-io/vs-agent/commit/9b091867d14576b29ddd707a98c2aafdb7e489c3))
+* reload ci new structure ([#297](https://github.com/2060-io/vs-agent/issues/297)) ([38bad47](https://github.com/2060-io/vs-agent/commit/38bad47f20ec541bc627cdc687c883e2eab48459))
+* remove duplicate context at did creation ([#261](https://github.com/2060-io/vs-agent/issues/261)) ([f266626](https://github.com/2060-io/vs-agent/commit/f266626d3029be4a3bd0886d2f46404002af970a))
+* remove matrix in cd ([dcb6b94](https://github.com/2060-io/vs-agent/commit/dcb6b9401f6ff0200e3cd1a8e008bbc7debc80b3))
+* repeated DID Document updates and migrate legacy verification methods ([#269](https://github.com/2060-io/vs-agent/issues/269)) ([f667aeb](https://github.com/2060-io/vs-agent/commit/f667aebde6902cbb0815c21fd7e85959c2ce0bd0))
+* set defaults to 2060 OU data ([#313](https://github.com/2060-io/vs-agent/issues/313)) ([1d1bfeb](https://github.com/2060-io/vs-agent/commit/1d1bfeb55518febcfbdcd6d3e4940586e42dc4b7))
+* short url processing for credential offer invitations ([#308](https://github.com/2060-io/vs-agent/issues/308)) ([7347e1f](https://github.com/2060-io/vs-agent/commit/7347e1f7003e78dc40ba3e0080a9cc5f0121b844))
+* simplify and strengthen credential and JSON Schema credential management ([#264](https://github.com/2060-io/vs-agent/issues/264)) ([f6cc927](https://github.com/2060-io/vs-agent/commit/f6cc9271f9b04324cb9e887630c4b7b231d098e7))
+* swager enablement is through a configuration flag ([#280](https://github.com/2060-io/vs-agent/issues/280)) ([6d94761](https://github.com/2060-io/vs-agent/commit/6d94761be38f9f42c6a28c05b3a1a6f55bd5475b))
+* update based on Docker extension rules ([#298](https://github.com/2060-io/vs-agent/issues/298)) ([23e644c](https://github.com/2060-io/vs-agent/commit/23e644c138210afbf16a59ce790bf7f0681f0949))
+* update didwebvh ts dependency to lastest version ([#272](https://github.com/2060-io/vs-agent/issues/272)) ([deaa141](https://github.com/2060-io/vs-agent/commit/deaa141740349677465bd905aafa530ff540ed65))
+* update packages for trusted published ([81a4b67](https://github.com/2060-io/vs-agent/commit/81a4b67a39060e0a47ccaf24efbc6406d6c33593))
+* update structure on credentials ([#268](https://github.com/2060-io/vs-agent/issues/268)) ([006cb0d](https://github.com/2060-io/vs-agent/commit/006cb0d640f6dbb8d92dd43b5cbc27f6163acd16))
+* Update Whois rules only when it is a service ([#295](https://github.com/2060-io/vs-agent/issues/295)) ([a76bc48](https://github.com/2060-io/vs-agent/commit/a76bc48a1a08369edfa914227b206ba3d4151e77))
+* use helm chat logic ([#300](https://github.com/2060-io/vs-agent/issues/300)) ([31fca49](https://github.com/2060-io/vs-agent/commit/31fca49ea1eb243288fc910bedab5ae392b9cf20))
+* use organization repo for helm action ([#299](https://github.com/2060-io/vs-agent/issues/299)) ([f249ad1](https://github.com/2060-io/vs-agent/commit/f249ad13887c3e37d6d232125dc1744f65fc46a5))
+* use Query Parameter for resourceType ([#276](https://github.com/2060-io/vs-agent/issues/276)) ([a6f8921](https://github.com/2060-io/vs-agent/commit/a6f8921a8cd6e078a7bf8f5b4dc0a16dfe32c769))
+* use relatedjsoncredential in place exchangeid ([#315](https://github.com/2060-io/vs-agent/issues/315)) ([f52df39](https://github.com/2060-io/vs-agent/commit/f52df3902352f0c21ec145374bd1d7817be556cf))
+* use vpr:verana:vna-testnet in place api ([#262](https://github.com/2060-io/vs-agent/issues/262)) ([7314b2a](https://github.com/2060-io/vs-agent/commit/7314b2a5c850ad74819f9baefa9482ce3c53fd83))
+* **VTC:** refactor update object with post method ([#283](https://github.com/2060-io/vs-agent/issues/283)) ([6639429](https://github.com/2060-io/vs-agent/commit/663942980d437099b4462c7853165c71bd442d26))
+
 ## [1.5.3](https://github.com/2060-io/vs-agent/compare/v1.5.2...v1.5.3) (2025-10-08)
 
 

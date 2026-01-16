@@ -1,4 +1,4 @@
-import { CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
+import { Claim, CredentialIssuanceMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
@@ -67,9 +67,9 @@ describe('TrustService', () => {
 
     it('should issue a JSON-LD credential with a valid Ed25519 proof', async () => {
       const credentialResponse = await faberService.issueCredential({
-        type: 'jsonld',
+        format: 'jsonld',
         did: 'did:web:example.com',
-        jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
+        jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
         claims: {
           id: 'https://example.org/org/123',
           name: 'OpenAI Research',
@@ -81,7 +81,7 @@ describe('TrustService', () => {
           countryCode: 'US',
         },
       })
-      expect(credentialResponse.credential.proof).toEqual(
+      expect(credentialResponse.credential!.proof).toEqual(
         expect.objectContaining({
           type: 'Ed25519Signature2020',
           verificationMethod: expect.any(String),
@@ -116,19 +116,20 @@ describe('TrustService', () => {
         return original.call(this, ...args)
       })
 
+      const claims = {
+        id: 'https://example.org/org/123',
+        name: 'OpenAI Research',
+        logo: 'https://example.com/logo.png',
+        registryId: 'REG-123',
+        registryUrl: 'https://registry.example.org',
+        address: '123 Main St, San Francisco, CA',
+        type: 'PRIVATE',
+        countryCode: 'US',
+      }
       const credentialResponse = await faberService.issueCredential({
-        type: 'anoncreds',
-        jsonSchemaCredential: 'https://example.org/vt/schemas-example-org-jsc.json',
-        claims: {
-          id: 'https://example.org/org/123',
-          name: 'OpenAI Research',
-          logo: 'https://example.com/logo.png',
-          registryId: 'REG-123',
-          registryUrl: 'https://registry.example.org',
-          address: '123 Main St, San Francisco, CA',
-          type: 'PRIVATE',
-          countryCode: 'US',
-        },
+        format: 'anoncreds',
+        jsonSchemaCredentialId: 'https://example.org/vt/schemas-example-org-jsc.json',
+        claims,
       })
 
       // Create wait event
@@ -138,7 +139,8 @@ describe('TrustService', () => {
         {
           type: 'credential-issuance',
           connectionId: faberConnection.id,
-          credentialSchemaId: credentialResponse.credential.credentialExchangeId,
+          claims: Object.entries(claims).map(([name, value]) => new Claim({ name, value: String(value) })),
+          jsonSchemaCredentialId: credentialResponse.jsonSchemaCredentialId,
         } as CredentialIssuanceMessage,
         faberConnection,
       )
@@ -167,9 +169,7 @@ describe('TrustService', () => {
         expect.objectContaining({
           status: 200,
           didcommInvitationUrl: expect.any(String),
-          credential: expect.objectContaining({
-            credentialExchangeId: expect.any(String),
-          }),
+          jsonSchemaCredentialId: expect.any(String),
         }),
       )
     }, 20000)

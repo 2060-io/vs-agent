@@ -78,7 +78,7 @@ export const USER_PROFILE_AUTODISCLOSE = process.env.USER_PROFILE_AUTODISCLOSE =
 
 // Values for Organization credential
 export const SELF_ISSUED_VTC_ORG_TYPE = process.env.SELF_ISSUED_VTC_ORG_TYPE ?? 'PUBLIC'
-export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'CO'
+export const SELF_ISSUED_VTC_ORG_COUNTRYCODE = process.env.SELF_ISSUED_VTC_ORG_COUNTRYCODE ?? 'EE'
 export const SELF_ISSUED_VTC_ORG_REGISTRYID = process.env.SELF_ISSUED_VTC_ORG_REGISTRYID ?? 'ID-123'
 export const SELF_ISSUED_VTC_ORG_REGISTRYURL =
   process.env.SELF_ISSUED_VTC_ORG_REGISTRYURL ?? 'https://example.com/registry'

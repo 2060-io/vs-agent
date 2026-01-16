@@ -7,6 +7,11 @@ import { sendWebhookEvent } from './WebhookEvent'
 import { DidCommConnectionEventTypes, DidCommConnectionRepository, DidCommConnectionStateChangedEvent, DidCommDidExchangeState, DidCommDiscoverFeaturesDisclosureReceivedEvent, DidCommDiscoverFeaturesEventTypes, DidCommEventTypes, DidCommHangupMessage, DidCommMessageProcessedEvent } from '@credo-ts/didcomm'
 
 export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => {
+  // Get the first record matching agent's DID and obtain all alternatives for it
+  const [agentPublicDidRecord] = await agent.dids.getCreatedDids({ did: agent.did })
+  const alternativeDids = agentPublicDidRecord.getTag('alternativeDids')
+  const agentPublicDids = [agent.did, ...(Array.isArray(alternativeDids) ? alternativeDids : [])]
+
   agent.events.on(
     DidCommConnectionEventTypes.DidCommConnectionStateChanged,
     async ({ payload }: DidCommConnectionStateChangedEvent) => {
@@ -39,7 +44,8 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
         const invitationRecord = await agent.oob.findById(record.outOfBandId)
         const threadIds = invitationRecord?.getTag('invitationRequestsThreadIds') as string[] | undefined
         threadIds?.map(async threadId => {
-          const proofRecord = await agent.proofs.getByThreadAndConnectionId(threadId)
+          const [proofRecord] = await agent.proofs.findAllByQuery({ threadId })
+          if (!proofRecord) return
           const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
             | { ref?: string; callbackUrl?: string }
             | undefined
@@ -123,7 +129,7 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
     config.logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
     const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
     if (
-      oob?.outOfBandInvitation.id === agent.did &&
+      agentPublicDids.includes(oob?.outOfBandInvitation.id) &&
       data.payload.connectionRecord.state === DidCommDidExchangeState.RequestReceived
     ) {
       config.logger.debug(`Incoming connection request for ${agent.did}`)

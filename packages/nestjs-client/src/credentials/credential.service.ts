@@ -125,20 +125,18 @@ export class CredentialService {
       refId?: string
       credentialDefinitionId?: string
       revokeIfAlreadyIssued?: boolean
-      jsonSchemaCredential?: string
+      jsonSchemaCredentialId?: string
     },
   ): Promise<void> {
-    const { revokeIfAlreadyIssued = false, jsonSchemaCredential } = options ?? {}
+    const { revokeIfAlreadyIssued = false, jsonSchemaCredentialId } = options ?? {}
     const refIdHash = options?.refId ? this.hash(options.refId) : null
-    let credentialSchemaId: string | undefined
 
-    if (jsonSchemaCredential) {
-      const { credential } = await this.apiClient.trustCredentials.issuance({
-        type: 'anoncreds',
-        jsonSchemaCredential,
+    if (jsonSchemaCredentialId) {
+      await this.apiClient.trustCredentials.issuance({
+        format: 'anoncreds',
+        jsonSchemaCredentialId,
         claims,
       })
-      credentialSchemaId = credential.credentialExchangeId as string
     }
 
     // Select the appropriate credential type based on definition or schema
@@ -147,7 +145,7 @@ export class CredentialService {
       credentialTypes.find(type =>
         options?.credentialDefinitionId
           ? type.id === options.credentialDefinitionId
-          : type.relatedJsonSchemaCredential === jsonSchemaCredential,
+          : type.relatedJsonSchemaCredentialId === jsonSchemaCredentialId,
       ) ?? credentialTypes[0]
     if (!credentialType) {
       throw new Error(
@@ -204,13 +202,11 @@ export class CredentialService {
       connectionId,
       revocationRegistryDefinitionId: cred.revocationRegistry?.revocationDefinitionId,
       revocationRegistryIndex: cred.revocationRegistry?.currentIndex,
+      claims: Object.entries(claims).map(([name, value]) => new Claim({ name, value: String(value) })),
     })
-    if (credentialSchemaId) payload.credentialSchemaId = credentialSchemaId
+    if (jsonSchemaCredentialId) payload.jsonSchemaCredentialId = jsonSchemaCredentialId
     else {
       payload.credentialDefinitionId = credentialDefinitionId
-      payload.claims = Object.entries(claims).map(
-        ([name, value]) => new Claim({ name, value: String(value) }),
-      )
     }
 
     const thread = await this.apiClient.messages.send(payload)
