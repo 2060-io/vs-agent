@@ -6,13 +6,14 @@ import {
   ProfileMessage,
   ReceiptsMessage,
 } from '@2060.io/vs-agent-model'
-import { CredentialState, JsonTransformer } from '@credo-ts/core'
+import { JsonTransformer } from '@credo-ts/core'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { ConnectionsEventService, ConnectionsRepository } from '../connections'
 import { CredentialService } from '../credentials'
 import { EventHandler } from '../interfaces'
 import { MessageEventOptions } from '../types'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 
 @Injectable()
 export class MessageEventService {
@@ -62,7 +63,7 @@ export class MessageEventService {
       if (message.type === CredentialReceptionMessage.type) {
         try {
           const msg = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
-          const isCredentialDone = msg.state === CredentialState.Done
+          const isCredentialDone = msg.state === DidCommCredentialState.Done
           if (this.credentialService) {
             if (!msg.threadId) throw new Error('threadId is required for credential')
             if (isCredentialDone) await this.credentialService.handleAcceptance(msg.threadId)

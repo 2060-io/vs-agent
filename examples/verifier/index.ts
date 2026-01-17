@@ -1,4 +1,5 @@
 import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
+import type { Express } from 'express'
 import cors from 'cors'
 import express from 'express'
 import path from 'path'
@@ -9,7 +10,7 @@ const logger = new Logger()
 const PORT = Number(process.env.PORT || 5100)
 const SERVICE_AGENT_BASE_URL = process.env.VS_AGENT_ADMIN_BASE_URL || 'http://localhost:3000/v1'
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5100'
-const app = express()
+const app: Express = express()
 
 const [baseUrl, versionPath] = SERVICE_AGENT_BASE_URL.split('/v')
 const version = versionPath ? `v${versionPath}` : ApiVersion.V1

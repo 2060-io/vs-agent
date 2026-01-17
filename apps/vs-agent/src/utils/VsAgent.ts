@@ -31,10 +31,11 @@ import {
 import {
   DidCommAutoAcceptCredential,
   DidCommAutoAcceptProof,
+  DidCommCredentialsModuleConfigOptions,
   DidCommCredentialV2Protocol,
-  DidCommHttpOutboundTransport,
-  DidCommInboundTransport,
   DidCommModule,
+  DidCommModuleConfigOptions,
+  DidCommProofsModuleConfigOptions,
   DidCommProofV2Protocol,
 } from '@credo-ts/didcomm'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
@@ -47,7 +48,6 @@ import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
-import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { WebDidRegistrar } from './WebDidRegistrar'
 import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 
@@ -57,7 +57,12 @@ type VsAgentModules = {
   actionMenu: ActionMenuModule
   dids: DidsModule
   calls: DidCommCallsModule
-  didcomm: DidCommModule
+  didcomm: DidCommModule<
+    DidCommModuleConfigOptions & {
+      credentials: DidCommCredentialsModuleConfigOptions<[DidCommCredentialV2Protocol<[LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]>]>
+      proofs: DidCommProofsModuleConfigOptions<[DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]>
+    }
+  >
   media: DidCommMediaSharingModule
   mrtd: DidCommMrtdModule
   questionAnswer: QuestionAnswerModule
