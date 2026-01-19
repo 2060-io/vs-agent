@@ -21,6 +21,7 @@ import {
   DidDocument,
   DidDocumentService,
   DidRepository,
+  DidsApi,
   DidsModule,
   InitConfig,
   Kms,
@@ -44,6 +45,7 @@ import { WebVhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@cr
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
+import { multibaseDecode } from 'didwebvh-ts'
 
 import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 import { FullTailsFileService } from '../services/FullTailsFileService'
@@ -266,11 +268,14 @@ export class VsAgent extends Agent<VsAgentModules> {
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
     const keyAgreementId = `${publicDid}#key-agreement-1`
-    const kms = this.agentContext.dependencyManager.resolve(Kms.KeyManagementApi)
-    const key = await kms.createKey({ type: { kty: 'OKP', crv: 'Ed25519' } })
-    const ed25519 = Kms.PublicJwk.fromPublicJwk(key.publicJwk)
-    const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
-    const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey.publicKey)
+    const didApi = this.agentContext.resolve(DidsApi)
+    const [record] = await didApi.getCreatedDids()
+    if (!record.keys) throw new CredoError('No keys found in DID record')
+    const { didDocumentRelativeKeyId } = record.keys[0]
+    const verificationMethodId = `${publicDid}${didDocumentRelativeKeyId}`
+    const publicKeyX25519 = convertPublicKeyToX25519(
+      multibaseDecode(didDocumentRelativeKeyId.slice(1)).bytes.slice(2),
+    )
     const x25519Key = Kms.PublicJwk.fromPublicKey({ kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
 
     // Remove legacy if exist
@@ -290,7 +295,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       {
         controller: publicDid,
         id: verificationMethodId,
-        publicKeyMultibase: ed25519.fingerprint,
+        publicKeyMultibase: didDocumentRelativeKeyId.slice(1),
         type: 'Ed25519VerificationKey2020',
       },
       {

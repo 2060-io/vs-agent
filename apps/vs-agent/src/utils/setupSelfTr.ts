@@ -226,8 +226,10 @@ async function generateVerifiableCredential(
 
 export function createCredential(options: Partial<W3cCredentialOptions>) {
   options.context ??= [
-    'https://www.w3.org/2018/credentials/v1',
-    'https://www.w3.org/2018/credentials/examples/v1',
+    'https://www.w3.org/ns/credentials/v2',
+    'https://www.w3.org/ns/credentials/examples/v2',
+    'https://w3id.org/security/suites/ed25519-2020/v1',
+    // 'https://www.w3.org/2018/credentials/v1',
   ]
 
   options.issuanceDate ??= new Date().toISOString()
@@ -362,7 +364,11 @@ export async function generateVerifiablePresentation(
 }
 
 export function createPresentation(options: Partial<W3cPresentationOptions>) {
-  options.context ??= ['https://www.w3.org/2018/credentials/v1']
+  options.context ??= [
+    'https://www.w3.org/ns/credentials/v2',
+    'https://www.w3.org/ns/credentials/examples/v2',
+    'https://w3id.org/security/suites/ed25519-2020/v1',
+  ] //
   options.type ??= ['VerifiablePresentation']
   return new W3cPresentation(options as W3cPresentationOptions)
 }

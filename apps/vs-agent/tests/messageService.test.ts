@@ -58,9 +58,7 @@ describe('MessageService', () => {
       await faberApp.close()
       await aliceApp.close()
       await faberAgent.shutdown()
-      await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
-      await aliceAgent.wallet.delete()
       vi.restoreAllMocks()
     })
 

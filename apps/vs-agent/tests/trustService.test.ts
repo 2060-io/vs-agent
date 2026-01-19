@@ -55,9 +55,7 @@ describe('TrustService', () => {
     afterEach(async () => {
       await faberApp.close()
       await faberAgent.shutdown()
-      await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
-      await aliceAgent.wallet.delete()
       vi.restoreAllMocks()
     })
 
@@ -143,11 +141,11 @@ describe('TrustService', () => {
 
       // Receiving messages
       const {
-        payload: { credentialRecord },
+        payload: { credentialExchangeRecord },
       } = await alicePromise
 
       // expects
-      expect(credentialRecord).toEqual(
+      expect(credentialExchangeRecord).toEqual(
         expect.objectContaining({
           state: 'offer-received',
           connectionId: aliceConnection.id,
@@ -160,7 +158,7 @@ describe('TrustService', () => {
           updatedAt: expect.any(Date),
         }),
       )
-      expect(record.id).toEqual(credentialRecord.threadId)
+      expect(record.id).toEqual(credentialExchangeRecord.threadId)
       expect(credentialResponse).toEqual(
         expect.objectContaining({
           status: 200,
