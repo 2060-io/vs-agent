@@ -1,17 +1,21 @@
 import { ConnectionProfileUpdatedEvent } from '@2060.io/credo-ts-didcomm-user-profile'
+import { LogLevel } from '@credo-ts/core'
 import {
-  LogLevel,
-} from '@credo-ts/core'
+  DidCommBasicMessage,
+  DidCommCredentialExchangeRecord,
+  DidCommCredentialStateChangedEvent,
+  DidCommHandshakeProtocol,
+  DidCommMessageProcessedEvent,
+} from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { vi } from 'vitest'
 
 import { VsAgentModule } from '../../src/admin.module'
+import { AGENT_LABEL } from '../../src/config'
 import { messageEvents } from '../../src/events/MessageEvents'
 import { PublicModule } from '../../src/public.module'
 import { ServerConfig, TsLogger, VsAgent } from '../../src/utils'
-import { DidCommBasicMessage, DidCommCredentialExchangeRecord, DidCommCredentialStateChangedEvent, DidCommHandshakeProtocol, DidCommMessageProcessedEvent } from '@credo-ts/didcomm'
-import { AGENT_LABEL } from '../../src/config'
 
 export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
   const agentAOutOfBand = await agentA.didcomm.oob.createInvitation({
@@ -20,7 +24,7 @@ export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
 
   let { connectionRecord: agentBConnection } = await agentB.didcomm.oob.receiveInvitation(
     agentAOutOfBand.outOfBandInvitation,
-    { label: AGENT_LABEL }
+    { label: AGENT_LABEL },
   )
 
   agentBConnection = await agentB.didcomm.connections.returnWhenIsConnected(agentBConnection!.id)

@@ -1,8 +1,8 @@
 import 'reflect-metadata'
 
 import { parseDid, utils } from '@credo-ts/core'
-import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
 import { NestFactory } from '@nestjs/core'
+import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
 import express from 'express'
 import * as fs from 'fs'
 import { IncomingMessage } from 'http'

@@ -33,6 +33,7 @@ import {
   DidCommAutoAcceptProof,
   DidCommCredentialsModuleConfigOptions,
   DidCommCredentialV2Protocol,
+  DidCommHttpOutboundTransport,
   DidCommModule,
   DidCommModuleConfigOptions,
   DidCommProofsModuleConfigOptions,
@@ -44,12 +45,13 @@ import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 
+import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { WebDidRegistrar } from './WebDidRegistrar'
-import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 
 type VsAgentModules = {
   askar: AskarModule
@@ -59,8 +61,16 @@ type VsAgentModules = {
   calls: DidCommCallsModule
   didcomm: DidCommModule<
     DidCommModuleConfigOptions & {
-      credentials: DidCommCredentialsModuleConfigOptions<[DidCommCredentialV2Protocol<[LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]>]>
-      proofs: DidCommProofsModuleConfigOptions<[DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]>
+      credentials: DidCommCredentialsModuleConfigOptions<
+        [
+          DidCommCredentialV2Protocol<
+            [LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]
+          >,
+        ]
+      >
+      proofs: DidCommProofsModuleConfigOptions<
+        [DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]
+      >
     }
   >
   media: DidCommMediaSharingModule
@@ -261,7 +271,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     const ed25519 = Kms.PublicJwk.fromPublicJwk(key.publicJwk)
     const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
     const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey.publicKey)
-    const x25519Key = Kms.PublicJwk.fromPublicKey({kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
+    const x25519Key = Kms.PublicJwk.fromPublicKey({ kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
 
     // Remove legacy if exist
     const legacyContexts = ['https://w3id.org/security/suites/ed25519-2018/v1']
@@ -393,10 +403,10 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     config: options.config,
     dependencies: options.dependencies,
     modules: {
-      askar: new AskarModule({ 
+      askar: new AskarModule({
         askar,
         store: options.walletConfig,
-       }),
+      }),
       anoncreds: new AnonCredsModule({
         anoncreds,
         tailsFileService: new FullTailsFileService({
@@ -421,6 +431,9 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
       didcomm: new DidCommModule({
         endpoints: options.endpoints,
+        transports: {
+          outbound: [new DidCommHttpOutboundTransport(), new VsAgentWsOutboundTransport()],
+        },
         connections: { autoAcceptConnections: true },
         credentials: {
           autoAcceptCredentials: DidCommAutoAcceptCredential.ContentApproved,

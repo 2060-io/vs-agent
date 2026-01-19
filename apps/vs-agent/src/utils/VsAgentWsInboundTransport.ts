@@ -1,10 +1,10 @@
-import { Agent, Logger, AgentContext, CredoError, AgentConfig, utils } from '@credo-ts/core'
+import { Logger, AgentContext, CredoError, utils } from '@credo-ts/core'
 import {
+  DidCommApi,
   DidCommConnectionRecord,
   DidCommEncryptedMessage,
   DidCommInboundTransport,
   DidCommMessageReceiver,
-  DidCommModule,
   DidCommTransportService,
   DidCommTransportSession,
 } from '@credo-ts/didcomm'
@@ -32,7 +32,7 @@ export class VsAgentWsInboundTransport implements DidCommInboundTransport {
 
   public async start(agentContext: AgentContext) {
     const transportService = agentContext.dependencyManager.resolve(DidCommTransportService)
-    const didcomm = agentContext.dependencyManager.resolve(DidCommModule)
+    const didcomm = agentContext.dependencyManager.resolve(DidCommApi)
 
     this.logger = agentContext.config.logger
     this.logger.debug('VS Agent Ws Inbound transport start')
@@ -96,7 +96,11 @@ export class VsAgentWsInboundTransport implements DidCommInboundTransport {
     }, interval)
   }
 
-  private listenOnWebSocketMessages(agentContext: AgentContext, socket: WebSocket, session: WebSocketTransportSession) {
+  private listenOnWebSocketMessages(
+    agentContext: AgentContext,
+    socket: WebSocket,
+    session: WebSocketTransportSession,
+  ) {
     socket.on('pong', () => {
       this.logger.debug('Pong received')
       ;(socket as ExtWebSocket).isAlive = true

@@ -1,5 +1,5 @@
+import { AskarModuleConfigStoreOptions } from '@credo-ts/askar'
 import { LogLevel, ParsedDid } from '@credo-ts/core'
-import { DidCommHttpOutboundTransport, DidCommInboundTransport } from '@credo-ts/didcomm'
 import { agentDependencies } from '@credo-ts/node'
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -11,8 +11,6 @@ import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
 import { TsLogger } from './logger'
-import { AskarModuleConfigStoreOptions } from '@credo-ts/askar'
-import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 
 export const setupAgent = async ({
   port,
@@ -69,9 +67,6 @@ export const setupAgent = async ({
       new VsAgentWsInboundTransport({ server: new WebSocket.Server({ noServer: true }) }),
     )
   }
-
-  agent.didcomm.registerOutboundTransport(new DidCommHttpOutboundTransport())
-  agent.didcomm.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
 

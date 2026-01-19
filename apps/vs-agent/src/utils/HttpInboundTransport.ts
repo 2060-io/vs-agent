@@ -1,4 +1,4 @@
-import type { Agent, AgentContext } from '@credo-ts/core'
+import type { AgentContext } from '@credo-ts/core'
 import type { Express, Request, Response } from 'express'
 import type { Server } from 'http'
 

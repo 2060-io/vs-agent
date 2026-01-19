@@ -6,11 +6,11 @@ import { createVsAgent, TsLogger } from '../../src/utils'
 export const startAgent = async ({ label, domain }: { label: string; domain: string }) => {
   const agent = createVsAgent({
     config: {
-      endpoints: [`rxjs:${domain}`],
-      walletConfig: getAskarStoreConfig(label, { inMemory: true }),
       label,
       logger: new TsLogger(LogLevel.off, label),
     },
+    walletConfig: getAskarStoreConfig(label, { inMemory: true }),
+    endpoints: [`rxjs:${domain}`],
     did: `did:webvh:${domain}`,
     dependencies: agentDependencies,
     publicApiBaseUrl: `https://${domain}`,

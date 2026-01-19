@@ -1,4 +1,3 @@
-
 import { AskarPostgresStorageConfig } from '@credo-ts/askar'
 import { LogLevel } from '@credo-ts/core'
 import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
@@ -50,7 +49,9 @@ export const askarPostgresConfig: AskarPostgresStorageConfig = {
   },
 }
 
-export const keyDerivationMethodMap: { [key: string]: `${KdfMethod.Argon2IInt}` | `${KdfMethod.Argon2IMod}` | `${KdfMethod.Raw}` } = {
+export const keyDerivationMethodMap: {
+  [key: string]: `${KdfMethod.Argon2IInt}` | `${KdfMethod.Argon2IMod}` | `${KdfMethod.Raw}`
+} = {
   ARGON2I_INT: KdfMethod.Argon2IInt,
   ARGON2I_MOD: KdfMethod.Argon2IMod,
   RAW: KdfMethod.Raw,

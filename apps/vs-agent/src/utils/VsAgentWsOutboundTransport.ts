@@ -1,7 +1,6 @@
 import type WebSocket from 'ws'
 
 import {
-  Agent,
   AgentConfig,
   CredoError,
   EventEmitter,
@@ -31,7 +30,7 @@ interface ExtWebSocket extends WebSocket {
 
 export class VsAgentWsOutboundTransport implements DidCommOutboundTransport {
   private transportTable: Map<string, WebSocket> = new Map<string, WebSocket>()
-  private agent!: Agent
+  private agentContext!: AgentContext
   private logger!: Logger
   private eventEmitter!: EventEmitter
   private WebSocketClass!: typeof WebSocket
@@ -132,7 +131,7 @@ export class VsAgentWsOutboundTransport implements DidCommOutboundTransport {
       )
     }
     this.logger.debug('Payload received from mediator')
-    this.eventEmitter.emit<DidCommMessageReceivedEvent>(this.agent.context, {
+    this.eventEmitter.emit<DidCommMessageReceivedEvent>(this.agentContext, {
       type: DidCommEventTypes.DidCommMessageReceived,
       payload: {
         message: payload,
@@ -174,7 +173,7 @@ export class VsAgentWsOutboundTransport implements DidCommOutboundTransport {
         socket.removeEventListener('message', this.handleMessageEvent)
         this.transportTable.delete(socketId)
 
-        this.eventEmitter.emit<DidCommOutboundWebSocketClosedEvent>(this.agent.context, {
+        this.eventEmitter.emit<DidCommOutboundWebSocketClosedEvent>(this.agentContext, {
           type: DidCommTransportEventTypes.DidCommOutboundWebSocketClosedEvent,
           payload: {
             socketId,

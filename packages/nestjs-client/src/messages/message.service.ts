@@ -7,13 +7,13 @@ import {
   ReceiptsMessage,
 } from '@2060.io/vs-agent-model'
 import { JsonTransformer } from '@credo-ts/core'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
 
 import { ConnectionsEventService, ConnectionsRepository } from '../connections'
 import { CredentialService } from '../credentials'
 import { EventHandler } from '../interfaces'
 import { MessageEventOptions } from '../types'
-import { DidCommCredentialState } from '@credo-ts/didcomm'
 
 @Injectable()
 export class MessageEventService {

@@ -350,9 +350,8 @@ export const messageEvents = async (agent: VsAgent, config: ServerConfig) => {
             credentialProposalMessage?.credentialPreview?.attributes.map(
               p => new Claim({ name: p.name, value: p.value, mimeType: p.mimeType }),
             ) ?? [],
-          credentialDefinitionId: record.metadata.get(
-            '_internal/anonCredsCredentialDefinitionMetadata',
-          )?.credentialDefinitionId,
+          credentialDefinitionId: record.metadata.get('_internal/anonCredsCredentialDefinitionMetadata')
+            ?.credentialDefinitionId,
           timestamp: record.createdAt,
         })
 
