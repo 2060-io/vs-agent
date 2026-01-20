@@ -61,7 +61,7 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-backend-container
-            image: verana-labs/vs-agent-demo-chatbot-backend:{{ .Chart.Version }}
+            image: veranalabs/vs-agent-demo-chatbot-backend:{{ .Chart.Version }}
             imagePullPolicy: Always
             env:
             # Base URL for the Agent Admin API
