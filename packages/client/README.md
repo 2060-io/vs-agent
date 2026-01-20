@@ -1,4 +1,4 @@
-`@2060.io/vs-agent-client`
+`@verana-labs/vs-agent-client`
 
 # VS Agent Client
 **VS Agent Client** is a TypeScript library designed to simplify the interaction with [**VS Agent**](https://github.com/2060-io/vs-agent). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
@@ -63,22 +63,22 @@ classDiagram
 
 ## Installation
 ```sh
-npm install @2060.io/vs-agent-client
+npm install @verana-labs/vs-agent-client
 ```
 or 
 ```sh
-yarn add @2060.io/vs-agent-client
+yarn add @verana-labs/vs-agent-client
 ```
 or 
 ```sh
-pnpm add @2060.io/vs-agent-client
+pnpm add @verana-labs/vs-agent-client
 ```
 ## `ApiClient.ts`
 `ApiClient` class provides a simple interface for interacting with VS Agent. It abstracts API calls and offers dedicated service methods for messaging, credential types, invitations, and revocation registries.
 
 ### Example Usage
 ```ts
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
+import { ApiClient, ApiVersion } from '@verana-labs/vs-agent-client'
 
 const apiClient = new ApiClient('http://localhost:3000', ApiVersion.V1)
 
@@ -104,7 +104,7 @@ The `ExpressEventHandler` simplifies event handling for Express applications, ma
 ### Example Usage
 ```ts
 import express from 'express'
-import { ExpressEventHandler } from '@2060.io/vs-agent-client'
+import { ExpressEventHandler } from '@verana-labs/vs-agent-client'
 
 const app = express()
 const eventHandler = new ExpressEventHandler(app)

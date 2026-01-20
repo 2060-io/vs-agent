@@ -1,5 +1,5 @@
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Test, TestingModule } from '@nestjs/testing'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { ConnectionsRepository, EventHandler, ConnectionsEventService } from '../../src'

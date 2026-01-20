@@ -1,6 +1,6 @@
 // src/services/TrustCredentialService.ts
 
-import { CredentialIssuanceRequest, CredentialIssuanceResponse } from '@2060.io/vs-agent-model'
+import { CredentialIssuanceRequest, CredentialIssuanceResponse } from '@verana-labs/vs-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'

@@ -1,6 +1,6 @@
-import { ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import { Repository } from 'typeorm'
 
 import { UserProfile } from '../types'

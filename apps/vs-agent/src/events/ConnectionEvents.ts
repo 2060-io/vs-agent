@@ -5,7 +5,6 @@ import type {
   DiscoverFeaturesDisclosureReceivedEvent,
 } from '@credo-ts/core'
 
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import {
   AgentEventTypes,
   ConnectionEventTypes,
@@ -14,6 +13,7 @@ import {
   DiscoverFeaturesEventTypes,
   HangupMessage,
 } from '@credo-ts/core'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'

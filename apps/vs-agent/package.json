@@ -1,5 +1,5 @@
 {
-  "name": "@2060.io/vs-agent",
+  "name": "@verana-labs/vs-agent",
   "main": "build/index",
   "types": "build/index",
   "private": true,
@@ -60,7 +60,7 @@
     "@2060.io/credo-ts-didcomm-mrtd": "0.0.18",
     "@2060.io/credo-ts-didcomm-receipts": "0.0.7",
     "@2060.io/credo-ts-didcomm-user-profile": "0.0.6",
-    "@2060.io/vs-agent-model": "workspace:*",
+    "@verana-labs/vs-agent-model": "workspace:*",
     "@credo-ts/action-menu": "0.5.18-alpha-20250930143725",
     "@credo-ts/anoncreds": "0.5.18-alpha-20250930143725",
     "@credo-ts/askar": "0.5.18-alpha-20250930143725",

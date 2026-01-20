@@ -70,7 +70,7 @@ Enable only the modules you need (`messages`, `connections`, `credentials`) and 
 
 ```typescript
 import { Module } from '@nestjs/common'
-import { EventsModule } from '@2060.io/vs-agent-nestjs-client'
+import { EventsModule } from '@verana-labs/vs-agent-nestjs-client'
 import { CoreService } from './core.service'
 
 @Module({
@@ -121,7 +121,7 @@ Use `CoreModule` (or your application’s main module) to set up TypeORM and imp
 ```typescript
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { EventsModule } from '@2060.io/vs-agent-nestjs-client'
+import { EventsModule } from '@verana-labs/vs-agent-nestjs-client'
 import { CoreService } from './core.service'
 
 @Module({
@@ -414,15 +414,15 @@ By following these steps, you can quickly set up a functional chatbot and start 
 
 ### **Library Documentation**
 
-- **`@2060.io/vs-agent-model`**:
+- **`@verana-labs/vs-agent-model`**:
 
   - Defines message models (e.g., `TextMessage`, `ContextualMenuItem`) for communication.
 
-- **`@2060.io/vs-agent-client`**:
+- **`@verana-labs/vs-agent-client`**:
 
   - Provides the `ApiClient` for interacting with VS Agent Admin API.
 
-- **`@2060.io/vs-agent-nestjs-client`**:
+- **`@verana-labs/vs-agent-nestjs-client`**:
 
   - Offers utilities like `CredentialService` for managing credentials.
 
@@ -562,9 +562,9 @@ To run the chatbot in a Docker container:
   > 💡 **Note:** For local development, consider replacing the `@2060.io` library versions such as:
   >
   > ```json
-  > "@2060.io/vs-agent-model": "workspace:*",
-  > "@2060.io/vs-agent-nestjs-client": "workspace:*",
-  > "@2060.io/vs-agent-client": "workspace:*"
+  > "@verana-labs/vs-agent-model": "workspace:*",
+  > "@verana-labs/vs-agent-nestjs-client": "workspace:*",
+  > "@verana-labs/vs-agent-client": "workspace:*"
   > ```
   >
   > This allows you to work more easily with local packages during development.

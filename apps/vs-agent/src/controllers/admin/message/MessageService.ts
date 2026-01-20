@@ -1,3 +1,19 @@
+import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
+import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
+import {
+  JsonTransformer,
+  AutoAcceptCredential,
+  AutoAcceptProof,
+  utils,
+  MessageSender,
+  OutboundMessageContext,
+  OutOfBandRepository,
+  OutOfBandInvitation,
+  ConnectionRecord,
+  CredentialPreviewAttributeOptions,
+} from '@credo-ts/core'
+import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import {
   TextMessage,
   ReceiptsMessage,
@@ -18,23 +34,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
   CredentialRevocationMessage,
-} from '@2060.io/vs-agent-model'
-import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
-import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
-import {
-  JsonTransformer,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  utils,
-  MessageSender,
-  OutboundMessageContext,
-  OutOfBandRepository,
-  OutOfBandInvitation,
-  ConnectionRecord,
-  CredentialPreviewAttributeOptions,
-} from '@credo-ts/core'
-import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Inject, Injectable, Logger } from '@nestjs/common'
+} from '@verana-labs/vs-agent-model'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils'

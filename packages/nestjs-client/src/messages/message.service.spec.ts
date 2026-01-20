@@ -1,13 +1,13 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import { ApiVersion } from '@2060.io/vs-agent-client'
+import { CredentialState } from '@credo-ts/core'
+import { Test, TestingModule } from '@nestjs/testing'
+import { ApiVersion } from '@verana-labs/vs-agent-client'
 import {
   CredentialReceptionMessage,
   MessageReceived,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/vs-agent-model'
-import { CredentialState } from '@credo-ts/core'
-import { Test, TestingModule } from '@nestjs/testing'
+} from '@verana-labs/vs-agent-model'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../src'
 
 const mockSend = vi.fn().mockResolvedValue({ id: 'mocked-id' })
-vi.mock('@2060.io/vs-agent-client', () => {
+vi.mock('@verana-labs/vs-agent-client', () => {
   return {
     ApiClient: vi.fn().mockImplementation(function () {
       return {

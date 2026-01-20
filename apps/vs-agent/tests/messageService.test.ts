@@ -1,6 +1,6 @@
-import { ProfileMessage, TextMessage } from '@2060.io/vs-agent-model'
 import { BasicMessage, ConnectionRecord } from '@credo-ts/core'
 import { INestApplication } from '@nestjs/common'
+import { ProfileMessage, TextMessage } from '@verana-labs/vs-agent-model'
 import { Subject } from 'rxjs'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 

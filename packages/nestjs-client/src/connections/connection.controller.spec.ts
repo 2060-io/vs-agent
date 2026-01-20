@@ -1,13 +1,13 @@
-import { HttpUtils } from '@2060.io/vs-agent-client'
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { HttpUtils } from '@verana-labs/vs-agent-client'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { ConnectionsEventController } from './connection.controller'
 import { ConnectionsEventService } from './connection.service'
 
-vi.mock('@2060.io/vs-agent-client', () => ({
+vi.mock('@verana-labs/vs-agent-client', () => ({
   HttpUtils: {
     handleException: vi.fn(),
   },
