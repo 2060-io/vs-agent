@@ -15,7 +15,6 @@ import {
   RedisMessageService,
   TrustController,
   TrustService,
-  VCAuthNController,
   VsAgentController,
 } from './controllers'
 import { HandledRedisModule } from './modules/redis.module'
@@ -38,7 +37,6 @@ export class VsAgentModule {
         PresentationsController,
         InvitationController,
         QrController,
-        VCAuthNController,
         TrustController,
       ],
       providers: [
