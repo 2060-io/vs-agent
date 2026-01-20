@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
-import { EventsModule } from '@2060.io/vs-agent-nestjs-client'
+import { EventsModule } from '@verana-labs/vs-agent-nestjs-client'
 import { CoreModule } from '@/core.module'
 
 @Module({

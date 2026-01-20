@@ -1,7 +1,7 @@
 import { MessageReceipt } from '@2060.io/credo-ts-didcomm-receipts'
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
-import { didcommMessageState, VsAgentMessageReceipt } from '@2060.io/vs-agent-model'
 import { isUri } from '@credo-ts/core/build/utils'
+import { didcommMessageState, VsAgentMessageReceipt } from '@verana-labs/vs-agent-model'
 
 export function parseDataUrl(dataUrl: string) {
   const regex = /^data:(.+);base64,(.*)$/

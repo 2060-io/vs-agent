@@ -1,7 +1,7 @@
-import { HttpUtils } from '@2060.io/vs-agent-client'
-import { EventType, MessageReceived, MessageStateUpdated } from '@2060.io/vs-agent-model'
 import { Body, Controller, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { HttpUtils } from '@verana-labs/vs-agent-client'
+import { EventType, MessageReceived, MessageStateUpdated } from '@verana-labs/vs-agent-model'
 
 import { MessageEventService } from './message.service'
 

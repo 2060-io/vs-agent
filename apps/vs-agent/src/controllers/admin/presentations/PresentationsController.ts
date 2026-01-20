@@ -1,4 +1,3 @@
-import { PresentationData, RequestedCredential, Claim } from '@2060.io/vs-agent-model'
 import { ProofExchangeRecord } from '@credo-ts/core'
 import {
   BadRequestException,
@@ -18,6 +17,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger'
+import { PresentationData, RequestedCredential, Claim } from '@verana-labs/vs-agent-model'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 

@@ -91,9 +91,6 @@ importers:
       '@2060.io/credo-ts-didcomm-user-profile':
         specifier: 0.0.6
         version: 0.0.6(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../../packages/model
       '@credo-ts/action-menu':
         specifier: 0.5.18-alpha-20250930143725
         version: 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -139,6 +136,9 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.0
         version: 1.5.5
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../../packages/model
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -212,10 +212,10 @@ importers:
 
   examples/chatbot:
     dependencies:
-      '@2060.io/vs-agent-client':
+      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@2060.io/vs-agent-model':
+      '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
       body-parser:
@@ -264,9 +264,6 @@ importers:
 
   examples/nestjs-vs:
     dependencies:
-      '@2060.io/vs-agent-nestjs-client':
-        specifier: workspace:*
-        version: link:../../packages/nestjs-client
       '@credo-ts/core':
         specifier: 0.5.18-alpha-20250930143725
         version: 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -294,6 +291,9 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      '@verana-labs/vs-agent-nestjs-client':
+        specifier: workspace:*
+        version: link:../../packages/nestjs-client
       axios:
         specifier: ^1.7.7
         version: 1.9.0
@@ -337,9 +337,6 @@ importers:
       '@types/node':
         specifier: 20.11.19
         version: 20.11.19
-      '@types/supertest':
-        specifier: ^6.0.0
-        version: 6.0.3
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.0.0
         version: 8.33.0(@typescript-eslint/parser@8.33.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
@@ -364,9 +361,6 @@ importers:
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
-      supertest:
-        specifier: ^7.0.0
-        version: 7.1.1
       ts-loader:
         specifier: ^9.4.3
         version: 9.5.2(typescript@5.8.3)(webpack@5.97.1)
@@ -382,10 +376,10 @@ importers:
 
   examples/verifier:
     dependencies:
-      '@2060.io/vs-agent-client':
+      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@2060.io/vs-agent-model':
+      '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
       body-parser:
@@ -434,12 +428,12 @@ importers:
 
   packages/client:
     dependencies:
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../model
       '@credo-ts/core':
         specifier: 0.5.18-alpha-20250930143725
         version: 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../model
       class-transformer:
         specifier: 0.5.1
         version: 0.5.1
@@ -496,12 +490,6 @@ importers:
       '@2060.io/credo-ts-didcomm-mrtd':
         specifier: 0.0.17
         version: 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3))(typescript@5.8.3)
-      '@2060.io/vs-agent-client':
-        specifier: workspace:*
-        version: link:../client
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../model
       '@credo-ts/core':
         specifier: 0.5.18-alpha-20250930143725
         version: 0.5.18-alpha-20250930143725(expo@53.0.9(@babel/core@7.27.3)(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(react@19.1.0))(react-native@0.79.2(@babel/core@7.27.3)(react@19.1.0))(web-streams-polyfill@3.3.3)
@@ -517,6 +505,12 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.4.18(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.24(ioredis@5.6.1)(pg@8.16.0)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.11.19)(typescript@5.8.3)))
+      '@verana-labs/vs-agent-client':
+        specifier: workspace:*
+        version: link:../client
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../model
       reflect-metadata:
         specifier: ^0.2.0
         version: 0.2.2
@@ -2475,9 +2469,6 @@ packages:
   '@types/supertest@2.0.16':
     resolution: {integrity: sha512-6c2ogktZ06tr2ENoZivgm7YnprnhYE4ZoXGMY+oA7IuAf17M8FWvujXZGmxLv8y0PTyts4x5A+erSwVUFA8XSg==}
 
-  '@types/supertest@6.0.3':
-    resolution: {integrity: sha512-8WzXq62EXFhJ7QsH3Ocb/iKQ/Ty9ZVWnVzoTKc9tyyFRRF3a74Tk2+TLFgaFFw364Ere+npzHKEJ6ga2LzIL7w==}
-
   '@types/uuid@10.0.0':
     resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
@@ -4182,10 +4173,6 @@ packages:
 
   formidable@2.1.5:
     resolution: {integrity: sha512-Oz5Hwvwak/DCaXVVUtPn4oLMLLy1CdclLKO1LFgU7XzDpVMUU5UjlSLpGMocyQNNk8F6IJW9M/YdooSn2MRI+Q==}
-
-  formidable@3.5.4:
-    resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
-    engines: {node: '>=14.0.0'}
 
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
@@ -6201,11 +6188,6 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
 
-  superagent@10.2.1:
-    resolution: {integrity: sha512-O+PCv11lgTNJUzy49teNAWLjBZfc+A1enOwTpLlH6/rsvKcTwcdTT8m9azGkVqM7HBl5jpyZ7KTPhHweokBcdg==}
-    engines: {node: '>=14.18.0'}
-    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
-
   superagent@8.1.2:
     resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
     engines: {node: '>=6.4.0 <13 || >=14'}
@@ -6214,11 +6196,6 @@ packages:
   supertest@6.3.4:
     resolution: {integrity: sha512-erY3HFDG0dPnhw4U+udPfrzXa4xhSG+n4rxfRuZWCUvjFWwKl+OxWf/7zk50s84/fAAs7vf5QAb9uRa0cCykxw==}
     engines: {node: '>=6.4.0'}
-    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
-
-  supertest@7.1.1:
-    resolution: {integrity: sha512-aI59HBTlG9e2wTjxGJV+DygfNLgnWbGdZxiA/sgrnNNikIW8lbDvCtF6RnhZoJ82nU7qv7ZLjrvWqCEm52fAmw==}
-    engines: {node: '>=14.18.0'}
     deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supports-color@5.5.0:
@@ -6259,10 +6236,12 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.4.3:
     resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
@@ -9749,11 +9728,6 @@ snapshots:
     dependencies:
       '@types/superagent': 8.1.9
 
-  '@types/supertest@6.0.3':
-    dependencies:
-      '@types/methods': 1.1.4
-      '@types/superagent': 8.1.9
-
   '@types/uuid@10.0.0': {}
 
   '@types/uuid@8.3.4': {}
@@ -11872,12 +11846,6 @@ snapshots:
       dezalgo: 1.0.4
       once: 1.4.0
       qs: 6.14.0
-
-  formidable@3.5.4:
-    dependencies:
-      '@paralleldrive/cuid2': 2.2.2
-      dezalgo: 1.0.4
-      once: 1.4.0
 
   forwarded@0.2.0: {}
 
@@ -14257,20 +14225,6 @@ snapshots:
       ts-interface-checker: 0.1.13
     optional: true
 
-  superagent@10.2.1:
-    dependencies:
-      component-emitter: 1.3.1
-      cookiejar: 2.1.4
-      debug: 4.4.1
-      fast-safe-stringify: 2.1.1
-      form-data: 4.0.2
-      formidable: 3.5.4
-      methods: 1.1.2
-      mime: 2.6.0
-      qs: 6.14.0
-    transitivePeerDependencies:
-      - supports-color
-
   superagent@8.1.2:
     dependencies:
       component-emitter: 1.3.1
@@ -14290,13 +14244,6 @@ snapshots:
     dependencies:
       methods: 1.1.2
       superagent: 8.1.2
-    transitivePeerDependencies:
-      - supports-color
-
-  supertest@7.1.1:
-    dependencies:
-      methods: 1.1.2
-      superagent: 10.2.1
     transitivePeerDependencies:
       - supports-color
 

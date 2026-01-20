@@ -1,7 +1,7 @@
-import { IBaseMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord } from '@credo-ts/core'
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable, Optional } from '@nestjs/common'
+import { IBaseMessage } from '@verana-labs/vs-agent-model'
 import { Queue } from 'bull'
 
 import { REDIS_HOST } from '../../../../config/constants'

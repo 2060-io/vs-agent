@@ -12,7 +12,7 @@ permissions:
 
 env:
   IMAGE_NAME: 'vs-agent'
-  DEMO_CHATBOT_IMAGE_NAME: 'demo-chatbot-backend'
+  DEMO_CHATBOT_IMAGE_NAME: 'vs-agent-demo-chatbot-backend'
 
 jobs:
   resolve-version:
