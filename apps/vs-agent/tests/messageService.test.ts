@@ -1,3 +1,4 @@
+import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ProfileMessage, TextMessage } from '@2060.io/vs-agent-model'
 import { DidCommBasicMessage, DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
@@ -40,11 +41,15 @@ describe('MessageService', () => {
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
+      faberAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(faberMessages))
+      faberAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberEvents = vi.spyOn(faberAgent.events, 'emit')
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
+      aliceAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
+      aliceAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
@@ -116,7 +121,7 @@ describe('MessageService', () => {
 
       // expects
       expect(connection.id).toBe(aliceConnection.id)
-      expect(profile.displayPicture?.links?.[0]).toBe(displayImageUrl)
+      expect((profile.displayPicture as PictureData)?.links?.[0]).toBe(displayImageUrl)
       expect(profile.description).toBe(description)
     })
   })

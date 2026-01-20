@@ -6,7 +6,7 @@ import {
   ProfileMessage,
   TextMessage,
 } from '@2060.io/vs-agent-model'
-import { CredentialState } from '@credo-ts/core'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 import { Test, TestingModule } from '@nestjs/testing'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
@@ -139,7 +139,7 @@ describe('MessageEventService', () => {
           type: 'credential-reception',
           connectionId: 'conn1',
           threadId: 'thread1',
-          state: CredentialState.Done,
+          state: DidCommCredentialState.Done,
         } as CredentialReceptionMessage,
       })
 

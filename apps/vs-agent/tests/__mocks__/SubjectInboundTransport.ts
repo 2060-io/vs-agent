@@ -1,6 +1,6 @@
 import type { Subscription } from 'rxjs'
 
-import { Agent, AgentContext, utils } from '@credo-ts/core'
+import { AgentContext, EventEmitter, utils } from '@credo-ts/core'
 import {
   DidCommEncryptedMessage,
   DidCommInboundTransport,
@@ -20,18 +20,19 @@ export class SubjectInboundTransport implements DidCommInboundTransport {
     this.ourSubject = ourSubject
   }
 
-  public async start(agent: Agent) {
-    this.subscribe(agent)
+  public async start(agentContext: AgentContext) {
+    this.subscribe(agentContext)
   }
 
   public async stop() {
     this.subscription?.unsubscribe()
   }
 
-  private subscribe(agent: Agent) {
-    const logger = agent.config.logger
-    const transportService = agent.dependencyManager.resolve(DidCommTransportService)
-    const messageReceiver = agent.dependencyManager.resolve(DidCommMessageReceiver)
+  private subscribe(agentContext: AgentContext) {
+    const logger = agentContext.config.logger
+    const transportService = agentContext.dependencyManager.resolve(DidCommTransportService)
+    const messageReceiver = agentContext.dependencyManager.resolve(DidCommMessageReceiver)
+    const eventEmitter = agentContext.dependencyManager.resolve(EventEmitter)
 
     this.subscription = this.ourSubject.subscribe({
       next: async ({ message, replySubject }: SubjectMessage) => {
@@ -54,7 +55,7 @@ export class SubjectInboundTransport implements DidCommInboundTransport {
         try {
           await messageReceiver.receiveMessage(message, { session })
         } catch (error) {
-          agent.events.emit(agent.context, {
+          eventEmitter.emit(agentContext, {
             type: 'AgentReceiveMessageError',
             payload: error,
           })
@@ -74,7 +75,7 @@ export class SubjectTransportSession implements DidCommTransportSession {
     this.replySubject = replySubject
   }
 
-  public async send(agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
+  public async send(_agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
     this.replySubject.next({ message: encryptedMessage })
   }
 

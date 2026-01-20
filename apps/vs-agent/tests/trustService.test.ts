@@ -39,10 +39,14 @@ describe('TrustService', () => {
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
+      faberAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(faberMessages))
+      faberAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
+      aliceAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
+      aliceAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')

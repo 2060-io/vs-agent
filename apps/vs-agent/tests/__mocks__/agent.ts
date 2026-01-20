@@ -1,12 +1,14 @@
-import { KeyDerivationMethod, LogLevel, utils } from '@credo-ts/core'
+import { AskarSqliteStorageConfig } from '@credo-ts/askar'
+import { LogLevel, utils } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
+import { KdfMethod } from '@openwallet-foundation/askar-nodejs'
 
+import { keyDerivationMethodMap } from '../../src/config'
 import { createVsAgent, TsLogger } from '../../src/utils'
 
 export const startAgent = async ({ label, domain }: { label: string; domain: string }) => {
   const agent = createVsAgent({
     config: {
-      label,
       logger: new TsLogger(LogLevel.off, label),
     },
     walletConfig: getAskarStoreConfig(label, { inMemory: true }),
@@ -29,13 +31,13 @@ export function getAskarStoreConfig(
   return {
     id: `Wallet: ${name} - ${random}`,
     key: 'DZ9hPqFWTPxemcGea72C1X1nusqk5wFNLq6QPjwXGqAa',
-    keyDerivationMethod: KeyDerivationMethod.Raw,
+    keyDerivationMethod: keyDerivationMethodMap[KdfMethod.Raw],
     database: {
       type: 'sqlite',
       config: {
         inMemory,
         maxConnections,
       },
-    },
+    } as AskarSqliteStorageConfig,
   }
 }

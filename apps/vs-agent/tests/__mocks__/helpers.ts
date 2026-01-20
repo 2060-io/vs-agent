@@ -39,9 +39,9 @@ export function isCredentialStateChangedEvent(arg: unknown): arg is DidCommCrede
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    type === 'CredentialStateChanged' &&
-    !!payload?.credentialRecord &&
-    payload?.credentialRecord.type === DidCommCredentialExchangeRecord.type
+    type === 'DidCommCredentialStateChanged' &&
+    !!payload?.credentialExchangeRecord &&
+    payload?.credentialExchangeRecord.type === DidCommCredentialExchangeRecord.type
   )
 }
 
@@ -50,7 +50,7 @@ export function isAgentMessageProcessedEvent(arg: unknown): arg is DidCommMessag
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    type === 'AgentMessageProcessed' &&
+    type === 'DidCommMessageProcessed' &&
     !!payload?.message &&
     payload?.message.type === DidCommBasicMessage.type.messageTypeUri &&
     !!payload?.connection
