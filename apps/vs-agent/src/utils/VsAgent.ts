@@ -21,7 +21,6 @@ import {
   DidDocument,
   DidDocumentService,
   DidRepository,
-  DidsApi,
   DidsModule,
   InitConfig,
   Kms,
@@ -45,7 +44,7 @@ import { WebVhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@cr
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
 import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
-import { multibaseDecode } from 'didwebvh-ts'
+import { multibaseEncode, MultibaseEncoding } from 'didwebvh-ts'
 
 import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 import { FullTailsFileService } from '../services/FullTailsFileService'
@@ -268,14 +267,24 @@ export class VsAgent extends Agent<VsAgentModules> {
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
     const keyAgreementId = `${publicDid}#key-agreement-1`
-    const didApi = this.agentContext.resolve(DidsApi)
-    const [record] = await didApi.getCreatedDids()
-    if (!record.keys) throw new CredoError('No keys found in DID record')
-    const { didDocumentRelativeKeyId } = record.keys[0]
-    const verificationMethodId = `${publicDid}${didDocumentRelativeKeyId}`
-    const publicKeyX25519 = convertPublicKeyToX25519(
-      multibaseDecode(didDocumentRelativeKeyId.slice(1)).bytes.slice(2),
+    const kms = this.agentContext.resolve(Kms.KeyManagementApi)
+    const didRepository = this.agentContext.resolve(DidRepository)
+
+    // Create didcomm keys
+    const key = await kms.createKey({ type: { kty: 'OKP', crv: 'Ed25519' } })
+    const publicKeyBytes = Kms.PublicJwk.fromPublicJwk(key.publicJwk).publicKey.publicKey
+    const publicKeyMultibase = multibaseEncode(
+      new Uint8Array([0xed, 0x01, ...publicKeyBytes]),
+      MultibaseEncoding.BASE58_BTC,
     )
+    const [record] = await didRepository.findByQuery(this.agentContext, { did: publicDid })
+    record.keys?.push({
+      kmsKeyId: key.keyId,
+      didDocumentRelativeKeyId: `#${publicKeyMultibase}`,
+    })
+    await didRepository.update(this.agentContext, record)
+    const verificationMethodId = `${publicDid}#${publicKeyMultibase}`
+    const publicKeyX25519 = convertPublicKeyToX25519(publicKeyBytes)
     const x25519Key = Kms.PublicJwk.fromPublicKey({ kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
 
     // Remove legacy if exist
@@ -295,7 +304,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       {
         controller: publicDid,
         id: verificationMethodId,
-        publicKeyMultibase: didDocumentRelativeKeyId.slice(1),
+        publicKeyMultibase: publicKeyMultibase,
         type: 'Ed25519VerificationKey2020',
       },
       {
