@@ -2,7 +2,7 @@
   "name": "@verana-labs/vs-agent-client",
   "main": "build/index",
   "types": "build/index",
-  "version": "1.3.2",
+  "version": "1.6.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/2060-io/vs-agent"
