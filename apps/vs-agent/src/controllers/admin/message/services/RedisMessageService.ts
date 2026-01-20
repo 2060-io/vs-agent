@@ -1,7 +1,7 @@
-import { IBaseMessage } from '@2060.io/vs-agent-model'
 import { ConnectionRecord, utils } from '@credo-ts/core'
 import { Process, Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
+import { IBaseMessage } from '@verana-labs/vs-agent-model'
 import { Job } from 'bull'
 
 import { MessageService } from '../MessageService'

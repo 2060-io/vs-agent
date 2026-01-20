@@ -20,7 +20,7 @@ The Chatbot example demonstrates a VS Agent–powered conversational service tha
 1. Clone the repository and navigate to the example:
 
    ```bash
-   git clone https://github.com/2060-io/vs-agent.git
+   git clone https://github.com/verana-labs/vs-agent.git
    cd vs-agent/examples/chatbot
    ```
 

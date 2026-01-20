@@ -1,4 +1,3 @@
-import { CredentialIssuanceRequest, CredentialIssuanceResponse } from '@2060.io/vs-agent-model'
 import { AnonCredsCredentialDefinitionRepository } from '@credo-ts/anoncreds'
 import {
   DidDocumentService,
@@ -12,6 +11,7 @@ import {
   W3cJsonLdVerifiablePresentation,
 } from '@credo-ts/core'
 import { Logger, Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { CredentialIssuanceRequest, CredentialIssuanceResponse } from '@verana-labs/vs-agent-model'
 
 import { UrlShorteningService } from '../../../services'
 import { VsAgentService } from '../../../services/VsAgentService'

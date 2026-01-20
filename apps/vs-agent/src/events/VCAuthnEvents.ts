@@ -1,5 +1,5 @@
-import { VCAuthnEvent } from '@2060.io/vs-agent-model'
 import { ProofEventTypes, ProofState, ProofStateChangedEvent } from '@credo-ts/core'
+import { VCAuthnEvent } from '@verana-labs/vs-agent-model'
 
 import { ServerConfig, VsAgent } from '../utils'
 

@@ -1,4 +1,4 @@
-import { ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
+import { ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 import { UserProfile } from '../types'

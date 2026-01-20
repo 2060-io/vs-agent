@@ -1,4 +1,4 @@
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@verana-labs/vs-agent-client'
 import {
   CallOfferRequestMessage,
   ContextualMenuSelectMessage,
@@ -24,7 +24,7 @@ import {
   MediaMessage,
   MrtdSubmitState,
   CredentialReceptionMessage,
-} from '@2060.io/vs-agent-model'
+} from '@verana-labs/vs-agent-model'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
 import express from 'express'

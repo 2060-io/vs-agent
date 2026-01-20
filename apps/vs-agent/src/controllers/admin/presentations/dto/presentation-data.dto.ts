@@ -1,5 +1,5 @@
-import { RequestedCredential, Claim } from '@2060.io/vs-agent-model'
 import { ApiProperty } from '@nestjs/swagger'
+import { RequestedCredential, Claim } from '@verana-labs/vs-agent-model'
 
 export class PresentationDataDto {
   @ApiProperty({
