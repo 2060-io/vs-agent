@@ -5,7 +5,7 @@
   "version": "1.6.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2060-io/vs-agent"
+    "url": "https://github.com/verana-labs/vs-agent"
   },
   "files": [
     "build"

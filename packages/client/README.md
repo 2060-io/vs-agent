@@ -1,7 +1,7 @@
 `@verana-labs/vs-agent-client`
 
 # VS Agent Client
-**VS Agent Client** is a TypeScript library designed to simplify the interaction with [**VS Agent**](https://github.com/2060-io/vs-agent). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
+**VS Agent Client** is a TypeScript library designed to simplify the interaction with [**VS Agent**](https://github.com/verana-labs/vs-agent). It provides an abstraction layer for communicating with the agent, handling messaging, credential management, and event handling efficiently.
 
 This package ensures that the client stays updated with the latest API versioning of the **VS Agent** to maintain compatibility with evolving endpoints.
 
@@ -129,4 +129,4 @@ This library evolves alongside VS Agent. Contributions are welcome!
 - Commit changes.
 - Open a pull request.
 
-For more details, visit the [official repository](https://github.com/2060-io/vs-agent).
+For more details, visit the [official repository](https://github.com/verana-labs/vs-agent).

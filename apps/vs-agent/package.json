@@ -11,11 +11,11 @@
     "access": "public"
   },
   "license": "Apache-2.0",
-  "description": "Your gateway to 2060 ecosystem",
-  "homepage": "https://2060.io",
+  "description": "Container-based Verifiable Trust Agent SDK",
+  "homepage": "https://verana.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2060-io/2060-vs-agent"
+    "url": "https://github.com/verana-labs/vs-agent"
   },
   "nohoist": [
     "@credo-ts/node",

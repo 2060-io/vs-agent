@@ -3,11 +3,11 @@
   "version": "1.6.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Your gateway to 2060 ecosystem",
-  "homepage": "https://2060.io",
+  "description": "Verifiable Trust Agent SDK",
+  "homepage": "https://verana.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2060-io/vs-agent"
+    "url": "https://github.com/verana-labs/vs-agent"
   },
   "scripts": {
     "build": "pnpm -r --workspace-concurrency=1 --sort run build",

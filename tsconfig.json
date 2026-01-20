@@ -8,7 +8,7 @@
     "skipLibCheck": true,   
     "baseUrl": ".",
     "paths": {
-      "@2060.io/*": ["packages/*/src"]
+      "@verana-labs/*": ["packages/*/src"]
     },
     "types": ["vitest", "node"]
   },

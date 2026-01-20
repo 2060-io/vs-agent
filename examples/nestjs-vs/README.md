@@ -319,7 +319,7 @@ The `CoreService` provides the main logic for handling messages, managing connec
 
   ```typescript
   import { STAT_KPI } from './common';
-  import { StatEnum } from '@2060.io/service-agent-model';
+  import { StatEnum } from '@verana-labs/vs-agent-model';
 
   private async sendStats(kpi: STAT_KPI, session: SessionEntity): Promise<void> {
     this.logger.debug('*** Sending stats event ***');
@@ -452,7 +452,7 @@ Follow these steps to run the `nestjs-vs` chatbot example from this repository:
 ### 1. **Clone the Repository**
 
 ```bash
-git clone https://github.com/2060-io/vs-agent.git
+git clone https://github.com/verana-labs/vs-agent.git
 cd vs-agent/examples/nestjs-vs
 ```
 
@@ -559,7 +559,7 @@ To run the chatbot in a Docker container:
   yarn test
   ```
 
-  > 💡 **Note:** For local development, consider replacing the `@2060.io` library versions such as:
+  > 💡 **Note:** For local development, consider replacing the `@verana-labs` library versions such as:
   >
   > ```json
   > "@verana-labs/vs-agent-model": "workspace:*",
@@ -604,7 +604,7 @@ To run the chatbot in a Docker container:
 
 5. **Review Library Documentation**:
 
-   - Familiarize yourself with the APIs provided by the `@2060.io` libraries. These libraries offer powerful tools for message handling, credential management, and API interactions.
+   - Familiarize yourself with the APIs provided by the `@verana-labs` libraries. These libraries offer powerful tools for message handling, credential management, and API interactions.
 
 6. **Extend Features**:
 

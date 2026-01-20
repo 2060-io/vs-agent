@@ -1,7 +1,7 @@
 `@verana-labs/vs-agent-model`
 # VS Agent Model
 
-This package provides the data models used by **VS Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
+This package provides the data models used by **VS Agent** and its related services and libraries within the `@verana-labs` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
 
 ## Packages Using This Library
 
