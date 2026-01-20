@@ -18,7 +18,7 @@ VS Agent is a web application that can be used as a framework for building conve
 The easiest way to get started with VS Agent is by using Docker. Pull the image from Docker Hub:
 
 ```
-docker pull io2060/vs-agent
+docker pull verana-labs/vs-agent
 ```
 
 Or build it directly from this repo:
@@ -30,7 +30,7 @@ docker build -t vs-agent:dev -f ./apps/vs-agent/Dockerfile .
 Then, you can just run it. Don't forget to set the environment variables as required! See [VS Agent Configuration](./apps/vs-agent/README.md#configuration) for a detailed description:
 
 ```
-docker run --env-file ./env-vars io2060/vs-agent
+docker run --env-file ./env-vars verana-labs/vs-agent
 ```
 
 Once your VS Agent is up and running, you can manage it from your backend basically in three different ways
