@@ -1,6 +1,6 @@
 // stats.service.ts
-import { StatEnum, StatEvent } from '@2060.io/vs-agent-model'
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
+import { StatEnum, StatEvent } from '@verana-labs/vs-agent-model'
 import { Container, Connection, Sender, create_container } from 'rhea'
 
 import { StatEventOptions } from '../types'

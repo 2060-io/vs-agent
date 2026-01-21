@@ -1,4 +1,4 @@
-import { ApiClient, ExpressEventHandler, ApiVersion } from '@2060.io/vs-agent-client'
+import { ApiClient, ExpressEventHandler, ApiVersion } from '@verana-labs/vs-agent-client'
 import type { Express } from 'express'
 import cors from 'cors'
 import express from 'express'

@@ -141,6 +141,9 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.0
         version: 1.5.5
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../../packages/model
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -214,10 +217,10 @@ importers:
 
   examples/chatbot:
     dependencies:
-      '@2060.io/vs-agent-client':
+      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@2060.io/vs-agent-model':
+      '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
       body-parser:
@@ -266,9 +269,6 @@ importers:
 
   examples/nestjs-vs:
     dependencies:
-      '@2060.io/vs-agent-nestjs-client':
-        specifier: workspace:*
-        version: link:../../packages/nestjs-client
       '@credo-ts/core':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.8.3)
@@ -296,6 +296,9 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      '@verana-labs/vs-agent-nestjs-client':
+        specifier: workspace:*
+        version: link:../../packages/nestjs-client
       axios:
         specifier: ^1.7.7
         version: 1.9.0
@@ -339,9 +342,6 @@ importers:
       '@types/node':
         specifier: 20.11.19
         version: 20.11.19
-      '@types/supertest':
-        specifier: ^6.0.0
-        version: 6.0.3
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.0.0
         version: 8.33.0(@typescript-eslint/parser@8.33.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
@@ -366,9 +366,6 @@ importers:
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
-      supertest:
-        specifier: ^7.0.0
-        version: 7.1.1
       ts-loader:
         specifier: ^9.4.3
         version: 9.5.2(typescript@5.8.3)(webpack@5.97.1)
@@ -384,10 +381,10 @@ importers:
 
   examples/verifier:
     dependencies:
-      '@2060.io/vs-agent-client':
+      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@2060.io/vs-agent-model':
+      '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
       body-parser:
@@ -436,9 +433,6 @@ importers:
 
   packages/client:
     dependencies:
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../model
       '@credo-ts/core':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.8.3)
@@ -1743,9 +1737,6 @@ packages:
 
   '@types/supertest@2.0.16':
     resolution: {integrity: sha512-6c2ogktZ06tr2ENoZivgm7YnprnhYE4ZoXGMY+oA7IuAf17M8FWvujXZGmxLv8y0PTyts4x5A+erSwVUFA8XSg==}
-
-  '@types/supertest@6.0.3':
-    resolution: {integrity: sha512-8WzXq62EXFhJ7QsH3Ocb/iKQ/Ty9ZVWnVzoTKc9tyyFRRF3a74Tk2+TLFgaFFw364Ere+npzHKEJ6ga2LzIL7w==}
 
   '@types/uuid@10.0.0':
     resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
@@ -3086,10 +3077,6 @@ packages:
 
   formidable@2.1.5:
     resolution: {integrity: sha512-Oz5Hwvwak/DCaXVVUtPn4oLMLLy1CdclLKO1LFgU7XzDpVMUU5UjlSLpGMocyQNNk8F6IJW9M/YdooSn2MRI+Q==}
-
-  formidable@3.5.4:
-    resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
-    engines: {node: '>=14.0.0'}
 
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
@@ -4655,10 +4642,12 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   terser-webpack-plugin@5.3.14:
     resolution: {integrity: sha512-vkZjpUjb6OMS7dhV+tILUW6BhpDR7P2L/aQSAv+Uwk+m8KATX9EccViHTJR2qDtACKPIYndLGCyl3FMo+r2LMw==}
@@ -6845,11 +6834,6 @@ snapshots:
     dependencies:
       '@types/superagent': 8.1.9
 
-  '@types/supertest@6.0.3':
-    dependencies:
-      '@types/methods': 1.1.4
-      '@types/superagent': 8.1.9
-
   '@types/uuid@10.0.0': {}
 
   '@types/uuid@8.3.4': {}
@@ -8486,12 +8470,6 @@ snapshots:
       dezalgo: 1.0.4
       once: 1.4.0
       qs: 6.14.0
-
-  formidable@3.5.4:
-    dependencies:
-      '@paralleldrive/cuid2': 2.2.2
-      dezalgo: 1.0.4
-      once: 1.4.0
 
   forwarded@0.2.0: {}
 

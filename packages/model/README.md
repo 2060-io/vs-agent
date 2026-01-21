@@ -1,15 +1,15 @@
-`@2060.io/vs-agent-model`
+`@verana-labs/vs-agent-model`
 # VS Agent Model
 
-This package provides the data models used by **VS Agent** and its related services and libraries within the `@2060.io` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
+This package provides the data models used by **VS Agent** and its related services and libraries within the `@verana-labs` ecosystem. These models are essential for chatbot development and facilitate integration with the broader system.
 
 ## Packages Using This Library
 
 The models in this package are used by the following services and libraries:
 
-- **[@2060.io/vs-agent](../../apps/vs-agent/README.md)** – VS Agent.
-- **[@2060.io/vs-agent-nestjs-client](../nestjs-client/README.md)** – A NestJS client for interacting with VS Agent.
-- **[@2060.io/vs-agent-client](../client/README.md)** – A general-purpose API client for VS Agent.
+- **[@verana-labs/vs-agent](../../apps/vs-agent/README.md)** – VS Agent.
+- **[@verana-labs/vs-agent-nestjs-client](../nestjs-client/README.md)** – A NestJS client for interacting with VS Agent.
+- **[@verana-labs/vs-agent-client](../client/README.md)** – A general-purpose API client for VS Agent.
 
 
 ## Usage
@@ -66,14 +66,14 @@ classDiagram
 ### Installation
 
 ```sh
-npm install @2060.io/vs-agent-model
+npm install @verana-labs/vs-agent-model
 ```
 or
 ```sh
-yarn add @2060.io/vs-agent-model
+yarn add @verana-labs/vs-agent-model
 or
 ```sh
-pnpm add @2060.io/vs-agent-model
+pnpm add @verana-labs/vs-agent-model
 ```
 
 ## Example
@@ -81,7 +81,7 @@ pnpm add @2060.io/vs-agent-model
 Importing and using a message model:
 
 ```typescript
-import { CallOfferRequestMessage } from '@2060.io/vs-agent-model';
+import { CallOfferRequestMessage } from '@verana-labs/vs-agent-model';
 
 const callOffer = new CallOfferRequestMessage({
     connectionId: 'connectionId',

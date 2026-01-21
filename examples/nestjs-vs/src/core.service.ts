@@ -15,7 +15,7 @@ import {
   MrzDataSubmitMessage,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/vs-agent-nestjs-client'
+} from '@verana-labs/vs-agent-nestjs-client'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'

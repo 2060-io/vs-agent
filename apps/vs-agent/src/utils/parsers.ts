@@ -1,6 +1,6 @@
 import { DidCommMessageReceipt } from '@2060.io/credo-ts-didcomm-receipts'
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
-import { didcommMessageState, VsAgentMessageReceipt } from '@2060.io/vs-agent-model'
+import { didcommMessageState, VsAgentMessageReceipt } from '@verana-labs/vs-agent-model'
 
 export const UriValidator = /\w+:(\/?\/?)[^\s]+/
 export function parseDataUrl(dataUrl: string) {

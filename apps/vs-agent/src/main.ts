@@ -38,7 +38,6 @@ import {
 } from './config'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
-import { vcAuthnEvents } from './events/VCAuthnEvents'
 import { PublicModule } from './public.module'
 import {
   commonAppConfig,
@@ -170,9 +169,6 @@ const run = async () => {
   // Listen to events emitted by the agent
   connectionEvents(agent, conf)
   messageEvents(agent, conf)
-
-  // VCAuthn related events (TODO: make configurable)
-  vcAuthnEvents(agent, conf)
 
   agent.config.logger.info(
     `VS Agent v${packageJson['version']} running in port ${AGENT_PORT}. Admin interface at port ${conf.port}`,

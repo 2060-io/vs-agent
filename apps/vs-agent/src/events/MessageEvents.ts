@@ -26,6 +26,8 @@ import {
   ProfileEventTypes,
   UserProfileRequestedEvent,
 } from '@2060.io/credo-ts-didcomm-user-profile'
+import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
+import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
 import {
   BaseMessage,
   Claim,
@@ -48,8 +50,7 @@ import {
   MessageReceived,
   MrtdSubmitState,
   CallAcceptRequestMessage,
-} from '@2060.io/vs-agent-model'
-import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
+} from '@verana-labs/vs-agent-model'
 import { DidCommPresentationV1Message, DidCommPresentationV1ProblemReportMessage } from '@credo-ts/anoncreds'
 import {
   DidCommBasicMessage,
@@ -61,7 +62,6 @@ import {
   DidCommPresentationV2Message,
   DidCommPresentationV2ProblemReportMessage,
 } from '@credo-ts/didcomm'
-import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
 
 import { createDataUrl, VsAgent } from '../utils'
 

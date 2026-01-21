@@ -1,4 +1,4 @@
-`@2060.io/vs-agent-nestjs-client`
+`@verana-labs/vs-agent-nestjs-client`
 # Nestjs-client for VS Agent
 The `nestjs-client` library simplifies the integration of VS Agent components in your NestJS applications. It provides several modules that follow a plug-and-play architecture, allowing you to incorporate them based on your needs. Certain modules, such as credential management, recommend using the message handling module for seamless operation.
 
@@ -112,7 +112,7 @@ This example demonstrates how to configure and use the `StatEventModule` to send
 - **AppModule**
 ```typescript
 import { Module } from '@nestjs/common';
-import { StatEventModule } from '@2060.io/vs-agent-nestjs-client';
+import { StatEventModule } from '@verana-labs/vs-agent-nestjs-client';
 
 EventsModule.register({
   modules: {
@@ -149,7 +149,7 @@ After configuring the `StatEventModule`, you can inject the `StatProducerService
 
 ```typescript
 import { STAT_KPI } from './common'
-import { StatEnum, StatProducerService } from '@2060.io/vs-agent-nestjs-client'
+import { StatEnum, StatProducerService } from '@verana-labs/vs-agent-nestjs-client'
 
 export class CoreService implements EventHandler, OnModuleInit {
   constructor(

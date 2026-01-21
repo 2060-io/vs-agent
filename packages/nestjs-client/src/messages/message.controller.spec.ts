@@ -1,14 +1,14 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import { HttpUtils } from '@2060.io/vs-agent-client'
-import { MessageReceived, MessageStateUpdated, TextMessage } from '@2060.io/vs-agent-model'
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
+import { HttpUtils } from '@verana-labs/vs-agent-client'
+import { MessageReceived, MessageStateUpdated, TextMessage } from '@verana-labs/vs-agent-model'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { MessageEventController } from './message.controller'
 import { MessageEventService } from './message.service'
 
-vi.mock('@2060.io/vs-agent-client', () => ({
+vi.mock('@verana-labs/vs-agent-client', () => ({
   HttpUtils: {
     handleException: vi.fn(),
   },

@@ -1,8 +1,8 @@
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
-import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@2060.io/vs-agent-model'
 import { JsonObject, Sha256, utils } from '@credo-ts/core'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { ApiClient, ApiVersion } from '@verana-labs/vs-agent-client'
+import { Claim, CredentialIssuanceMessage, CredentialRevocationMessage } from '@verana-labs/vs-agent-model'
 import { FindOneOptions, IsNull, Not, Repository } from 'typeorm'
 
 import { CredentialOptions, CredentialStatus } from '../types'

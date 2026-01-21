@@ -1,6 +1,6 @@
 import type { ServerConfig, VsAgent } from '../utils'
 
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@2060.io/vs-agent-model'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import {
   DidCommConnectionEventTypes,
   DidCommConnectionRepository,

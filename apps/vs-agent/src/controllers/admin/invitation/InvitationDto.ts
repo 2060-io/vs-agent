@@ -1,10 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger'
 import {
   ClaimOptions,
   CreateCredentialOfferOptions,
   CreatePresentationRequestOptions,
   RequestedCredential,
-} from '@2060.io/vs-agent-model'
-import { ApiProperty } from '@nestjs/swagger'
+} from '@verana-labs/vs-agent-model'
 import { IsNotEmpty } from 'class-validator'
 
 export class CreatePresentationRequestDto implements CreatePresentationRequestOptions {

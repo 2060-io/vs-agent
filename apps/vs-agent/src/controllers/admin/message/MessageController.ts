@@ -1,4 +1,3 @@
-import { BaseMessage } from '@2060.io/vs-agent-model'
 import { utils } from '@credo-ts/core'
 import { DidCommDidExchangeState } from '@credo-ts/didcomm'
 import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
@@ -9,6 +8,7 @@ import {
   ApiInternalServerErrorResponse,
   getSchemaPath,
 } from '@nestjs/swagger'
+import { BaseMessage } from '@verana-labs/vs-agent-model'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { VsAgent } from '../../../utils'

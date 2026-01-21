@@ -1,8 +1,3 @@
-import {
-  CreateCredentialOfferResult,
-  CreatePresentationRequestResult,
-  CreateInvitationResult,
-} from '@2060.io/vs-agent-model'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { Controller, Get, Post, Body, Query, Inject } from '@nestjs/common'
 import {
@@ -13,6 +8,11 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import {
+  CreateCredentialOfferResult,
+  CreatePresentationRequestResult,
+  CreateInvitationResult,
+} from '@verana-labs/vs-agent-model'
 
 import { UrlShorteningService } from '../../../services/UrlShorteningService'
 import { VsAgentService } from '../../../services/VsAgentService'

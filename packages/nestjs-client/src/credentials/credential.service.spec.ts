@@ -25,7 +25,7 @@ const mockGetAll = vi.fn().mockResolvedValue([
     revocationSupported: true,
   },
 ])
-vi.mock('@2060.io/vs-agent-client', () => {
+vi.mock('@verana-labs/vs-agent-client', () => {
   return {
     ApiClient: vi.fn().mockImplementation(function () {
       return {

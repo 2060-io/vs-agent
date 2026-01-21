@@ -4,7 +4,7 @@ import {
   CredentialTypeInfo,
   CredentialTypeResult,
   ImportCredentialTypeOptions,
-} from '@2060.io/vs-agent-model'
+} from '@verana-labs/vs-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'

@@ -1,3 +1,5 @@
+import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import {
   TextMessage,
   ReceiptsMessage,
@@ -32,8 +34,6 @@ import {
   DidCommOutOfBandInvitation,
   DidCommOutOfBandRepository,
 } from '@credo-ts/didcomm'
-import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
-import { Inject, Injectable, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { didcommReceiptFromVsAgentReceipt, parsePictureData } from '../../../utils'
