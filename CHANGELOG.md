@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/verana-labs/vs-agent/compare/v1.6.0...v1.7.0) (2026-01-20)
+
+
+### Features
+
+* drop vcauthn support ([#319](https://github.com/verana-labs/vs-agent/issues/319)) ([24d662b](https://github.com/verana-labs/vs-agent/commit/24d662b97f50cf85ad949266dd548546adf155dc))
+
+
+### Bug Fixes
+
+* references to veranalabs in DockerHub ([#322](https://github.com/verana-labs/vs-agent/issues/322)) ([2a4b94e](https://github.com/verana-labs/vs-agent/commit/2a4b94e013fe8748a964647c95716c5728a8b116))
+* update chart name for demo chatbot ([#320](https://github.com/verana-labs/vs-agent/issues/320)) ([eb56a6c](https://github.com/verana-labs/vs-agent/commit/eb56a6c947c9c7dfc3ca7628ffcb45d327eeb961))
+
 ## [1.6.0](https://github.com/verana-labs/vs-agent/compare/v1.5.3...v1.6.0) (2026-01-13)
 
 
