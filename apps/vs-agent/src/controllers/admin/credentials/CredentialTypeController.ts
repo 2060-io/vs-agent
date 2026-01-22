@@ -1,9 +1,4 @@
 import {
-  CredentialTypeInfo,
-  CredentialTypeResult,
-  ImportCredentialTypeOptions,
-} from '@2060.io/vs-agent-model'
-import {
   AnonCredsCredentialDefinition,
   AnonCredsCredentialDefinitionPrivateRecord,
   AnonCredsCredentialDefinitionPrivateRepository,
@@ -41,6 +36,11 @@ import {
   getSchemaPath,
   ApiParam,
 } from '@nestjs/swagger'
+import {
+  CredentialTypeInfo,
+  CredentialTypeResult,
+  ImportCredentialTypeOptions,
+} from '@verana-labs/vs-agent-model'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 

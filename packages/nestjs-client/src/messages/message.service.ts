@@ -1,13 +1,13 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
+import { CredentialState, JsonTransformer } from '@credo-ts/core'
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
+import { ApiClient, ApiVersion } from '@verana-labs/vs-agent-client'
 import {
   CredentialReceptionMessage,
   MessageReceived,
   ProfileMessage,
   ReceiptsMessage,
-} from '@2060.io/vs-agent-model'
-import { CredentialState, JsonTransformer } from '@credo-ts/core'
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common'
+} from '@verana-labs/vs-agent-model'
 
 import { ConnectionsEventService, ConnectionsRepository } from '../connections'
 import { CredentialService } from '../credentials'

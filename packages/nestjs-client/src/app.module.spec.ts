@@ -1,4 +1,4 @@
-import { ApiVersion } from '@2060.io/vs-agent-client'
+import { ApiVersion } from '@verana-labs/vs-agent-client'
 import { describe, it, expect, vi } from 'vitest'
 
 import { ConnectionsEventModule, EventsModule, MessageEventModule } from '../src'

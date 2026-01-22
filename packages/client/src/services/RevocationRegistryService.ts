@@ -1,6 +1,6 @@
 // src/services/RevocationRegistryService.ts
 
-import { RevocationRegistryInfo } from '@2060.io/vs-agent-model'
+import { RevocationRegistryInfo } from '@verana-labs/vs-agent-model'
 import { Logger } from 'tslog'
 
 import { ApiVersion } from '../types/enums'

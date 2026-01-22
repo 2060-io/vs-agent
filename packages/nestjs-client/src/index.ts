@@ -1,5 +1,5 @@
-export * from '@2060.io/vs-agent-client'
-export * from '@2060.io/vs-agent-model'
+export * from '@verana-labs/vs-agent-client'
+export * from '@verana-labs/vs-agent-model'
 export * from './app.module'
 export * from './connections'
 export * from './credentials'

@@ -1,20 +1,20 @@
 {
   "name": "vs-agent",
-  "version": "1.5.3",
+  "version": "1.7.0",
   "private": true,
   "license": "Apache-2.0",
-  "description": "Your gateway to 2060 ecosystem",
-  "homepage": "https://2060.io",
+  "description": "Verifiable Trust Agent SDK",
+  "homepage": "https://verana.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/2060-io/vs-agent"
+    "url": "https://github.com/verana-labs/vs-agent"
   },
   "scripts": {
     "build": "pnpm -r --workspace-concurrency=1 --sort run build",
-    "start": "pnpm --filter @2060.io/vs-agent start",
-    "start:dev": "pnpm --filter @2060.io/vs-agent start:dev",
-    "start:chatbot": "pnpm --filter 2060-demo-chatbot start",
-    "start:verifier": "pnpm --filter 2060-demo-verifier start",
+    "start": "pnpm --filter @verana-labs/vs-agent start",
+    "start:dev": "pnpm --filter @verana-labs/vs-agent start:dev",
+    "start:chatbot": "pnpm --filter demo-chatbot start",
+    "start:verifier": "pnpm --filter demo-verifier start",
     "start:nestjsvs": "pnpm --filter nestjs-vs start",
     "check-types": "pnpm check-types:build",
     "check-types:build": "pnpm -r --parallel exec tsc --noEmit",

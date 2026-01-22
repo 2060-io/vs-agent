@@ -27,6 +27,19 @@ import {
   ProfileEventTypes,
   UserProfileRequestedEvent,
 } from '@2060.io/credo-ts-didcomm-user-profile'
+import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
+import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
+import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
+import {
+  CredentialEventTypes,
+  CredentialState,
+  V2PresentationProblemReportMessage,
+  AgentEventTypes,
+  AgentMessageProcessedEvent,
+  BasicMessage,
+  V2PresentationMessage,
+} from '@credo-ts/core'
+import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
 import {
   BaseMessage,
   Claim,
@@ -49,20 +62,7 @@ import {
   MessageReceived,
   MrtdSubmitState,
   CallAcceptRequestMessage,
-} from '@2060.io/vs-agent-model'
-import { MenuRequestMessage, PerformMessage } from '@credo-ts/action-menu'
-import { V1PresentationMessage, V1PresentationProblemReportMessage } from '@credo-ts/anoncreds'
-import { AnonCredsCredentialDefinitionRecordMetadataKeys } from '@credo-ts/anoncreds/build/repository/anonCredsCredentialDefinitionRecordMetadataTypes'
-import {
-  CredentialEventTypes,
-  CredentialState,
-  V2PresentationProblemReportMessage,
-  AgentEventTypes,
-  AgentMessageProcessedEvent,
-  BasicMessage,
-  V2PresentationMessage,
-} from '@credo-ts/core'
-import { AnswerMessage, QuestionAnswerService } from '@credo-ts/question-answer'
+} from '@verana-labs/vs-agent-model'
 
 import { createDataUrl, VsAgent } from '../utils'
 
