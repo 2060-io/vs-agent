@@ -18,7 +18,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   RequestedCredential,
   CredentialRevocationMessage,
-} from '@2060.io/vs-agent-model'
+} from '@verana-labs/vs-agent-model'
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
 import { JsonTransformer, utils } from '@credo-ts/core'
