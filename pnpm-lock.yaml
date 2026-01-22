@@ -90,9 +90,6 @@ importers:
       '@2060.io/credo-ts-didcomm-user-profile':
         specifier: 0.0.8
         version: 0.0.8(@credo-ts/core@0.6.1(typescript@5.7.2))(@credo-ts/didcomm@0.6.1(typescript@5.7.2))
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../../packages/model
       '@credo-ts/action-menu':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.7.2)
@@ -141,9 +138,6 @@ importers:
       '@types/qrcode':
         specifier: ^1.5.0
         version: 1.5.5
-      '@verana-labs/vs-agent-model':
-        specifier: workspace:*
-        version: link:../../packages/model
       '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
@@ -221,10 +215,8 @@ importers:
   examples/chatbot:
     dependencies:
       '@verana-labs/vs-agent-client':
-      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@verana-labs/vs-agent-model':
       '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
@@ -301,9 +293,6 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
-      '@verana-labs/vs-agent-nestjs-client':
-        specifier: workspace:*
-        version: link:../../packages/nestjs-client
       '@verana-labs/vs-agent-nestjs-client':
         specifier: workspace:*
         version: link:../../packages/nestjs-client
@@ -390,10 +379,8 @@ importers:
   examples/verifier:
     dependencies:
       '@verana-labs/vs-agent-client':
-      '@verana-labs/vs-agent-client':
         specifier: workspace:*
         version: link:../../packages/client
-      '@verana-labs/vs-agent-model':
       '@verana-labs/vs-agent-model':
         specifier: workspace:*
         version: link:../../packages/model
@@ -446,6 +433,9 @@ importers:
       '@credo-ts/core':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.8.3)
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../model
       class-transformer:
         specifier: 0.5.1
         version: 0.5.1
@@ -505,12 +495,6 @@ importers:
       '@2060.io/credo-ts-didcomm-mrtd':
         specifier: 0.0.20
         version: 0.0.20(@credo-ts/core@0.6.1(typescript@5.8.3))(@credo-ts/didcomm@0.6.1(typescript@5.8.3))(typescript@5.8.3)
-      '@2060.io/vs-agent-client':
-        specifier: workspace:*
-        version: link:../client
-      '@2060.io/vs-agent-model':
-        specifier: workspace:*
-        version: link:../model
       '@credo-ts/core':
         specifier: ^0.6.1
         version: 0.6.1(typescript@5.8.3)
@@ -529,6 +513,12 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@10.4.18(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.18)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.24(ioredis@5.6.1)(pg@8.16.0)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.11.19)(typescript@5.8.3)))
+      '@verana-labs/vs-agent-client':
+        specifier: workspace:*
+        version: link:../client
+      '@verana-labs/vs-agent-model':
+        specifier: workspace:*
+        version: link:../model
       reflect-metadata:
         specifier: ^0.2.0
         version: 0.2.2
@@ -4602,11 +4592,6 @@ packages:
     resolution: {integrity: sha512-Xt18+h4s7Z8xyZ0tmBoRmzxcop97R4BAh+dXouUDCYn+Em+1P3qpkUfI5ueWLT8ynC5hZ+q4iPEmGG1urvQGBg==}
     engines: {node: '>=18'}
 
-  superagent@10.2.1:
-    resolution: {integrity: sha512-O+PCv11lgTNJUzy49teNAWLjBZfc+A1enOwTpLlH6/rsvKcTwcdTT8m9azGkVqM7HBl5jpyZ7KTPhHweokBcdg==}
-    engines: {node: '>=14.18.0'}
-    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
-
   superagent@8.1.2:
     resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
     engines: {node: '>=6.4.0 <13 || >=14'}
@@ -4615,11 +4600,6 @@ packages:
   supertest@6.3.4:
     resolution: {integrity: sha512-erY3HFDG0dPnhw4U+udPfrzXa4xhSG+n4rxfRuZWCUvjFWwKl+OxWf/7zk50s84/fAAs7vf5QAb9uRa0cCykxw==}
     engines: {node: '>=6.4.0'}
-    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
-
-  supertest@7.1.1:
-    resolution: {integrity: sha512-aI59HBTlG9e2wTjxGJV+DygfNLgnWbGdZxiA/sgrnNNikIW8lbDvCtF6RnhZoJ82nU7qv7ZLjrvWqCEm52fAmw==}
-    engines: {node: '>=14.18.0'}
     deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supports-color@7.2.0:
@@ -4652,7 +4632,6 @@ packages:
   tar@6.2.1:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
     deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   tar@7.5.2:
@@ -10052,20 +10031,6 @@ snapshots:
       '@tokenizer/token': 0.3.0
       peek-readable: 7.0.0
 
-  superagent@10.2.1:
-    dependencies:
-      component-emitter: 1.3.1
-      cookiejar: 2.1.4
-      debug: 4.4.1
-      fast-safe-stringify: 2.1.1
-      form-data: 4.0.2
-      formidable: 3.5.4
-      methods: 1.1.2
-      mime: 2.6.0
-      qs: 6.14.0
-    transitivePeerDependencies:
-      - supports-color
-
   superagent@8.1.2:
     dependencies:
       component-emitter: 1.3.1
@@ -10085,13 +10050,6 @@ snapshots:
     dependencies:
       methods: 1.1.2
       superagent: 8.1.2
-    transitivePeerDependencies:
-      - supports-color
-
-  supertest@7.1.1:
-    dependencies:
-      methods: 1.1.2
-      superagent: 10.2.1
     transitivePeerDependencies:
       - supports-color
 

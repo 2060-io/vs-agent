@@ -1,4 +1,6 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
+import { Test, TestingModule } from '@nestjs/testing'
 import { ApiVersion } from '@verana-labs/vs-agent-client'
 import {
   CredentialReceptionMessage,
@@ -6,8 +8,6 @@ import {
   ProfileMessage,
   TextMessage,
 } from '@verana-labs/vs-agent-model'
-import { DidCommCredentialState } from '@credo-ts/didcomm'
-import { Test, TestingModule } from '@nestjs/testing'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {

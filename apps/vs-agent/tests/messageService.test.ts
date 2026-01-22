@@ -1,5 +1,4 @@
 import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
-import { ProfileMessage, TextMessage } from '@verana-labs/vs-agent-model'
 import { DidCommBasicMessage, DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
 import { ProfileMessage, TextMessage } from '@verana-labs/vs-agent-model'

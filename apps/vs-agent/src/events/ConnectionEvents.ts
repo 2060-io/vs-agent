@@ -1,6 +1,5 @@
 import type { ServerConfig, VsAgent } from '../utils'
 
-import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 import {
   DidCommConnectionEventTypes,
   DidCommConnectionRepository,
@@ -12,6 +11,7 @@ import {
   DidCommHangupMessage,
   DidCommMessageProcessedEvent,
 } from '@credo-ts/didcomm'
+import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
 import { sendWebhookEvent } from './WebhookEvent'
