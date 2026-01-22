@@ -1,6 +1,6 @@
 import type { Express } from 'express'
 
-import { FeatureQueryOptions } from '@credo-ts/core'
+import { DidCommFeatureQueryOptions } from '@credo-ts/didcomm'
 
 import { TsLogger } from './logger'
 
@@ -11,7 +11,7 @@ export interface ServerConfig {
   app?: Express
   logger: TsLogger
   webhookUrl?: string
-  discoveryOptions?: FeatureQueryOptions[]
+  discoveryOptions?: DidCommFeatureQueryOptions[]
   endpoints: string[]
 }
 

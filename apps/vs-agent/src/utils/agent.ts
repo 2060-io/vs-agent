@@ -1,6 +1,7 @@
-import { AgentMessage, HandshakeProtocol, parseDid } from '@credo-ts/core'
+import { parseDid } from '@credo-ts/core'
+import { DidCommHandshakeProtocol, DidCommMessage } from '@credo-ts/didcomm'
 
-import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL } from '../config/constants'
+import { AGENT_INVITATION_BASE_URL, AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config/constants'
 
 import { VsAgent } from './VsAgent'
 
@@ -13,7 +14,7 @@ import { VsAgent } from './VsAgent'
  */
 export async function createInvitation(options: {
   agent: VsAgent
-  messages?: AgentMessage[]
+  messages?: DidCommMessage[]
   useLegacyDid?: boolean
 }) {
   const { agent, messages, useLegacyDid } = options
@@ -25,9 +26,9 @@ export async function createInvitation(options: {
       : agent.did
 
   const outOfBandInvitation = (
-    await agent.oob.createInvitation({
-      label: agent.config.label,
-      handshakeProtocols: [HandshakeProtocol.DidExchange, HandshakeProtocol.Connections],
+    await agent.didcomm.oob.createInvitation({
+      label: AGENT_LABEL,
+      handshakeProtocols: [DidCommHandshakeProtocol.DidExchange, DidCommHandshakeProtocol.Connections],
       invitationDid,
       multiUseInvitation: !messages,
       imageUrl: AGENT_INVITATION_IMAGE_URL,

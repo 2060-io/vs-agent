@@ -1,13 +1,14 @@
 import type { SubjectMessage } from './SubjectInboundTransport'
-import type { OutboundPackage, OutboundTransport, Agent, Logger } from '@credo-ts/core'
+import type { AgentContext, Logger } from '@credo-ts/core'
 
-import { MessageReceiver, InjectionSymbols, CredoError } from '@credo-ts/core'
+import { InjectionSymbols, CredoError } from '@credo-ts/core'
+import { DidCommMessageReceiver, DidCommOutboundPackage, DidCommOutboundTransport } from '@credo-ts/didcomm'
 import { takeUntil, Subject, take } from 'rxjs'
 
-export class SubjectOutboundTransport implements OutboundTransport {
+export class SubjectOutboundTransport implements DidCommOutboundTransport {
   private logger!: Logger
   private subjectMap: { [key: string]: Subject<SubjectMessage> | undefined }
-  private agent!: Agent
+  private agentContext!: AgentContext
   private stop$!: Subject<boolean>
 
   public supportedSchemes = ['rxjs', 'wss']
@@ -16,19 +17,19 @@ export class SubjectOutboundTransport implements OutboundTransport {
     this.subjectMap = subjectMap
   }
 
-  public async start(agent: Agent): Promise<void> {
-    this.agent = agent
+  public async start(agentContext: AgentContext): Promise<void> {
+    this.agentContext = agentContext
 
-    this.logger = agent.dependencyManager.resolve(InjectionSymbols.Logger)
-    this.stop$ = agent.dependencyManager.resolve(InjectionSymbols.Stop$)
+    this.logger = agentContext.dependencyManager.resolve(InjectionSymbols.Logger)
+    this.stop$ = agentContext.dependencyManager.resolve(InjectionSymbols.Stop$)
   }
 
   public async stop(): Promise<void> {
     // No logic needed
   }
 
-  public async sendMessage(outboundPackage: OutboundPackage) {
-    const messageReceiver = this.agent.dependencyManager.resolve(MessageReceiver)
+  public async sendMessage(outboundPackage: DidCommOutboundPackage) {
+    const messageReceiver = this.agentContext.dependencyManager.resolve(DidCommMessageReceiver)
     this.logger.debug(`Sending outbound message to endpoint ${outboundPackage.endpoint}`, {
       endpoint: outboundPackage.endpoint,
     })
@@ -53,7 +54,9 @@ export class SubjectOutboundTransport implements OutboundTransport {
       next: async ({ message }: SubjectMessage) => {
         this.logger.test('Received message')
 
-        await messageReceiver.receiveMessage(message)
+        await messageReceiver
+          .receiveMessage(message)
+          .catch(e => this.agentContext.config.logger.error('Error processing message', e))
       },
     })
 

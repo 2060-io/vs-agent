@@ -1,7 +1,7 @@
-import { DateParser } from '@credo-ts/core/build/utils/transformers'
 import { Expose, Transform } from 'class-transformer'
 import { IsOptional, IsString } from 'class-validator'
 
+import { DateParser } from '../../utils'
 import { BaseMessage, BaseMessageOptions } from '../BaseMessage'
 import { MessageType } from '../MessageType'
 

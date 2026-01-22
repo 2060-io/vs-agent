@@ -342,6 +342,7 @@ export class CredentialService {
   }
 
   private hash(value: string): string {
-    return Buffer.from(new Sha256().hash(value)).toString('hex')
+    const bytes = new TextEncoder().encode(value)
+    return Buffer.from(new Sha256().hash(bytes)).toString('hex')
   }
 }

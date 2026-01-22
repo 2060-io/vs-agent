@@ -1,21 +1,23 @@
 import type WebSocket from 'ws'
 
 import {
-  Agent,
   AgentConfig,
-  AgentEventTypes,
-  AgentMessageReceivedEvent,
   CredoError,
   EventEmitter,
   Logger,
-  OutboundPackage,
-  OutboundTransport,
-  OutboundWebSocketClosedEvent,
-  TransportEventTypes,
-  isValidJweStructure,
   JsonEncoder,
   Buffer,
+  AgentContext,
 } from '@credo-ts/core'
+import {
+  DidCommEventTypes,
+  DidCommMessageReceivedEvent,
+  DidCommOutboundPackage,
+  DidCommOutboundTransport,
+  DidCommOutboundWebSocketClosedEvent,
+  DidCommTransportEventTypes,
+  isValidJweStructure,
+} from '@credo-ts/didcomm'
 
 export function getProtocolScheme(url: string) {
   const [protocolScheme] = url.split(':')
@@ -26,9 +28,9 @@ interface ExtWebSocket extends WebSocket {
   lastActivity: Date
 }
 
-export class VsAgentWsOutboundTransport implements OutboundTransport {
+export class VsAgentWsOutboundTransport implements DidCommOutboundTransport {
   private transportTable: Map<string, WebSocket> = new Map<string, WebSocket>()
-  private agent!: Agent
+  private agentContext!: AgentContext
   private logger!: Logger
   private eventEmitter!: EventEmitter
   private WebSocketClass!: typeof WebSocket
@@ -51,11 +53,10 @@ export class VsAgentWsOutboundTransport implements OutboundTransport {
     }, interval)
   }
 
-  public async start(agent: Agent): Promise<void> {
-    this.agent = agent
-    const agentConfig = agent.dependencyManager.resolve(AgentConfig)
+  public async start(agentContext: AgentContext): Promise<void> {
+    const agentConfig = agentContext.dependencyManager.resolve(AgentConfig)
     this.logger = agentConfig.logger
-    this.eventEmitter = agent.dependencyManager.resolve(EventEmitter)
+    this.eventEmitter = agentContext.dependencyManager.resolve(EventEmitter)
     this.logger.debug('Starting WS outbound transport')
     this.WebSocketClass = agentConfig.agentDependencies.WebSocketClass
   }
@@ -69,7 +70,7 @@ export class VsAgentWsOutboundTransport implements OutboundTransport {
     })
   }
 
-  public async sendMessage(outboundPackage: OutboundPackage) {
+  public async sendMessage(outboundPackage: DidCommOutboundPackage) {
     const { payload, endpoint, connectionId } = outboundPackage
     this.logger.debug(`Sending outbound message to endpoint '${endpoint}' over WebSocket transport.`, {
       payload,
@@ -130,8 +131,8 @@ export class VsAgentWsOutboundTransport implements OutboundTransport {
       )
     }
     this.logger.debug('Payload received from mediator')
-    this.eventEmitter.emit<AgentMessageReceivedEvent>(this.agent.context, {
-      type: AgentEventTypes.AgentMessageReceived,
+    this.eventEmitter.emit<DidCommMessageReceivedEvent>(this.agentContext, {
+      type: DidCommEventTypes.DidCommMessageReceived,
       payload: {
         message: payload,
       },
@@ -172,8 +173,8 @@ export class VsAgentWsOutboundTransport implements OutboundTransport {
         socket.removeEventListener('message', this.handleMessageEvent)
         this.transportTable.delete(socketId)
 
-        this.eventEmitter.emit<OutboundWebSocketClosedEvent>(this.agent.context, {
-          type: TransportEventTypes.OutboundWebSocketClosedEvent,
+        this.eventEmitter.emit<DidCommOutboundWebSocketClosedEvent>(this.agentContext, {
+          type: DidCommTransportEventTypes.DidCommOutboundWebSocketClosedEvent,
           payload: {
             socketId,
             connectionId: connectionId,

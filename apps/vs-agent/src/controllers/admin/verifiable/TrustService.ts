@@ -318,7 +318,7 @@ export class TrustService {
               HttpStatus.BAD_REQUEST,
             )
           }
-          const request = await agent.credentials.createOffer({
+          const request = await agent.didcomm.credentials.createOffer({
             protocolVersion: 'v2',
             credentialFormats: {
               anoncreds: {
@@ -336,7 +336,7 @@ export class TrustService {
 
           const shortUrlId = await this.urlShortenerService.createShortUrl({
             longUrl,
-            relatedFlowId: request.credentialRecord.id,
+            relatedFlowId: request.credentialExchangeRecord.id,
           })
           const didcommInvitationUrl = `${this.publicApiBaseUrl}/s?id=${shortUrlId}`
           return {
