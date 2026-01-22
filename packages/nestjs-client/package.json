@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@2060.io/credo-ts-didcomm-mrtd": "0.0.20",
-    "@2060.io/vs-agent-client": "workspace:*",
-    "@2060.io/vs-agent-model": "workspace:*",
+    "@verana-labs/vs-agent-client": "workspace:*",
+    "@verana-labs/vs-agent-model": "workspace:*",
     "@credo-ts/core": "^0.6.1",
     "@credo-ts/didcomm": "^0.6.1",
     "@nestjs/common": "^10.0.0",
