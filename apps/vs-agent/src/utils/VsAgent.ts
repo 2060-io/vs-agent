@@ -304,7 +304,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       {
         controller: publicDid,
         id: verificationMethodId,
-        publicKeyMultibase: publicKeyMultibase,
+        publicKeyMultibase,
         type: 'Ed25519VerificationKey2020',
       },
       {
