@@ -14,6 +14,7 @@ import {
 import { Proof, utils } from '@credo-ts/core'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -126,21 +127,51 @@ export class CredentialTypesController {
   @ApiBadRequestResponse({ description: 'Invalid request payload' })
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
     try {
-      const { issuerId, schemaId, schema } = await this.service.getOrRegisterSchema({ ...options })
-      const { credentialDefinitionId } = await this.service.getOrRegisterCredentialDefinition({
-        name: options.name,
-        schemaId,
-        issuerId,
-        supportRevocation: options.supportRevocation,
-        jsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
-      })
+      // Based on a related JSON Schema Credential: use attribute names from it instead of the provided ones
+      if (options.relatedJsonSchemaCredentialId) {
+        if (options.attributes) {
+          throw new BadRequestException(
+            'If relatedJsonSchemaCredentialId is specified, attributes has no effect',
+          )
+        }
+        const credentialDefinitionId = await this.service.getCredentialDefinition(
+          options.relatedJsonSchemaCredentialId,
+        )
+        const agent = await this.agentService.getAgent()
+        const [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
+          credentialDefinitionId,
+        })
+        const [schemaRecord] = await agent.modules.anoncreds.getCreatedSchemas({
+          schemaId: credentialDefinitionRecord.credentialDefinition.schemaId,
+        })
+        return {
+          id: credentialDefinitionRecord.credentialDefinitionId,
+          name: (credentialDefinitionRecord.getTag('name') as string) ?? schemaRecord.schema?.name,
+          version: (credentialDefinitionRecord.getTag('version') as string) ?? schemaRecord.schema?.version,
+          attributes: schemaRecord.schema?.attrNames || [],
+          supportRevocation: options.supportRevocation,
+          relatedJsonSchemaCredentialId: credentialDefinitionRecord.getTag(
+            'relatedJsonSchemaCredentialId',
+          ) as string,
+        }
+        // Legacy: no link to any VT JSON Schema Credential (only for testing and existing demos)
+      } else {
+        const { issuerId, schemaId, schema } = await this.service.getOrRegisterSchema({ ...options })
+        const { credentialDefinitionId } = await this.service.getOrRegisterCredentialDefinition({
+          name: options.name,
+          schemaId,
+          issuerId,
+          supportRevocation: options.supportRevocation,
+          jsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
+        })
 
-      return {
-        id: credentialDefinitionId,
-        attributes: schema.attrNames,
-        name: options.name,
-        version: options.version,
-        relatedJsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
+        return {
+          id: credentialDefinitionId,
+          attributes: schema!.attrNames,
+          name: options.name,
+          version: options.version,
+          relatedJsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
+        }
       }
     } catch (error) {
       throw new HttpException(
