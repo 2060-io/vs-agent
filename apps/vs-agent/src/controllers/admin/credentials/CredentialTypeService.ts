@@ -1,9 +1,13 @@
-import { AnonCredsCredentialDefinitionRepository, AnonCredsSchema } from '@credo-ts/anoncreds'
-import { utils } from '@credo-ts/core'
-import { Inject, Logger } from '@nestjs/common'
+import {
+  AnonCredsCredentialDefinitionRepository,
+  AnonCredsSchema,
+  AnonCredsSchemaRepository,
+} from '@credo-ts/anoncreds'
+import { JsonObject, utils, W3cCredential } from '@credo-ts/core'
+import { HttpException, HttpStatus, Inject, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { VsAgent } from '../../../utils'
+import { mapToEcosystem, VsAgent } from '../../../utils'
 
 export class CredentialTypesService {
   private readonly logger = new Logger(CredentialTypesService.name)
@@ -32,7 +36,6 @@ export class CredentialTypesService {
     jsonSchemaCredentialId?: string
   }) {
     const agent = await this.agentService.getAgent()
-
     let schemaId: string | undefined
     let schema: AnonCredsSchema | undefined
 
@@ -40,17 +43,24 @@ export class CredentialTypesService {
     if (!issuerId) {
       throw new Error('Agent does not have any defined public DID')
     }
-
-    if (options.schemaId) {
-      const schemaState = await agent.modules.anoncreds.getSchema(options.schemaId)
-
-      if (!schemaState.schema) {
-        throw new Error('Specified schema has not been found')
+    let schemaRecord
+    if (options.jsonSchemaCredentialId || options.schemaId) {
+      ;[schemaRecord] = await agent.modules.anoncreds.getCreatedSchemas({
+        schemaId,
+        issuerId,
+        relatedJsonSchemaCredentialId: options.jsonSchemaCredentialId,
+      })
+    }
+    if (schemaRecord) {
+      schemaId = schemaRecord.schemaId
+      schema = schemaRecord.schema
+      return {
+        schemaId: schemaRecord.schemaId,
+        issuerId: schemaRecord.schema.issuerId,
+        schema: schemaRecord.schema,
       }
-      schemaId = schemaState.schemaId
-      schema = schemaState.schema
     } else {
-      // No schema specified. A new one will be created
+      // No schema found. A new one will be created
       if (!options.attributes || !options.name) {
         throw new Error('Missing required options: "name" and "attributes" must be provided')
       }
@@ -67,7 +77,6 @@ export class CredentialTypesService {
       const { attestedResource: schemaRegistration } = schemaMetadata as {
         attestedResource: Record<string, unknown>
       }
-
       this.logger.debug!(`schemaState: ${JSON.stringify(schemaState)}`)
       schemaId = schemaState.schemaId
       schema = schemaState.schema
@@ -75,6 +84,16 @@ export class CredentialTypesService {
       if (!schemaId || !schema) {
         throw new Error('Schema for the credential definition could not be created')
       }
+      const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
+
+      schemaRecord = await schemaRepository.getBySchemaId(agent.context, schemaId)
+
+      if (options.jsonSchemaCredentialId) {
+        schemaRecord.setTag('relatedJsonSchemaCredentialId', options.jsonSchemaCredentialId)
+      }
+
+      await schemaRepository.update(agent.context, schemaRecord)
+
       await this.saveAttestedResource(agent, schemaRegistration, 'anonCredsSchema')
     }
     return { issuerId, schemaId, schema }
@@ -141,5 +160,75 @@ export class CredentialTypesService {
     await this.saveAttestedResource(agent, credentialRegistration, 'anonCredsCredDef')
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
     return { credentialDefinitionId }
+  }
+
+  public async getCredentialDefinition(jsonSchemaCredentialId: string) {
+    const agent = await this.agentService.getAgent()
+
+    const credentialDefinitionRepository = agent.dependencyManager.resolve(
+      AnonCredsCredentialDefinitionRepository,
+    )
+    const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
+    })
+    if (existCredential) {
+      return existCredential.credentialDefinitionId
+    }
+
+    const { attrNames: attributes } = await this.parseJsonSchemaCredential(jsonSchemaCredentialId)
+
+    const issuerId = agent.did!
+    const name = jsonSchemaCredentialId.match(/schemas-(.+?)-jsc\.json$/)?.[1] ?? 'credential'
+    const { schemaId } = await this.getOrRegisterSchema({
+      attributes,
+      name,
+      issuerId,
+      jsonSchemaCredentialId,
+    })
+
+    const { credentialDefinitionId } = await this.getOrRegisterCredentialDefinition({
+      name,
+      schemaId,
+      issuerId,
+      jsonSchemaCredentialId,
+    })
+    return credentialDefinitionId
+  }
+
+  private async fetchJson<T>(url: string): Promise<T> {
+    const res = await fetch(url)
+    if (!res.ok) {
+      throw new HttpException(`Failed to fetch ${url}: ${res.statusText}`, HttpStatus.BAD_REQUEST)
+    }
+    return res.json() as Promise<T>
+  }
+
+  private getCredentialSubjectId(credentialSubject: any): string {
+    const subject = Array.isArray(credentialSubject) ? credentialSubject[0] : credentialSubject
+    const id = subject?.id
+    if (!id) {
+      throw new HttpException(`Missing credentialSubject.id in credential`, HttpStatus.BAD_REQUEST)
+    }
+    return id
+  }
+
+  public async parseJsonSchemaCredential(jsonSchemaCredentialId: string) {
+    // Check schema for credential
+    const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
+    const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
+    const schemaData = await this.fetchJson<JsonObject>(mapToEcosystem(subjectId))
+    const parsedSchema =
+      typeof schemaData.schema === 'string' ? JSON.parse(schemaData.schema) : schemaData.schema
+    const subjectProps = parsedSchema?.properties?.credentialSubject?.properties ?? {}
+
+    const attrNames = Object.keys(subjectProps).map(String)
+    if (attrNames.length === 0) {
+      throw new HttpException(
+        `No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`,
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+
+    return { parsedSchema, attrNames }
   }
 }
