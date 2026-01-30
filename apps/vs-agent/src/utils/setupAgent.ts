@@ -5,7 +5,7 @@ import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import WebSocket from 'ws'
 
-import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL, ENABLE_PUBLIC_API_SWAGGER } from '../config'
+import { ENABLE_PUBLIC_API_SWAGGER } from '../config'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -18,6 +18,8 @@ export const setupAgent = async ({
   endpoints,
   logLevel,
   publicApiBaseUrl,
+  imageUrl,
+  label,
   parsedDid,
   autoDiscloseUserProfile,
   masterListCscaLocation,
@@ -28,6 +30,8 @@ export const setupAgent = async ({
   endpoints: string[]
   logLevel?: LogLevel
   publicApiBaseUrl: string
+  imageUrl?: string
+  label: string
   autoDiscloseUserProfile?: boolean
   parsedDid?: ParsedDid
   masterListCscaLocation?: string
@@ -52,8 +56,8 @@ export const setupAgent = async ({
     dependencies: agentDependencies,
     publicApiBaseUrl,
     masterListCscaLocation,
-    imageUrl: AGENT_INVITATION_IMAGE_URL,
-    label: AGENT_LABEL,
+    imageUrl,
+    label,
   })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
