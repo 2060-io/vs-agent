@@ -24,7 +24,7 @@ export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
 
   let { connectionRecord: agentBConnection } = await agentB.didcomm.oob.receiveInvitation(
     agentAOutOfBand.outOfBandInvitation,
-    { label: AGENT_LABEL },
+    { label: agentB.label },
   )
 
   agentBConnection = await agentB.didcomm.connections.returnWhenIsConnected(agentBConnection!.id)
@@ -105,7 +105,7 @@ export const startServersTesting = async (agent: VsAgent): Promise<INestApplicat
 
   const conf: ServerConfig = {
     port: 3000,
-    logger: new TsLogger(LogLevel.off, AGENT_LABEL),
+    logger: new TsLogger(LogLevel.off, agent.label),
     publicApiBaseUrl: 'http://localhost:3001',
     webhookUrl: 'http://localhost:5000',
     endpoints: agent.didcomm.config.endpoints,
