@@ -12,7 +12,6 @@ import { Test } from '@nestjs/testing'
 import { vi } from 'vitest'
 
 import { VsAgentModule } from '../../src/admin.module'
-import { AGENT_LABEL } from '../../src/config'
 import { messageEvents } from '../../src/events/MessageEvents'
 import { PublicModule } from '../../src/public.module'
 import { ServerConfig, TsLogger, VsAgent } from '../../src/utils'
