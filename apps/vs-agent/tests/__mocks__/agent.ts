@@ -16,6 +16,7 @@ export const startAgent = async ({ label, domain }: { label: string; domain: str
     did: `did:webvh:${domain}`,
     dependencies: agentDependencies,
     publicApiBaseUrl: `https://${domain}`,
+    label,
   })
   return agent
 }
