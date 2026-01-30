@@ -17,6 +17,8 @@ import {
   ADMIN_PORT,
   AGENT_ENDPOINT,
   AGENT_ENDPOINTS,
+  AGENT_INVITATION_IMAGE_URL,
+  AGENT_LABEL,
   AGENT_LOG_LEVEL,
   AGENT_NAME,
   AGENT_PORT,
@@ -35,8 +37,6 @@ import {
   USER_PROFILE_AUTODISCLOSE,
   MASTER_LIST_CSCA_LOCATION,
   AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
-  AGENT_LABEL,
-  AGENT_INVITATION_IMAGE_URL,
 } from './config'
 import { connectionEvents } from './events/ConnectionEvents'
 import { messageEvents } from './events/MessageEvents'
@@ -137,11 +137,11 @@ const run = async () => {
       keyDerivationMethod: keyDerivationMethodMap[AGENT_WALLET_KEY_DERIVATION_METHOD ?? KdfMethod.Argon2IMod],
       database: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
+    label: AGENT_LABEL || 'Test VS Agent',
+    imageUrl: AGENT_INVITATION_IMAGE_URL,
     parsedDid: parsedDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,
-    imageUrl: AGENT_INVITATION_IMAGE_URL,
-    label: AGENT_LABEL || 'Test VS Agent',
     autoDiscloseUserProfile: USER_PROFILE_AUTODISCLOSE,
     masterListCscaLocation: MASTER_LIST_CSCA_LOCATION,
     autoUpdateStorageOnStartup: AGENT_AUTO_UPDATE_STORAGE_ON_STARTUP,
