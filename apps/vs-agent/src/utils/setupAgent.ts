@@ -26,9 +26,9 @@ export const setupAgent = async ({
   autoUpdateStorageOnStartup,
 }: {
   port: number
+  walletConfig: AskarModuleConfigStoreOptions
   label: string
   displayPictureUrl?: string
-  walletConfig: AskarModuleConfigStoreOptions
   endpoints: string[]
   logLevel?: LogLevel
   publicApiBaseUrl: string

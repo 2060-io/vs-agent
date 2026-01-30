@@ -75,7 +75,7 @@ export class SubjectTransportSession implements DidCommTransportSession {
     this.replySubject = replySubject
   }
 
-  public async send(_agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
+  public async send(agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
     this.replySubject.next({ message: encryptedMessage })
   }
 
