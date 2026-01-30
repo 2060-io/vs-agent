@@ -46,7 +46,6 @@ import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
 import { multibaseEncode, MultibaseEncoding } from 'didwebvh-ts'
 
-import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL } from '../config'
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { defaultDocumentLoader } from './CachedDocumentLoader'
@@ -92,29 +91,35 @@ export class VsAgent extends Agent<VsAgentModules> {
   public did?: string
   public autoDiscloseUserProfile?: boolean
   public publicApiBaseUrl: string
+  public imageUrl?: string
+  public label: string
 
   public constructor(
     options: AgentOptions<VsAgentModules> & {
       did?: string
       autoDiscloseUserProfile?: boolean
       publicApiBaseUrl: string
+      imageUrl?: string
+      label: string
     },
   ) {
     super(options)
     this.did = options.did
     this.autoDiscloseUserProfile = options.autoDiscloseUserProfile
     this.publicApiBaseUrl = options.publicApiBaseUrl
+    this.imageUrl = options.imageUrl
+    this.label = options.label
   }
 
   public async initialize() {
     await super.initialize()
 
     // Make sure default User Profile corresponds to settings in environment variables
-    const imageUrl = AGENT_INVITATION_IMAGE_URL
+    const imageUrl = this.imageUrl
     const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
     await this.modules.userProfile.updateUserProfileData({
-      displayName: AGENT_LABEL,
+      displayName: this.label,
       displayPicture,
     })
 
@@ -410,6 +415,8 @@ export interface VsAgentOptions {
   masterListCscaLocation?: string
   endpoints: string[]
   walletConfig: AskarModuleConfigStoreOptions
+  imageUrl?: string
+  label: string
 }
 
 export const createVsAgent = (options: VsAgentOptions): VsAgent => {
@@ -484,5 +491,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     did: options.did,
     autoDiscloseUserProfile: options.autoDiscloseUserProfile,
     publicApiBaseUrl: options.publicApiBaseUrl,
+    imageUrl: options.imageUrl,
+    label: options.label,
   })
 }

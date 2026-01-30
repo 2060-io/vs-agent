@@ -5,7 +5,7 @@ import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import WebSocket from 'ws'
 
-import { ENABLE_PUBLIC_API_SWAGGER } from '../config'
+import { AGENT_INVITATION_IMAGE_URL, AGENT_LABEL, ENABLE_PUBLIC_API_SWAGGER } from '../config'
 
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
@@ -52,6 +52,8 @@ export const setupAgent = async ({
     dependencies: agentDependencies,
     publicApiBaseUrl,
     masterListCscaLocation,
+    imageUrl: AGENT_INVITATION_IMAGE_URL,
+    label: AGENT_LABEL,
   })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))

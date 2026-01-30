@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiOkResponse, getSchemaPath, ApiExtraModels } from '@nestjs/swagger'
 
-import { AGENT_LABEL } from '../../../../src/config'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { VsAgentInfoDto } from './dto'
@@ -25,7 +24,7 @@ export class VsAgentController {
   public async getAgentInfo(): Promise<VsAgentInfoDto> {
     const vsAgent = await this.vsAgentService.getAgent()
     return {
-      label: AGENT_LABEL,
+      label: vsAgent.label,
       endpoints: vsAgent.didcomm.config.endpoints,
       isInitialized: vsAgent.isInitialized,
       publicDid: vsAgent.did,
