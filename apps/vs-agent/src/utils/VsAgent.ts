@@ -91,7 +91,7 @@ export class VsAgent extends Agent<VsAgentModules> {
   public did?: string
   public autoDiscloseUserProfile?: boolean
   public publicApiBaseUrl: string
-  public imageUrl?: string
+  public displayPictureUrl?: string
   public label: string
 
   public constructor(
@@ -99,7 +99,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       did?: string
       autoDiscloseUserProfile?: boolean
       publicApiBaseUrl: string
-      imageUrl?: string
+      displayPictureUrl?: string
       label: string
     },
   ) {
@@ -107,7 +107,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     this.did = options.did
     this.autoDiscloseUserProfile = options.autoDiscloseUserProfile
     this.publicApiBaseUrl = options.publicApiBaseUrl
-    this.imageUrl = options.imageUrl
+    this.displayPictureUrl = options.displayPictureUrl
     this.label = options.label
   }
 
@@ -115,7 +115,7 @@ export class VsAgent extends Agent<VsAgentModules> {
     await super.initialize()
 
     // Make sure default User Profile corresponds to settings in environment variables
-    const imageUrl = this.imageUrl
+    const imageUrl = this.displayPictureUrl
     const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
     await this.modules.userProfile.updateUserProfileData({
@@ -415,7 +415,7 @@ export interface VsAgentOptions {
   masterListCscaLocation?: string
   endpoints: string[]
   walletConfig: AskarModuleConfigStoreOptions
-  imageUrl?: string
+  displayPictureUrl?: string
   label: string
 }
 
@@ -491,7 +491,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     did: options.did,
     autoDiscloseUserProfile: options.autoDiscloseUserProfile,
     publicApiBaseUrl: options.publicApiBaseUrl,
-    imageUrl: options.imageUrl,
+    displayPictureUrl: options.displayPictureUrl,
     label: options.label,
   })
 }

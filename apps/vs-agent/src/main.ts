@@ -138,7 +138,7 @@ const run = async () => {
       database: POSTGRES_HOST ? askarPostgresConfig : undefined,
     },
     label: AGENT_LABEL || 'Test VS Agent',
-    imageUrl: AGENT_INVITATION_IMAGE_URL,
+    displayPictureUrl: AGENT_INVITATION_IMAGE_URL,
     parsedDid: parsedDid ?? undefined,
     logLevel: AGENT_LOG_LEVEL,
     publicApiBaseUrl,

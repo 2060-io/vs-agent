@@ -15,23 +15,23 @@ import { TsLogger } from './logger'
 export const setupAgent = async ({
   port,
   walletConfig,
+  label,
+  displayPictureUrl,
   endpoints,
   logLevel,
   publicApiBaseUrl,
-  imageUrl,
-  label,
   parsedDid,
   autoDiscloseUserProfile,
   masterListCscaLocation,
   autoUpdateStorageOnStartup,
 }: {
   port: number
+  label: string
+  displayPictureUrl?: string
   walletConfig: AskarModuleConfigStoreOptions
   endpoints: string[]
   logLevel?: LogLevel
   publicApiBaseUrl: string
-  imageUrl?: string
-  label: string
   autoDiscloseUserProfile?: boolean
   parsedDid?: ParsedDid
   masterListCscaLocation?: string
@@ -56,7 +56,7 @@ export const setupAgent = async ({
     dependencies: agentDependencies,
     publicApiBaseUrl,
     masterListCscaLocation,
-    imageUrl,
+    displayPictureUrl,
     label,
   })
 
