@@ -22,7 +22,9 @@ export class CreateCredentialTypeDto {
     description: 'Schema attributes',
     example: `['name', 'age']`,
   })
-  attributes!: string[]
+  @IsOptional()
+  @IsNotEmpty()
+  attributes?: string[]
 
   @ApiProperty({
     description:
