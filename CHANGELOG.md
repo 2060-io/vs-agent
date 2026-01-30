@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/verana-labs/vs-agent/compare/v1.7.0...v1.7.1) (2026-01-30)
+
+
+### Bug Fixes
+
+* credential types based on JSON Schema credentials ([#325](https://github.com/verana-labs/vs-agent/issues/325)) ([c205d2f](https://github.com/verana-labs/vs-agent/commit/c205d2fd57ca0e44d89d977a7bad0e4c4e362efd))
+
 ## [1.7.0](https://github.com/verana-labs/vs-agent/compare/v1.6.0...v1.7.0) (2026-01-20)
 
 
