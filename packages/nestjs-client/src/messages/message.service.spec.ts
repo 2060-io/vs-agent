@@ -1,5 +1,5 @@
 import { MessageState } from '@2060.io/credo-ts-didcomm-receipts'
-import { CredentialState } from '@credo-ts/core'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 import { Test, TestingModule } from '@nestjs/testing'
 import { ApiVersion } from '@verana-labs/vs-agent-client'
 import {
@@ -139,7 +139,7 @@ describe('MessageEventService', () => {
           type: 'credential-reception',
           connectionId: 'conn1',
           threadId: 'thread1',
-          state: CredentialState.Done,
+          state: DidCommCredentialState.Done,
         } as CredentialReceptionMessage,
       })
 

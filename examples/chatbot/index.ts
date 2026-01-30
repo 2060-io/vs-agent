@@ -30,6 +30,7 @@ import { randomUUID } from 'crypto'
 import express from 'express'
 import { existsSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
+import type { Express } from 'express'
 import fetch from 'node-fetch'
 import path from 'path'
 import { Logger } from 'tslog'
@@ -44,7 +45,7 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5000'
 const VISION_SERVICE_BASE_URL =
   process.env.VISION_SERVICE_BASE_URL || 'https://webrtc-pymediasoup-client-demo.dev.2060.io'
 const WEBRTC_SERVER_BASE_URL = process.env.WEBRTC_SERVER_BASE_URL || 'https://dts-webrtc.dev.2060.io'
-const app = express()
+const app: Express = express()
 
 const [baseUrl, versionPath] = VS_AGENT_BASE_URL.split('/v')
 const version = versionPath ? `v${versionPath}` : ApiVersion.V1

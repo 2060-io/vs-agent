@@ -47,7 +47,7 @@ export const rootMenuAsQA = {
 }
 
 export const worldCupPoll = {
-  prompt: 'Who will win 2022 World Cup ⚽?',
+  prompt: 'Who will win 2026 World Cup ⚽?',
   menuItems: [
     { id: 'argentina', text: '🇦🇷 Argentina' },
     { id: 'belgium', text: '🇧🇪 Belgium' },
@@ -55,6 +55,7 @@ export const worldCupPoll = {
     { id: 'england', text: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England' },
     { id: 'france', text: '🇫🇷 France' },
     { id: 'germany', text: '🇩🇪 Germany' },
+    { id: 'colombia', text: '🇨🇴 Colombia' },
     { id: 'other', text: '❓ Other' },
   ],
 }

@@ -1,4 +1,4 @@
-import { CredentialState } from '@credo-ts/core'
+import { DidCommCredentialState } from '@credo-ts/didcomm'
 import { Expose } from 'class-transformer'
 import { IsString } from 'class-validator'
 
@@ -6,7 +6,7 @@ import { BaseMessage, BaseMessageOptions } from './BaseMessage'
 import { MessageType } from './MessageType'
 
 export interface CredentialReceptionMessageOptions extends BaseMessageOptions {
-  state: CredentialState
+  state: DidCommCredentialState
 }
 
 export class CredentialReceptionMessage extends BaseMessage {
@@ -27,5 +27,5 @@ export class CredentialReceptionMessage extends BaseMessage {
 
   @Expose()
   @IsString()
-  public state!: CredentialState
+  public state!: DidCommCredentialState
 }

@@ -1,4 +1,5 @@
-import { HttpOutboundTransport, LogLevel, ParsedDid, WalletConfig } from '@credo-ts/core'
+import { AskarModuleConfigStoreOptions } from '@credo-ts/askar'
+import { LogLevel, ParsedDid } from '@credo-ts/core'
 import { agentDependencies } from '@credo-ts/node'
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -9,7 +10,6 @@ import { ENABLE_PUBLIC_API_SWAGGER } from '../config'
 import { HttpInboundTransport } from './HttpInboundTransport'
 import { createVsAgent } from './VsAgent'
 import { VsAgentWsInboundTransport } from './VsAgentWsInboundTransport'
-import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { TsLogger } from './logger'
 
 export const setupAgent = async ({
@@ -24,10 +24,9 @@ export const setupAgent = async ({
   autoDiscloseUserProfile,
   masterListCscaLocation,
   autoUpdateStorageOnStartup,
-  backupBeforeStorageUpdate,
 }: {
   port: number
-  walletConfig: WalletConfig
+  walletConfig: AskarModuleConfigStoreOptions
   label: string
   displayPictureUrl?: string
   endpoints: string[]
@@ -37,7 +36,6 @@ export const setupAgent = async ({
   parsedDid?: ParsedDid
   masterListCscaLocation?: string
   autoUpdateStorageOnStartup?: boolean
-  backupBeforeStorageUpdate?: boolean
 }) => {
   const logger = new TsLogger(logLevel ?? LogLevel.warn, 'Agent')
   const publicDid = parsedDid?.did
@@ -48,37 +46,33 @@ export const setupAgent = async ({
 
   const agent = createVsAgent({
     config: {
-      label,
-      connectionImageUrl: displayPictureUrl,
-      endpoints,
-      walletConfig,
       logger,
       autoUpdateStorageOnStartup,
-      backupBeforeStorageUpdate,
     },
+    endpoints,
+    walletConfig,
     did: publicDid,
     autoDiscloseUserProfile,
     dependencies: agentDependencies,
     publicApiBaseUrl,
     masterListCscaLocation,
+    displayPictureUrl,
+    label,
   })
 
   const enableHttp = endpoints.find(endpoint => endpoint.startsWith('http'))
   if (enableHttp) {
     logger.info('Inbound HTTP transport enabled')
-    agent.registerInboundTransport(new HttpInboundTransport({ port }))
+    agent.didcomm.registerInboundTransport(new HttpInboundTransport({ port }))
   }
 
   const enableWs = endpoints.find(endpoint => endpoint.startsWith('ws'))
   if (enableWs) {
     logger.info('Inbound WebSocket transport enabled')
-    agent.registerInboundTransport(
+    agent.didcomm.registerInboundTransport(
       new VsAgentWsInboundTransport({ server: new WebSocket.Server({ noServer: true }) }),
     )
   }
-
-  agent.registerOutboundTransport(new HttpOutboundTransport())
-  agent.registerOutboundTransport(new VsAgentWsOutboundTransport())
 
   await agent.initialize()
 

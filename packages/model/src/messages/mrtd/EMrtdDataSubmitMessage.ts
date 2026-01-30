@@ -69,7 +69,7 @@ export class EMrtdDataSubmitMessage extends BaseMessage {
 
     const dataUrls = parsed.fields.images.map(image => {
       const faceMimeType = image.imageType === 1 ? 'image/jp2' : 'image/jpeg'
-      return `data:${faceMimeType};base64,${image.imageData.toString('base64')}`
+      return `data:${faceMimeType};base64,${Buffer.from(image.imageData).toString('base64')}`
     })
 
     const mrzString = parsed.fields.mrzData

@@ -1,18 +1,16 @@
 import type { ServerConfig, VsAgent } from '../utils'
-import type {
-  AgentMessageProcessedEvent,
-  ConnectionStateChangedEvent,
-  DiscoverFeaturesDisclosureReceivedEvent,
-} from '@credo-ts/core'
 
 import {
-  AgentEventTypes,
-  ConnectionEventTypes,
-  ConnectionRepository,
-  DidExchangeState,
-  DiscoverFeaturesEventTypes,
-  HangupMessage,
-} from '@credo-ts/core'
+  DidCommConnectionEventTypes,
+  DidCommConnectionRepository,
+  DidCommConnectionStateChangedEvent,
+  DidCommDidExchangeState,
+  DidCommDiscoverFeaturesDisclosureReceivedEvent,
+  DidCommDiscoverFeaturesEventTypes,
+  DidCommEventTypes,
+  DidCommHangupMessage,
+  DidCommMessageProcessedEvent,
+} from '@credo-ts/didcomm'
 import { ConnectionStateUpdated, ExtendedDidExchangeState } from '@verana-labs/vs-agent-model'
 
 import { PresentationStatus, sendPresentationCallbackEvent } from './CallbackEvent'
@@ -25,25 +23,27 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
   const agentPublicDids = [agent.did, ...(Array.isArray(alternativeDids) ? alternativeDids : [])]
 
   agent.events.on(
-    ConnectionEventTypes.ConnectionStateChanged,
-    async ({ payload }: ConnectionStateChangedEvent) => {
+    DidCommConnectionEventTypes.DidCommConnectionStateChanged,
+    async ({ payload }: DidCommConnectionStateChangedEvent) => {
       const record = payload.connectionRecord
 
       if (record.outOfBandId && !record.getTag('parentConnectionId')) {
-        const outOfBandRecord = await agent.oob.getById(record.outOfBandId)
+        const outOfBandRecord = await agent.didcomm.oob.getById(record.outOfBandId)
         const parentConnectionId = outOfBandRecord.getTag('parentConnectionId') as string
 
         // Tag connection with its parent
         if (parentConnectionId) {
           record.setTag('parentConnectionId', parentConnectionId)
-          await agent.context.dependencyManager.resolve(ConnectionRepository).update(agent.context, record)
+          await agent.context.dependencyManager
+            .resolve(DidCommConnectionRepository)
+            .update(agent.context, record)
         }
       }
 
-      if (record.state === DidExchangeState.Completed) {
+      if (record.state === DidCommDidExchangeState.Completed) {
         await agent.modules.userProfile.requestUserProfile({ connectionId: record.id })
         if (config.discoveryOptions)
-          await agent.discovery.queryFeatures({
+          await agent.didcomm.discovery.queryFeatures({
             connectionId: record.id,
             protocolVersion: 'v2',
             queries: config.discoveryOptions,
@@ -53,10 +53,10 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
       // If an out-of-band ID exists, use the invitation to find the thread IDs
       // and identify the invitation that created the connection to update its state.
       if (record.outOfBandId) {
-        const invitationRecord = await agent.oob.findById(record.outOfBandId)
+        const invitationRecord = await agent.didcomm.oob.findById(record.outOfBandId)
         const threadIds = invitationRecord?.getTag('invitationRequestsThreadIds') as string[] | undefined
         threadIds?.map(async threadId => {
-          const [proofRecord] = await agent.proofs.findAllByQuery({ threadId })
+          const [proofRecord] = await agent.didcomm.proofs.findAllByQuery({ threadId })
           if (!proofRecord) return
           const callbackParameters = proofRecord.metadata.get('_2060/callbackParameters') as
             | { ref?: string; callbackUrl?: string }
@@ -65,7 +65,7 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
           if (
             callbackParameters &&
             callbackParameters.callbackUrl &&
-            record.state === DidExchangeState.RequestReceived
+            record.state === DidCommDidExchangeState.RequestReceived
           ) {
             await sendPresentationCallbackEvent({
               proofExchangeId: proofRecord.id,
@@ -92,29 +92,32 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
 
   // When a hangup message is received for a given connection, it will be effectively terminated. VS Agent controller
   // will be notified about this 'termination' status
-  agent.events.on(AgentEventTypes.AgentMessageProcessed, async ({ payload }: AgentMessageProcessedEvent) => {
-    const { message, connection } = payload
+  agent.events.on(
+    DidCommEventTypes.DidCommMessageProcessed,
+    async ({ payload }: DidCommMessageProcessedEvent) => {
+      const { message, connection } = payload
 
-    if (message.type === HangupMessage.type.messageTypeUri && connection) {
-      const body = new ConnectionStateUpdated({
-        connectionId: connection.id,
-        invitationId: connection.outOfBandId,
-        state: 'terminated',
-      })
+      if (message.type === DidCommHangupMessage.type.messageTypeUri && connection) {
+        const body = new ConnectionStateUpdated({
+          connectionId: connection.id,
+          invitationId: connection.outOfBandId,
+          state: 'terminated',
+        })
 
-      await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
-    }
-  })
+        await sendWebhookEvent(config.webhookUrl + '/connection-state-updated', body, config.logger)
+      }
+    },
+  )
 
   agent.events.on(
-    DiscoverFeaturesEventTypes.DisclosureReceived,
-    async ({ payload }: DiscoverFeaturesDisclosureReceivedEvent) => {
+    DidCommDiscoverFeaturesEventTypes.DisclosureReceived,
+    async ({ payload }: DidCommDiscoverFeaturesDisclosureReceivedEvent) => {
       const record = payload.connection
       payload.disclosures.forEach(item =>
         record.metadata.add(`features-${item.type}`, { [item.id]: item.toJSON() }),
       )
       await agent.context.dependencyManager
-        .resolve(ConnectionRepository)
+        .resolve(DidCommConnectionRepository)
         .update(agent.context, payload.connection)
 
       const metadata = payload.disclosures?.reduce(
@@ -137,16 +140,19 @@ export const connectionEvents = async (agent: VsAgent, config: ServerConfig) => 
   )
 
   // Auto-accept connections that go to the public did
-  agent.events.on(ConnectionEventTypes.ConnectionStateChanged, async (data: ConnectionStateChangedEvent) => {
-    config.logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
-    const oob = await agent.oob.findById(data.payload.connectionRecord.outOfBandId!)
-    if (
-      agentPublicDids.includes(oob?.outOfBandInvitation.id) &&
-      data.payload.connectionRecord.state === DidExchangeState.RequestReceived
-    ) {
-      config.logger.debug(`Incoming connection request for ${agent.did}`)
-      await agent.connections.acceptRequest(data.payload.connectionRecord.id)
-      config.logger.debug(`Accepted request for ${agent.did}`)
-    }
-  })
+  agent.events.on(
+    DidCommConnectionEventTypes.DidCommConnectionStateChanged,
+    async (data: DidCommConnectionStateChangedEvent) => {
+      config.logger.debug(`Incoming connection event: ${data.payload.connectionRecord.state}}`)
+      const oob = await agent.didcomm.oob.findById(data.payload.connectionRecord.outOfBandId!)
+      if (
+        agentPublicDids.includes(oob?.outOfBandInvitation.id) &&
+        data.payload.connectionRecord.state === DidCommDidExchangeState.RequestReceived
+      ) {
+        config.logger.debug(`Incoming connection request for ${agent.did}`)
+        await agent.didcomm.connections.acceptRequest(data.payload.connectionRecord.id)
+        config.logger.debug(`Accepted request for ${agent.did}`)
+      }
+    },
+  )
 }

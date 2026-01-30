@@ -1,12 +1,12 @@
 import { ConnectionProfileUpdatedEvent } from '@2060.io/credo-ts-didcomm-user-profile'
+import { LogLevel } from '@credo-ts/core'
 import {
-  AgentMessageProcessedEvent,
-  BasicMessage,
-  CredentialExchangeRecord,
-  CredentialStateChangedEvent,
-  HandshakeProtocol,
-  LogLevel,
-} from '@credo-ts/core'
+  DidCommBasicMessage,
+  DidCommCredentialExchangeRecord,
+  DidCommCredentialStateChangedEvent,
+  DidCommHandshakeProtocol,
+  DidCommMessageProcessedEvent,
+} from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { vi } from 'vitest'
@@ -17,40 +17,41 @@ import { PublicModule } from '../../src/public.module'
 import { ServerConfig, TsLogger, VsAgent } from '../../src/utils'
 
 export async function makeConnection(agentA: VsAgent, agentB: VsAgent) {
-  const agentAOutOfBand = await agentA.oob.createInvitation({
-    handshakeProtocols: [HandshakeProtocol.Connections],
+  const agentAOutOfBand = await agentA.didcomm.oob.createInvitation({
+    handshakeProtocols: [DidCommHandshakeProtocol.Connections],
   })
 
-  let { connectionRecord: agentBConnection } = await agentB.oob.receiveInvitation(
+  let { connectionRecord: agentBConnection } = await agentB.didcomm.oob.receiveInvitation(
     agentAOutOfBand.outOfBandInvitation,
+    { label: agentB.label },
   )
 
-  agentBConnection = await agentB.connections.returnWhenIsConnected(agentBConnection!.id)
-  let [agentAConnection] = await agentA.connections.findAllByOutOfBandId(agentAOutOfBand.id)
-  agentAConnection = await agentA.connections.returnWhenIsConnected(agentAConnection!.id)
+  agentBConnection = await agentB.didcomm.connections.returnWhenIsConnected(agentBConnection!.id)
+  let [agentAConnection] = await agentA.didcomm.connections.findAllByOutOfBandId(agentAOutOfBand.id)
+  agentAConnection = await agentA.didcomm.connections.returnWhenIsConnected(agentAConnection!.id)
 
   return [agentAConnection, agentBConnection]
 }
 
-export function isCredentialStateChangedEvent(arg: unknown): arg is CredentialStateChangedEvent {
+export function isCredentialStateChangedEvent(arg: unknown): arg is DidCommCredentialStateChangedEvent {
   const { type, payload } = arg as any
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    type === 'CredentialStateChanged' &&
-    !!payload?.credentialRecord &&
-    payload?.credentialRecord.type === CredentialExchangeRecord.type
+    type === 'DidCommCredentialStateChanged' &&
+    !!payload?.credentialExchangeRecord &&
+    payload?.credentialExchangeRecord.type === DidCommCredentialExchangeRecord.type
   )
 }
 
-export function isAgentMessageProcessedEvent(arg: unknown): arg is AgentMessageProcessedEvent {
+export function isAgentMessageProcessedEvent(arg: unknown): arg is DidCommMessageProcessedEvent {
   const { type, payload } = arg as any
   return (
     typeof arg === 'object' &&
     arg !== null &&
-    type === 'AgentMessageProcessed' &&
+    type === 'DidCommMessageProcessed' &&
     !!payload?.message &&
-    payload?.message.type === BasicMessage.type.messageTypeUri &&
+    payload?.message.type === DidCommBasicMessage.type.messageTypeUri &&
     !!payload?.connection
   )
 }
@@ -103,10 +104,10 @@ export const startServersTesting = async (agent: VsAgent): Promise<INestApplicat
 
   const conf: ServerConfig = {
     port: 3000,
-    logger: new TsLogger(LogLevel.off, agent.config.label),
+    logger: new TsLogger(LogLevel.off, agent.label),
     publicApiBaseUrl: 'http://localhost:3001',
     webhookUrl: 'http://localhost:5000',
-    endpoints: agent.config.endpoints,
+    endpoints: agent.didcomm.config.endpoints,
   }
   messageEvents(agent, conf)
   return app

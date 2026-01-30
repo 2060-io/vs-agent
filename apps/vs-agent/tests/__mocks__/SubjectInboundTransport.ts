@@ -1,20 +1,18 @@
 import type { Subscription } from 'rxjs'
 
+import { AgentContext, EventEmitter, utils } from '@credo-ts/core'
 import {
-  Agent,
-  AgentContext,
-  EncryptedMessage,
-  InboundTransport,
-  MessageReceiver,
-  TransportService,
-  TransportSession,
-  utils,
-} from '@credo-ts/core'
+  DidCommEncryptedMessage,
+  DidCommInboundTransport,
+  DidCommMessageReceiver,
+  DidCommTransportService,
+  DidCommTransportSession,
+} from '@credo-ts/didcomm'
 import { Subject } from 'rxjs'
 
-export type SubjectMessage = { message: EncryptedMessage; replySubject?: Subject<SubjectMessage> }
+export type SubjectMessage = { message: DidCommEncryptedMessage; replySubject?: Subject<SubjectMessage> }
 
-export class SubjectInboundTransport implements InboundTransport {
+export class SubjectInboundTransport implements DidCommInboundTransport {
   public readonly ourSubject: Subject<SubjectMessage>
   private subscription?: Subscription
 
@@ -22,18 +20,19 @@ export class SubjectInboundTransport implements InboundTransport {
     this.ourSubject = ourSubject
   }
 
-  public async start(agent: Agent) {
-    this.subscribe(agent)
+  public async start(agentContext: AgentContext) {
+    this.subscribe(agentContext)
   }
 
   public async stop() {
     this.subscription?.unsubscribe()
   }
 
-  private subscribe(agent: Agent) {
-    const logger = agent.config.logger
-    const transportService = agent.dependencyManager.resolve(TransportService)
-    const messageReceiver = agent.dependencyManager.resolve(MessageReceiver)
+  private subscribe(agentContext: AgentContext) {
+    const logger = agentContext.config.logger
+    const transportService = agentContext.dependencyManager.resolve(DidCommTransportService)
+    const messageReceiver = agentContext.dependencyManager.resolve(DidCommMessageReceiver)
+    const eventEmitter = agentContext.dependencyManager.resolve(EventEmitter)
 
     this.subscription = this.ourSubject.subscribe({
       next: async ({ message, replySubject }: SubjectMessage) => {
@@ -56,7 +55,7 @@ export class SubjectInboundTransport implements InboundTransport {
         try {
           await messageReceiver.receiveMessage(message, { session })
         } catch (error) {
-          agent.events.emit(agent.context, {
+          eventEmitter.emit(agentContext, {
             type: 'AgentReceiveMessageError',
             payload: error,
           })
@@ -66,7 +65,7 @@ export class SubjectInboundTransport implements InboundTransport {
   }
 }
 
-export class SubjectTransportSession implements TransportSession {
+export class SubjectTransportSession implements DidCommTransportSession {
   public id: string
   public readonly type = 'subject'
   private replySubject: Subject<SubjectMessage>
@@ -76,7 +75,7 @@ export class SubjectTransportSession implements TransportSession {
     this.replySubject = replySubject
   }
 
-  public async send(agentContext: AgentContext, encryptedMessage: EncryptedMessage): Promise<void> {
+  public async send(agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
     this.replySubject.next({ message: encryptedMessage })
   }
 

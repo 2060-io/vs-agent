@@ -1,4 +1,5 @@
-import { BasicMessage, ConnectionRecord } from '@credo-ts/core'
+import { PictureData } from '@2060.io/credo-ts-didcomm-user-profile'
+import { DidCommBasicMessage, DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { INestApplication } from '@nestjs/common'
 import { ProfileMessage, TextMessage } from '@verana-labs/vs-agent-model'
 import { Subject } from 'rxjs'
@@ -32,23 +33,23 @@ describe('MessageService', () => {
   }
   let faberAgent: VsAgent
   let aliceAgent: VsAgent
-  let faberConnection: ConnectionRecord
-  let aliceConnection: ConnectionRecord
+  let faberConnection: DidCommConnectionRecord
+  let aliceConnection: DidCommConnectionRecord
   let faberEvents: ReturnType<typeof vi.spyOn>
   let aliceEvents: ReturnType<typeof vi.spyOn>
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
-      faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
-      faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
+      faberAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(faberMessages))
+      faberAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberEvents = vi.spyOn(faberAgent.events, 'emit')
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
-      aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
-      aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
+      aliceAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
+      aliceAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
@@ -62,9 +63,7 @@ describe('MessageService', () => {
       await faberApp.close()
       await aliceApp.close()
       await faberAgent.shutdown()
-      await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
-      await aliceAgent.wallet.delete()
       vi.restoreAllMocks()
     })
 
@@ -92,8 +91,8 @@ describe('MessageService', () => {
       const msgToAlice = await alicePromise
 
       // expects
-      expect((msgToFaber.payload.message as BasicMessage)?.content).toBe(msgFaber)
-      expect((msgToAlice.payload.message as BasicMessage)?.content).toBe(msgAlice)
+      expect((msgToFaber.payload.message as DidCommBasicMessage)?.content).toBe(msgFaber)
+      expect((msgToAlice.payload.message as DidCommBasicMessage)?.content).toBe(msgAlice)
     })
 
     it('Should Faber send a profile update message to Alice.', async () => {
@@ -122,7 +121,7 @@ describe('MessageService', () => {
 
       // expects
       expect(connection.id).toBe(aliceConnection.id)
-      expect(profile.displayPicture?.links?.[0]).toBe(displayImageUrl)
+      expect((profile.displayPicture as PictureData)?.links?.[0]).toBe(displayImageUrl)
       expect(profile.description).toBe(description)
     })
   })

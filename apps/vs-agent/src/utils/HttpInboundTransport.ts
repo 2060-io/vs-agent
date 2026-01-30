@@ -1,19 +1,22 @@
-import type {
-  InboundTransport,
-  Agent,
-  TransportSession,
-  EncryptedMessage,
-  AgentContext,
-} from '@credo-ts/core'
+import type { AgentContext } from '@credo-ts/core'
 import type { Express, Request, Response } from 'express'
 import type { Server } from 'http'
 
-import { DidCommMimeType, CredoError, TransportService, utils, MessageReceiver } from '@credo-ts/core'
+import { CredoError, utils } from '@credo-ts/core'
+import {
+  DidCommEncryptedMessage,
+  DidCommInboundTransport,
+  DidCommMessageReceiver,
+  DidCommMimeType,
+  DidCommModuleConfig,
+  DidCommTransportService,
+  DidCommTransportSession,
+} from '@credo-ts/didcomm'
 import express, { text } from 'express'
 
 const supportedContentTypes: string[] = [DidCommMimeType.V0, DidCommMimeType.V1]
 
-export class HttpInboundTransport implements InboundTransport {
+export class HttpInboundTransport implements DidCommInboundTransport {
   public app?: Express
   private port: number
   private path: string
@@ -37,15 +40,15 @@ export class HttpInboundTransport implements InboundTransport {
     this.app?.use(text({ type: supportedContentTypes, limit: '5mb' }))
   }
 
-  public async start(agent: Agent, app?: Express) {
+  public async start(agentContext: AgentContext, app?: Express) {
     if (!this.app) {
       this.app = app ?? express()
       this.setupMiddleware()
     }
-    const transportService = agent.dependencyManager.resolve(TransportService)
-    const messageReceiver = agent.dependencyManager.resolve(MessageReceiver)
+    const transportService = agentContext.dependencyManager.resolve(DidCommTransportService)
+    const messageReceiver = agentContext.dependencyManager.resolve(DidCommMessageReceiver)
 
-    agent.config.logger.debug(`Starting HTTP inbound transport`, {
+    agentContext.config.logger.debug(`Starting HTTP inbound transport`, {
       port: this.port,
     })
 
@@ -71,7 +74,7 @@ export class HttpInboundTransport implements InboundTransport {
           res.status(200).end()
         }
       } catch (error) {
-        agent.config.logger.error(`Error processing inbound message: ${error.message}`, error)
+        agentContext.config.logger.error(`Error processing inbound message: ${error.message}`, error)
 
         if (!res.headersSent) {
           res.status(500).send('Error processing message')
@@ -89,7 +92,7 @@ export class HttpInboundTransport implements InboundTransport {
   }
 }
 
-export class HttpTransportSession implements TransportSession {
+export class HttpTransportSession implements DidCommTransportSession {
   public id: string
   public readonly type = 'http'
   public req: Request
@@ -107,13 +110,13 @@ export class HttpTransportSession implements TransportSession {
     }
   }
 
-  public async send(agentContext: AgentContext, encryptedMessage: EncryptedMessage): Promise<void> {
+  public async send(agentContext: AgentContext, encryptedMessage: DidCommEncryptedMessage): Promise<void> {
     if (this.res.headersSent) {
       throw new CredoError(`${this.type} transport session has been closed.`)
     }
 
     // By default we take the agent config's default DIDComm content-type
-    let responseMimeType = agentContext.config.didCommMimeType as string
+    let responseMimeType = agentContext.dependencyManager.resolve(DidCommModuleConfig).didCommMimeType
 
     // However, if the request mime-type is a mime-type that is supported by us, we use that
     // to minimize the chance of interoperability issues

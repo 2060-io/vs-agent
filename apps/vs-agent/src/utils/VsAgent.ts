@@ -1,25 +1,21 @@
 import { DidCommCallsModule } from '@2060.io/credo-ts-didcomm-calls'
-import { MediaSharingModule } from '@2060.io/credo-ts-didcomm-media-sharing'
+import { DidCommMediaSharingModule } from '@2060.io/credo-ts-didcomm-media-sharing'
 import { DidCommMrtdModule } from '@2060.io/credo-ts-didcomm-mrtd'
-import { ReceiptsModule } from '@2060.io/credo-ts-didcomm-receipts'
-import { UserProfileModule, UserProfileModuleConfig } from '@2060.io/credo-ts-didcomm-user-profile'
+import { DidCommReceiptsModule } from '@2060.io/credo-ts-didcomm-receipts'
+import { DidCommUserProfileModule, UserProfileModuleConfig } from '@2060.io/credo-ts-didcomm-user-profile'
 import { ActionMenuModule } from '@credo-ts/action-menu'
 import {
-  AnonCredsCredentialFormatService,
+  AnonCredsDidCommCredentialFormatService,
   AnonCredsModule,
-  AnonCredsProofFormatService,
-  LegacyIndyCredentialFormatService,
-  LegacyIndyProofFormatService,
+  AnonCredsDidCommProofFormatService,
+  LegacyIndyDidCommCredentialFormatService,
+  LegacyIndyDidCommProofFormatService,
 } from '@credo-ts/anoncreds'
-import { AskarModule } from '@credo-ts/askar'
+import { AskarModule, AskarModuleConfigStoreOptions } from '@credo-ts/askar'
 import {
   Agent,
   AgentDependencies,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  ConnectionsModule,
   convertPublicKeyToX25519,
-  CredentialsModule,
   CredoError,
   DidCommV1Service,
   DidDocument,
@@ -27,25 +23,34 @@ import {
   DidRepository,
   DidsModule,
   InitConfig,
-  Key,
-  KeyType,
+  Kms,
   ParsedDid,
   parseDid,
-  ProofsModule,
-  V2CredentialProtocol,
-  V2ProofProtocol,
   W3cCredentialsModule,
 } from '@credo-ts/core'
+import {
+  DidCommAutoAcceptCredential,
+  DidCommAutoAcceptProof,
+  DidCommCredentialsModuleConfigOptions,
+  DidCommCredentialV2Protocol,
+  DidCommHttpOutboundTransport,
+  DidCommModule,
+  DidCommModuleConfigOptions,
+  DidCommProofsModuleConfigOptions,
+  DidCommProofV2Protocol,
+} from '@credo-ts/didcomm'
 import { QuestionAnswerModule } from '@credo-ts/question-answer'
-import { WebvhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
+import { WebVhDidResolver, WebVhAnonCredsRegistry, WebVhDidRegistrar } from '@credo-ts/webvh'
 import { anoncreds } from '@hyperledger/anoncreds-nodejs'
-import { ariesAskar } from '@hyperledger/aries-askar-nodejs'
+import { askar } from '@openwallet-foundation/askar-nodejs'
 import { DidWebAnonCredsRegistry } from 'credo-ts-didweb-anoncreds'
+import { multibaseEncode, MultibaseEncoding } from 'didwebvh-ts'
 
 import { FullTailsFileService } from '../services/FullTailsFileService'
 
 import { defaultDocumentLoader } from './CachedDocumentLoader'
 import { CachedWebDidResolver } from './CachedWebDidResolver'
+import { VsAgentWsOutboundTransport } from './VsAgentWsOutboundTransport'
 import { WebDidRegistrar } from './WebDidRegistrar'
 
 type VsAgentModules = {
@@ -53,17 +58,26 @@ type VsAgentModules = {
   anoncreds: AnonCredsModule
   actionMenu: ActionMenuModule
   dids: DidsModule
-  connections: ConnectionsModule
   calls: DidCommCallsModule
-  credentials: CredentialsModule<
-    [V2CredentialProtocol<[LegacyIndyCredentialFormatService, AnonCredsCredentialFormatService]>]
+  didcomm: DidCommModule<
+    DidCommModuleConfigOptions & {
+      credentials: DidCommCredentialsModuleConfigOptions<
+        [
+          DidCommCredentialV2Protocol<
+            [LegacyIndyDidCommCredentialFormatService, AnonCredsDidCommCredentialFormatService]
+          >,
+        ]
+      >
+      proofs: DidCommProofsModuleConfigOptions<
+        [DidCommProofV2Protocol<[LegacyIndyDidCommProofFormatService, AnonCredsDidCommProofFormatService]>]
+      >
+    }
   >
-  proofs: ProofsModule<[V2ProofProtocol<[LegacyIndyProofFormatService, AnonCredsProofFormatService]>]>
-  media: MediaSharingModule
+  media: DidCommMediaSharingModule
   mrtd: DidCommMrtdModule
   questionAnswer: QuestionAnswerModule
-  receipts: ReceiptsModule
-  userProfile: UserProfileModule
+  receipts: DidCommReceiptsModule
+  userProfile: DidCommUserProfileModule
   w3cCredentials: W3cCredentialsModule
 }
 
@@ -77,29 +91,35 @@ export class VsAgent extends Agent<VsAgentModules> {
   public did?: string
   public autoDiscloseUserProfile?: boolean
   public publicApiBaseUrl: string
+  public displayPictureUrl?: string
+  public label: string
 
   public constructor(
     options: AgentOptions<VsAgentModules> & {
       did?: string
       autoDiscloseUserProfile?: boolean
       publicApiBaseUrl: string
+      displayPictureUrl?: string
+      label: string
     },
   ) {
     super(options)
     this.did = options.did
     this.autoDiscloseUserProfile = options.autoDiscloseUserProfile
     this.publicApiBaseUrl = options.publicApiBaseUrl
+    this.displayPictureUrl = options.displayPictureUrl
+    this.label = options.label
   }
 
   public async initialize() {
     await super.initialize()
 
     // Make sure default User Profile corresponds to settings in environment variables
-    const imageUrl = this.config.connectionImageUrl
+    const imageUrl = this.displayPictureUrl
     const displayPicture = imageUrl ? { links: [imageUrl], mimeType: 'image/png' } : undefined
 
     await this.modules.userProfile.updateUserProfileData({
-      displayName: this.config.label,
+      displayName: this.label,
       displayPicture,
     })
 
@@ -231,7 +251,7 @@ export class VsAgent extends Agent<VsAgentModules> {
   private getDidCommServices(publicDid: string) {
     const keyAgreementId = `${publicDid}#key-agreement-1`
 
-    return this.config.endpoints.map((endpoint, index) => {
+    return this.didcomm.config.endpoints.map((endpoint, index) => {
       return new DidCommV1Service({
         id: `${publicDid}#did-communication`,
         serviceEndpoint: endpoint,
@@ -252,10 +272,25 @@ export class VsAgent extends Agent<VsAgentModules> {
       'https://w3id.org/security/suites/x25519-2019/v1',
     ]
     const keyAgreementId = `${publicDid}#key-agreement-1`
-    const ed25519 = await this.wallet.createKey({ keyType: KeyType.Ed25519 })
-    const verificationMethodId = `${publicDid}#${ed25519.fingerprint}`
-    const publicKeyX25519 = convertPublicKeyToX25519(ed25519.publicKey)
-    const x25519Key = Key.fromPublicKey(publicKeyX25519, KeyType.X25519)
+    const kms = this.agentContext.resolve(Kms.KeyManagementApi)
+    const didRepository = this.agentContext.resolve(DidRepository)
+
+    // Create didcomm keys
+    const key = await kms.createKey({ type: { kty: 'OKP', crv: 'Ed25519' } })
+    const publicKeyBytes = Kms.PublicJwk.fromPublicJwk(key.publicJwk).publicKey.publicKey
+    const publicKeyMultibase = multibaseEncode(
+      new Uint8Array([0xed, 0x01, ...publicKeyBytes]),
+      MultibaseEncoding.BASE58_BTC,
+    )
+    const [record] = await didRepository.findByQuery(this.agentContext, { did: publicDid })
+    record.keys?.push({
+      kmsKeyId: key.keyId,
+      didDocumentRelativeKeyId: `#${publicKeyMultibase}`,
+    })
+    await didRepository.update(this.agentContext, record)
+    const verificationMethodId = `${publicDid}#${publicKeyMultibase}`
+    const publicKeyX25519 = convertPublicKeyToX25519(publicKeyBytes)
+    const x25519Key = Kms.PublicJwk.fromPublicKey({ kty: 'OKP', crv: 'X25519', publicKey: publicKeyX25519 })
 
     // Remove legacy if exist
     const legacyContexts = ['https://w3id.org/security/suites/ed25519-2018/v1']
@@ -274,7 +309,7 @@ export class VsAgent extends Agent<VsAgentModules> {
       {
         controller: publicDid,
         id: verificationMethodId,
-        publicKeyMultibase: ed25519.fingerprint,
+        publicKeyMultibase,
         type: 'Ed25519VerificationKey2020',
       },
       {
@@ -378,6 +413,10 @@ export interface VsAgentOptions {
   dependencies: AgentDependencies
   publicApiBaseUrl: string
   masterListCscaLocation?: string
+  endpoints: string[]
+  walletConfig: AskarModuleConfigStoreOptions
+  displayPictureUrl?: string
+  label: string
 }
 
 export const createVsAgent = (options: VsAgentOptions): VsAgent => {
@@ -385,7 +424,10 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     config: options.config,
     dependencies: options.dependencies,
     modules: {
-      askar: new AskarModule({ ariesAskar }),
+      askar: new AskarModule({
+        askar,
+        store: options.walletConfig,
+      }),
       anoncreds: new AnonCredsModule({
         anoncreds,
         tailsFileService: new FullTailsFileService({
@@ -400,39 +442,48 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
       }),
       actionMenu: new ActionMenuModule(),
       calls: new DidCommCallsModule(),
-      connections: new ConnectionsModule({ autoAcceptConnections: true }),
-      credentials: new CredentialsModule({
-        autoAcceptCredentials: AutoAcceptCredential.ContentApproved,
-        credentialProtocols: [
-          new V2CredentialProtocol({
-            credentialFormats: [
-              new LegacyIndyCredentialFormatService(),
-              new AnonCredsCredentialFormatService(),
-            ],
-          }),
-        ],
-      }),
       dids: new DidsModule({
         resolvers: [
           new CachedWebDidResolver({ publicApiBaseUrl: options.publicApiBaseUrl }),
-          new WebvhDidResolver(),
+          new WebVhDidResolver(),
         ],
         registrars: [new WebDidRegistrar(), new WebVhDidRegistrar()],
       }),
       mrtd: new DidCommMrtdModule({ masterListCscaLocation: options.masterListCscaLocation }),
-      proofs: new ProofsModule({
-        autoAcceptProofs: AutoAcceptProof.ContentApproved,
-        proofProtocols: [
-          new V2ProofProtocol({
-            proofFormats: [new LegacyIndyProofFormatService(), new AnonCredsProofFormatService()],
-          }),
-        ],
+      didcomm: new DidCommModule({
+        endpoints: options.endpoints,
+        transports: {
+          outbound: [new DidCommHttpOutboundTransport(), new VsAgentWsOutboundTransport()],
+        },
+        connections: { autoAcceptConnections: true },
+        credentials: {
+          autoAcceptCredentials: DidCommAutoAcceptCredential.ContentApproved,
+          credentialProtocols: [
+            new DidCommCredentialV2Protocol({
+              credentialFormats: [
+                new LegacyIndyDidCommCredentialFormatService(),
+                new AnonCredsDidCommCredentialFormatService(),
+              ],
+            }),
+          ],
+        },
+        proofs: {
+          autoAcceptProofs: DidCommAutoAcceptProof.ContentApproved,
+          proofProtocols: [
+            new DidCommProofV2Protocol({
+              proofFormats: [
+                new LegacyIndyDidCommProofFormatService(),
+                new AnonCredsDidCommProofFormatService(),
+              ],
+            }),
+          ],
+        },
       }),
-      media: new MediaSharingModule(),
+      media: new DidCommMediaSharingModule(),
       questionAnswer: new QuestionAnswerModule(),
-      receipts: new ReceiptsModule(),
+      receipts: new DidCommReceiptsModule(),
       // Disable module's auto disclose feature, since we are going to manage it in MessageEvents
-      userProfile: new UserProfileModule(new UserProfileModuleConfig({ autoSendProfile: false })),
+      userProfile: new DidCommUserProfileModule(new UserProfileModuleConfig({ autoSendProfile: false })),
       w3cCredentials: new W3cCredentialsModule({
         documentLoader: defaultDocumentLoader,
       }),
@@ -440,5 +491,7 @@ export const createVsAgent = (options: VsAgentOptions): VsAgent => {
     did: options.did,
     autoDiscloseUserProfile: options.autoDiscloseUserProfile,
     publicApiBaseUrl: options.publicApiBaseUrl,
+    displayPictureUrl: options.displayPictureUrl,
+    label: options.label,
   })
 }

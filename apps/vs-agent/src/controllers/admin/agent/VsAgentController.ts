@@ -2,18 +2,15 @@ import { Controller, Get } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiOkResponse, getSchemaPath, ApiExtraModels } from '@nestjs/swagger'
 
 import { VsAgentService } from '../../../services/VsAgentService'
-import { TrustService } from '../verifiable'
 
 import { VsAgentInfoDto } from './dto'
+import { AGENT_LABEL } from '../../../../src/config'
 
 @ApiTags('agent')
 @ApiExtraModels(VsAgentInfoDto)
 @Controller({ path: 'agent', version: '1' })
 export class VsAgentController {
-  constructor(
-    private readonly vsAgentService: VsAgentService,
-    private readonly trustService: TrustService,
-  ) {}
+  constructor(private readonly vsAgentService: VsAgentService) {}
 
   @Get('/')
   @ApiOperation({
@@ -28,8 +25,8 @@ export class VsAgentController {
   public async getAgentInfo(): Promise<VsAgentInfoDto> {
     const vsAgent = await this.vsAgentService.getAgent()
     return {
-      label: vsAgent.config.label,
-      endpoints: vsAgent.config.endpoints,
+      label: AGENT_LABEL,
+      endpoints: vsAgent.didcomm.config.endpoints,
       isInitialized: vsAgent.isInitialized,
       publicDid: vsAgent.did,
     }

@@ -1,17 +1,16 @@
 import { ActionMenuRole, ActionMenuOption } from '@credo-ts/action-menu'
 import { AnonCredsRequestedAttribute } from '@credo-ts/anoncreds'
+import { JsonTransformer, utils } from '@credo-ts/core'
 import {
-  JsonTransformer,
-  AutoAcceptCredential,
-  AutoAcceptProof,
-  utils,
-  MessageSender,
-  OutboundMessageContext,
-  OutOfBandRepository,
-  OutOfBandInvitation,
-  ConnectionRecord,
-  CredentialPreviewAttributeOptions,
-} from '@credo-ts/core'
+  DidCommAutoAcceptCredential,
+  DidCommAutoAcceptProof,
+  DidCommConnectionRecord,
+  DidCommCredentialPreviewAttributeOptions,
+  DidCommMessageSender,
+  DidCommOutboundMessageContext,
+  DidCommOutOfBandInvitation,
+  DidCommOutOfBandRepository,
+} from '@credo-ts/didcomm'
 import { QuestionAnswerRepository, ValidResponse } from '@credo-ts/question-answer'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import {
@@ -49,7 +48,10 @@ export class MessageService {
     @Inject(CredentialTypesService) private readonly credentialService: CredentialTypesService,
   ) {}
 
-  public async sendMessage(message: IBaseMessage, connection: ConnectionRecord): Promise<{ id: string }> {
+  public async sendMessage(
+    message: IBaseMessage,
+    connection: DidCommConnectionRecord,
+  ): Promise<{ id: string }> {
     try {
       const agent = await this.agentService.getAgent()
 
@@ -59,7 +61,7 @@ export class MessageService {
 
       if (messageType === TextMessage.type) {
         const textMsg = JsonTransformer.fromJSON(message, TextMessage)
-        const record = await agent.basicMessages.sendMessage(textMsg.connectionId, textMsg.content)
+        const record = await agent.didcomm.basicMessages.sendMessage(textMsg.connectionId, textMsg.content)
         messageId = record.threadId
       } else if (messageType === MediaMessage.type) {
         const mediaMsg = JsonTransformer.fromJSON(message, MediaMessage)
@@ -186,7 +188,7 @@ export class MessageService {
               restrictions: [{ cred_def_id: credentialDefinitionId }],
             }
 
-            const record = await agent.proofs.requestProof({
+            const record = await agent.didcomm.proofs.requestProof({
               comment: vcItem.description as string,
               connectionId: msg.connectionId,
               proofFormats: {
@@ -198,14 +200,14 @@ export class MessageService {
               },
               protocolVersion: 'v2',
               parentThreadId: msg.threadId,
-              autoAcceptProof: AutoAcceptProof.Never,
+              autoAcceptProof: DidCommAutoAcceptProof.Never,
             })
             messageId = record.threadId
             record.metadata.set('_2060/requestedCredentials', {
               credentialDefinitionId,
               attributes,
             } as RequestedCredential)
-            await agent.proofs.update(record)
+            await agent.didcomm.proofs.update(record)
           }
         }
       } else if (messageType === IdentityProofResultMessage.type) {
@@ -214,15 +216,15 @@ export class MessageService {
         const msg = JsonTransformer.fromJSON(message, CredentialIssuanceMessage)
         let credential
         if (message.threadId)
-          [credential] = await agent.credentials.findAllByQuery({ threadId: message.threadId })
+          [credential] = await agent.didcomm.credentials.findAllByQuery({ threadId: message.threadId })
 
         if (credential) {
-          await agent.credentials.acceptProposal({
-            credentialRecordId: credential.id,
-            autoAcceptCredential: AutoAcceptCredential.Always,
+          await agent.didcomm.credentials.acceptProposal({
+            credentialExchangeRecordId: credential.id,
+            autoAcceptCredential: DidCommAutoAcceptCredential.Always,
           })
         } else {
-          let attributes: CredentialPreviewAttributeOptions[] = []
+          let attributes: DidCommCredentialPreviewAttributeOptions[] = []
           const revocationRegistryDefinitionId = msg.revocationRegistryDefinitionId
           const revocationRegistryIndex = msg.revocationRegistryIndex
           let credentialDefinitionId = msg.credentialDefinitionId
@@ -243,7 +245,7 @@ export class MessageService {
           }
 
           if (attributes.length) {
-            const record = await agent.credentials.offerCredential({
+            const record = await agent.didcomm.credentials.offerCredential({
               connectionId: msg.connectionId,
               credentialFormats: {
                 anoncreds: {
@@ -254,7 +256,7 @@ export class MessageService {
                 },
               },
               protocolVersion: 'v2',
-              autoAcceptCredential: AutoAcceptCredential.Always,
+              autoAcceptCredential: DidCommAutoAcceptCredential.Always,
             })
             messageId = record.threadId
           } else {
@@ -266,11 +268,11 @@ export class MessageService {
       } else if (messageType === CredentialRevocationMessage.type) {
         const msg = JsonTransformer.fromJSON(message, CredentialRevocationMessage)
 
-        let credentials = await agent.credentials.findAllByQuery({ threadId: msg.threadId })
+        let credentials = await agent.didcomm.credentials.findAllByQuery({ threadId: msg.threadId })
         if (!credentials?.length && msg.threadId) {
           const record = await agent.genericRecords.findById(msg.threadId)
           const threadId = record?.getTag('messageId') as string
-          credentials = await agent.credentials.findAllByQuery({ threadId })
+          credentials = await agent.didcomm.credentials.findAllByQuery({ threadId })
         }
         if (credentials && credentials.length > 0) {
           for (const credential of credentials) {
@@ -291,8 +293,8 @@ export class MessageService {
               throw new Error(`Failed to update revocation status list`)
             }
 
-            await agent.credentials.sendRevocationNotification({
-              credentialRecordId: credential.id,
+            await agent.didcomm.credentials.sendRevocationNotification({
+              credentialExchangeRecordId: credential.id,
               revocationFormat: 'anoncreds',
               revocationId: `${credential.getTag('anonCredsRevocationRegistryId')}::${credential.getTag('anonCredsCredentialRevocationId')}`,
             })
@@ -304,12 +306,12 @@ export class MessageService {
         const msg = JsonTransformer.fromJSON(message, InvitationMessage)
         const { label, imageUrl, did } = msg
 
-        const messageSender = agent.context.dependencyManager.resolve(MessageSender)
+        const messageSender = agent.context.dependencyManager.resolve(DidCommMessageSender)
 
         if (did) {
           // FIXME: This is a workaround due to an issue found in AFJ validator. Replace with class when fixed
           const json = {
-            '@type': OutOfBandInvitation.type.messageTypeUri,
+            '@type': DidCommOutOfBandInvitation.type.messageTypeUri,
             '@id': utils.uuid(),
             label: label ?? '',
             imageUrl: imageUrl,
@@ -317,13 +319,13 @@ export class MessageService {
             handshake_protocols: ['https://didcomm.org/didexchange/1.0'],
           }
 
-          const invitation = OutOfBandInvitation.fromJson(json)
+          const invitation = DidCommOutOfBandInvitation.fromJson(json)
 
           // In this special case we use the public did as pthid to indicate recipient to treat as an implicit invitation
           invitation.setThread({ parentThreadId: did })
 
           await messageSender.sendMessage(
-            new OutboundMessageContext(invitation, {
+            new DidCommOutboundMessageContext(invitation, {
               agentContext: agent.context,
               connection,
             }),
@@ -331,15 +333,17 @@ export class MessageService {
 
           messageId = invitation.id
         } else {
-          const outOfBandRecord = await agent.oob.createInvitation({
+          const outOfBandRecord = await agent.didcomm.oob.createInvitation({
             label,
             imageUrl,
           })
           outOfBandRecord.setTag('parentConnectionId', connection.id)
-          await agent.dependencyManager.resolve(OutOfBandRepository).update(agent.context, outOfBandRecord)
+          await agent.dependencyManager
+            .resolve(DidCommOutOfBandRepository)
+            .update(agent.context, outOfBandRecord)
 
           await messageSender.sendMessage(
-            new OutboundMessageContext(outOfBandRecord.outOfBandInvitation, {
+            new DidCommOutboundMessageContext(outOfBandRecord.outOfBandInvitation, {
               agentContext: agent.context,
               connection,
             }),
@@ -366,7 +370,7 @@ export class MessageService {
       } else if (messageType === TerminateConnectionMessage.type) {
         JsonTransformer.fromJSON(message, TerminateConnectionMessage)
 
-        await agent.connections.hangup({ connectionId: connection.id })
+        await agent.didcomm.connections.hangup({ connectionId: connection.id })
 
         // FIXME: No message id is returned here
       } else if (messageType === CallOfferRequestMessage.type) {

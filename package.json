@@ -51,15 +51,14 @@
     "@types/node": "20.11.19",
     "tsyringe": "4.8.0",
     "@hyperledger/anoncreds-nodejs": "0.2.4",
-    "@hyperledger/aries-askar-nodejs": "0.2.3",
     "@hyperledger/anoncreds-shared": "0.2.4",
     "@hyperledger/aries-askar-shared": "0.2.3",
-    "@credo-ts/action-menu": "0.5.18-alpha-20250930143725",
-    "@credo-ts/core": "0.5.18-alpha-20250930143725",
-    "@credo-ts/question-answer": "0.5.18-alpha-20250930143725",
-    "@credo-ts/node": "0.5.18-alpha-20250930143725",
-    "@credo-ts/askar": "0.5.18-alpha-20250930143725",
-    "@credo-ts/anoncreds": "0.5.18-alpha-20250930143725"
+    "@credo-ts/action-menu": "^0.6.1",
+    "@credo-ts/core": "^0.6.1",
+    "@credo-ts/question-answer": "^0.6.1",
+    "@credo-ts/node": "^0.6.1",
+    "@credo-ts/askar": "^0.6.1",
+    "@credo-ts/anoncreds": "^0.6.1"
   },
   "packageManager": "pnpm@9.15.3"
 }

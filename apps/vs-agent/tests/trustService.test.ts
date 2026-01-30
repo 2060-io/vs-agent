@@ -1,4 +1,4 @@
-import { ConnectionRecord } from '@credo-ts/core'
+import { DidCommConnectionRecord } from '@credo-ts/didcomm'
 import { WebVhAnonCredsRegistry } from '@credo-ts/webvh'
 import { INestApplication } from '@nestjs/common'
 import { Claim, CredentialIssuanceMessage } from '@verana-labs/vs-agent-model'
@@ -32,21 +32,21 @@ describe('TrustService', () => {
   }
   let faberAgent: VsAgent
   let aliceAgent: VsAgent
-  let faberConnection: ConnectionRecord
-  let aliceConnection: ConnectionRecord
+  let faberConnection: DidCommConnectionRecord
+  let aliceConnection: DidCommConnectionRecord
   let aliceEvents: ReturnType<typeof vi.spyOn>
 
   describe('Testing for message exchange with VsAgent', async () => {
     beforeEach(async () => {
       faberAgent = await startAgent({ label: 'Faber Test', domain: 'faber' })
-      faberAgent.registerInboundTransport(new SubjectInboundTransport(faberMessages))
-      faberAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
+      faberAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(faberMessages))
+      faberAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await faberAgent.initialize()
       faberApp = await startServersTesting(faberAgent)
 
       aliceAgent = await startAgent({ label: 'Alice Test', domain: 'alice' })
-      aliceAgent.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
-      aliceAgent.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
+      aliceAgent.didcomm.registerInboundTransport(new SubjectInboundTransport(aliceMessages))
+      aliceAgent.didcomm.registerOutboundTransport(new SubjectOutboundTransport(subjectMap))
       await aliceAgent.initialize()
       ;[aliceConnection, faberConnection] = await makeConnection(aliceAgent, faberAgent)
       aliceEvents = vi.spyOn(aliceAgent.events, 'emit')
@@ -59,9 +59,7 @@ describe('TrustService', () => {
     afterEach(async () => {
       await faberApp.close()
       await faberAgent.shutdown()
-      await faberAgent.wallet.delete()
       await aliceAgent.shutdown()
-      await aliceAgent.wallet.delete()
       vi.restoreAllMocks()
     })
 
@@ -147,11 +145,11 @@ describe('TrustService', () => {
 
       // Receiving messages
       const {
-        payload: { credentialRecord },
+        payload: { credentialExchangeRecord },
       } = await alicePromise
 
       // expects
-      expect(credentialRecord).toEqual(
+      expect(credentialExchangeRecord).toEqual(
         expect.objectContaining({
           state: 'offer-received',
           connectionId: aliceConnection.id,
@@ -164,7 +162,7 @@ describe('TrustService', () => {
           updatedAt: expect.any(Date),
         }),
       )
-      expect(record.id).toEqual(credentialRecord.threadId)
+      expect(record.id).toEqual(credentialExchangeRecord.threadId)
       expect(credentialResponse).toEqual(
         expect.objectContaining({
           status: 200,
