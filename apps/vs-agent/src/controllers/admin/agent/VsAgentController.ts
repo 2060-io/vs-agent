@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiOkResponse, getSchemaPath, ApiExtraModels } f
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { VsAgentInfoDto } from './dto'
+import { AGENT_LABEL } from '../../../../src/config'
 
 @ApiTags('agent')
 @ApiExtraModels(VsAgentInfoDto)
@@ -24,7 +25,7 @@ export class VsAgentController {
   public async getAgentInfo(): Promise<VsAgentInfoDto> {
     const vsAgent = await this.vsAgentService.getAgent()
     return {
-      label: vsAgent.label,
+      label: AGENT_LABEL,
       endpoints: vsAgent.didcomm.config.endpoints,
       isInitialized: vsAgent.isInitialized,
       publicDid: vsAgent.did,
