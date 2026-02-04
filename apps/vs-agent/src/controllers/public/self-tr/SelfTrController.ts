@@ -52,7 +52,7 @@ export class SelfTrController {
       }
       const ecsSchema = this.ecsSchemas[schemaId]
       return {
-        schema: JSON.stringify(ecsSchema),
+        schema: ecsSchema,
       }
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
