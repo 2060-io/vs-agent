@@ -103,7 +103,7 @@ export class CredentialTypesService {
     name,
     schemaId,
     issuerId,
-    supportRevocation = false,
+    supportRevocation = true,
     version = '1.0',
     jsonSchemaCredentialId,
   }: {
