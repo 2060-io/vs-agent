@@ -20,7 +20,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              head: `${context.repo.owner}:release-please--branches--main`
+              head: `${context.repo.owner}:release-please--branches--main--components--vs-agent`
             })
 
             if (prs.data.length === 0) {
