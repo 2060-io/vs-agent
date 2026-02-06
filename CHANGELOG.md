@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.2](https://github.com/verana-labs/vs-agent/compare/v1.7.1...v1.7.2) (2026-02-06)
+
+
+### Bug Fixes
+
+* add sync with main version ([#335](https://github.com/verana-labs/vs-agent/issues/335)) ([5ad461c](https://github.com/verana-labs/vs-agent/commit/5ad461c9b836926cc5c53b6c22feda0ea97f5f2e))
+* dotenv dependency ([#333](https://github.com/verana-labs/vs-agent/issues/333)) ([7c13cc1](https://github.com/verana-labs/vs-agent/commit/7c13cc1909fde3f99506fb3de6f08da1c16360ce))
+* scaped json schema ([#330](https://github.com/verana-labs/vs-agent/issues/330)) ([56809a8](https://github.com/verana-labs/vs-agent/commit/56809a82af3b27b2e2afb0268bfcc20c60ff24d1))
+
 ## [1.7.1](https://github.com/verana-labs/vs-agent/compare/v1.7.0...v1.7.1) (2026-01-30)
 
 
