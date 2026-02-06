@@ -1,0 +1,64 @@
+name: Sync monorepo versions
+
+on:
+  workflow_run:
+    workflows: ["Continuous Deployment"]
+    types:
+      - completed
+
+jobs:
+  sync-versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find release-please PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:release-please--branches--main`
+            })
+
+            if (prs.data.length === 0) {
+              core.setFailed('No open release-please PR found')
+            }
+
+            core.setOutput('branch', prs.data[0].head.ref)
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+
+      - name: Read root version
+        id: version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          echo "current=$(node -p "require('./apps/vs-agent/package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Sync versions
+        run: |
+          if [ "${{ steps.version.outputs.version }}" != "${{ steps.version.outputs.current }}" ]; then
+            pnpm -r --topological --ignore-scripts version ${{ steps.version.outputs.version }} --no-git-tag-version
+          else
+            echo "Version already ${{ steps.version.outputs.version }}, skipping"
+          fi
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "chore: sync package versions"
+          git push origin HEAD:${{ steps.pr.outputs.branch }}
