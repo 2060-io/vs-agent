@@ -50,7 +50,7 @@ jobs:
       - name: Sync versions
         run: |
           if [ "${{ steps.version.outputs.version }}" != "${{ steps.version.outputs.current }}" ]; then
-            pnpm -r --topological --ignore-scripts version ${{ steps.version.outputs.version }} --no-git-tag-version
+            pnpm -r --topological --no-bail --ignore-scripts version ${{ steps.version.outputs.version }} --no-git-tag-version
           else
             echo "Version already ${{ steps.version.outputs.version }}, skipping"
           fi
