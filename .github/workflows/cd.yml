@@ -140,22 +140,20 @@ jobs:
               "${RELEASE_VERSION}"
             )
           fi
+          CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
           for tag in "${TAGS[@]}"; do
-            sed -i "s/^version:.*/version: $tag/" ./charts/vs-agent/Chart.yaml
-            CHART_NAME=$(grep '^name:' ./charts/vs-agent/Chart.yaml | awk '{print $2}')
             helm dependency update ./charts/vs-agent
-            helm package ./charts/vs-agent -d ./charts
+            helm package ./charts/vs-agent --version $tag -d ./charts
             helm push ./charts/${CHART_NAME}-$tag.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
           done
 
       - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
         run: |
-          sed -i "s/^version:.*/version: $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
           # update the dependencies version in the Chart.yaml
           sed -i "s/^\([[:space:]]*version:\).*/\1 $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
           CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
           helm dependency update ./charts/chatbot
-          helm package ./charts/chatbot -d ./charts
+          helm package ./charts/chatbot --version $RELEASE_VERSION -d ./charts
           helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
 
   npm-publish:
