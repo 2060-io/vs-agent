@@ -3,18 +3,23 @@ import {
   AnonCredsSchema,
   AnonCredsSchemaRepository,
 } from '@credo-ts/anoncreds'
-import { JsonObject, utils, W3cCredential } from '@credo-ts/core'
+import { JsonObject, TagsBase, utils, W3cCredential } from '@credo-ts/core'
 import { HttpException, HttpStatus, Inject, Logger } from '@nestjs/common'
 
 import { VsAgentService } from '../../../services/VsAgentService'
 import { mapToEcosystem, VsAgent } from '../../../utils'
+
+type Tags = TagsBase & {
+  type?: never
+  attestedResourceId?: never
+}
 
 export class CredentialTypesService {
   private readonly logger = new Logger(CredentialTypesService.name)
 
   constructor(@Inject(VsAgentService) private readonly agentService: VsAgentService) {}
 
-  public async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>, resourceType: string) {
+  public async saveAttestedResource(agent: VsAgent, resource: Record<string, unknown>, tags?: Tags) {
     if (!resource) return
     return await agent.genericRecords.save({
       id: utils.uuid(),
@@ -22,10 +27,60 @@ export class CredentialTypesService {
       tags: {
         attestedResourceId: resource.id as string,
         type: 'AttestedResource',
-        resourceType,
+        ...tags
       },
     })
   }
+
+  public async findSchema(options: {
+    schemaId?: string
+    attributes?: string[]
+    name?: string
+    version?: string
+    issuerId?: string
+    jsonSchemaCredentialId?: string
+  }) {
+    const agent = await this.agentService.getAgent()
+    let schemaId: string | undefined
+
+    if (!options.jsonSchemaCredentialId && (!options.name || !options.version)) {
+      throw new Error('Either jsonSchemaCredentialiD or "name" and "version" must be provided')
+    }
+    const issuerId = options.issuerId ?? agent.did
+    if (!issuerId) {
+      throw new Error('Agent does not have any defined public DID')
+    }
+
+    let schemaRecord
+    ;[schemaRecord] = await agent.modules.anoncreds.getCreatedSchemas({
+        schemaId,
+        issuerId,
+        relatedJsonSchemaCredentialId: options.jsonSchemaCredentialId,
+    })
+
+    if (schemaRecord) return schemaRecord
+  }
+
+  public async findCredentialDefinition(options: {
+    schemaId?: string
+    issuerId?: string
+    name?: string
+    version?: string
+    relatedJsonSchemaCredentialId?: string
+  }) {
+    const { name, version, schemaId, issuerId, relatedJsonSchemaCredentialId } = options
+  
+    const agent = await this.agentService.getAgent()
+
+    let [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
+      schemaId,
+      issuerId,
+      tag: `${name}.${version}`,
+      relatedJsonSchemaCredentialId,
+    })
+    if (credentialDefinitionRecord) return credentialDefinitionRecord
+  }
+
 
   public async getOrRegisterSchema(options: {
     schemaId?: string
@@ -43,14 +98,8 @@ export class CredentialTypesService {
     if (!issuerId) {
       throw new Error('Agent does not have any defined public DID')
     }
-    let schemaRecord
-    if (options.jsonSchemaCredentialId || options.schemaId) {
-      ;[schemaRecord] = await agent.modules.anoncreds.getCreatedSchemas({
-        schemaId,
-        issuerId,
-        relatedJsonSchemaCredentialId: options.jsonSchemaCredentialId,
-      })
-    }
+    let schemaRecord = await this.findSchema(options)
+
     if (schemaRecord) {
       schemaId = schemaRecord.schemaId
       schema = schemaRecord.schema
@@ -64,6 +113,9 @@ export class CredentialTypesService {
       if (!options.attributes || !options.name) {
         throw new Error('Missing required options: "name" and "attributes" must be provided')
       }
+      const schemaRegistrationOptions = { extraMetadata: {
+      relatedJsonSchemaCredentialId: options.jsonSchemaCredentialId,
+    }}
       const { schemaState, registrationMetadata: schemaMetadata } =
         await agent.modules.anoncreds.registerSchema({
           schema: {
@@ -72,8 +124,9 @@ export class CredentialTypesService {
             version: options.version ?? '1.0',
             issuerId,
           },
-          options: {},
+          options: schemaRegistrationOptions,
         })
+
       const { attestedResource: schemaRegistration } = schemaMetadata as {
         attestedResource: Record<string, unknown>
       }
@@ -94,41 +147,35 @@ export class CredentialTypesService {
 
       await schemaRepository.update(agent.context, schemaRecord)
 
-      await this.saveAttestedResource(agent, schemaRegistration, 'anonCredsSchema')
+      await this.saveAttestedResource(agent, schemaRegistration, 
+        { 
+          resourceType: 'anonCredsSchema', 
+          relatedJsonSchemaCredentialId: options.jsonSchemaCredentialId 
+        })
     }
     return { issuerId, schemaId, schema }
   }
 
-  public async getOrRegisterCredentialDefinition({
-    name,
-    schemaId,
-    issuerId,
-    supportRevocation = false,
-    version = '1.0',
-    jsonSchemaCredentialId,
-  }: {
-    name?: string
-    schemaId?: string
-    issuerId?: string
+
+  public async registerCredentialDefinition(options: {
+    name: string
+    schemaId: string
+    issuerId: string
     supportRevocation?: boolean
     version?: string
     jsonSchemaCredentialId?: string
   }) {
+    const { name, schemaId, issuerId, supportRevocation = false, version = '1.0', jsonSchemaCredentialId } = options
     const agent = await this.agentService.getAgent()
-    let [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
-      schemaId,
-      issuerId,
+
+    const credentialDefinitionRegistrationOptions = { supportRevocation, extraMetadata: {
       relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
-    })
-    if (credentialDefinitionRecord)
-      return { credentialDefinitionId: credentialDefinitionRecord.credentialDefinitionId }
-    if (!schemaId || !name || !issuerId)
-      throw new Error(`Missing required parameters to create credential definition`)
+    }}
 
     const { credentialDefinitionState, registrationMetadata: credDefMetadata } =
       await agent.modules.anoncreds.registerCredentialDefinition({
         credentialDefinition: { issuerId, schemaId, tag: `${name}.${version}` },
-        options: { supportRevocation },
+        options: credentialDefinitionRegistrationOptions,
       })
     const { attestedResource: credentialRegistration } = credDefMetadata as {
       attestedResource: Record<string, unknown>
@@ -147,7 +194,7 @@ export class CredentialTypesService {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
-    credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
+    const credentialDefinitionRecord = await credentialDefinitionRepository.getByCredentialDefinitionId(
       agent.context,
       credentialDefinitionId,
     )
@@ -157,9 +204,49 @@ export class CredentialTypesService {
       credentialDefinitionRecord.setTag('relatedJsonSchemaCredentialId', jsonSchemaCredentialId)
     }
 
-    await this.saveAttestedResource(agent, credentialRegistration, 'anonCredsCredDef')
+    await this.saveAttestedResource(agent, credentialRegistration, { 
+      resourceType: 'anonCredsCredDef', 
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId })
     await credentialDefinitionRepository.update(agent.context, credentialDefinitionRecord)
-    return { credentialDefinitionId }
+    
+    return credentialDefinitionRecord
+  }
+
+  /**
+   * Gets or registers an AnonCreds Credential Definition based on the provided parameters. If a 
+   * credential definition with the same schemaId, issuerId, name, version, and relatedJsonSchemaCredentialId 
+   * already exists, it will be returned. Otherwise, a new credential definition will be registered.
+   * 
+   * @returns AnonCredCredentialDefinitionRecord of the existing or newly created credential definition
+   */
+  public async getOrRegisterCredentialDefinition({
+    name,
+    schemaId,
+    issuerId,
+    supportRevocation = false,
+    version = '1.0',
+    jsonSchemaCredentialId,
+  }: {
+    name?: string
+    schemaId?: string
+    issuerId?: string
+    supportRevocation?: boolean
+    version?: string
+    jsonSchemaCredentialId?: string
+  }) {
+    const agent = await this.agentService.getAgent()
+    let credentialDefinitionRecord = await this.findCredentialDefinition({
+      schemaId,
+      issuerId,
+      name, 
+      version,
+      relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
+    })
+    if (credentialDefinitionRecord) return credentialDefinitionRecord
+    if (!schemaId || !name || !issuerId)
+      throw new Error(`Missing required parameters to create credential definition`)
+
+    return this.registerCredentialDefinition({ name, schemaId, issuerId, supportRevocation, version, jsonSchemaCredentialId })
   }
 
   public async getCredentialDefinition(jsonSchemaCredentialId: string) {
@@ -168,11 +255,11 @@ export class CredentialTypesService {
     const credentialDefinitionRepository = agent.dependencyManager.resolve(
       AnonCredsCredentialDefinitionRepository,
     )
-    const existCredential = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
+    const existingCredentialDefinitionRecord = await credentialDefinitionRepository.findSingleByQuery(agent.context, {
       relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
     })
-    if (existCredential) {
-      return existCredential.credentialDefinitionId
+    if (existingCredentialDefinitionRecord) {
+      return existingCredentialDefinitionRecord
     }
 
     const { attrNames: attributes } = await this.parseJsonSchemaCredential(jsonSchemaCredentialId)
@@ -186,19 +273,19 @@ export class CredentialTypesService {
       jsonSchemaCredentialId,
     })
 
-    const { credentialDefinitionId } = await this.getOrRegisterCredentialDefinition({
+    const credentialDefinitionRecord = await this.getOrRegisterCredentialDefinition({
       name,
       schemaId,
       issuerId,
       jsonSchemaCredentialId,
     })
-    return credentialDefinitionId
+    return credentialDefinitionRecord
   }
 
   private async fetchJson<T>(url: string): Promise<T> {
     const res = await fetch(url)
     if (!res.ok) {
-      throw new HttpException(`Failed to fetch ${url}: ${res.statusText}`, HttpStatus.BAD_REQUEST)
+      throw new Error(`Failed to fetch ${url}: ${res.statusText}`)
     }
     return res.json() as Promise<T>
   }
@@ -207,13 +294,14 @@ export class CredentialTypesService {
     const subject = Array.isArray(credentialSubject) ? credentialSubject[0] : credentialSubject
     const id = subject?.id
     if (!id) {
-      throw new HttpException(`Missing credentialSubject.id in credential`, HttpStatus.BAD_REQUEST)
+      throw new Error('Missing credentialSubject.id in credential')
     }
     return id
   }
 
   public async parseJsonSchemaCredential(jsonSchemaCredentialId: string) {
-    // Check schema for credential
+    // Check schema for credentialt
+    try {
     const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
     const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
     const schemaData = await this.fetchJson<JsonObject>(mapToEcosystem(subjectId))
@@ -223,12 +311,12 @@ export class CredentialTypesService {
 
     const attrNames = Object.keys(subjectProps).map(String)
     if (attrNames.length === 0) {
-      throw new HttpException(
-        `No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`,
-        HttpStatus.BAD_REQUEST,
-      )
+      throw new Error(`No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`)
+    }
+    return { parsedSchema, attrNames }
+    } catch(error) {
+      throw new Error(`Failed to parse JSON Schema Credential ${jsonSchemaCredentialId}: ${error}`)
     }
 
-    return { parsedSchema, attrNames }
   }
 }

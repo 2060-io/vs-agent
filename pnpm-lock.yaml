@@ -17,6 +17,11 @@ overrides:
   '@credo-ts/askar': ^0.6.1
   '@credo-ts/anoncreds': ^0.6.1
 
+patchedDependencies:
+  '@credo-ts/webvh':
+    hash: 4hpwhvy45xjyng2ng33i32fadi
+    path: patches/@credo-ts__webvh.patch
+
 importers:
 
   .:
@@ -113,7 +118,7 @@ importers:
         version: 0.6.1(typescript@5.7.2)
       '@credo-ts/webvh':
         specifier: ^0.6.1
-        version: 0.6.1(@hyperledger/anoncreds-shared@0.2.4)(typescript@5.7.2)
+        version: 0.6.1(patch_hash=4hpwhvy45xjyng2ng33i32fadi)(@hyperledger/anoncreds-shared@0.2.4)(typescript@5.7.2)
       '@hyperledger/anoncreds-nodejs':
         specifier: 0.2.4
         version: 0.2.4
@@ -5615,7 +5620,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@credo-ts/webvh@0.6.1(@hyperledger/anoncreds-shared@0.2.4)(typescript@5.7.2)':
+  '@credo-ts/webvh@0.6.1(patch_hash=4hpwhvy45xjyng2ng33i32fadi)(@hyperledger/anoncreds-shared@0.2.4)(typescript@5.7.2)':
     dependencies:
       '@credo-ts/anoncreds': 0.6.1(@hyperledger/anoncreds-shared@0.2.4)(typescript@5.7.2)
       '@credo-ts/core': 0.6.1(typescript@5.7.2)
