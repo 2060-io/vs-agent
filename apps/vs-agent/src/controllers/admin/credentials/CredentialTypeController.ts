@@ -139,7 +139,7 @@ export class CredentialTypesController {
     }
 
     try {
-        let credentialDefinitionRecord = await this.service.findCredentialDefinition({ 
+        let credentialDefinitionRecord = await this.service.findAnonCredsCredentialDefinition({ 
           name,
           version
            })
@@ -150,8 +150,8 @@ export class CredentialTypesController {
           )
         }
 
-        const { schema, schemaId } = await this.service.getOrRegisterSchema(options)
-        credentialDefinitionRecord = await this.service.registerCredentialDefinition({
+        const { schema, schemaId } = await this.service.getOrRegisterAnonCredsSchema(options)
+        credentialDefinitionRecord = await this.service.registerAnonCredsCredentialDefinition({
           name,
           version,
           schemaId: schemaId,
@@ -159,9 +159,6 @@ export class CredentialTypesController {
           supportRevocation,
           relatedJsonSchemaCredentialId,
         })
-
-        const agent = await this.agentService.getAgent()
-
 
         return {
           id: credentialDefinitionRecord.credentialDefinitionId,
