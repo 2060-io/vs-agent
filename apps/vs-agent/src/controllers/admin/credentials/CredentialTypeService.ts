@@ -288,7 +288,6 @@ export class CredentialTypesService {
   }
 
   public async parseJsonSchemaCredential(jsonSchemaCredentialId: string) {
-    // Check schema for credentialt
     try {
     const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
     const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
