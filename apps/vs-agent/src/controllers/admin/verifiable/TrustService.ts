@@ -298,7 +298,7 @@ export class TrustService {
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
           const { credentialDefinitionId } =
-            await this.credentialService.getCredentialDefinition(jsonSchemaCredentialId)
+            await this.credentialService.getOrRegisterCredentialDefinition({ relatedJsonSchemaCredentialId: jsonSchemaCredentialId })
 
           // TODO: if a DID is specified, we can directly start the exchange: if we are already connected, start the offer
           // and if not, do the DID Exchange and then the offer

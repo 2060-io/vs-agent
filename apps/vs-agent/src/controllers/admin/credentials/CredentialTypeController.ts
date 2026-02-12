@@ -157,7 +157,7 @@ export class CredentialTypesController {
           schemaId: schemaId,
           issuerId: schema.issuerId,
           supportRevocation,
-          jsonSchemaCredentialId: relatedJsonSchemaCredentialId,
+          relatedJsonSchemaCredentialId,
         })
 
         const agent = await this.agentService.getAgent()
