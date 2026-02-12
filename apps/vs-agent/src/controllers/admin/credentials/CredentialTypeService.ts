@@ -232,7 +232,7 @@ export class CredentialTypesService {
     issuerId?: string
     supportRevocation?: boolean
     version?: string
-    jsonSchemaCredentialId?: string
+    jsonSchemaCredentialId: string
   }) {
     const agent = await this.agentService.getAgent()
     let credentialDefinitionRecord = await this.findCredentialDefinition({
@@ -243,10 +243,25 @@ export class CredentialTypesService {
       relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
     })
     if (credentialDefinitionRecord) return credentialDefinitionRecord
-    if (!schemaId || !name || !issuerId)
-      throw new Error(`Missing required parameters to create credential definition`)
 
-    return this.registerCredentialDefinition({ name, schemaId, issuerId, supportRevocation, version, jsonSchemaCredentialId })
+
+     const getOrRegisterSchemaResult = await this.getOrRegisterSchema({
+      name,
+      version,
+      issuerId,
+      jsonSchemaCredentialId,
+    })
+     const { schema, schemaId: resolvedSchemaId } = getOrRegisterSchemaResult
+        credentialDefinitionRecord = await this.registerCredentialDefinition({
+          name: schema.name,
+          version: schema.version,
+          schemaId: resolvedSchemaId,
+          issuerId: schema.issuerId,
+          supportRevocation,
+          jsonSchemaCredentialId,
+        })
+
+      return credentialDefinitionRecord 
   }
 
   public async getCredentialDefinition(jsonSchemaCredentialId: string) {
