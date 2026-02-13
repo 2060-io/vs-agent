@@ -186,7 +186,7 @@ jobs:
 
       - name: Set version for apps and packages
         run: |
-          pnpm -r --topological --no-bail version "$RELEASE_VERSION"
+          pnpm -r --topological version "$RELEASE_VERSION"
 
       # --no-git-checks is used due to topological version updating.
       - name: Publish NPM packages
