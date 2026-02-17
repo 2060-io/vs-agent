@@ -149,12 +149,22 @@ jobs:
 
       - name: Push Helm chart Chatbot Demo to Docker Hub OCI repo
         run: |
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            TAGS=("${RELEASE_VERSION}")
+          else
+            TAGS=(
+              "v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-dev"
+              "${RELEASE_VERSION}"
+            )
+          fi
           # update the dependencies version in the Chart.yaml
           sed -i "s/^\([[:space:]]*version:\).*/\1 $RELEASE_VERSION/" ./charts/chatbot/Chart.yaml
           CHART_NAME=$(grep '^name:' ./charts/chatbot/Chart.yaml | awk '{print $2}')
-          helm dependency update ./charts/chatbot
-          helm package ./charts/chatbot --version $RELEASE_VERSION -d ./charts
-          helm push ./charts/${CHART_NAME}-$RELEASE_VERSION.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
+          for tag in "${TAGS[@]}"; do
+            helm dependency update ./charts/chatbot
+            helm package ./charts/chatbot --version $tag -d ./charts
+            helm push ./charts/${CHART_NAME}-$tag.tgz oci://docker.io/${{ secrets.DOCKER_HUB_LOGIN }}
+          done
 
   npm-publish:
     needs: [resolve-version]
