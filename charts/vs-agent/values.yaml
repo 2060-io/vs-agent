@@ -24,6 +24,10 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+image:
+  repository: ""
+  tag: ""
+
 # DB and Redis configuration
 database:
   enabled: false

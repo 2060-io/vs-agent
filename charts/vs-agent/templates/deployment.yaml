@@ -174,7 +174,7 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-sa-container
-            image: veranalabs/vs-agent:{{ .Chart.Version }}
+            image: {{ .Values.image.repository | default "veranalabs/vs-agent" }}:{{ .Values.image.tag | default .Chart.Version }}
             imagePullPolicy: Always
             env:
             - name: AGENT_LABEL
