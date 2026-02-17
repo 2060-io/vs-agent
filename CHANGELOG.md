@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.3](https://github.com/verana-labs/vs-agent/compare/v1.7.2...v1.7.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* allow same version ([#339](https://github.com/verana-labs/vs-agent/issues/339)) ([9fe87d0](https://github.com/verana-labs/vs-agent/commit/9fe87d04501455178ad9af5ee53309c16d9615df))
+* include devnet on urlMap ([#344](https://github.com/verana-labs/vs-agent/issues/344)) ([698b5b3](https://github.com/verana-labs/vs-agent/commit/698b5b3ba70e984787ca348ea70b623d79187721))
+* upgrade chatbot demo base image ([#340](https://github.com/verana-labs/vs-agent/issues/340)) ([dd29ff3](https://github.com/verana-labs/vs-agent/commit/dd29ff3c05e209d6e9f42eb939e0aa824b2bed90))
+
 ## [1.7.2](https://github.com/verana-labs/vs-agent/compare/v1.7.1...v1.7.2) (2026-02-12)
 
 
