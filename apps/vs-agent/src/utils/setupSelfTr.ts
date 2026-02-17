@@ -168,7 +168,7 @@ export const setupSelfTr = async ({
 async function generateVerifiableCredential(
   agent: VsAgent,
   id: string,
-  ecsSchemas: Record<string, AnySchemaObject>,
+  ecsSchemas: Record<string, string>,
   schemaKey: string,
   type: string[],
   subject: W3cCredentialSubject,
@@ -307,7 +307,7 @@ export async function signerW3c(
 export async function generateVerifiablePresentation(
   agent: VsAgent,
   id: string,
-  ecsSchemas: Record<string, AnySchemaObject>,
+  ecsSchemas: Record<string, string>,
   schemaKey: string,
   type: string[],
   credentialSchema: W3cCredentialSchema,
@@ -383,7 +383,7 @@ export function createPresentation(options: Partial<W3cPresentationOptions>) {
  */
 export async function getClaims(
   logger: Logger,
-  ecsSchemas: Record<string, AnySchemaObject>,
+  ecsSchemas: Record<string, string>,
   { id, claims }: W3cCredentialSubject,
   schemaKey: string,
 ) {
@@ -415,7 +415,7 @@ export async function getClaims(
   }
 
   const credentialSubject = { id, ...claims }
-  validateSchema(ecsSchema, credentialSubject)
+  validateSchema(JSON.parse(ecsSchema), credentialSubject)
 
   return claims
 }
@@ -454,7 +454,7 @@ export function validateSchema(ecsSchema: AnySchemaObject, credentialSubject: Re
 export async function addDigestSRI<T extends object>(
   id?: string,
   data?: T,
-  ecsSchemas?: Record<string, AnySchemaObject>,
+  ecsSchemas?: Record<string, string>,
 ): Promise<T & { digestSRI: string }> {
   if (!id || !data) {
     throw new Error(`id and data has requiered`)
@@ -463,18 +463,12 @@ export async function addDigestSRI<T extends object>(
   const key = id.split('/').pop()
   const fallbackSchema = key && ecsSchemas?.[key]
 
-  if (!response.ok && !fallbackSchema) {
+  const schemaContent = response.ok ? await response.text() : fallbackSchema
+
+  if (!schemaContent) {
     throw new Error(
       `Failed to fetch schema from ${id}: ${response.status} ${response.statusText}, and no local fallback found.`,
     )
-  }
-
-  let schemaContent: string
-
-  if (response.ok) {
-    schemaContent = await response.text()
-  } else {
-    schemaContent = JSON.stringify({ schema: JSON.stringify(fallbackSchema) })
   }
 
   return {
@@ -491,7 +485,7 @@ export async function addDigestSRI<T extends object>(
  */
 export function generateDigestSRI(content: string, algorithm: string = 'sha384'): string {
   const hash = createHash(algorithm)
-    .update(JSON.stringify(JSON.parse(content)), 'utf8')
+    .update(content)
     .digest('base64')
   return `${algorithm}-${hash}`
 }
