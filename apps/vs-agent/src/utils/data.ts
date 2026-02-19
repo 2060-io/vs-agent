@@ -24,7 +24,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): Record<string, string> 
           "type": "string",
           "format": "uri",
           "maxLength": 1400000,
-          "pattern": "^data:image/(png|jpeg|svg\\+xml);base64,"
+          "pattern": "^data:image/(png|jpeg|svg\\\\+xml);base64,"
         },
         "registryId": {
           "type": "string",
@@ -98,7 +98,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): Record<string, string> 
           "type": "string",
           "format": "uri",
           "maxLength": 1400000,
-          "pattern": "^data:image/(png|jpeg|svg\\+xml);base64,"
+          "pattern": "^data:image/(png|jpeg|svg\\\\+xml);base64,"
         },
         "description": {
           "type": "string",
@@ -175,7 +175,7 @@ export function getEcsSchemas(publicApiBaseUrl: string): Record<string, string> 
           "type": "string",
           "format": "uri",
           "maxLength": 1400000,
-          "pattern": "^data:image/(png|jpeg|svg\\+xml);base64,"
+          "pattern": "^data:image/(png|jpeg|svg\\\\+xml);base64,"
         },
         "minimumAgeRequired": {
           "type": "integer",
