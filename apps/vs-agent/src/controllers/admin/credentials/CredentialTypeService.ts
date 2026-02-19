@@ -292,8 +292,7 @@ export class CredentialTypesService {
     const jscData = await this.fetchJson<W3cCredential>(jsonSchemaCredentialId)
     const subjectId = this.getCredentialSubjectId(jscData.credentialSubject)
     const schemaData = await this.fetchJson<JsonObject>(mapToEcosystem(subjectId))
-    const parsedSchema =
-      typeof schemaData.schema === 'string' ? JSON.parse(schemaData.schema) : schemaData.schema
+    const parsedSchema = schemaData as any
     const subjectProps = parsedSchema?.properties?.credentialSubject?.properties ?? {}
 
     const attrNames = Object.keys(subjectProps).map(String)
