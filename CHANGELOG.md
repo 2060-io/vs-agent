@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.8.0](https://github.com/verana-labs/vs-agent/compare/v1.7.3...v1.8.0) (2026-02-20)
+
+
+### Features
+
+* update base ECS schemas according to latest verifiable trust v4 ([#350](https://github.com/verana-labs/vs-agent/issues/350)) ([2520a2f](https://github.com/verana-labs/vs-agent/commit/2520a2fc3502f7ed6ab398af8f57b54a91ed6093))
+
+
+### Bug Fixes
+
+* **chatbot:** create dev version ([#347](https://github.com/verana-labs/vs-agent/issues/347)) ([969beb8](https://github.com/verana-labs/vs-agent/commit/969beb872a82d671ed3264e27bee9e133cbbaeb8))
+* **chats:** add custom version ([#345](https://github.com/verana-labs/vs-agent/issues/345)) ([06ac60d](https://github.com/verana-labs/vs-agent/commit/06ac60d23dc540323d7396da5938566837fb1578))
+* digestSRI calculation ([#348](https://github.com/verana-labs/vs-agent/issues/348)) ([9a1cddc](https://github.com/verana-labs/vs-agent/commit/9a1cddc5e184313cee8ba836186e2e895459f746))
+* ecs schema encoding error ([91b03ef](https://github.com/verana-labs/vs-agent/commit/91b03ef0c1923c01a8bba89e8dc7d0fdd8304ad5))
+* JSC parsing ([08c192f](https://github.com/verana-labs/vs-agent/commit/08c192f7219ad0a03fbcd18d8e5989f913fdcf25))
+* set agentContext in WsOutboundTransport ([#352](https://github.com/verana-labs/vs-agent/issues/352)) ([a05e28a](https://github.com/verana-labs/vs-agent/commit/a05e28a2a4c641dea2574557cc63473ef25b046d))
+* use verana indexer instead of blockchain API ([#349](https://github.com/verana-labs/vs-agent/issues/349)) ([f827a2b](https://github.com/verana-labs/vs-agent/commit/f827a2b2debbb424320247797884e2ca51654a13))
+
 ## [1.7.3](https://github.com/verana-labs/vs-agent/compare/v1.7.2...v1.7.3) (2026-02-16)
 
 
