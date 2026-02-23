@@ -74,12 +74,11 @@ export class CredentialTypesService {
     let [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
       schemaId,
       issuerId,
-      tag: `${name}.${version}`,
+      ...(name && version ? { tag: `${name}.${version}` } : {}),
       relatedJsonSchemaCredentialId,
     })
     if (credentialDefinitionRecord) return credentialDefinitionRecord
   }
-
 
   public async getOrRegisterAnonCredsSchema(options: {
     schemaId?: string
@@ -89,11 +88,11 @@ export class CredentialTypesService {
     issuerId?: string
     relatedJsonSchemaCredentialId?: string
   }) {
-    if (options.attributes && options.relatedJsonSchemaCredentialId){
+    if (options.attributes && options.relatedJsonSchemaCredentialId) {
       throw new Error('Cannot provide both "attributes" and "relatedJsonSchemaCredentialId" options')
     }
 
-    if (!options.attributes && !options.relatedJsonSchemaCredentialId){
+    if (!options.attributes && !options.relatedJsonSchemaCredentialId) {
       throw new Error('Either "attributes" or "relatedJsonSchemaCredentialId" option must be provided')
     }
 
@@ -144,8 +143,9 @@ export class CredentialTypesService {
         throw new Error('Schema for the credential definition could not be created')
       }
       const schemaRepository = agent.dependencyManager.resolve(AnonCredsSchemaRepository)
-
-      schemaRecord = await schemaRepository.getBySchemaId(agent.context, schemaId)
+      schemaRecord = (await schemaRepository.findBySchemaId(agent.context, schemaId)) ?? undefined
+      if (!schemaRecord)
+        throw new Error(`Schema record not found after registration for schemaId: ${schemaId}`)
 
       if (options.relatedJsonSchemaCredentialId) {
         schemaRecord.setTag('relatedJsonSchemaCredentialId', options.relatedJsonSchemaCredentialId)
@@ -161,7 +161,6 @@ export class CredentialTypesService {
     }
     return { issuerId, schemaId, schema }
   }
-
 
   public async registerAnonCredsCredentialDefinition(options: {
     name: string
