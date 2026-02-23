@@ -3,7 +3,8 @@ import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator'
 
 export class CreateCredentialTypeDto {
   @ApiProperty({
-    description: 'Name. Used together with version to identify the credential type. Must be unique across all credential types.',
+    description:
+      'Name. Used together with version to identify the credential type. Must be unique across all credential types.',
     example: 'myCredentialType',
   })
   @IsString()
@@ -11,7 +12,8 @@ export class CreateCredentialTypeDto {
   name!: string
 
   @ApiProperty({
-    description: 'Version. Used together with name to identify the credential type. Must be unique across all credential types.',
+    description:
+      'Version. Used together with name to identify the credential type. Must be unique across all credential types.',
     example: '1.0',
   })
   @IsString()
@@ -19,7 +21,8 @@ export class CreateCredentialTypeDto {
   version!: string
 
   @ApiProperty({
-    description: 'Schema attributes. Only in case you want to create a new schema without providing a relatedJsonSchemaCredentialId',
+    description:
+      'Schema attributes. Only in case you want to create a new schema without providing a relatedJsonSchemaCredentialId',
     example: `['name', 'age']`,
   })
   @IsOptional()

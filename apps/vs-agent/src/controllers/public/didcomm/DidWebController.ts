@@ -204,8 +204,9 @@ export class DidWebController {
   @Get('/resources')
   async getWebVhResourcesByType(
     @Res() res: Response,
-    @Query('resourceType') resourceType: string, 
-    @Query('relatedJsonSchemaCredentialId') relatedJsonSchemaCredentialId?: string) {
+    @Query('resourceType') resourceType: string,
+    @Query('relatedJsonSchemaCredentialId') relatedJsonSchemaCredentialId?: string,
+  ) {
     if (!resourceType) {
       throw new HttpException('resourceType query param is required', HttpStatus.BAD_REQUEST)
     }
