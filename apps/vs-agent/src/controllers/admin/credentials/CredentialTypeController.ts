@@ -126,50 +126,47 @@ export class CredentialTypesController {
   })
   @ApiBadRequestResponse({ description: 'Invalid request payload' })
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
-
     const { relatedJsonSchemaCredentialId, attributes, name, version, supportRevocation } = options
     if (relatedJsonSchemaCredentialId && attributes) {
-        throw new BadRequestException(
-          'Either relatedJsonSchemaCredentialId or attributes must be specified, but not both.',
-        )
+      throw new BadRequestException(
+        'Either relatedJsonSchemaCredentialId or attributes must be specified, but not both.',
+      )
     } else if (!relatedJsonSchemaCredentialId && !attributes) {
-        throw new BadRequestException(
-          'Either relatedJsonSchemaCredentialId or attributes must be specified.',
-        )
+      throw new BadRequestException('Either relatedJsonSchemaCredentialId or attributes must be specified.')
     }
 
     try {
-        let credentialDefinitionRecord = await this.service.findAnonCredsCredentialDefinition({ 
-          name,
-          version
-           })
+      let credentialDefinitionRecord = await this.service.findAnonCredsCredentialDefinition({
+        name,
+        version,
+      })
 
-        if (credentialDefinitionRecord) {
-          throw new BadRequestException(
-            `Credential type with name "${name}", version "${version}" already exists.`
-          )
-        }
+      if (credentialDefinitionRecord) {
+        throw new BadRequestException(
+          `Credential type with name "${name}", version "${version}" already exists.`,
+        )
+      }
 
-        const { schema, schemaId } = await this.service.getOrRegisterAnonCredsSchema(options)
-        credentialDefinitionRecord = await this.service.registerAnonCredsCredentialDefinition({
-          name,
-          version,
-          schemaId: schemaId,
-          issuerId: schema.issuerId,
-          supportRevocation,
-          relatedJsonSchemaCredentialId,
-        })
+      const { schema, schemaId } = await this.service.getOrRegisterAnonCredsSchema(options)
+      credentialDefinitionRecord = await this.service.registerAnonCredsCredentialDefinition({
+        name,
+        version,
+        schemaId: schemaId,
+        issuerId: schema.issuerId,
+        supportRevocation,
+        relatedJsonSchemaCredentialId,
+      })
 
-        return {
-          id: credentialDefinitionRecord.credentialDefinitionId,
-          name: schema.name,
-          version: schema.version,
-          attributes: schema.attrNames || [],
-          supportRevocation,
-          relatedJsonSchemaCredentialId: credentialDefinitionRecord.getTag(
-            'relatedJsonSchemaCredentialId',
-          ) as string,
-        }
+      return {
+        id: credentialDefinitionRecord.credentialDefinitionId,
+        name: schema.name,
+        version: schema.version,
+        attributes: schema.attrNames || [],
+        supportRevocation,
+        relatedJsonSchemaCredentialId: credentialDefinitionRecord.getTag(
+          'relatedJsonSchemaCredentialId',
+        ) as string,
+      }
     } catch (error) {
       throw new HttpException(
         {
@@ -496,11 +493,9 @@ export class CredentialTypesController {
       )
 
       // save registration metadata for webvh
-      const revocationRecord = await this.service.saveAttestedResource(
-        agent,
-        revocationRegistration,
-        { resourceType: 'anonCredsRevocRegDef' },
-      )
+      const revocationRecord = await this.service.saveAttestedResource(agent, revocationRegistration, {
+        resourceType: 'anonCredsRevocRegDef',
+      })
 
       const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
@@ -542,7 +537,9 @@ export class CredentialTypesController {
             ],
           },
         )
-        await this.service.saveAttestedResource(agent, statusRegistration, { resourceType: 'anonCredsStatusList' })
+        await this.service.saveAttestedResource(agent, statusRegistration, {
+          resourceType: 'anonCredsStatusList',
+        })
 
         revocationRecord.content = registrationMetadata
         await agent.genericRecords.update(revocationRecord)
