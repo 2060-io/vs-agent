@@ -292,14 +292,16 @@ export class TrustController {
     examples: {
       jsonSchemaCredentialId: {
         summary: 'JSON Schema Credential example',
-        description: 'A full URL identifying the Verifiable Trust Json Schema Credential (VTJSC) to be deleted.',
+        description:
+          'A full URL identifying the Verifiable Trust Json Schema Credential (VTJSC) to be deleted.',
         value: 'https://ecosystem/shemas-example-jsc.json',
       },
     },
   })
   @ApiResponse({
     status: 200,
-    description: 'The Verifiable Trust Json Schema Credential (VTJSC) was successfully deleted for the given schema ID.',
+    description:
+      'The Verifiable Trust Json Schema Credential (VTJSC) was successfully deleted for the given schema ID.',
   })
   @ApiResponse({
     status: 404,
@@ -343,8 +345,7 @@ export class TrustController {
   })
   @ApiResponse({
     status: 201,
-    description:
-      'The Verifiable Trust Json Schema Credential (VTJSC) was successfully created or updated.',
+    description: 'The Verifiable Trust Json Schema Credential (VTJSC) was successfully created or updated.',
   })
   @ApiResponse({
     status: 400,
