@@ -9,6 +9,7 @@ ENV RUN_MODE="docker"
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.json tsconfig.build.json ./
 
+COPY patches ./patches
 COPY packages/model/package.json packages/model/package.json
 COPY packages/client/package.json packages/client/package.json
 COPY packages/nestjs-client/package.json packages/nestjs-client/package.json

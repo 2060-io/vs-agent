@@ -1,6 +1,6 @@
 {
   "name": "@verana-labs/vs-agent-nestjs-client",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "description": "",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm build",
-    "version": "pnpm version",
+    "version": "pnpm version --allow-same-version",
     "test": "vitest"
   },
   "dependencies": {

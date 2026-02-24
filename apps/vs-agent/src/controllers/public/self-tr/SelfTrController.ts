@@ -50,10 +50,7 @@ export class SelfTrController {
       if (!schemaId) {
         throw new HttpException('Schema not found', HttpStatus.NOT_FOUND)
       }
-      const ecsSchema = this.ecsSchemas[schemaId]
-      return {
-        schema: ecsSchema,
-      }
+      return this.ecsSchemas[schemaId]
     } catch (error) {
       this.logger.error(`Error loading schema file: ${error.message}`)
       throw new HttpException('Failed to load schema', HttpStatus.INTERNAL_SERVER_ERROR)

@@ -22,6 +22,10 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+image:
+  repository: ""
+  tag: "dev"
+
 # VS Agent Chart dependency configuration
 # This section defines the configuration for the VS Agent chart that is used by the chatbot application
 vs-agent-chart:

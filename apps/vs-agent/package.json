@@ -3,7 +3,7 @@
   "main": "build/index",
   "types": "build/index",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.8.0",
   "files": [
     "build"
   ],
@@ -51,7 +51,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "version": "pnpm version",
+    "version": "pnpm version --allow-same-version",
     "test": "vitest"
   },
   "dependencies": {

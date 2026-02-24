@@ -54,9 +54,10 @@ export class VsAgentWsOutboundTransport implements DidCommOutboundTransport {
   }
 
   public async start(agentContext: AgentContext): Promise<void> {
-    const agentConfig = agentContext.dependencyManager.resolve(AgentConfig)
+    this.agentContext = agentContext
+    const agentConfig = this.agentContext.dependencyManager.resolve(AgentConfig)
     this.logger = agentConfig.logger
-    this.eventEmitter = agentContext.dependencyManager.resolve(EventEmitter)
+    this.eventEmitter = this.agentContext.dependencyManager.resolve(EventEmitter)
     this.logger.debug('Starting WS outbound transport')
     this.WebSocketClass = agentConfig.agentDependencies.WebSocketClass
   }

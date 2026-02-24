@@ -126,58 +126,52 @@ export class CredentialTypesController {
   })
   @ApiBadRequestResponse({ description: 'Invalid request payload' })
   public async createCredentialType(@Body() options: CreateCredentialTypeDto): Promise<CredentialTypeInfo> {
-    try {
-      // Based on a related JSON Schema Credential: use attribute names from it instead of the provided ones
-      if (options.relatedJsonSchemaCredentialId) {
-        if (options.attributes) {
-          throw new BadRequestException(
-            'If relatedJsonSchemaCredentialId is specified, attributes has no effect',
-          )
-        }
-        const credentialDefinitionId = await this.service.getCredentialDefinition(
-          options.relatedJsonSchemaCredentialId,
-        )
-        const agent = await this.agentService.getAgent()
-        const [credentialDefinitionRecord] = await agent.modules.anoncreds.getCreatedCredentialDefinitions({
-          credentialDefinitionId,
-        })
-        const [schemaRecord] = await agent.modules.anoncreds.getCreatedSchemas({
-          schemaId: credentialDefinitionRecord.credentialDefinition.schemaId,
-        })
-        return {
-          id: credentialDefinitionRecord.credentialDefinitionId,
-          name: (credentialDefinitionRecord.getTag('name') as string) ?? schemaRecord.schema?.name,
-          version: (credentialDefinitionRecord.getTag('version') as string) ?? schemaRecord.schema?.version,
-          attributes: schemaRecord.schema?.attrNames || [],
-          supportRevocation: options.supportRevocation,
-          relatedJsonSchemaCredentialId: credentialDefinitionRecord.getTag(
-            'relatedJsonSchemaCredentialId',
-          ) as string,
-        }
-        // Legacy: no link to any VT JSON Schema Credential (only for testing and existing demos)
-      } else {
-        const { issuerId, schemaId, schema } = await this.service.getOrRegisterSchema({ ...options })
-        const { credentialDefinitionId } = await this.service.getOrRegisterCredentialDefinition({
-          name: options.name,
-          schemaId,
-          issuerId,
-          supportRevocation: options.supportRevocation,
-          jsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
-        })
+    const { relatedJsonSchemaCredentialId, attributes, name, version, supportRevocation } = options
+    if (relatedJsonSchemaCredentialId && attributes) {
+      throw new BadRequestException(
+        'Either relatedJsonSchemaCredentialId or attributes must be specified, but not both.',
+      )
+    } else if (!relatedJsonSchemaCredentialId && !attributes) {
+      throw new BadRequestException('Either relatedJsonSchemaCredentialId or attributes must be specified.')
+    }
 
-        return {
-          id: credentialDefinitionId,
-          attributes: schema!.attrNames,
-          name: options.name,
-          version: options.version,
-          relatedJsonSchemaCredentialId: options.relatedJsonSchemaCredentialId,
-        }
+    try {
+      let credentialDefinitionRecord = await this.service.findAnonCredsCredentialDefinition({
+        name,
+        version,
+      })
+
+      if (credentialDefinitionRecord) {
+        throw new BadRequestException(
+          `Credential type with name "${name}", version "${version}" already exists.`,
+        )
+      }
+
+      const { schema, schemaId } = await this.service.getOrRegisterAnonCredsSchema(options)
+      credentialDefinitionRecord = await this.service.registerAnonCredsCredentialDefinition({
+        name,
+        version,
+        schemaId: schemaId,
+        issuerId: schema.issuerId,
+        supportRevocation,
+        relatedJsonSchemaCredentialId,
+      })
+
+      return {
+        id: credentialDefinitionRecord.credentialDefinitionId,
+        name: schema.name,
+        version: schema.version,
+        attributes: schema.attrNames || [],
+        supportRevocation,
+        relatedJsonSchemaCredentialId: credentialDefinitionRecord.getTag(
+          'relatedJsonSchemaCredentialId',
+        ) as string,
       }
     } catch (error) {
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `something went wrong: ${error}`,
+          error: error.message,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
         {
@@ -499,11 +493,9 @@ export class CredentialTypesController {
       )
 
       // save registration metadata for webvh
-      const revocationRecord = await this.service.saveAttestedResource(
-        agent,
-        revocationRegistration,
-        'anonCredsRevocRegDef',
-      )
+      const revocationRecord = await this.service.saveAttestedResource(agent, revocationRegistration, {
+        resourceType: 'anonCredsRevocRegDef',
+      })
 
       const { revocationStatusListState, registrationMetadata: revListMetadata } =
         await agent.modules.anoncreds.registerRevocationStatusList({
@@ -545,7 +537,9 @@ export class CredentialTypesController {
             ],
           },
         )
-        await this.service.saveAttestedResource(agent, statusRegistration, 'anonCredsStatusList')
+        await this.service.saveAttestedResource(agent, statusRegistration, {
+          resourceType: 'anonCredsStatusList',
+        })
 
         revocationRecord.content = registrationMetadata
         await agent.genericRecords.update(revocationRecord)

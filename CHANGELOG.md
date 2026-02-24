@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.8.0](https://github.com/verana-labs/vs-agent/compare/v1.7.3...v1.8.0) (2026-02-20)
+
+
+### Features
+
+* update base ECS schemas according to latest verifiable trust v4 ([#350](https://github.com/verana-labs/vs-agent/issues/350)) ([2520a2f](https://github.com/verana-labs/vs-agent/commit/2520a2fc3502f7ed6ab398af8f57b54a91ed6093))
+
+
+### Bug Fixes
+
+* **chatbot:** create dev version ([#347](https://github.com/verana-labs/vs-agent/issues/347)) ([969beb8](https://github.com/verana-labs/vs-agent/commit/969beb872a82d671ed3264e27bee9e133cbbaeb8))
+* **chats:** add custom version ([#345](https://github.com/verana-labs/vs-agent/issues/345)) ([06ac60d](https://github.com/verana-labs/vs-agent/commit/06ac60d23dc540323d7396da5938566837fb1578))
+* digestSRI calculation ([#348](https://github.com/verana-labs/vs-agent/issues/348)) ([9a1cddc](https://github.com/verana-labs/vs-agent/commit/9a1cddc5e184313cee8ba836186e2e895459f746))
+* ecs schema encoding error ([91b03ef](https://github.com/verana-labs/vs-agent/commit/91b03ef0c1923c01a8bba89e8dc7d0fdd8304ad5))
+* JSC parsing ([08c192f](https://github.com/verana-labs/vs-agent/commit/08c192f7219ad0a03fbcd18d8e5989f913fdcf25))
+* set agentContext in WsOutboundTransport ([#352](https://github.com/verana-labs/vs-agent/issues/352)) ([a05e28a](https://github.com/verana-labs/vs-agent/commit/a05e28a2a4c641dea2574557cc63473ef25b046d))
+* use verana indexer instead of blockchain API ([#349](https://github.com/verana-labs/vs-agent/issues/349)) ([f827a2b](https://github.com/verana-labs/vs-agent/commit/f827a2b2debbb424320247797884e2ca51654a13))
+
+## [1.7.3](https://github.com/verana-labs/vs-agent/compare/v1.7.2...v1.7.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* allow same version ([#339](https://github.com/verana-labs/vs-agent/issues/339)) ([9fe87d0](https://github.com/verana-labs/vs-agent/commit/9fe87d04501455178ad9af5ee53309c16d9615df))
+* include devnet on urlMap ([#344](https://github.com/verana-labs/vs-agent/issues/344)) ([698b5b3](https://github.com/verana-labs/vs-agent/commit/698b5b3ba70e984787ca348ea70b623d79187721))
+* upgrade chatbot demo base image ([#340](https://github.com/verana-labs/vs-agent/issues/340)) ([dd29ff3](https://github.com/verana-labs/vs-agent/commit/dd29ff3c05e209d6e9f42eb939e0aa824b2bed90))
+
+## [1.7.2](https://github.com/verana-labs/vs-agent/compare/v1.7.1...v1.7.2) (2026-02-12)
+
+
+### Bug Fixes
+
+* add sync with main version ([#335](https://github.com/verana-labs/vs-agent/issues/335)) ([5ad461c](https://github.com/verana-labs/vs-agent/commit/5ad461c9b836926cc5c53b6c22feda0ea97f5f2e))
+* docker image generation ([21a21d6](https://github.com/verana-labs/vs-agent/commit/21a21d69070b23078d428f8930792e8b3c27bf8e))
+* dotenv dependency ([#333](https://github.com/verana-labs/vs-agent/issues/333)) ([7c13cc1](https://github.com/verana-labs/vs-agent/commit/7c13cc1909fde3f99506fb3de6f08da1c16360ce))
+* patches on dockerfiles ([b03b138](https://github.com/verana-labs/vs-agent/commit/b03b138c4b73204612bb0f2efac926b7f20e33f2))
+* properly link JSC to AnonCreds objects in Credential Type creation ([#338](https://github.com/verana-labs/vs-agent/issues/338)) ([67e0d58](https://github.com/verana-labs/vs-agent/commit/67e0d5812494a91b0190b38cb611102c6e36988c))
+* scaped json schema ([#330](https://github.com/verana-labs/vs-agent/issues/330)) ([56809a8](https://github.com/verana-labs/vs-agent/commit/56809a82af3b27b2e2afb0268bfcc20c60ff24d1))
+
 ## [1.7.1](https://github.com/verana-labs/vs-agent/compare/v1.7.0...v1.7.1) (2026-01-30)
 
 

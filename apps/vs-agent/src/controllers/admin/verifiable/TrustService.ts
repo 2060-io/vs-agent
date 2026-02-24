@@ -39,7 +39,7 @@ export class TrustService {
   constructor(
     @Inject(VsAgentService) private readonly agentService: VsAgentService,
     @Inject(UrlShorteningService) private readonly urlShortenerService: UrlShorteningService,
-    @Inject(CredentialTypesService) private readonly credentialService: CredentialTypesService,
+    @Inject(CredentialTypesService) private readonly credentialTypesService: CredentialTypesService,
     @Inject('PUBLIC_API_BASE_URL') private readonly publicApiBaseUrl: string,
   ) {
     this.ecsSchemas = getEcsSchemas(publicApiBaseUrl)
@@ -281,7 +281,7 @@ export class TrustService {
       const { agent, didRecord } = await this.getDidRecord()
 
       const { parsedSchema, attrNames } =
-        await this.credentialService.parseJsonSchemaCredential(jsonSchemaCredentialId)
+        await this.credentialTypesService.parseJsonSchemaCredential(jsonSchemaCredentialId)
       if (attrNames.length === 0) {
         throw new HttpException(
           `No properties found in credentialSubject of schema from ${jsonSchemaCredentialId}`,
@@ -297,8 +297,10 @@ export class TrustService {
           const credential = await this.issueW3cJsonLd(agent, didRecord, did, jsonSchemaCredentialId, claims)
           return { status: 200, didcommInvitationUrl: '', credential }
         case 'anoncreds':
-          const credentialDefinitionId =
-            await this.credentialService.getCredentialDefinition(jsonSchemaCredentialId)
+          const { credentialDefinitionId } =
+            await this.credentialTypesService.getOrRegisterAnonCredsCredentialDefinition({
+              relatedJsonSchemaCredentialId: jsonSchemaCredentialId,
+            })
 
           // TODO: if a DID is specified, we can directly start the exchange: if we are already connected, start the offer
           // and if not, do the DID Exchange and then the offer

@@ -202,7 +202,11 @@ export class DidWebController {
   }
 
   @Get('/resources')
-  async getWebVhResourcesByType(@Query('resourceType') resourceType: string, @Res() res: Response) {
+  async getWebVhResourcesByType(
+    @Res() res: Response,
+    @Query('resourceType') resourceType: string,
+    @Query('relatedJsonSchemaCredentialId') relatedJsonSchemaCredentialId?: string,
+  ) {
     if (!resourceType) {
       throw new HttpException('resourceType query param is required', HttpStatus.BAD_REQUEST)
     }
@@ -210,6 +214,7 @@ export class DidWebController {
     const records = await agent.genericRecords.findAllByQuery({
       type: 'AttestedResource',
       resourceType,
+      relatedJsonSchemaCredentialId,
     })
 
     if (!records || records.length === 0) {

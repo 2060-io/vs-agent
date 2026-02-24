@@ -11,6 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 COPY packages/model/package.json packages/model/package.json
 COPY apps/vs-agent/package.json apps/vs-agent/package.json
+COPY patches ./patches
 
 # Run install after copying only depdendency file
 # to make use of docker layer caching

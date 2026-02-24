@@ -2,7 +2,7 @@
   "name": "@verana-labs/vs-agent-model",
   "main": "build/index",
   "types": "build/index",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/verana-labs/vs-agent"
@@ -19,7 +19,7 @@
     "clean": "rimraf -rf ./build",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm run build",
-    "version": "pnpm version",
+    "version": "pnpm version --allow-same-version",
     "test": "vitest"
   },
   "dependencies": {
