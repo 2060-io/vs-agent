@@ -229,14 +229,17 @@ export class MessageService {
           const revocationRegistryIndex = msg.revocationRegistryIndex
           let credentialDefinitionId = msg.credentialDefinitionId
           if (!credentialDefinitionId && msg.jsonSchemaCredentialId) {
-            ({ credentialDefinitionId } = await this.credentialService.getOrRegisterAnonCredsCredentialDefinition({
-              issuerId: agent.did,
-              relatedJsonSchemaCredentialId: msg.jsonSchemaCredentialId,
-            }))
+            ;({ credentialDefinitionId } =
+              await this.credentialService.getOrRegisterAnonCredsCredentialDefinition({
+                issuerId: agent.did,
+                relatedJsonSchemaCredentialId: msg.jsonSchemaCredentialId,
+              }))
           }
 
           if (!credentialDefinitionId) {
-            throw new Error('credentialDefinitionId or jsonSchemaCredentialId must be provided to issue a credential')
+            throw new Error(
+              'credentialDefinitionId or jsonSchemaCredentialId must be provided to issue a credential',
+            )
           }
 
           if (msg.claims) {

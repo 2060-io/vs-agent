@@ -1,10 +1,10 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiOkResponse, getSchemaPath, ApiExtraModels } from '@nestjs/swagger'
 
+import { AGENT_LABEL } from '../../../../src/config'
 import { VsAgentService } from '../../../services/VsAgentService'
 
 import { VsAgentInfoDto } from './dto'
-import { AGENT_LABEL } from '../../../../src/config'
 
 @ApiTags('agent')
 @ApiExtraModels(VsAgentInfoDto)

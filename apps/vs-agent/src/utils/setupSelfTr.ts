@@ -484,9 +484,7 @@ export async function addDigestSRI<T extends object>(
  * @returns The SRI digest string.
  */
 export function generateDigestSRI(content: string, algorithm: string = 'sha384'): string {
-  const hash = createHash(algorithm)
-    .update(content)
-    .digest('base64')
+  const hash = createHash(algorithm).update(content).digest('base64')
   return `${algorithm}-${hash}`
 }
 
