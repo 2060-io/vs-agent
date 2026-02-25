@@ -6,9 +6,32 @@
 
 ## 1. Overview
 
-This document specifies the core runtime behaviour of the VS-Agent — a Verifiable Service agent that participates in the Verana trust network. It covers bootstrap configuration, authority and account management, credential acquisition flows, trust registry schema publication, and indexer WebSocket subscription.
+Resources created in the Verana ledger (a VPR) are linked to DIDs that represent VS-Agents. For this reason, a VS-Agent MUST receive notifications of changes in the ledger that are directly or indirectly linked to its DID, and update its state accordingly.
+
+**Examples:**
+
+- **Trust registry schema addition** — A new credential schema is created for a trust registry. The VS-Agent whose DID owns that trust registry is notified and automatically creates the corresponding VTJSC, publishing it in its DID Document.
+- **Validation process lifecycle** — An applicant initiates a validation process to obtain a HOLDER permission from an ISSUER for a given credential schema. The applicant creates the Validation Process on the Verana ledger. The VS-Agents of both applicant and validator (ISSUER) are notified and begin a userland validation flow over DIDComm. As the on-chain permission state changes, the respective VS-Agents receive further notifications and execute follow-up tasks (e.g., continuing the DIDComm exchange, issuing the credential).
+
+```mermaid
+flowchart LR
+    VPR["Verana Ledger\n(VPR)"]
+    IDX["Indexer\n(WebSocket)"]
+    VSA["VS-Agent A\n(Applicant)"]
+    VSB["VS-Agent B\n(Validator / ISSUER)"]
+    DID["DID Document"]
+
+    VPR -- "on-chain event\n(schema, permission, …)" --> IDX
+    IDX -- "notification" --> VSA
+    IDX -- "notification" --> VSB
+    VSA <-- "DIDComm\n(userland validation)" --> VSB
+    VSA -- "publish VTJSC /\nupdate state" --> DID
+```
+
+*Figure 1 — VS-Agent reactive loop. On-chain events in the VPR are relayed by the Indexer to the affected VS-Agents, which then coordinate over DIDComm and publish artefacts to their DID Documents.*
 
 > Note: this spec only shows add-ons to the existing VS-Agent. Full VS-Agent functionality is not covered here.
+
 
 ### 1.1 Conformance
 
