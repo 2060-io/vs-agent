@@ -30,6 +30,8 @@ flowchart LR
 
 *Figure 1 — VS-Agent reactive loop. On-chain events in the VPR are relayed by the Indexer to the affected VS-Agents, which then coordinate over DIDComm and publish artefacts to their DID Documents.*
 
+Additionally, an Authority controller needs to remotely query and manage the state of its VS-Agents directly from the Verana frontend. To enable this, each VS-Agent MUST expose a secure Administration API accessible to Verana accounts that have been granted administrative rights over the agent by the Authority.
+
 > Note: this spec only shows add-ons to the existing VS-Agent. Full VS-Agent functionality is not covered here.
 
 
@@ -479,3 +481,76 @@ All notifications are sent both to the Applicant and Validator.
 | `SlashPermissionTrustDeposit` [MOD-PERM-MSG-12] | Validator or TR controller has slashed the agent's permission trust deposit. | Clean up the associated flow state. |
 | `RepayPermissionSlashedTrustDeposit` [MOD-PERM-MSG-13] | The agent's slashed trust deposit has been repaid (confirmation of own tx). | N/A. |
 | `CancelPermissionVPLastRequest` [MOD-PERM-MSG-6] | An applicant has cancelled a pending Validation Process. | Clean up the associated flow state. |
+
+## 8. Administration API
+
+The VS-Agent MUST expose a secure Administration API that allows authorized members of the agent's Authority to remotely query and manage the agent's state — for example, from the Verana frontend.
+
+### 8.1 Authentication and Authorization
+
+1. The VS-Agent MUST authenticate callers using a Verana-account-based mechanism (e.g., ADR-036 signature challenge) and verify that the authenticated account belongs to the same Authority as the agent's configured `VERANA_AUTHORITY`.
+2. Authenticated users MAY perform **read** operations (queries) on the Administration API.
+3. **Write** operations (actions) MUST additionally require that the caller's Verana account has been granted an `OperatorAuthorization` by the Authority for the relevant scope.
+
+### 8.2 Queries
+
+The VS-Agent MUST provide query endpoints for the following:
+
+- **Credential acquisition flows** — List and inspect the state of Validation Process and Direct Issuance flows (see [§5.6](#56-flow-state)), with support for filtering by connection state, flow state, peer DID, `perm_id`, and `schema_id`. Results MUST include associated flow data such as submitted credential claims, proofs, OOB URLs, and permission session details.
+
+### 8.3 Actions
+
+The Administration API MUST expose the following write operations, scoped by the agent's role in the flow. All actions MUST be logged and linked to the Verana account that performed them.
+
+**Validator actions:**
+
+- **Edit credential claims** — Create, modify, or override the credential claims submitted by the applicant.
+- **Send OOB link** — Send or resend an `OOB_LINK` message to the applicant requesting additional information (see [§5.4](#54-didcomm-message-summary-for-vt_flow)).
+- **Validate** — Mark the applicant's documentation as validated. When a Validation Process is involved, this is independent from the on-chain `set-perm-vp-validated` transaction and MAY trigger credential issuance (see [§5.1](#51-validation-process) steps 6–8).
+- **Revoke credential** — Revoke a previously issued credential. The agent MUST notify the applicant via a `CRED_STATE_CHANGE` message over DIDComm (see [§5.3](#53-validator-updates)).
+- **Terminate flow** — Close the DIDComm session and terminate the credential acquisition flow. Applicable to Direct Issuance flows only; for Validation Process flows, termination is performed on-chain.
+
+**Applicant actions:**
+
+- **Terminate flow** — Close the DIDComm session and terminate the credential acquisition flow.
+
+```mermaid
+stateDiagram-v2
+    [*] --> AWAITING_VP : §5.1 start
+
+    AWAITING_VP --> VR_SENT : Applicant sends VR
+    VR_SENT --> AWAITING_VR : Validator receives VR
+
+    [*] --> IR_SENT : §5.2 start
+    IR_SENT --> AWAITING_IR : Validator receives IR
+
+    AWAITING_VR --> OOB_PENDING : Send OOB link
+    AWAITING_IR --> OOB_PENDING : Send OOB link
+    OOB_PENDING --> VALIDATING : Applicant completes OOB
+
+    AWAITING_VR --> VALIDATING : Validate (no OOB needed)
+    AWAITING_IR --> VALIDATING : Validate
+
+    VALIDATING --> VALIDATED : set validated +<br/>set-perm-vp-validated (on-chain, §5.1)
+    VALIDATING --> VALIDATED : set validated (§5.2)
+    VALIDATED --> CRED_OFFERED : Credential generated + offered
+
+    CRED_OFFERED --> COMPLETED : Applicant accepts credential
+
+    COMPLETED --> CRED_OFFERED : Validator sends updated credential
+    COMPLETED --> OOB_PENDING : Validator sends OOB link
+    COMPLETED --> CRED_REVOKED : Revoke credential
+    CRED_REVOKED --> OOB_PENDING : Validator sends OOB link
+    CRED_REVOKED --> CRED_OFFERED : Validator sends new credential
+    CRED_REVOKED --> VR_SENT : Applicant resends VR (§5.1)
+    CRED_REVOKED --> IR_SENT : Applicant resends IR (§5.2)
+
+
+    COMPLETED --> PERM_REVOKED : On-chain revocation
+    COMPLETED --> PERM_SLASHED : On-chain slash
+
+    PERM_REVOKED --> [*]
+    PERM_SLASHED --> [*]
+```
+
+*Figure 2 — Flow state transitions. Solid arrows represent state changes triggered by Administration API actions, DIDComm messages, or on-chain events. Terminal states are shown converging to the end node.*
