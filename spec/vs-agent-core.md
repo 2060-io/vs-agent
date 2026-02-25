@@ -15,17 +15,17 @@ Resources created in the Verana ledger (a VPR) are linked to DIDs that represent
 
 ```mermaid
 flowchart LR
-    VPR["Verana Ledger\n(VPR)"]
-    IDX["Indexer\n(WebSocket)"]
-    VSA["VS-Agent A\n(Applicant)"]
-    VSB["VS-Agent B\n(Validator / ISSUER)"]
+    VPR["Verana Ledger<br/>(VPR)"]
+    IDX["Indexer<br/>(WebSocket)"]
+    VSA["VS-Agent A<br/>(Applicant)"]
+    VSB["VS-Agent B<br/>(Validator / ISSUER)"]
     DID["DID Document"]
 
-    VPR -- "on-chain event\n(schema, permission, …)" --> IDX
+    VPR -- "on-chain event<br/>(schema, permission, …)" --> IDX
     IDX -- "notification" --> VSA
     IDX -- "notification" --> VSB
-    VSA <-- "DIDComm\n(userland validation)" --> VSB
-    VSA -- "publish VTJSC /\nupdate state" --> DID
+    VSA <-- "DIDComm<br/>(userland validation)" --> VSB
+    VSA -- "publish VTJSC /<br/>update state" --> DID
 ```
 
 *Figure 1 — VS-Agent reactive loop. On-chain events in the VPR are relayed by the Indexer to the affected VS-Agents, which then coordinate over DIDComm and publish artefacts to their DID Documents.*
