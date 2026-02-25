@@ -152,11 +152,9 @@ This section describes the general VS-Agent userspace protocol for the following
 - Validation Process
 - Credential Direct Issuance
 
-> When credential schema management mode is set to `OPEN` for issuance or verification, no validation process is required — the applicant self-creates its permission directly. In that case, no userspace actions happen in the VS-Agent.
+When credential schema management mode is set to `OPEN` for issuance or verification, no validation process is required — the applicant self-creates its permission directly. In that case, no userspace actions happen in the VS-Agent.
 
-:::note
-Applicant is always the peer that initiates a connection to Validator.
-:::
+> Applicant is always the peer that initiates a connection to Validator.
 
 ### 5.1 Validation Process
 
@@ -518,6 +516,8 @@ The Administration API MUST expose the following write operations, scoped by the
 - **Validate** — Mark the applicant's documentation as validated. When a Validation Process is involved, this is independent from the on-chain `set-perm-vp-validated` transaction and MAY trigger credential issuance (see [§5.1](#51-validation-process) steps 6–8).
 - **Revoke credential** — Revoke a previously issued credential. The agent MUST notify the applicant via a `CRED_STATE_CHANGE` message over DIDComm (see [§5.3](#53-validator-updates)).
 - **Terminate flow** — Close the DIDComm session and terminate the credential acquisition flow. Applicable to Direct Issuance flows only; for Validation Process flows, termination is performed on-chain.
+
+> Note: some VS-Agent implementations may not support all actions, or may prefer sending the user to a portal for providing proofs, etc... using the OOB link.
 
 **Applicant actions:**
 
