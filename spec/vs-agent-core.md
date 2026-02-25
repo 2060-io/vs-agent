@@ -17,23 +17,32 @@ Resources created in the Verana ledger (a VPR) are linked to DIDs that represent
 flowchart LR
     VPR["Verana Ledger<br/>(VPR)"]
     IDX["Indexer<br/>(WebSocket)"]
-    VSA["VS-Agent A<br/>(Applicant)"]
-    VSB["VS-Agent B<br/>(Validator / ISSUER)"]
+    VS["VS-Agent<br/>(TR Owner)"]
     DID["DID Document"]
 
-    VPR -- "on-chain event<br/>(schema, permission, …)" --> IDX
-    IDX -- "notification" --> VSA
-    IDX -- "notification" --> VSB
-    VSA <-- "DIDComm<br/>(userland validation)" --> VSB
-    VSA -- "publish VTJSC /<br/>update state" --> DID
+    VPR -- "new credential schema<br/>created in TR" --> IDX
+    IDX -- "notification" --> VS
+    VS -- "generate VTJSC +<br/>publish VP" --> DID
 ```
 
-*Figure 1 — VS-Agent reactive loop. On-chain events in the VPR are relayed by the Indexer to the affected VS-Agents, which then coordinate over DIDComm and publish artefacts to their DID Documents.*
+*Figure 1a — Trust registry schema addition. A new credential schema is created on-chain; the Indexer notifies the owning VS-Agent, which generates the corresponding VTJSC and publishes it in its DID Document.*
+
+```mermaid
+flowchart LR
+    VPR["Verana Ledger<br/>(VPR)"]
+    IDX["Indexer<br/>(WebSocket)"]
+    VSA["VS-Agent A<br/>(Applicant)"]
+    VSB["VS-Agent B<br/>(Validator / ISSUER)"]
+
+    VPR -- "permission event" --> IDX
+    IDX -- "perm change notifications" --> VSA
+    IDX -- "perm change notifications" --> VSB
+    VSA <-- "DIDComm<br/>(validation + issuance)" --> VSB
+```
+
+*Figure 1b — Validation process lifecycle. The applicant creates a Validation Process on-chain; both VS-Agents are notified and coordinate over DIDComm. As the on-chain permission state changes, further notifications trigger follow-up tasks.*
 
 Additionally, an Authority controller needs to remotely query and manage the state of its VS-Agents directly from the Verana frontend. To enable this, each VS-Agent MUST expose a secure Administration API accessible to Verana accounts that have been granted administrative rights over the agent by the Authority.
-
-> Note: this spec only shows add-ons to the existing VS-Agent. Full VS-Agent functionality is not covered here.
-
 
 ### 1.1 Conformance
 
