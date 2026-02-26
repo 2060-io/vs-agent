@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.1](https://github.com/verana-labs/vs-agent/compare/v1.8.0...v1.8.1) (2026-02-24)
+
+
+### Bug Fixes
+
+* problem creating and search schema ([#353](https://github.com/verana-labs/vs-agent/issues/353)) ([f170f34](https://github.com/verana-labs/vs-agent/commit/f170f34b33772ae305e6720adab1d015c66c2a6f))
+* update Admin Swagger API documentation ([#331](https://github.com/verana-labs/vs-agent/issues/331)) ([38a7191](https://github.com/verana-labs/vs-agent/commit/38a7191c874ab1c9e567013718bea70fb9872436))
+
 ## [1.8.0](https://github.com/verana-labs/vs-agent/compare/v1.7.3...v1.8.0) (2026-02-20)
 
 
